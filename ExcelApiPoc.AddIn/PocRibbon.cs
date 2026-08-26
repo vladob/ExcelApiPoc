@@ -6,6 +6,8 @@ using System.Windows.Forms;
 using ExcelApiPoc.AddIn.Models;
 using Newtonsoft.Json;
 using System.Text;
+using ExcelApiPoc.AddIn.Services;
+using System.Threading.Tasks;
 
 namespace ExcelApiPoc.AddIn
 {
@@ -80,10 +82,51 @@ namespace ExcelApiPoc.AddIn
 
             try
             {
+                /*
                 string json = HttpClient
                     .GetStringAsync(TemplateMetadataEndpoint)
                     .GetAwaiter()
                     .GetResult();
+
+                string cachePath = TemplateMetadataCache.SaveMetadata(690, json);
+                */
+
+                const int templateErpId = 690;
+
+                string json;
+                string source;
+                string apiFailureMessage = null;
+
+                string cachePath =
+                    TemplateMetadataCache.GetMetadataPath(templateErpId);
+
+                try
+                {
+                    json = HttpClient
+                        .GetStringAsync(TemplateMetadataEndpoint)
+                        .GetAwaiter()
+                        .GetResult();
+
+                    cachePath =
+                        TemplateMetadataCache.SaveMetadata(
+                            templateErpId,
+                            json);
+
+                    source = "IIS API";
+                }
+                catch (Exception exception)
+                    when (exception is HttpRequestException ||
+                          exception is TaskCanceledException)
+                {
+                    apiFailureMessage = exception.Message;
+
+                    json =
+                        TemplateMetadataCache.LoadMetadata(
+                            templateErpId);
+
+                    source = "Local cache";
+                }
+
 
                 AuditTemplateMetadataResponse template =
                     JsonConvert.DeserializeObject<AuditTemplateMetadataResponse>(json);
@@ -117,6 +160,20 @@ namespace ExcelApiPoc.AddIn
                         $"{table.NumberOfDataColumns} data columns)");
                 }
 
+                message.AppendLine();
+                //message.AppendLine($"Cached at: {cachePath}");
+
+                message.AppendLine();
+                message.AppendLine($"Source: {source}");
+                message.AppendLine($"Cache: {cachePath}");
+
+                if (!string.IsNullOrWhiteSpace(apiFailureMessage))
+                {
+                    message.AppendLine();
+                    message.AppendLine(
+                        $"API unavailable: {apiFailureMessage}");
+                }
+
                 MessageBox.Show(
                     message.ToString(),
                     "Audit Template Metadata",
@@ -126,7 +183,7 @@ namespace ExcelApiPoc.AddIn
             catch (Exception exception)
             {
                 MessageBox.Show(
-                    $"Downloading the audit template failed.\n\n{exception.Message}",
+                    $"Loading the audit template failed...\n\n{exception.Message}",
                     "Audit Template Error",
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Error);
