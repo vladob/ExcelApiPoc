@@ -35,6 +35,14 @@ namespace ExcelApiPoc.AddIn
   <ribbon>
     <tabs>
       <tab id='tabExcelApiPoc' label='API PoC'>
+        <group id='groupAuditWorkbook' label='Audit Workbook'>
+            <button
+                id='buttonCreateAuditWorkbook'
+                label='Create Audit Workbook'
+                size='large'
+                imageMso='FileNew'
+                onAction='OnCreateAuditWorkbook'/>
+        </group>
         <group id='groupApiConnection' label='API Connection'>
             <button
                 id='buttonCheckApi'
@@ -457,6 +465,17 @@ namespace ExcelApiPoc.AddIn
             _ = control;
 
             using (var dialog = new SettingsForm())
+            {
+                dialog.ShowDialog();
+            }
+        }
+
+        public void OnCreateAuditWorkbook(IRibbonControl control)
+        {
+            _ = control;
+
+            using (var dialog =
+                new CreateAuditWorkbookForm())
             {
                 dialog.ShowDialog();
             }
