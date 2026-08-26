@@ -122,6 +122,22 @@ public sealed class AuditTemplatePackageRepository
                 [SumRow],
                 [Account3];
 
+            SELECT
+                [SumTableErpId],
+                [SumRow],
+                [SourceTableErpId],
+                [SourceRow],
+                [Coefficient],
+                [CalculationLevel]
+            FROM [Template].[SumCalculationPlan]
+            WHERE [TemplateErpId] = @TemplateErpId
+            ORDER BY
+                [CalculationLevel],
+                [SumTableErpId],
+                [SumRow],
+                [SourceTableErpId],
+                [SourceRow];
+
             """;
 
         await using var connection =
@@ -372,6 +388,24 @@ public sealed class AuditTemplatePackageRepository
                 });
         }
 
+        var calculationPlan = new List<AuditCalculationDependencyDefinition>();
+
+        await reader.NextResultAsync(cancellationToken);
+
+        while (await reader.ReadAsync(cancellationToken))
+        {
+            calculationPlan.Add(
+                new AuditCalculationDependencyDefinition
+                {
+                    TargetTableErpId = reader.GetInt32(0),
+                    TargetRowNumber = reader.GetInt32(1),
+                    SourceTableErpId = reader.GetInt32(2),
+                    SourceRowNumber = reader.GetInt32(3),
+                    Coefficient = reader.GetInt32(4),
+                    CalculationLevel = reader.GetInt32(5)
+                });
+        }
+
         return new AuditTemplatePackage
         {
             ContractVersion = 1,
@@ -388,7 +422,8 @@ public sealed class AuditTemplatePackageRepository
                 Tables = tables
             },
             AccountGroups = accountGroups,
-            ReportMappingRules = reportMappingRules
+            ReportMappingRules = reportMappingRules,
+            CalculationPlan = calculationPlan
         };
     }
 }

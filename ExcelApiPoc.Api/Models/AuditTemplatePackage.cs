@@ -13,6 +13,11 @@ public sealed class AuditTemplatePackage
 
     public IReadOnlyList<AuditReportMappingRuleDefinition> ReportMappingRules { get; init; }
         = Array.Empty<AuditReportMappingRuleDefinition>();
+
+    public IReadOnlyList<AuditCalculationDependencyDefinition>
+    CalculationPlan
+    { get; init; }
+        = Array.Empty<AuditCalculationDependencyDefinition>();
 }
 
 public sealed class AuditTemplateDefinition
@@ -116,4 +121,19 @@ public sealed class AuditReportMappingRuleDefinition
     public string Side { get; init; } = string.Empty;
 
     public string ValueSource { get; init; } = string.Empty;
+}
+
+public sealed class AuditCalculationDependencyDefinition
+{
+    public int TargetTableErpId { get; init; }
+
+    public int TargetRowNumber { get; init; }
+
+    public int SourceTableErpId { get; init; }
+
+    public int SourceRowNumber { get; init; }
+
+    public int Coefficient { get; init; }
+
+    public int CalculationLevel { get; init; }
 }
