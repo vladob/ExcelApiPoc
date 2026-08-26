@@ -8,17 +8,20 @@ using Newtonsoft.Json;
 using System.Text;
 using ExcelApiPoc.AddIn.Services;
 using System.Threading.Tasks;
+using ExcelApiPoc.AddIn.Forms;
 
 namespace ExcelApiPoc.AddIn
 {
     [ComVisible(true)]
     public class PocRibbon : ExcelRibbon
     {
+/*
         private const string HealthEndpoint = "http://localhost:5080/api/health";
         private const string TemplateMetadataEndpoint = "http://localhost:5080/api/templates/690/metadata";
+        private const string TemplatePackageEndpoint = "http://localhost:5080/api/v1/templates/690/package";
+*/
         private const int PackageTemplateErpId = 690;
         private const int PackageContractVersion = 1;
-        private const string TemplatePackageEndpoint = "http://localhost:5080/api/v1/templates/690/package";
 
         private static readonly HttpClient HttpClient = new HttpClient
         {
@@ -48,6 +51,12 @@ namespace ExcelApiPoc.AddIn
                 label='Get Package 690'
                 size='large'
                 onAction='OnGetTemplatePackage'/>
+            <button
+                id='buttonSettings'
+                label='Settings'
+                size='large'
+                imageMso='FileProperties'
+                onAction='OnSettings'/>
         </group>
       </tab>
     </tabs>
@@ -62,7 +71,8 @@ namespace ExcelApiPoc.AddIn
             try
             {
                 string response = HttpClient
-                    .GetStringAsync(HealthEndpoint)
+//                    .GetStringAsync(HealthEndpoint)
+                    .GetStringAsync(SettingsService.BuildApiUri("api/health"))
                     .GetAwaiter()
                     .GetResult();
 
@@ -109,7 +119,8 @@ namespace ExcelApiPoc.AddIn
                 try
                 {
                     json = HttpClient
-                        .GetStringAsync(TemplateMetadataEndpoint)
+//                        .GetStringAsync(TemplateMetadataEndpoint)
+                        .GetStringAsync(SettingsService.BuildApiUri("api/templates/690/metadata"))
                         .GetAwaiter()
                         .GetResult();
 
@@ -215,7 +226,8 @@ namespace ExcelApiPoc.AddIn
                 try
                 {
                     json = HttpClient
-                        .GetStringAsync(TemplatePackageEndpoint)
+//                        .GetStringAsync(TemplatePackageEndpoint)
+                        .GetStringAsync(SettingsService.BuildApiUri("api/v1/templates/690/package"))
                         .GetAwaiter()
                         .GetResult();
 
@@ -440,5 +452,14 @@ namespace ExcelApiPoc.AddIn
             }
         }
 
+        public void OnSettings(IRibbonControl control)
+        {
+            _ = control;
+
+            using (var dialog = new SettingsForm())
+            {
+                dialog.ShowDialog();
+            }
+        }
     }
 }
