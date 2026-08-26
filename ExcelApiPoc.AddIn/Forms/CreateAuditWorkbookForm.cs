@@ -159,12 +159,7 @@ namespace ExcelApiPoc.AddIn.Forms
 
         private void AddLabel(string text, int left, int top, int width)
         {
-            var label = new Label
-            {
-                Text = text,
-                AutoSize = false
-            };
-
+            var label = new Label {Text = text, AutoSize = false};
             label.SetBounds(left, top, width, 23);
             Controls.Add(label);
         }
@@ -174,7 +169,6 @@ namespace ExcelApiPoc.AddIn.Forms
             using (var dialog = CreateOpenFileDialog())
             {
                 dialog.Title = "Select Accounting Journal";
-
                 if (dialog.ShowDialog() != DialogResult.OK)
                 {
                     return;
@@ -189,7 +183,6 @@ namespace ExcelApiPoc.AddIn.Forms
             using (var dialog = CreateOpenFileDialog())
             {
                 dialog.Title = "Select Accounts List";
-
                 if (dialog.ShowDialog() == DialogResult.OK)
                 {
                     _accountsPathTextBox.Text = dialog.FileName;
@@ -247,7 +240,6 @@ namespace ExcelApiPoc.AddIn.Forms
                 default: technicalType = "Unknown";
                     break;
             }
-
             _technicalTypeComboBox.SelectedItem = technicalType;
         }
 
@@ -262,26 +254,16 @@ namespace ExcelApiPoc.AddIn.Forms
         private void ContinueButton_ClickOld(object sender,EventArgs e)
         {
             string journalPath = _journalPathTextBox.Text.Trim();
-
             if (!File.Exists(journalPath))
             {
-                MessageBox.Show(
-                    "Select a valid accounting journal file.",
-                    "Accounting Journal Required",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Warning);
+                MessageBox.Show("Select a valid accounting journal file.", "Accounting Journal Required", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
-
             string accountsPath = _accountsPathTextBox.Text.Trim();
 
             if (!string.IsNullOrWhiteSpace(accountsPath) && !File.Exists(accountsPath))
             {
-                MessageBox.Show(
-                    "The selected accounts-list file does not exist.",
-                    "Invalid Accounts List",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Warning);
+                MessageBox.Show("The selected accounts-list file does not exist.", "Invalid Accounts List", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
@@ -428,9 +410,7 @@ namespace ExcelApiPoc.AddIn.Forms
         {
             string path = (filePath ?? string.Empty).Trim();
             bool fileExists = File.Exists(path);
-
             _continueButton.Enabled = fileExists;
-
             if (!fileExists)
             {
                 return;

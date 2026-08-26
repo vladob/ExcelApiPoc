@@ -213,9 +213,7 @@ namespace ExcelApiPoc.AddIn.Services
             {
                 throw new InvalidDataException($"{record.Location}: invalid IfoSoft " + "journal-title record.");
             }
-
             string title = record.Fields[0].Trim();
-
             if (!string.Equals(title, "Uctovny dennik", StringComparison.OrdinalIgnoreCase) && !string.Equals(title, "Účtovný denník", StringComparison.OrdinalIgnoreCase))
             {
                 throw new InvalidDataException($"{record.Location}: expected the IfoSoft " + "journal title, but found '" + title + "'.");

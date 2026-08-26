@@ -28,7 +28,6 @@ namespace ExcelApiPoc.AddIn.Forms
             {
                 Text = "API base URL:"
             };
-
             apiUrlLabel.SetBounds(15, 20, 100, 23);
 
             _apiBaseUrlTextBox = new TextBox();
@@ -39,14 +38,12 @@ namespace ExcelApiPoc.AddIn.Forms
                 Text = $"Settings file: {SettingsService.SettingsPath}",
                 AutoEllipsis = true
             };
-
             settingsPathLabel.SetBounds(15, 55, 525, 23);
 
             _testConnectionButton = new Button
             {
                 Text = "Test connection"
             };
-
             _testConnectionButton.SetBounds(15, 95, 125, 30);
             _testConnectionButton.Click += TestConnectionButton_Click;
 
@@ -54,7 +51,6 @@ namespace ExcelApiPoc.AddIn.Forms
             {
                 Text = "Save"
             };
-
             _saveButton.SetBounds(360, 95, 85, 30);
             _saveButton.Click += SaveButton_Click;
 
@@ -63,7 +59,6 @@ namespace ExcelApiPoc.AddIn.Forms
                 Text = "Cancel",
                 DialogResult = DialogResult.Cancel
             };
-
             _cancelButton.SetBounds(455, 95, 85, 30);
 
             Controls.Add(apiUrlLabel);
@@ -81,103 +76,51 @@ namespace ExcelApiPoc.AddIn.Forms
 
         private void LoadCurrentSettings()
         {
-            AddInSettings settings =
-                SettingsService.Load();
-
-            _apiBaseUrlTextBox.Text =
-                settings.ApiBaseUrl;
+            AddInSettings settings = SettingsService.Load();
+            _apiBaseUrlTextBox.Text = settings.ApiBaseUrl;
         }
 
-        private void TestConnectionButton_Click(
-            object sender,
-            EventArgs e)
+        private void TestConnectionButton_Click(object sender,EventArgs e)
         {
             try
             {
-                string baseUrl =
-                    ValidateAndNormalizeUrl(
-                        _apiBaseUrlTextBox.Text);
-
-                var healthUri =
-                    new Uri(
-                        $"{baseUrl}/api/health",
-                        UriKind.Absolute);
-
+                string baseUrl = ValidateAndNormalizeUrl( _apiBaseUrlTextBox.Text);
+                var healthUri = new Uri( $"{baseUrl}/api/health", UriKind.Absolute);
                 using (var client = new HttpClient())
                 {
-                    client.Timeout =
-                        TimeSpan.FromSeconds(10);
-
-                    string response = client
-                        .GetStringAsync(healthUri)
-                        .GetAwaiter()
-                        .GetResult();
-
-                    MessageBox.Show(
-                        $"Connection successful.\n\n{response}",
-                        "API Connection",
-                        MessageBoxButtons.OK,
-                        MessageBoxIcon.Information);
+                    client.Timeout = TimeSpan.FromSeconds(10);
+                    string response = client.GetStringAsync(healthUri).GetAwaiter().GetResult();
+                    MessageBox.Show($"Connection successful.\n\n{response}", "API Connection", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
             }
             catch (Exception exception)
             {
-                MessageBox.Show(
-                    $"Connection failed.\n\n{exception.Message}",
-                    "API Connection",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Error);
+                MessageBox.Show($"Connection failed.\n\n{exception.Message}", "API Connection", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
-        private void SaveButton_Click(
-            object sender,
-            EventArgs e)
+        private void SaveButton_Click(object sender,EventArgs e)
         {
             try
             {
-                string baseUrl =
-                    ValidateAndNormalizeUrl(
-                        _apiBaseUrlTextBox.Text);
-
-                SettingsService.Save(
-                    new AddInSettings
-                    {
-                        ApiBaseUrl = baseUrl
-                    });
-
+                string baseUrl = ValidateAndNormalizeUrl(_apiBaseUrlTextBox.Text);
+                SettingsService.Save(new AddInSettings{ApiBaseUrl = baseUrl});
                 DialogResult = DialogResult.OK;
                 Close();
             }
             catch (Exception exception)
             {
-                MessageBox.Show(
-                    exception.Message,
-                    "Invalid Settings",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Warning);
+                MessageBox.Show(exception.Message,"Invalid Settings",MessageBoxButtons.OK,MessageBoxIcon.Warning);
             }
         }
 
-        private static string ValidateAndNormalizeUrl(
-            string value)
+        private static string ValidateAndNormalizeUrl(string value)
         {
-            string normalized =
-                (value ?? string.Empty)
-                .Trim()
-                .TrimEnd('/');
-
-            if (!Uri.TryCreate(
-                    normalized,
-                    UriKind.Absolute,
-                    out Uri uri) ||
-                (uri.Scheme != Uri.UriSchemeHttp &&
-                 uri.Scheme != Uri.UriSchemeHttps))
+            string normalized =(value ?? string.Empty).Trim().TrimEnd('/');
+            if (!Uri.TryCreate(normalized,UriKind.Absolute,out Uri uri) || (uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps))
             {
-                throw new InvalidOperationException(
-                    "Enter a valid HTTP or HTTPS API address.");
+                throw new InvalidOperationException("Enter a valid HTTP or HTTPS API address.");
             }
-
             return normalized;
         }
     }

@@ -7,11 +7,7 @@ namespace ExcelApiPoc.AddIn.Services
         public static string NormalizeText(string value, out bool changed)
         {
             string original = value ?? string.Empty;
-            string normalized = original
-                .Replace("\r\n", " ")
-                .Replace('\r', ' ')
-                .Replace('\n', ' ')
-                .Replace('\t', ' ');
+            string normalized = original.Replace("\r\n", " ").Replace('\r', ' ').Replace('\n', ' ').Replace('\t', ' ');
 
             while (normalized.Contains("  "))
             {

@@ -7,18 +7,12 @@ public sealed class AuditTemplatePackageRepository
 {
     private readonly string _connectionString;
 
-    public AuditTemplatePackageRepository(
-        IConfiguration configuration)
+    public AuditTemplatePackageRepository(IConfiguration configuration)
     {
-        _connectionString =
-            configuration.GetConnectionString("AuditAddIn")
-            ?? throw new InvalidOperationException(
-                "Connection string 'AuditAddIn' is not configured.");
+        _connectionString = configuration.GetConnectionString("AuditAddIn") ?? throw new InvalidOperationException( "Connection string 'AuditAddIn' is not configured.");
     }
 
-    public async Task<AuditTemplatePackage?> GetPackageAsync(
-        int templateErpId,
-        CancellationToken cancellationToken)
+    public async Task<AuditTemplatePackage?> GetPackageAsync(int templateErpId, CancellationToken cancellationToken)
     {
         const string sql = """
             SELECT
@@ -140,100 +134,43 @@ public sealed class AuditTemplatePackageRepository
 
             """;
 
-        await using var connection =
-            new SqlConnection(_connectionString);
-
+        await using var connection = new SqlConnection(_connectionString);
         await connection.OpenAsync(cancellationToken);
-
-        await using var command =
-            new SqlCommand(sql, connection);
-
-        command.Parameters.AddWithValue(
-            "@TemplateErpId",
-            templateErpId);
-
-        await using SqlDataReader reader =
-            await command.ExecuteReaderAsync(cancellationToken);
-
+        await using var command = new SqlCommand(sql, connection);
+        command.Parameters.AddWithValue("@TemplateErpId", templateErpId);
+        await using SqlDataReader reader = await command.ExecuteReaderAsync(cancellationToken);
         if (!await reader.ReadAsync(cancellationToken))
         {
             return null;
         }
 
         int actualTemplateErpId = reader.GetInt32(0);
-
-        string? name = reader.IsDBNull(1)
-            ? null
-            : reader.GetString(1);
-
-        string? mfSpecification = reader.IsDBNull(2)
-            ? null
-            : reader.GetString(2);
-
-        DateOnly? validFrom = reader.IsDBNull(3)
-            ? null
-            : DateOnly.FromDateTime(reader.GetDateTime(3));
-
-        DateOnly? validTo = reader.IsDBNull(4)
-            ? null
-            : DateOnly.FromDateTime(reader.GetDateTime(4));
-
-        string? accountingModel = reader.IsDBNull(5)
-            ? null
-            : reader.GetString(5);
-
-        var tables =
-            new List<AuditReportTableDefinition>();
-
-        var headersByTable =
-            new Dictionary<
-                int,
-                List<AuditReportHeaderDefinition>>();
-
-        var rowsByTable =
-            new Dictionary<
-                int,
-                List<AuditReportRowDefinition>>();
-
+        string? name = reader.IsDBNull(1) ? null : reader.GetString(1);
+        string? mfSpecification = reader.IsDBNull(2) ? null : reader.GetString(2);
+        DateOnly? validFrom = reader.IsDBNull(3) ? null : DateOnly.FromDateTime(reader.GetDateTime(3));
+        DateOnly? validTo = reader.IsDBNull(4) ? null : DateOnly.FromDateTime(reader.GetDateTime(4));
+        string? accountingModel = reader.IsDBNull(5) ? null : reader.GetString(5);
+        var tables = new List<AuditReportTableDefinition>();
+        var headersByTable = new Dictionary<int, List<AuditReportHeaderDefinition>>();
+        var rowsByTable = new Dictionary<int, List<AuditReportRowDefinition>>();
         await reader.NextResultAsync(cancellationToken);
 
         while (await reader.ReadAsync(cancellationToken))
         {
             int tableErpId = reader.GetInt32(0);
-
-            var headers =
-                new List<AuditReportHeaderDefinition>();
-
-            var rows =
-                new List<AuditReportRowDefinition>();
-
+            var headers = new List<AuditReportHeaderDefinition>();
+            var rows = new List<AuditReportRowDefinition>();
             headersByTable.Add(tableErpId, headers);
             rowsByTable.Add(tableErpId, rows);
 
             tables.Add(new AuditReportTableDefinition
             {
                 TableErpId = tableErpId,
-
-                NameSk = reader.IsDBNull(1)
-                    ? null
-                    : reader.GetString(1),
-
-                NameEn = reader.IsDBNull(2)
-                    ? null
-                    : reader.GetString(2),
-
-                NumberOfColumns = reader.IsDBNull(3)
-                    ? null
-                    : reader.GetInt32(3),
-
-                NumberOfDataColumns = reader.IsDBNull(4)
-                    ? null
-                    : reader.GetInt32(4),
-
-                DontHaveRowNumbers =
-                    !reader.IsDBNull(5) &&
-                    reader.GetByte(5) != 0,
-
+                NameSk = reader.IsDBNull(1) ? null : reader.GetString(1),
+                NameEn = reader.IsDBNull(2) ? null : reader.GetString(2),
+                NumberOfColumns = reader.IsDBNull(3) ? null : reader.GetInt32(3),
+                NumberOfDataColumns = reader.IsDBNull(4) ? null : reader.GetInt32(4),
+                DontHaveRowNumbers = !reader.IsDBNull(5) && reader.GetByte(5) != 0,
                 Headers = headers,
                 Rows = rows
             });
@@ -245,76 +182,43 @@ public sealed class AuditTemplatePackageRepository
         {
             int tableErpId = reader.GetInt32(0);
 
-            if (!headersByTable.TryGetValue(
-                    tableErpId,
-                    out List<AuditReportHeaderDefinition>? headers))
+            if (!headersByTable.TryGetValue(tableErpId, out List<AuditReportHeaderDefinition>? headers))
             {
-                throw new InvalidOperationException(
-                    $"Header references unknown table {tableErpId}.");
+                throw new InvalidOperationException($"Header references unknown table {tableErpId}.");
             }
 
             headers.Add(new AuditReportHeaderDefinition
             {
-                TextSk = reader.IsDBNull(1)
-                    ? null
-                    : reader.GetString(1),
-
-                TextEn = reader.IsDBNull(2)
-                    ? null
-                    : reader.GetString(2),
-
+                TextSk = reader.IsDBNull(1) ? null : reader.GetString(1),
+                TextEn = reader.IsDBNull(2) ? null : reader.GetString(2),
                 RowPosition = reader.GetInt32(3),
                 ColumnPosition = reader.GetInt32(4),
                 RowSpan = reader.GetInt32(5),
                 ColumnSpan = reader.GetInt32(6)
             });
         }
-
         await reader.NextResultAsync(cancellationToken);
 
         while (await reader.ReadAsync(cancellationToken))
         {
             int tableErpId = reader.GetInt32(0);
-
-            if (!rowsByTable.TryGetValue(
-                    tableErpId,
-                    out List<AuditReportRowDefinition>? rows))
+            if (!rowsByTable.TryGetValue(tableErpId,out List<AuditReportRowDefinition>? rows))
             {
-                throw new InvalidOperationException(
-                    $"Row references unknown table {tableErpId}.");
+                throw new InvalidOperationException($"Row references unknown table {tableErpId}.");
             }
 
             rows.Add(new AuditReportRowDefinition
             {
-                RowNumber = reader.IsDBNull(1)
-                    ? null
-                    : reader.GetInt32(1),
-
-                Designation = reader.IsDBNull(2)
-                    ? null
-                    : reader.GetString(2),
-
-                TextSk = reader.IsDBNull(3)
-                    ? null
-                    : reader.GetString(3),
-
-                TextEn = reader.IsDBNull(4)
-                    ? null
-                    : reader.GetString(4),
-
-                IsSumRow =
-                    !reader.IsDBNull(5) &&
-                    reader.GetByte(5) != 0,
-
-                CategorySk = reader.IsDBNull(6)
-                    ? null
-                    : reader.GetString(6)
+                RowNumber = reader.IsDBNull(1) ? null : reader.GetInt32(1),
+                Designation = reader.IsDBNull(2) ? null : reader.GetString(2),
+                TextSk = reader.IsDBNull(3) ? null : reader.GetString(3),
+                TextEn = reader.IsDBNull(4) ? null : reader.GetString(4),
+                IsSumRow = !reader.IsDBNull(5) && reader.GetByte(5) != 0,
+                CategorySk = reader.IsDBNull(6) ? null : reader.GetString(6)
             });
         }
 
-        var accountGroups =
-    new List<AuditAccountGroupDefinition>();
-
+        var accountGroups = new List<AuditAccountGroupDefinition>();
         await reader.NextResultAsync(cancellationToken);
 
         while (await reader.ReadAsync(cancellationToken))
@@ -322,45 +226,22 @@ public sealed class AuditTemplatePackageRepository
             accountGroups.Add(new AuditAccountGroupDefinition
             {
                 Account = reader.GetString(0),
-
-                Title = reader.IsDBNull(1)
-                    ? null
-                    : reader.GetString(1),
-
-                Legend = reader.IsDBNull(2)
-                    ? null
-                    : reader.GetString(2),
-
-                AssetsValueSource = reader.IsDBNull(3)
-                    ? null
-                    : reader.GetString(3),
-
-                LiabilitiesValueSource = reader.IsDBNull(4)
-                    ? null
-                    : reader.GetString(4)
+                Title = reader.IsDBNull(1) ? null : reader.GetString(1),
+                Legend = reader.IsDBNull(2) ? null : reader.GetString(2),
+                AssetsValueSource = reader.IsDBNull(3) ? null : reader.GetString(3),
+                LiabilitiesValueSource = reader.IsDBNull(4) ? null : reader.GetString(4)
             });
         }
-
-        var reportMappingRules =
-    new List<AuditReportMappingRuleDefinition>();
-
+        var reportMappingRules = new List<AuditReportMappingRuleDefinition>();
         await reader.NextResultAsync(cancellationToken);
 
         while (await reader.ReadAsync(cancellationToken))
         {
-            string usage = reader.IsDBNull(7)
-                ? string.Empty
-                : reader.GetString(7).Trim();
-
-            string[] usageParts =
-                usage.Split(
-                    ' ',
-                    StringSplitOptions.RemoveEmptyEntries);
-
+            string usage = reader.IsDBNull(7) ? string.Empty : reader.GetString(7).Trim();
+            string[] usageParts = usage.Split(' ', StringSplitOptions.RemoveEmptyEntries);
             if (usageParts.Length != 2)
             {
-                throw new InvalidOperationException(
-                    $"Invalid mapping-rule Usage value '{usage}'.");
+                throw new InvalidOperationException($"Invalid mapping-rule Usage value '{usage}'.");
             }
 
             reportMappingRules.Add(
@@ -370,19 +251,9 @@ public sealed class AuditTemplatePackageRepository
                     Account3 = reader.GetString(1),
                     ReportRowNumber = reader.GetInt32(2),
                     AccountTitle = reader.GetString(3),
-
-                    RequiresAnalyticalMapping =
-                        !reader.IsDBNull(4) &&
-                        reader.GetInt16(4) != 0,
-
-                    IncludeInBrutto =
-                        !reader.IsDBNull(5) &&
-                        reader.GetInt16(5) != 0,
-
-                    IncludeInCorrection =
-                        !reader.IsDBNull(6) &&
-                        reader.GetInt16(6) != 0,
-
+                    RequiresAnalyticalMapping = !reader.IsDBNull(4) && reader.GetInt16(4) != 0,
+                    IncludeInBrutto = !reader.IsDBNull(5) && reader.GetInt16(5) != 0,
+                    IncludeInCorrection = !reader.IsDBNull(6) && reader.GetInt16(6) != 0,
                     Side = usageParts[0],
                     ValueSource = usageParts[1]
                 });

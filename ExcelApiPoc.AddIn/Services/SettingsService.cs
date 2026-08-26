@@ -8,15 +8,9 @@ namespace ExcelApiPoc.AddIn.Services
 {
     internal static class SettingsService
     {
-        private const string DefaultApiBaseUrl =
-            "http://localhost:5080";
+        private const string DefaultApiBaseUrl = "http://localhost:5080";
 
-        public static string SettingsPath =>
-            Path.Combine(
-                Environment.GetFolderPath(
-                    Environment.SpecialFolder.LocalApplicationData),
-                "ExcelApiPoc",
-                "settings.json");
+        public static string SettingsPath => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),"ExcelApiPoc","settings.json");
 
         public static AddInSettings Load()
         {
@@ -25,21 +19,15 @@ namespace ExcelApiPoc.AddIn.Services
                 return CreateDefault();
             }
 
-            string json =
-                File.ReadAllText(SettingsPath, Encoding.UTF8);
+            string json = File.ReadAllText(SettingsPath, Encoding.UTF8);
+            AddInSettings settings = JsonConvert.DeserializeObject<AddInSettings>(json);
 
-            AddInSettings settings =
-                JsonConvert.DeserializeObject<AddInSettings>(json);
-
-            if (settings == null ||
-                string.IsNullOrWhiteSpace(settings.ApiBaseUrl))
+            if (settings == null || string.IsNullOrWhiteSpace(settings.ApiBaseUrl))
             {
                 return CreateDefault();
             }
 
-            settings.ApiBaseUrl =
-                NormalizeApiBaseUrl(settings.ApiBaseUrl);
-
+            settings.ApiBaseUrl = NormalizeApiBaseUrl(settings.ApiBaseUrl);
             return settings;
         }
 
@@ -49,36 +37,18 @@ namespace ExcelApiPoc.AddIn.Services
             {
                 throw new ArgumentNullException(nameof(settings));
             }
-
-            settings.ApiBaseUrl =
-                NormalizeApiBaseUrl(settings.ApiBaseUrl);
-
-            string directory =
-                Path.GetDirectoryName(SettingsPath);
-
+            settings.ApiBaseUrl = NormalizeApiBaseUrl(settings.ApiBaseUrl);
+            string directory = Path.GetDirectoryName(SettingsPath);
             Directory.CreateDirectory(directory);
-
-            string json =
-                JsonConvert.SerializeObject(
-                    settings,
-                    Formatting.Indented);
-
-            File.WriteAllText(
-                SettingsPath,
-                json,
-                new UTF8Encoding(false));
+            string json = JsonConvert.SerializeObject(settings, Formatting.Indented);
+            File.WriteAllText(SettingsPath, json, new UTF8Encoding(false));
         }
 
         public static Uri BuildApiUri(string relativePath)
         {
             AddInSettings settings = Load();
-
-            string path =
-                relativePath?.TrimStart('/') ?? string.Empty;
-
-            return new Uri(
-                $"{settings.ApiBaseUrl}/{path}",
-                UriKind.Absolute);
+            string path = relativePath?.TrimStart('/') ?? string.Empty;
+            return new Uri( $"{settings.ApiBaseUrl}/{path}", UriKind.Absolute);
         }
 
         private static AddInSettings CreateDefault()
@@ -91,20 +61,11 @@ namespace ExcelApiPoc.AddIn.Services
 
         private static string NormalizeApiBaseUrl(string value)
         {
-            string normalized =
-                (value ?? string.Empty).Trim().TrimEnd('/');
-
-            if (!Uri.TryCreate(
-                    normalized,
-                    UriKind.Absolute,
-                    out Uri uri) ||
-                (uri.Scheme != Uri.UriSchemeHttp &&
-                 uri.Scheme != Uri.UriSchemeHttps))
+            string normalized = (value ?? string.Empty).Trim().TrimEnd('/');
+            if (!Uri.TryCreate(normalized,UriKind.Absolute,out Uri uri) || (uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps))
             {
-                throw new InvalidOperationException(
-                    "The API URL must be a valid HTTP or HTTPS address.");
+                throw new InvalidOperationException( "The API URL must be a valid HTTP or HTTPS address.");
             }
-
             return normalized;
         }
     }

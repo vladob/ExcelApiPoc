@@ -34,16 +34,9 @@ app.MapGet("/api/health", () =>
 
 app.MapGet(
     "/api/templates/{templateErpId:int}/metadata",
-    async (
-        int templateErpId,
-        AuditTemplateRepository repository,
-        CancellationToken cancellationToken) =>
+    async (int templateErpId, AuditTemplateRepository repository, CancellationToken cancellationToken) =>
     {
-        AuditTemplateMetadata? template =
-            await repository.GetMetadataAsync(
-                templateErpId,
-                cancellationToken);
-
+        AuditTemplateMetadata? template = await repository.GetMetadataAsync(templateErpId, cancellationToken);
         if (template is null)
         {
             return Results.NotFound(new
@@ -60,56 +53,31 @@ app.MapGet(
 app.MapGet("/api/health/database",
     async (IConfiguration configuration) =>
     {
-        string? connectionString =
-            configuration.GetConnectionString("AuditAddIn");
+        string? connectionString = configuration.GetConnectionString("AuditAddIn");
 
         if (string.IsNullOrWhiteSpace(connectionString))
         {
-            return Results.Problem(
-                title: "Database connection is not configured.",
-                statusCode: StatusCodes.Status503ServiceUnavailable);
+            return Results.Problem(title: "Database connection is not configured.", statusCode: StatusCodes.Status503ServiceUnavailable);
         }
-
-        await using var connection =
-            new SqlConnection(connectionString);
-
+        await using var connection = new SqlConnection(connectionString);
         await connection.OpenAsync();
-
-        await using var command = new SqlCommand(
-            "SELECT DB_NAME();",
-            connection);
-
+        await using var command = new SqlCommand("SELECT DB_NAME();", connection);
         object? databaseName = await command.ExecuteScalarAsync();
 
-        return Results.Ok(new
-        {
-            status = "Healthy",
-            server = "SRVHPV",
-            database = databaseName?.ToString()
-        });
+        return Results.Ok(new {status = "Healthy", server = "SRVHPV", database = databaseName?.ToString()});
     })
 .WithName("GetDatabaseHealth")
 .WithOpenApi();
 
 app.MapGet(
     "/api/v1/templates/{templateErpId:int}/package",
-    async (
-        int templateErpId,
-        AuditTemplatePackageRepository repository,
-        CancellationToken cancellationToken) =>
+    async (int templateErpId,AuditTemplatePackageRepository repository,CancellationToken cancellationToken) =>
     {
-        AuditTemplatePackage? package =
-            await repository.GetPackageAsync(
-                templateErpId,
-                cancellationToken);
+        AuditTemplatePackage? package = await repository.GetPackageAsync( templateErpId, cancellationToken);
 
         if (package is null)
         {
-            return Results.NotFound(new
-            {
-                message =
-                    $"Template package {templateErpId} was not found."
-            });
+            return Results.NotFound(new{message = $"Template package {templateErpId} was not found."});
         }
 
         return Results.Ok(package);

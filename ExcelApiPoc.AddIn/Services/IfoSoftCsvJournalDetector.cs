@@ -48,7 +48,6 @@ namespace ExcelApiPoc.AddIn.Services
             {
                 return false;
             }
-
             string normalizedTitle = titleLine.Trim().Trim('"');
 
             if (!string.Equals(normalizedTitle,"Uctovny dennik", StringComparison.OrdinalIgnoreCase) &&
@@ -87,7 +86,6 @@ namespace ExcelApiPoc.AddIn.Services
             }
             string normalized = entityLine.Trim().Trim('"').Trim();
             Match match = Regex.Match(normalized, @"^(?<ico>\d{8})(?:\s+(?<name>.*))?$");
-
             if (!match.Success)
             {
                 return;
@@ -112,7 +110,6 @@ namespace ExcelApiPoc.AddIn.Services
                 {
                     continue;
                 }
-
                 string[] values = line.Split(';');
 
                 // Datum is the third IfoSoft column.
@@ -120,15 +117,9 @@ namespace ExcelApiPoc.AddIn.Services
                 {
                     continue;
                 }
-
                 string dateText = values[2].Trim().Trim('"');
 
-                if (DateTime.TryParseExact(
-                        dateText,
-                        "dd.MM.yyyy",
-                        CultureInfo.InvariantCulture,
-                        DateTimeStyles.None,
-                        out DateTime date))
+                if (DateTime.TryParseExact(dateText,"dd.MM.yyyy",CultureInfo.InvariantCulture,DateTimeStyles.None,out DateTime date))
                 {
                     result.FiscalYear = date.Year;
                     return;

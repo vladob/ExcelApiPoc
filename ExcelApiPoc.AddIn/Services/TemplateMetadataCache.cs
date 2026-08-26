@@ -8,126 +8,70 @@ namespace ExcelApiPoc.AddIn.Services
     {
         public static string GetMetadataPath(int templateErpId)
         {
-            return Path.Combine(
-                GetTemplateDirectory(templateErpId),
-                "metadata.json");
+            return Path.Combine(GetTemplateDirectory(templateErpId), "metadata.json");
         }
 
-        public static string GetPackagePath(
-            int templateErpId,
-            int contractVersion)
+        public static string GetPackagePath(int templateErpId,int contractVersion)
         {
             if (contractVersion <= 0)
             {
-                throw new ArgumentOutOfRangeException(
-                    nameof(contractVersion));
+                throw new ArgumentOutOfRangeException(nameof(contractVersion));
             }
 
-            return Path.Combine(
-                GetTemplateDirectory(templateErpId),
-                $"package-v{contractVersion}.json");
+            return Path.Combine(GetTemplateDirectory(templateErpId), $"package-v{contractVersion}.json");
         }
 
-        public static string SaveMetadata(
-            int templateErpId,
-            string json)
+        public static string SaveMetadata(int templateErpId,string json)
         {
-            return SaveJson(
-                GetMetadataPath(templateErpId),
-                json);
+            return SaveJson(GetMetadataPath(templateErpId),json);
         }
 
         public static string LoadMetadata(int templateErpId)
         {
-            return LoadJson(
-                GetMetadataPath(templateErpId),
-                "audit-template metadata");
+            return LoadJson(GetMetadataPath(templateErpId),"audit-template metadata");
         }
 
-        public static string SavePackage(
-            int templateErpId,
-            int contractVersion,
-            string json)
+        public static string SavePackage(int templateErpId, int contractVersion, string json)
         {
-            return SaveJson(
-                GetPackagePath(
-                    templateErpId,
-                    contractVersion),
-                json);
+            return SaveJson(GetPackagePath(templateErpId, contractVersion),json);
         }
 
-        public static string LoadPackage(
-            int templateErpId,
-            int contractVersion)
+        public static string LoadPackage(int templateErpId, int contractVersion)
         {
-            return LoadJson(
-                GetPackagePath(
-                    templateErpId,
-                    contractVersion),
-                "audit-template package");
+            return LoadJson(GetPackagePath(templateErpId, contractVersion), "audit-template package");
         }
 
-        private static string GetTemplateDirectory(
-            int templateErpId)
+        private static string GetTemplateDirectory(int templateErpId)
         {
             if (templateErpId <= 0)
             {
-                throw new ArgumentOutOfRangeException(
-                    nameof(templateErpId));
+                throw new ArgumentOutOfRangeException(nameof(templateErpId));
             }
-
-            string localAppData =
-                Environment.GetFolderPath(
-                    Environment.SpecialFolder.LocalApplicationData);
-
-            return Path.Combine(
-                localAppData,
-                "ExcelApiPoc",
-                "Cache",
-                "Templates",
-                templateErpId.ToString());
+            string localAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+            return Path.Combine(localAppData,"ExcelApiPoc","Cache","Templates",templateErpId.ToString());
         }
 
-        private static string SaveJson(
-            string targetPath,
-            string json)
+        private static string SaveJson(string targetPath,string json)
         {
             if (string.IsNullOrWhiteSpace(json))
             {
-                throw new ArgumentException(
-                    "JSON content cannot be empty.",
-                    nameof(json));
+                throw new ArgumentException("JSON content cannot be empty.",nameof(json));
             }
 
-            string directory =
-                Path.GetDirectoryName(targetPath);
-
+            string directory = Path.GetDirectoryName(targetPath);
             Directory.CreateDirectory(directory);
-
-            string temporaryPath =
-                targetPath + ".tmp";
-
+            string temporaryPath = targetPath + ".tmp";
             try
             {
-                File.WriteAllText(
-                    temporaryPath,
-                    json,
-                    new UTF8Encoding(false));
-
+                File.WriteAllText(temporaryPath, json, new UTF8Encoding(false));
                 if (File.Exists(targetPath))
                 {
-                    File.Replace(
-                        temporaryPath,
-                        targetPath,
-                        null);
+                    File.Replace(temporaryPath, targetPath, null);
                 }
                 else
                 {
-                    File.Move(
-                        temporaryPath,
-                        targetPath);
+                    File.Move(temporaryPath, targetPath);
                 }
-
                 return targetPath;
             }
             finally
@@ -139,26 +83,17 @@ namespace ExcelApiPoc.AddIn.Services
             }
         }
 
-        private static string LoadJson(
-            string path,
-            string contentDescription)
+        private static string LoadJson(string path,string contentDescription)
         {
             if (!File.Exists(path))
             {
-                throw new FileNotFoundException(
-                    $"No cached {contentDescription} is available.",
-                    path);
+                throw new FileNotFoundException($"No cached {contentDescription} is available.",path);
             }
-
-            string json =
-                File.ReadAllText(path, Encoding.UTF8);
-
+            string json =File.ReadAllText(path, Encoding.UTF8);
             if (string.IsNullOrWhiteSpace(json))
             {
-                throw new InvalidDataException(
-                    $"The cached {contentDescription} is empty.");
+                throw new InvalidDataException($"The cached {contentDescription} is empty.");
             }
-
             return json;
         }
     }
