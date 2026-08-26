@@ -6,8 +6,13 @@ public sealed class AuditTemplatePackage
 
     public DateTime GeneratedAtUtc { get; init; }
 
-    public AuditTemplateDefinition Template { get; init; }
-        = new();
+    public AuditTemplateDefinition Template { get; init; } = new();
+
+    public IReadOnlyList<AuditAccountGroupDefinition> AccountGroups { get; init; }
+    = Array.Empty<AuditAccountGroupDefinition>();
+
+    public IReadOnlyList<AuditReportMappingRuleDefinition> ReportMappingRules { get; init; }
+        = Array.Empty<AuditReportMappingRuleDefinition>();
 }
 
 public sealed class AuditTemplateDefinition
@@ -77,4 +82,38 @@ public sealed class AuditReportRowDefinition
     public bool IsSumRow { get; init; }
 
     public string? CategorySk { get; init; }
+}
+
+public sealed class AuditAccountGroupDefinition
+{
+    public string Account { get; init; } = string.Empty;
+
+    public string? Title { get; init; }
+
+    public string? Legend { get; init; }
+
+    public string? AssetsValueSource { get; init; }
+
+    public string? LiabilitiesValueSource { get; init; }
+}
+
+public sealed class AuditReportMappingRuleDefinition
+{
+    public int TableErpId { get; init; }
+
+    public string Account3 { get; init; } = string.Empty;
+
+    public int ReportRowNumber { get; init; }
+
+    public string AccountTitle { get; init; } = string.Empty;
+
+    public bool RequiresAnalyticalMapping { get; init; }
+
+    public bool IncludeInBrutto { get; init; }
+
+    public bool IncludeInCorrection { get; init; }
+
+    public string Side { get; init; } = string.Empty;
+
+    public string ValueSource { get; init; } = string.Empty;
 }

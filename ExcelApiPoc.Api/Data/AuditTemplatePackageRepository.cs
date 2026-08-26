@@ -83,6 +83,45 @@ public sealed class AuditTemplatePackageRepository
             ORDER BY
                 r.[TableErpId],
                 r.[RowNumber];
+
+            SELECT
+                ag.[Account],
+                ag.[Title],
+                ag.[Legend],
+                ag.[ForAssets],
+                ag.[ForLiabilities]
+            FROM [Accounts].[AccountGroups] ag
+            WHERE ag.[Type] =
+            (
+                SELECT
+                    CASE
+                        WHEN COUNT(DISTINCT agu.[Type]) = 1
+                            THEN MIN(agu.[Type])
+                        ELSE NULL
+                    END
+                FROM [Accounts].[AcountGroupsUsage] agu
+                WHERE agu.[TemplateErpId] = @TemplateErpId
+            )
+            ORDER BY
+                LEN(ag.[Account]),
+                ag.[Account];
+
+            SELECT
+                [TableErpId],
+                [Account3],
+                [SumRow],
+                [AccountTitle],
+                [Au],
+                [InBrutto],
+                [InCorrection],
+                [Usage]
+            FROM [Accounts].[AcountGroupsUsage]
+            WHERE [TemplateErpId] = @TemplateErpId
+            ORDER BY
+                [TableErpId],
+                [SumRow],
+                [Account3];
+
             """;
 
         await using var connection =
@@ -257,6 +296,82 @@ public sealed class AuditTemplatePackageRepository
             });
         }
 
+        var accountGroups =
+    new List<AuditAccountGroupDefinition>();
+
+        await reader.NextResultAsync(cancellationToken);
+
+        while (await reader.ReadAsync(cancellationToken))
+        {
+            accountGroups.Add(new AuditAccountGroupDefinition
+            {
+                Account = reader.GetString(0),
+
+                Title = reader.IsDBNull(1)
+                    ? null
+                    : reader.GetString(1),
+
+                Legend = reader.IsDBNull(2)
+                    ? null
+                    : reader.GetString(2),
+
+                AssetsValueSource = reader.IsDBNull(3)
+                    ? null
+                    : reader.GetString(3),
+
+                LiabilitiesValueSource = reader.IsDBNull(4)
+                    ? null
+                    : reader.GetString(4)
+            });
+        }
+
+        var reportMappingRules =
+    new List<AuditReportMappingRuleDefinition>();
+
+        await reader.NextResultAsync(cancellationToken);
+
+        while (await reader.ReadAsync(cancellationToken))
+        {
+            string usage = reader.IsDBNull(7)
+                ? string.Empty
+                : reader.GetString(7).Trim();
+
+            string[] usageParts =
+                usage.Split(
+                    ' ',
+                    StringSplitOptions.RemoveEmptyEntries);
+
+            if (usageParts.Length != 2)
+            {
+                throw new InvalidOperationException(
+                    $"Invalid mapping-rule Usage value '{usage}'.");
+            }
+
+            reportMappingRules.Add(
+                new AuditReportMappingRuleDefinition
+                {
+                    TableErpId = reader.GetInt32(0),
+                    Account3 = reader.GetString(1),
+                    ReportRowNumber = reader.GetInt32(2),
+                    AccountTitle = reader.GetString(3),
+
+                    RequiresAnalyticalMapping =
+                        !reader.IsDBNull(4) &&
+                        reader.GetInt16(4) != 0,
+
+                    IncludeInBrutto =
+                        !reader.IsDBNull(5) &&
+                        reader.GetInt16(5) != 0,
+
+                    IncludeInCorrection =
+                        !reader.IsDBNull(6) &&
+                        reader.GetInt16(6) != 0,
+
+                    Side = usageParts[0],
+                    ValueSource = usageParts[1]
+                });
+        }
+
         return new AuditTemplatePackage
         {
             ContractVersion = 1,
@@ -271,7 +386,9 @@ public sealed class AuditTemplatePackageRepository
                 ValidTo = validTo,
                 AccountingModel = accountingModel,
                 Tables = tables
-            }
+            },
+            AccountGroups = accountGroups,
+            ReportMappingRules = reportMappingRules
         };
     }
 }

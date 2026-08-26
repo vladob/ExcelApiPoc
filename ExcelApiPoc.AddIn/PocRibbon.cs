@@ -279,6 +279,41 @@ namespace ExcelApiPoc.AddIn
                     package.Template.Tables
                     ?? Array.Empty<AuditReportTableDefinitionResponse>();
 
+                AuditAccountGroupDefinitionResponse[] accountGroups =
+                    package.AccountGroups
+                    ?? Array.Empty<AuditAccountGroupDefinitionResponse>();
+
+                AuditReportMappingRuleDefinitionResponse[] mappingRules =
+                    package.ReportMappingRules
+                    ?? Array.Empty<AuditReportMappingRuleDefinitionResponse>();
+
+                int analyticalRuleCount = 0;
+                int assetsRuleCount = 0;
+                int liabilitiesRuleCount = 0;
+
+                foreach (AuditReportMappingRuleDefinitionResponse rule in mappingRules)
+                {
+                    if (rule.RequiresAnalyticalMapping)
+                    {
+                        analyticalRuleCount++;
+                    }
+
+                    if (string.Equals(
+                            rule.Side,
+                            "Assets",
+                            StringComparison.OrdinalIgnoreCase))
+                    {
+                        assetsRuleCount++;
+                    }
+                    else if (string.Equals(
+                                 rule.Side,
+                                 "Liabilities",
+                                 StringComparison.OrdinalIgnoreCase))
+                    {
+                        liabilitiesRuleCount++;
+                    }
+                }
+
                 int totalHeaders = 0;
                 int totalRows = 0;
 
@@ -323,6 +358,20 @@ namespace ExcelApiPoc.AddIn
                 message.AppendLine(
                     $"Totals: {tables.Length} tables, " +
                     $"{totalHeaders} headers, {totalRows} rows");
+
+                message.AppendLine();
+                message.AppendLine(
+                    $"Account groups: {accountGroups.Length}");
+
+                message.AppendLine(
+                    $"Report mapping rules: {mappingRules.Length}");
+
+                message.AppendLine(
+                    $"Analytical mapping rules: {analyticalRuleCount}");
+
+                message.AppendLine(
+                    $"Rule sides: {assetsRuleCount} Assets, " +
+                    $"{liabilitiesRuleCount} Liabilities");
 
                 message.AppendLine();
                 message.AppendLine($"Source: {source}");

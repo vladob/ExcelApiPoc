@@ -9,6 +9,14 @@ namespace ExcelApiPoc.AddIn.Models
         public DateTime GeneratedAtUtc { get; set; }
 
         public AuditTemplateDefinitionResponse Template { get; set; }
+
+        public AuditAccountGroupDefinitionResponse[] AccountGroups { get; set; }
+
+        public AuditReportMappingRuleDefinitionResponse[] ReportMappingRules
+        {
+            get;
+            set;
+        }
     }
 
     public sealed class AuditTemplateDefinitionResponse
@@ -76,4 +84,39 @@ namespace ExcelApiPoc.AddIn.Models
 
         public string CategorySk { get; set; }
     }
+
+    public sealed class AuditAccountGroupDefinitionResponse
+    {
+        public string Account { get; set; }
+
+        public string Title { get; set; }
+
+        public string Legend { get; set; }
+
+        public string AssetsValueSource { get; set; }
+
+        public string LiabilitiesValueSource { get; set; }
+    }
+
+    public sealed class AuditReportMappingRuleDefinitionResponse
+    {
+        public int TableErpId { get; set; }
+
+        public string Account3 { get; set; }
+
+        public int ReportRowNumber { get; set; }
+
+        public string AccountTitle { get; set; }
+
+        public bool RequiresAnalyticalMapping { get; set; }
+
+        public bool IncludeInBrutto { get; set; }
+
+        public bool IncludeInCorrection { get; set; }
+
+        public string Side { get; set; }
+
+        public string ValueSource { get; set; }
+    }
+
 }
