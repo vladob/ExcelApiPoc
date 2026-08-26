@@ -1,11 +1,15 @@
 using ExcelApiPoc.Api.Models;
+using Microsoft.Data.SqlClient;
+using ExcelApiPoc.Api.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddScoped<AuditTemplateRepository>();
 
 var app = builder.Build();
+
 
 if (app.Environment.IsDevelopment())
 {
@@ -27,10 +31,19 @@ app.MapGet("/api/health", () =>
 .WithName("GetHealth")
 .WithOpenApi();
 
-app.MapGet("/api/templates/{templateErpId:int}/metadata",
-    (int templateErpId) =>
+app.MapGet(
+    "/api/templates/{templateErpId:int}/metadata",
+    async (
+        int templateErpId,
+        AuditTemplateRepository repository,
+        CancellationToken cancellationToken) =>
     {
-        if (templateErpId != 690)
+        AuditTemplateMetadata? template =
+            await repository.GetMetadataAsync(
+                templateErpId,
+                cancellationToken);
+
+        if (template is null)
         {
             return Results.NotFound(new
             {
@@ -38,39 +51,43 @@ app.MapGet("/api/templates/{templateErpId:int}/metadata",
             });
         }
 
-        var template = new AuditTemplateMetadata
-        {
-            TemplateErpId = 690,
-            Name = "Súvaha Úè ROPO SFOV 1-01",
-            MfSpecification = "MF/21227/2014-31",
-            ValidFrom = new DateOnly(2014, 1, 1),
-            ValidTo = null,
-            Tables =
-            [
-                new AuditTableMetadata
-            {
-                TableErpId = 69001,
-                NameSk = "Strana aktív",
-                NameEn = "Assets",
-                NumberOfColumns = 7,
-                NumberOfDataColumns = 4,
-                DontHaveRowNumbers = false
-            },
-            new AuditTableMetadata
-            {
-                TableErpId = 69002,
-                NameSk = "Strana pasív",
-                NameEn = "Liabilities and Equity",
-                NumberOfColumns = 5,
-                NumberOfDataColumns = 2,
-                DontHaveRowNumbers = false
-            }
-            ]
-        };
-
         return Results.Ok(template);
     })
-.WithName("GetAuditTemplateMetadata")
+    .WithName("GetAuditTemplateMetadata")
+    .WithOpenApi();
+
+app.MapGet("/api/health/database",
+    async (IConfiguration configuration) =>
+    {
+        string? connectionString =
+            configuration.GetConnectionString("AuditAddIn");
+
+        if (string.IsNullOrWhiteSpace(connectionString))
+        {
+            return Results.Problem(
+                title: "Database connection is not configured.",
+                statusCode: StatusCodes.Status503ServiceUnavailable);
+        }
+
+        await using var connection =
+            new SqlConnection(connectionString);
+
+        await connection.OpenAsync();
+
+        await using var command = new SqlCommand(
+            "SELECT DB_NAME();",
+            connection);
+
+        object? databaseName = await command.ExecuteScalarAsync();
+
+        return Results.Ok(new
+        {
+            status = "Healthy",
+            server = "SRVHPV",
+            database = databaseName?.ToString()
+        });
+    })
+.WithName("GetDatabaseHealth")
 .WithOpenApi();
 
 app.Run();
