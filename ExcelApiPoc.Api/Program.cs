@@ -7,6 +7,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<AuditTemplateRepository>();
+builder.Services.AddScoped<AuditTemplatePackageRepository>();
 
 var app = builder.Build();
 
@@ -89,5 +90,31 @@ app.MapGet("/api/health/database",
     })
 .WithName("GetDatabaseHealth")
 .WithOpenApi();
+
+app.MapGet(
+    "/api/v1/templates/{templateErpId:int}/package",
+    async (
+        int templateErpId,
+        AuditTemplatePackageRepository repository,
+        CancellationToken cancellationToken) =>
+    {
+        AuditTemplatePackage? package =
+            await repository.GetPackageAsync(
+                templateErpId,
+                cancellationToken);
+
+        if (package is null)
+        {
+            return Results.NotFound(new
+            {
+                message =
+                    $"Template package {templateErpId} was not found."
+            });
+        }
+
+        return Results.Ok(package);
+    })
+    .WithName("GetAuditTemplatePackageV1")
+    .WithOpenApi();
 
 app.Run();
