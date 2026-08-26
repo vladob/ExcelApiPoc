@@ -473,9 +473,7 @@ namespace ExcelApiPoc.AddIn
         public void OnCreateAuditWorkbook(IRibbonControl control)
         {
             _ = control;
-
-            using (var dialog =
-                new CreateAuditWorkbookForm())
+            using (var dialog = new CreateAuditWorkbookForm())
             {
                 dialog.ShowDialog();
             }

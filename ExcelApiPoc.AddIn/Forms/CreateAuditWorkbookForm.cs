@@ -4,8 +4,6 @@ using System;
 using System.Globalization;
 using System.IO;
 using System.Windows.Forms;
-using ExcelApiPoc.AddIn.Models;
-using ExcelApiPoc.AddIn.Services;
 
 namespace ExcelApiPoc.AddIn.Forms
 {
@@ -333,6 +331,19 @@ namespace ExcelApiPoc.AddIn.Forms
 
                 JournalPreflightResult result = IfoSoftJournalPreflightValidator.Validate(journalPath);
 
+                var importer = new IfoSoftCsvJournalImporter();
+
+                if (!importer.CanImport(journalPath,_accountingFormatComboBox.Text))
+                {
+                    throw new InvalidOperationException("No compatible journal importer was found.");
+                }
+                JournalImport journalImport =importer.Import(journalPath);
+
+                if (journalImport.Rows.Count != result.ValidRows)
+                {
+                    throw new InvalidOperationException($"Preflight found {result.ValidRows:N0} valid records, " + $"but the canonical importer produced " + $"{journalImport.Rows.Count:N0} records.");
+                }
+
                 bool fiscalYearMatches =
                     result.DateFrom.HasValue &&
                     result.DateTo.HasValue &&
@@ -343,25 +354,20 @@ namespace ExcelApiPoc.AddIn.Forms
 
                 message.AppendLine("Journal preflight completed.");
                 message.AppendLine();
-
-                message.AppendLine(
-                    $"Source records: {result.SourceRows:N0}");
-
+                message.AppendLine($"Source records: {result.SourceRows:N0}");
                 message.AppendLine($"Valid records: {result.ValidRows:N0}");
-
                 message.AppendLine($"Rejected records: {result.RejectedRows:N0}");
-
                 message.AppendLine($"Maximum supported: " + $"{IfoSoftJournalPreflightValidator.MaximumJournalRows:N0}");
-
                 message.AppendLine();
-
                 message.AppendLine($"Date from: " + $"{result.DateFrom?.ToString("yyyy-MM-dd") ?? "-"}");
-
                 message.AppendLine($"Date to: " + $"{result.DateTo?.ToString("yyyy-MM-dd") ?? "-"}");
-
                 message.AppendLine($"Selected fiscal year: {selectedFiscalYear}");
-
                 message.AppendLine($"Fiscal year matches: " + $"{(fiscalYearMatches ? "Yes" : "No")}");
+                message.AppendLine();
+                message.AppendLine($"Canonical rows: {journalImport.Rows.Count:N0}");
+                message.AppendLine($"Normalized text fields: " + $"{journalImport.NormalizedTextFieldCount:N0}");
+                message.AppendLine($"Company: {journalImport.CompanyName}");
+                message.AppendLine($"Source SHA-256: {journalImport.SourceFileHash}");
 
                 if (result.Errors.Count > 0)
                 {

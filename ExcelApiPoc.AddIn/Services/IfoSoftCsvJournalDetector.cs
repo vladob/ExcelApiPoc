@@ -11,34 +11,22 @@ namespace ExcelApiPoc.AddIn.Services
     {
         private const int MaximumDetectionRows = 100;
 
-        public static bool TryDetect(
-            string filePath,
-            out JournalDetectionResult result)
+        public static bool TryDetect(string filePath,out JournalDetectionResult result)
         {
             result = null;
 
-            if (string.IsNullOrWhiteSpace(filePath) ||
-                !File.Exists(filePath) ||
-                !string.Equals(
-                    Path.GetExtension(filePath),
-                    ".csv",
-                    StringComparison.OrdinalIgnoreCase))
+            if (string.IsNullOrWhiteSpace(filePath) || !File.Exists(filePath) || !string.Equals(Path.GetExtension(filePath), ".csv", StringComparison.OrdinalIgnoreCase))
             {
                 return false;
             }
 
-            using (var reader = new StreamReader(
-                filePath,
-                Encoding.GetEncoding(1250),
-                true))
+            using (var reader = new StreamReader(filePath,Encoding.GetEncoding(1250),true))
             {
                 string entityLine = reader.ReadLine();
                 string titleLine = reader.ReadLine();
                 string headerLine = reader.ReadLine();
 
-                if (!IsIfoSoftJournal(
-                        titleLine,
-                        headerLine))
+                if (!IsIfoSoftJournal(titleLine,headerLine))
                 {
                     return false;
                 }
@@ -48,40 +36,23 @@ namespace ExcelApiPoc.AddIn.Services
                     TechnicalType = "CSV",
                     AccountingFormat = "IfoSoft"
                 };
-
-                DetectEntityInformation(
-                    entityLine,
-                    result);
-
-                DetectFiscalYear(
-                    reader,
-                    result);
-
+                DetectEntityInformation(entityLine, result);
+                DetectFiscalYear(reader, result);
                 return true;
             }
         }
 
-        private static bool IsIfoSoftJournal(
-            string titleLine,
-            string headerLine)
+        private static bool IsIfoSoftJournal(string titleLine, string headerLine)
         {
-            if (string.IsNullOrWhiteSpace(titleLine) ||
-                string.IsNullOrWhiteSpace(headerLine))
+            if (string.IsNullOrWhiteSpace(titleLine) || string.IsNullOrWhiteSpace(headerLine))
             {
                 return false;
             }
 
-            string normalizedTitle =
-                titleLine.Trim().Trim('"');
+            string normalizedTitle = titleLine.Trim().Trim('"');
 
-            if (!string.Equals(
-                    normalizedTitle,
-                    "Uctovny dennik",
-                    StringComparison.OrdinalIgnoreCase) &&
-                !string.Equals(
-                    normalizedTitle,
-                    "Účtovný denník",
-                    StringComparison.OrdinalIgnoreCase))
+            if (!string.Equals(normalizedTitle,"Uctovny dennik", StringComparison.OrdinalIgnoreCase) &&
+                !string.Equals(normalizedTitle,"Účtovný denník",StringComparison.OrdinalIgnoreCase))
             {
                 return false;
             }
@@ -99,9 +70,7 @@ namespace ExcelApiPoc.AddIn.Services
 
             foreach (string requiredColumn in requiredColumns)
             {
-                if (headerLine.IndexOf(
-                        requiredColumn,
-                        StringComparison.OrdinalIgnoreCase) < 0)
+                if (headerLine.IndexOf(requiredColumn, StringComparison.OrdinalIgnoreCase) < 0)
                 {
                     return false;
                 }
@@ -110,45 +79,31 @@ namespace ExcelApiPoc.AddIn.Services
             return true;
         }
 
-        private static void DetectEntityInformation(
-            string entityLine,
-            JournalDetectionResult result)
+        private static void DetectEntityInformation(string entityLine, JournalDetectionResult result)
         {
             if (string.IsNullOrWhiteSpace(entityLine))
             {
                 return;
             }
-
-            string normalized =
-                entityLine.Trim().Trim('"').Trim();
-
-            Match match = Regex.Match(
-                normalized,
-                @"^(?<ico>\d{8})(?:\s+(?<name>.*))?$");
+            string normalized = entityLine.Trim().Trim('"').Trim();
+            Match match = Regex.Match(normalized, @"^(?<ico>\d{8})(?:\s+(?<name>.*))?$");
 
             if (!match.Success)
             {
                 return;
             }
-
-            result.Ico =
-                match.Groups["ico"].Value;
+            result.Ico = match.Groups["ico"].Value;
 
             if (match.Groups["name"].Success)
             {
-                result.CompanyName =
-                    match.Groups["name"].Value.Trim();
+                result.CompanyName = match.Groups["name"].Value.Trim();
             }
         }
 
-        private static void DetectFiscalYear(
-            StreamReader reader,
-            JournalDetectionResult result)
+        private static void DetectFiscalYear(StreamReader reader, JournalDetectionResult result)
         {
             int inspectedRows = 0;
-
-            while (!reader.EndOfStream &&
-                   inspectedRows < MaximumDetectionRows)
+            while (!reader.EndOfStream && inspectedRows < MaximumDetectionRows)
             {
                 string line = reader.ReadLine();
                 inspectedRows++;
@@ -166,8 +121,7 @@ namespace ExcelApiPoc.AddIn.Services
                     continue;
                 }
 
-                string dateText =
-                    values[2].Trim().Trim('"');
+                string dateText = values[2].Trim().Trim('"');
 
                 if (DateTime.TryParseExact(
                         dateText,
