@@ -8,6 +8,68 @@ namespace ExcelApiPoc.AddIn.Services
     {
         public static string GetMetadataPath(int templateErpId)
         {
+            return Path.Combine(
+                GetTemplateDirectory(templateErpId),
+                "metadata.json");
+        }
+
+        public static string GetPackagePath(
+            int templateErpId,
+            int contractVersion)
+        {
+            if (contractVersion <= 0)
+            {
+                throw new ArgumentOutOfRangeException(
+                    nameof(contractVersion));
+            }
+
+            return Path.Combine(
+                GetTemplateDirectory(templateErpId),
+                $"package-v{contractVersion}.json");
+        }
+
+        public static string SaveMetadata(
+            int templateErpId,
+            string json)
+        {
+            return SaveJson(
+                GetMetadataPath(templateErpId),
+                json);
+        }
+
+        public static string LoadMetadata(int templateErpId)
+        {
+            return LoadJson(
+                GetMetadataPath(templateErpId),
+                "audit-template metadata");
+        }
+
+        public static string SavePackage(
+            int templateErpId,
+            int contractVersion,
+            string json)
+        {
+            return SaveJson(
+                GetPackagePath(
+                    templateErpId,
+                    contractVersion),
+                json);
+        }
+
+        public static string LoadPackage(
+            int templateErpId,
+            int contractVersion)
+        {
+            return LoadJson(
+                GetPackagePath(
+                    templateErpId,
+                    contractVersion),
+                "audit-template package");
+        }
+
+        private static string GetTemplateDirectory(
+            int templateErpId)
+        {
             if (templateErpId <= 0)
             {
                 throw new ArgumentOutOfRangeException(
@@ -23,31 +85,27 @@ namespace ExcelApiPoc.AddIn.Services
                 "ExcelApiPoc",
                 "Cache",
                 "Templates",
-                templateErpId.ToString(),
-                "metadata.json");
+                templateErpId.ToString());
         }
 
-        public static string SaveMetadata(
-            int templateErpId,
+        private static string SaveJson(
+            string targetPath,
             string json)
         {
             if (string.IsNullOrWhiteSpace(json))
             {
                 throw new ArgumentException(
-                    "Template JSON cannot be empty.",
+                    "JSON content cannot be empty.",
                     nameof(json));
             }
 
-            string metadataPath =
-                GetMetadataPath(templateErpId);
-
             string directory =
-                Path.GetDirectoryName(metadataPath);
+                Path.GetDirectoryName(targetPath);
 
             Directory.CreateDirectory(directory);
 
             string temporaryPath =
-                metadataPath + ".tmp";
+                targetPath + ".tmp";
 
             try
             {
@@ -56,21 +114,21 @@ namespace ExcelApiPoc.AddIn.Services
                     json,
                     new UTF8Encoding(false));
 
-                if (File.Exists(metadataPath))
+                if (File.Exists(targetPath))
                 {
                     File.Replace(
                         temporaryPath,
-                        metadataPath,
+                        targetPath,
                         null);
                 }
                 else
                 {
                     File.Move(
                         temporaryPath,
-                        metadataPath);
+                        targetPath);
                 }
 
-                return metadataPath;
+                return targetPath;
             }
             finally
             {
@@ -81,25 +139,24 @@ namespace ExcelApiPoc.AddIn.Services
             }
         }
 
-        public static string LoadMetadata(int templateErpId)
+        private static string LoadJson(
+            string path,
+            string contentDescription)
         {
-            string metadataPath =
-                GetMetadataPath(templateErpId);
-
-            if (!File.Exists(metadataPath))
+            if (!File.Exists(path))
             {
                 throw new FileNotFoundException(
-                    "No cached audit-template metadata is available.",
-                    metadataPath);
+                    $"No cached {contentDescription} is available.",
+                    path);
             }
 
             string json =
-                File.ReadAllText(metadataPath, Encoding.UTF8);
+                File.ReadAllText(path, Encoding.UTF8);
 
             if (string.IsNullOrWhiteSpace(json))
             {
                 throw new InvalidDataException(
-                    "The cached audit-template metadata is empty.");
+                    $"The cached {contentDescription} is empty.");
             }
 
             return json;

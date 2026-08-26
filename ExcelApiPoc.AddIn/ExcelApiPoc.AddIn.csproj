@@ -148,6 +148,7 @@
   <ItemGroup>
     <Compile Include="ExcelFunctions.cs" />
     <Compile Include="Models\AuditTemplateMetadataResponse.cs" />
+    <Compile Include="Models\AuditTemplatePackageResponse.cs" />
     <Compile Include="PocRibbon.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Services\TemplateMetadataCache.cs" />

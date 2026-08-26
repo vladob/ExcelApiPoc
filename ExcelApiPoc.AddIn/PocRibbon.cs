@@ -14,10 +14,11 @@ namespace ExcelApiPoc.AddIn
     [ComVisible(true)]
     public class PocRibbon : ExcelRibbon
     {
-//        private const string HealthEndpoint = "https://localhost:7238/api/health";
         private const string HealthEndpoint = "http://localhost:5080/api/health";
-
         private const string TemplateMetadataEndpoint = "http://localhost:5080/api/templates/690/metadata";
+        private const int PackageTemplateErpId = 690;
+        private const int PackageContractVersion = 1;
+        private const string TemplatePackageEndpoint = "http://localhost:5080/api/v1/templates/690/package";
 
         private static readonly HttpClient HttpClient = new HttpClient
         {
@@ -42,6 +43,11 @@ namespace ExcelApiPoc.AddIn
                 label='Get Template 690'
                 size='large'
                 onAction='OnGetTemplate'/>
+            <button
+                id='buttonGetTemplatePackage'
+                label='Get Package 690'
+                size='large'
+                onAction='OnGetTemplatePackage'/>
         </group>
       </tab>
     </tabs>
@@ -185,6 +191,162 @@ namespace ExcelApiPoc.AddIn
                 MessageBox.Show(
                     $"Loading the audit template failed...\n\n{exception.Message}",
                     "Audit Template Error",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
+            }
+        }
+
+        public void OnGetTemplatePackage(IRibbonControl control)
+        {
+            _ = control;
+
+            try
+            {
+                string json;
+                string source;
+                string apiFailureMessage = null;
+                bool downloadedFromApi = false;
+
+                string cachePath =
+                    TemplateMetadataCache.GetPackagePath(
+                        PackageTemplateErpId,
+                        PackageContractVersion);
+
+                try
+                {
+                    json = HttpClient
+                        .GetStringAsync(TemplatePackageEndpoint)
+                        .GetAwaiter()
+                        .GetResult();
+
+                    source = "IIS API";
+                    downloadedFromApi = true;
+                }
+                catch (Exception exception)
+                    when (exception is HttpRequestException ||
+                          exception is TaskCanceledException)
+                {
+                    apiFailureMessage = exception.Message;
+
+                    json =
+                        TemplateMetadataCache.LoadPackage(
+                            PackageTemplateErpId,
+                            PackageContractVersion);
+
+                    source = "Local cache";
+                }
+
+                AuditTemplatePackageResponse package =
+                    JsonConvert.DeserializeObject<
+                        AuditTemplatePackageResponse>(json);
+
+                if (package == null)
+                {
+                    throw new InvalidOperationException(
+                        "The API returned an empty template package.");
+                }
+
+                if (package.ContractVersion != PackageContractVersion)
+                {
+                    throw new InvalidOperationException(
+                        $"Unsupported package contract version " +
+                        $"{package.ContractVersion}.");
+                }
+
+                if (package.Template == null)
+                {
+                    throw new InvalidOperationException(
+                        "The package does not contain a template.");
+                }
+
+                if (package.Template.TemplateErpId != PackageTemplateErpId)
+                {
+                    throw new InvalidOperationException(
+                        $"Expected template {PackageTemplateErpId}, " +
+                        $"but received {package.Template.TemplateErpId}.");
+                }
+
+                if (downloadedFromApi)
+                {
+                    cachePath =
+                        TemplateMetadataCache.SavePackage(
+                            PackageTemplateErpId,
+                            PackageContractVersion,
+                            json);
+                }
+
+                AuditReportTableDefinitionResponse[] tables =
+                    package.Template.Tables
+                    ?? Array.Empty<AuditReportTableDefinitionResponse>();
+
+                int totalHeaders = 0;
+                int totalRows = 0;
+
+                var message = new StringBuilder();
+
+                message.AppendLine(
+                    $"Contract version: {package.ContractVersion}");
+
+                message.AppendLine(
+                    $"Generated UTC: " +
+                    $"{package.GeneratedAtUtc:yyyy-MM-dd HH:mm:ss}");
+
+                message.AppendLine(
+                    $"Template ERP ID: {package.Template.TemplateErpId}");
+
+                message.AppendLine(
+                    $"Name: {package.Template.Name}");
+
+                message.AppendLine(
+                    $"Accounting model: {package.Template.AccountingModel}");
+
+                message.AppendLine();
+                message.AppendLine("Tables:");
+
+                foreach (AuditReportTableDefinitionResponse table in tables)
+                {
+                    int headerCount =
+                        table.Headers?.Length ?? 0;
+
+                    int rowCount =
+                        table.Rows?.Length ?? 0;
+
+                    totalHeaders += headerCount;
+                    totalRows += rowCount;
+
+                    message.AppendLine(
+                        $"{table.TableErpId} – {table.NameSk}: " +
+                        $"{headerCount} headers, {rowCount} rows");
+                }
+
+                message.AppendLine();
+                message.AppendLine(
+                    $"Totals: {tables.Length} tables, " +
+                    $"{totalHeaders} headers, {totalRows} rows");
+
+                message.AppendLine();
+                message.AppendLine($"Source: {source}");
+                message.AppendLine($"Cache: {cachePath}");
+
+                if (!string.IsNullOrWhiteSpace(apiFailureMessage))
+                {
+                    message.AppendLine();
+                    message.AppendLine(
+                        $"API unavailable: {apiFailureMessage}");
+                }
+
+                MessageBox.Show(
+                    message.ToString(),
+                    "Audit Template Package",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Information);
+            }
+            catch (Exception exception)
+            {
+                MessageBox.Show(
+                    $"Loading the audit-template package failed." +
+                    $"\n\n{exception.Message}",
+                    "Audit Template Package Error",
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Error);
             }
