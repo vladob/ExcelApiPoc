@@ -12,11 +12,9 @@ namespace ExcelApiPoc.AddIn.Models
 
         public AuditAccountGroupDefinitionResponse[] AccountGroups { get; set; }
 
-        public AuditReportMappingRuleDefinitionResponse[] ReportMappingRules
-        {
-            get;
-            set;
-        }
+        public AuditReportMappingRuleDefinitionResponse[] ReportMappingRules { get; set; }
+
+        public AuditCalculationDependencyDefinitionResponse[] CalculationPlan { get; set; }
     }
 
     public sealed class AuditTemplateDefinitionResponse
@@ -119,4 +117,18 @@ namespace ExcelApiPoc.AddIn.Models
         public string ValueSource { get; set; }
     }
 
+    public sealed class AuditCalculationDependencyDefinitionResponse
+    {
+        public int TargetTableErpId { get; set; }
+
+        public int TargetRowNumber { get; set; }
+
+        public int SourceTableErpId { get; set; }
+
+        public int SourceRowNumber { get; set; }
+
+        public int Coefficient { get; set; }
+
+        public int CalculationLevel { get; set; }
+    }
 }

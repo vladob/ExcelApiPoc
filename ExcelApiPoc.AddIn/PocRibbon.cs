@@ -314,6 +314,34 @@ namespace ExcelApiPoc.AddIn
                     }
                 }
 
+                AuditCalculationDependencyDefinitionResponse[] calculationPlan =
+                    package.CalculationPlan
+                    ?? Array.Empty<AuditCalculationDependencyDefinitionResponse>();
+
+                int additionCount = 0;
+                int subtractionCount = 0;
+                int crossTableCount = 0;
+
+                foreach (
+                    AuditCalculationDependencyDefinitionResponse dependency
+                    in calculationPlan)
+                {
+                    if (dependency.Coefficient == 1)
+                    {
+                        additionCount++;
+                    }
+                    else if (dependency.Coefficient == -1)
+                    {
+                        subtractionCount++;
+                    }
+
+                    if (dependency.TargetTableErpId !=
+                        dependency.SourceTableErpId)
+                    {
+                        crossTableCount++;
+                    }
+                }
+
                 int totalHeaders = 0;
                 int totalRows = 0;
 
@@ -372,6 +400,17 @@ namespace ExcelApiPoc.AddIn
                 message.AppendLine(
                     $"Rule sides: {assetsRuleCount} Assets, " +
                     $"{liabilitiesRuleCount} Liabilities");
+
+                message.AppendLine();
+                message.AppendLine(
+                    $"Calculation dependencies: {calculationPlan.Length}");
+
+                message.AppendLine(
+                    $"Operations: {additionCount} additions, " +
+                    $"{subtractionCount} subtractions");
+
+                message.AppendLine(
+                    $"Cross-table dependencies: {crossTableCount}");
 
                 message.AppendLine();
                 message.AppendLine($"Source: {source}");
