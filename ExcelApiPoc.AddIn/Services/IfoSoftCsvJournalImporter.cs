@@ -11,7 +11,7 @@ namespace ExcelApiPoc.AddIn.Services
 {
     internal sealed class IfoSoftCsvJournalImporter : IJournalImporter
     {
-        private const int MaximumJournalRows = 500_000;
+        public const int MaximumJournalRows = 500_000;
 
         private static readonly string[] ExpectedHeaders =
         {

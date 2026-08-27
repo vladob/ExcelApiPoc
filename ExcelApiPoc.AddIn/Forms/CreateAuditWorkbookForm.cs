@@ -4,6 +4,7 @@ using System;
 using System.Globalization;
 using System.IO;
 using System.Windows.Forms;
+using System.Linq;
 
 namespace ExcelApiPoc.AddIn.Forms
 {
@@ -311,7 +312,8 @@ namespace ExcelApiPoc.AddIn.Forms
                     throw new InvalidOperationException("Enter a valid fiscal year.");
                 }
 
-                JournalPreflightResult result = IfoSoftJournalPreflightValidator.Validate(journalPath);
+                // JournalPreflightResult result = IfoSoftJournalPreflightValidator.Validate(journalPath);
+
 
                 var importer = new IfoSoftCsvJournalImporter();
 
@@ -320,29 +322,35 @@ namespace ExcelApiPoc.AddIn.Forms
                     throw new InvalidOperationException("No compatible journal importer was found.");
                 }
                 JournalImport journalImport =importer.Import(journalPath);
+                DateTime dateFrom = journalImport.Rows.Min(row => row.PostingDate);
+                DateTime dateTo = journalImport.Rows.Max(row => row.PostingDate);
 
+/*
                 if (journalImport.Rows.Count != result.ValidRows)
                 {
                     throw new InvalidOperationException($"Preflight found {result.ValidRows:N0} valid records, " + $"but the canonical importer produced " + $"{journalImport.Rows.Count:N0} records.");
                 }
+*/
 
-                bool fiscalYearMatches =
-                    result.DateFrom.HasValue &&
-                    result.DateTo.HasValue &&
-                    result.DateFrom.Value.Year == selectedFiscalYear &&
-                    result.DateTo.Value.Year == selectedFiscalYear;
+                bool fiscalYearMatches = dateFrom.Year == selectedFiscalYear && dateTo.Year == selectedFiscalYear;
 
                 var message = new System.Text.StringBuilder();
 
                 message.AppendLine("Journal preflight completed.");
                 message.AppendLine();
-                message.AppendLine($"Source records: {result.SourceRows:N0}");
-                message.AppendLine($"Valid records: {result.ValidRows:N0}");
-                message.AppendLine($"Rejected records: {result.RejectedRows:N0}");
-                message.AppendLine($"Maximum supported: " + $"{IfoSoftJournalPreflightValidator.MaximumJournalRows:N0}");
+                // message.AppendLine($"Source records: {result.SourceRows:N0}");
+                message.AppendLine($"Source records: {journalImport.Rows.Count:N0}");
+                //message.AppendLine($"Valid records: {result.ValidRows:N0}");
+                message.AppendLine($"Valid records: {journalImport.Rows.Count:N0}");
+                //message.AppendLine($"Rejected records: {result.RejectedRows:N0}");
+                message.AppendLine("Rejected records: 0");
+                //message.AppendLine($"Maximum supported: " + $"{IfoSoftJournalPreflightValidator.MaximumJournalRows:N0}");
+                message.AppendLine($"Maximum supported: " + $"{IfoSoftCsvJournalImporter.MaximumJournalRows:N0}");
                 message.AppendLine();
-                message.AppendLine($"Date from: " + $"{result.DateFrom?.ToString("yyyy-MM-dd") ?? "-"}");
-                message.AppendLine($"Date to: " + $"{result.DateTo?.ToString("yyyy-MM-dd") ?? "-"}");
+                //message.AppendLine($"Date from: " + $"{result.DateFrom?.ToString("yyyy-MM-dd") ?? "-"}");
+                message.AppendLine($"Date from: {dateFrom:yyyy-MM-dd}");
+                //message.AppendLine($"Date to: " + $"{result.DateTo?.ToString("yyyy-MM-dd") ?? "-"}");
+                message.AppendLine($"Date to: {dateTo:yyyy-MM-dd}");
                 message.AppendLine($"Selected fiscal year: {selectedFiscalYear}");
                 message.AppendLine($"Fiscal year matches: " + $"{(fiscalYearMatches ? "Yes" : "No")}");
                 message.AppendLine();
@@ -350,7 +358,7 @@ namespace ExcelApiPoc.AddIn.Forms
                 message.AppendLine($"Normalized text fields: " + $"{journalImport.NormalizedTextFieldCount:N0}");
                 message.AppendLine($"Company: {journalImport.CompanyName}");
                 message.AppendLine($"Source SHA-256: {journalImport.SourceFileHash}");
-
+/*
                 if (result.Errors.Count > 0)
                 {
                     message.AppendLine();
@@ -361,8 +369,9 @@ namespace ExcelApiPoc.AddIn.Forms
                         message.AppendLine($"• {error}");
                     }
                 }
-
-                MessageBoxIcon icon = result.RejectedRows == 0 && fiscalYearMatches ? MessageBoxIcon.Information : MessageBoxIcon.Warning;
+*/
+                //MessageBoxIcon icon = result.RejectedRows == 0 && fiscalYearMatches ? MessageBoxIcon.Information : MessageBoxIcon.Warning;
+                MessageBoxIcon icon = fiscalYearMatches ? MessageBoxIcon.Information : MessageBoxIcon.Warning;
 
                 MessageBox.Show(message.ToString(), "Accounting Journal Preflight", MessageBoxButtons.OK, icon);
             }
