@@ -99,16 +99,17 @@ namespace ExcelApiPoc.AddIn.Services
 
                 // One COM assignment for the complete journal.
                 tableRange.Value2 = values;
-                //dataRange.Errors[Excel.XlErrorChecks.xlNumberAsText].Ignore = true;
 
                 Excel.ListObject table = worksheet.ListObjects.Add( Excel.XlListObjectSourceType.xlSrcRange,
                         tableRange, Type.Missing, Excel.XlYesNoGuess.xlYes, Type.Missing);
                 table.Name = TableName;
                 table.TableStyle = "TableStyleMedium2";
+                ApplyWorksheetLayout(worksheet, table, dataRange);
 
                 Excel.Range countCell = (Excel.Range)worksheet.Cells[3, 1];
                 countCell.Formula = "=SUBTOTAL(3,JournalRows[SequenceNumber])";
                 countCell.Font.Bold = true;
+                countCell.NumberFormat = "#,##0";
                 worksheet.Activate();
 
                 Excel.Window window = application.ActiveWindow;
@@ -202,5 +203,58 @@ namespace ExcelApiPoc.AddIn.Services
             sourceEndLineColumn.NumberFormat = "0";
         }
 
+        private static void ApplyWorksheetLayout(Excel.Worksheet worksheet, Excel.ListObject table, Excel.Range dataRange)
+        {
+            Excel.Range headerRange = table.HeaderRowRange;
+
+            headerRange.WrapText = false;
+            headerRange.HorizontalAlignment = Excel.XlHAlign.xlHAlignCenter;
+            headerRange.VerticalAlignment = Excel.XlVAlign.xlVAlignCenter;
+            headerRange.RowHeight = 20;
+            Excel.Range visibleHeaderRange = worksheet.Range["A4:S4"];
+
+            // Fit only according to the 19 visible headers.
+            visibleHeaderRange.Columns.AutoFit();
+
+            // Add room for the table filter buttons.
+            for (int columnNumber = 1; columnNumber <= 19; columnNumber++)
+            {
+                Excel.Range column = (Excel.Range)worksheet.Columns[ columnNumber];
+                double currentWidth = Convert.ToDouble( column.ColumnWidth);
+                column.ColumnWidth = Math.Min(currentWidth + 2, 40);
+            }
+
+            SetMinimumColumnWidth(worksheet, 2, 12); // PostingDate
+            SetMinimumColumnWidth(worksheet, 4, 16); // DocumentNumber
+            SetMinimumColumnWidth(worksheet, 5, 40); // Description
+            SetMinimumColumnWidth(worksheet, 7, 14); // DebitAmount
+            SetMinimumColumnWidth(worksheet, 14, 14); // CreditAmount
+
+            Excel.Range sequenceColumn = (Excel.Range)dataRange.Columns[1];
+            Excel.Range postingDateColumn = (Excel.Range)dataRange.Columns[2];
+            Excel.Range descriptionColumn = (Excel.Range)dataRange.Columns[5];
+            Excel.Range debitAmountColumn = (Excel.Range)dataRange.Columns[7];
+            Excel.Range creditAmountColumn = (Excel.Range)dataRange.Columns[14];
+            sequenceColumn.HorizontalAlignment = Excel.XlHAlign.xlHAlignRight;
+            postingDateColumn.HorizontalAlignment = Excel.XlHAlign.xlHAlignCenter;
+            descriptionColumn.HorizontalAlignment = Excel.XlHAlign.xlHAlignLeft;
+            debitAmountColumn.HorizontalAlignment = Excel.XlHAlign.xlHAlignRight;
+            creditAmountColumn.HorizontalAlignment = Excel.XlHAlign.xlHAlignRight;
+
+            // Preserve row-level source traceability in the table,
+            // but keep technical columns out of the auditor's default view.
+            Excel.Range technicalColumns = worksheet.Range["T:X"];
+            technicalColumns.EntireColumn.Hidden = true;
+        }
+
+        private static void SetMinimumColumnWidth(Excel.Worksheet worksheet, int columnNumber, double minimumWidth)
+        {
+            Excel.Range column = (Excel.Range)worksheet.Columns[columnNumber];
+            double currentWidth = Convert.ToDouble(column.ColumnWidth);
+            if (currentWidth < minimumWidth)
+            {
+                column.ColumnWidth =minimumWidth;
+            }
+        }
     }
 }

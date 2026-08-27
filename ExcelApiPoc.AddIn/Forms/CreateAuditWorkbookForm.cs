@@ -1,10 +1,14 @@
 ﻿using ExcelApiPoc.AddIn.Models;
 using ExcelApiPoc.AddIn.Services;
+using Microsoft.Office.Interop.Excel;
 using System;
 using System.Globalization;
 using System.IO;
-using System.Windows.Forms;
 using System.Linq;
+using System.Windows.Forms;
+using Button = System.Windows.Forms.Button;
+using Label = System.Windows.Forms.Label;
+using TextBox = System.Windows.Forms.TextBox;
 
 namespace ExcelApiPoc.AddIn.Forms
 {
@@ -315,9 +319,10 @@ namespace ExcelApiPoc.AddIn.Forms
 
                 MessageBox.Show(message.ToString(), "Accounting Journal Preflight", MessageBoxButtons.OK, icon);
 
-                JournalWorksheetWriter.CreateWorkbook(journalImport);
+                var workbook = JournalWorksheetWriter.CreateWorkbook(journalImport);
                 DialogResult = DialogResult.OK;
                 Close();
+                workbook.Activate();
             }
             catch (Exception exception)
             {
