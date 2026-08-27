@@ -252,38 +252,6 @@ namespace ExcelApiPoc.AddIn.Forms
             }
         }
 
-        private void ContinueButton_ClickOld(object sender,EventArgs e)
-        {
-            string journalPath = _journalPathTextBox.Text.Trim();
-            if (!File.Exists(journalPath))
-            {
-                MessageBox.Show("Select a valid accounting journal file.", "Accounting Journal Required", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
-            }
-            string accountsPath = _accountsPathTextBox.Text.Trim();
-
-            if (!string.IsNullOrWhiteSpace(accountsPath) && !File.Exists(accountsPath))
-            {
-                MessageBox.Show("The selected accounts-list file does not exist.", "Invalid Accounts List", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
-            }
-
-            string message =
-                $"Accounting journal:\n{journalPath}\n\n" +
-                $"Accounts list:\n" +
-                $"{(string.IsNullOrWhiteSpace(accountsPath) ? "Not selected" : accountsPath)}\n\n" +
-                $"Technical type: {_technicalTypeComboBox.Text}\n" +
-                $"Accounting format: {_accountingFormatComboBox.Text}\n" +
-                $"IČO: {_icoTextBox.Text.Trim()}\n" +
-                $"Fiscal year: {_fiscalYearTextBox.Text.Trim()}\n\n" +
-                "The dialog input is valid.\n" +
-                "Journal import is not implemented yet.";
-
-            MessageBox.Show(message, "Create Audit Workbook", MessageBoxButtons.OK, MessageBoxIcon.Information);
-            DialogResult = DialogResult.OK;
-            Close();
-        }
-
         private void ContinueButton_Click(object sender, EventArgs e)
         {
             try
@@ -346,10 +314,14 @@ namespace ExcelApiPoc.AddIn.Forms
                 MessageBoxIcon icon = fiscalYearMatches ? MessageBoxIcon.Information : MessageBoxIcon.Warning;
 
                 MessageBox.Show(message.ToString(), "Accounting Journal Preflight", MessageBoxButtons.OK, icon);
+
+                JournalWorksheetWriter.CreateWorkbook(journalImport);
+                DialogResult = DialogResult.OK;
+                Close();
             }
             catch (Exception exception)
             {
-                MessageBox.Show($"Journal validation failed.\n\n" + exception.Message, "Accounting Journal Preflight", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show($"Accounting journal processing failed.\n\n" + exception.Message, "Create Audit Workbook", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
