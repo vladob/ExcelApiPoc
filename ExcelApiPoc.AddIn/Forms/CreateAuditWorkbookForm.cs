@@ -319,7 +319,8 @@ namespace ExcelApiPoc.AddIn.Forms
 
                 MessageBox.Show(message.ToString(), "Accounting Journal Preflight", MessageBoxButtons.OK, icon);
 
-                var workbook = JournalWorksheetWriter.CreateWorkbook(journalImport);
+                var workbook = AuditWorkbookWriter.CreateWorkbook(journalImport);
+
                 DialogResult = DialogResult.OK;
                 Close();
                 workbook.Activate();

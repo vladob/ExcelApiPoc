@@ -1,5 +1,5 @@
 ﻿using ExcelApiPoc.AddIn.Models;
-using ExcelDna.Integration;
+//using ExcelDna.Integration;
 using System;
 using Excel = Microsoft.Office.Interop.Excel;
 
@@ -66,8 +66,12 @@ namespace ExcelApiPoc.AddIn.Services
             23  // SourceLocation
         };
 
-        public static Excel.Workbook CreateWorkbook(JournalImport journalImport)
+        public static Excel.Worksheet AddWorksheet(Excel.Workbook workbook,JournalImport journalImport)
         {
+            if (workbook == null)
+            {
+                throw new ArgumentNullException(nameof(workbook));
+            }
             if (journalImport == null)
             {
                 throw new ArgumentNullException(nameof(journalImport));
@@ -79,52 +83,43 @@ namespace ExcelApiPoc.AddIn.Services
             }
 
             object[,] values = CreateValues(journalImport);
-            Excel.Application application = (Excel.Application)ExcelDnaUtil.Application;
-            Excel.Workbook workbook = application.Workbooks.Add();
+            Excel.Worksheet worksheet = (Excel.Worksheet)workbook.Worksheets[1];
+            worksheet.Name = WorksheetName;
 
-            try
-            {
-                Excel.Worksheet worksheet = (Excel.Worksheet)workbook.Worksheets[1];
-                worksheet.Name = WorksheetName;
+            int lastRow = HeaderRow + journalImport.Rows.Count;
+            int lastColumn = Headers.Length;
+            Excel.Range firstCell = (Excel.Range)worksheet.Cells[HeaderRow, FirstColumn];
+            Excel.Range lastCell = (Excel.Range)worksheet.Cells[ lastRow, lastColumn];
+            Excel.Range tableRange = worksheet.Range[firstCell, lastCell];
 
-                int lastRow = HeaderRow + journalImport.Rows.Count;
-                int lastColumn = Headers.Length;
-                Excel.Range firstCell = (Excel.Range)worksheet.Cells[HeaderRow, FirstColumn];
-                Excel.Range lastCell = (Excel.Range)worksheet.Cells[ lastRow, lastColumn];
-                Excel.Range tableRange = worksheet.Range[firstCell, lastCell];
+            Excel.Range firstDataCell =(Excel.Range)worksheet.Cells[HeaderRow + 1, FirstColumn];
+            Excel.Range dataRange = worksheet.Range[firstDataCell, lastCell];
+            ApplyDataFormats(dataRange);
 
-                Excel.Range firstDataCell =(Excel.Range)worksheet.Cells[HeaderRow + 1, FirstColumn];
-                Excel.Range dataRange = worksheet.Range[firstDataCell, lastCell];
-                ApplyDataFormats(dataRange);
+            // One COM assignment for the complete journal.
+            tableRange.Value2 = values;
 
-                // One COM assignment for the complete journal.
-                tableRange.Value2 = values;
+            Excel.ListObject table = worksheet.ListObjects.Add( Excel.XlListObjectSourceType.xlSrcRange,
+                    tableRange, Type.Missing, Excel.XlYesNoGuess.xlYes, Type.Missing);
+            table.Name = TableName;
+            table.TableStyle = "TableStyleMedium2";
+            ApplyWorksheetLayout(worksheet, table, dataRange);
 
-                Excel.ListObject table = worksheet.ListObjects.Add( Excel.XlListObjectSourceType.xlSrcRange,
-                        tableRange, Type.Missing, Excel.XlYesNoGuess.xlYes, Type.Missing);
-                table.Name = TableName;
-                table.TableStyle = "TableStyleMedium2";
-                ApplyWorksheetLayout(worksheet, table, dataRange);
+            Excel.Range countCell = (Excel.Range)worksheet.Cells[3, 1];
+            countCell.Formula = "=SUBTOTAL(3,JournalRows[SequenceNumber])";
+            countCell.Font.Bold = true;
+            countCell.NumberFormat = "#,##0";
+            worksheet.Activate();
 
-                Excel.Range countCell = (Excel.Range)worksheet.Cells[3, 1];
-                countCell.Formula = "=SUBTOTAL(3,JournalRows[SequenceNumber])";
-                countCell.Font.Bold = true;
-                countCell.NumberFormat = "#,##0";
-                worksheet.Activate();
+            Excel.Application application = workbook.Application;
+            Excel.Window window = application.ActiveWindow;
 
-                Excel.Window window = application.ActiveWindow;
+            window.SplitRow = 4;
+            window.SplitColumn = 1;
+            window.FreezePanes = true;
 
-                window.SplitRow = 4;
-                window.SplitColumn = 1;
-                window.FreezePanes = true;
+            return worksheet;
 
-                return workbook;
-            }
-            catch
-            {
-                workbook.Close( SaveChanges: false);
-                throw;
-            }
         }
 
         private static object[,] CreateValues(JournalImport journalImport)
