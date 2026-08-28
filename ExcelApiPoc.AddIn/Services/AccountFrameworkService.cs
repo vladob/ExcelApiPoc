@@ -45,6 +45,7 @@ namespace ExcelApiPoc.AddIn.Services
             return new AccountFrameworkLoadResult
             {
                 Framework = framework,
+                FiscalYear = fiscalYear,
                 Source = source,
                 CachePath = cachePath,
                 ApiFailureMessage = apiFailureMessage
@@ -104,5 +105,6 @@ namespace ExcelApiPoc.AddIn.Services
         public string Source { get; set; }
         public string CachePath { get; set; }
         public string ApiFailureMessage { get; set; }
+        public int FiscalYear { get; set; }
     }
 }

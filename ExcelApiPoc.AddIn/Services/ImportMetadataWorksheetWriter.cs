@@ -28,7 +28,7 @@ namespace ExcelApiPoc.AddIn.Services
             "NormalizedTextFieldCount"
         };
 
-        public static Excel.Worksheet AddWorksheet(Excel.Workbook workbook,JournalImport journalImport)
+        public static Excel.Worksheet AddWorksheet(Excel.Workbook workbook,JournalImport journalImport, AccountFrameworkLoadResult frameworkLoad)
         {
             if (workbook == null)
             {
@@ -38,6 +38,11 @@ namespace ExcelApiPoc.AddIn.Services
             if (journalImport == null)
             {
                 throw new ArgumentNullException(nameof(journalImport));
+            }
+
+            if (frameworkLoad == null)
+            {
+                throw new ArgumentNullException(nameof(frameworkLoad));
             }
 
             Excel.Worksheet lastWorksheet = (Excel.Worksheet)workbook.Worksheets[ workbook.Worksheets.Count];
@@ -100,6 +105,90 @@ namespace ExcelApiPoc.AddIn.Services
             worksheet.Visible = Excel.XlSheetVisibility.xlSheetHidden;
 
             return worksheet;
+        }
+
+        private static void AddAccountFrameworkTable(Excel.Worksheet worksheet,AccountFrameworkLoadResult frameworkLoad)
+        {
+            ApplicableAccountFrameworkResponse framework = frameworkLoad.Framework;
+            AccountDefinitionMetadataResponse[] definitions = framework.Definitions ?? Array.Empty<AccountDefinitionMetadataResponse>();
+            AccountRangeMetadataResponse[] ranges = framework.Ranges ?? Array.Empty<AccountRangeMetadataResponse>();
+            int syntheticAccountCount = definitions.Count(definition => definition.AccountLevel == 3);
+            string[] headers =
+            {
+                "FrameworkCode",
+                "FrameworkName",
+                "FrameworkVersionId",
+                "VersionCode",
+                "FiscalYear",
+                "ValidFrom",
+                "ValidTo",
+                "LegalReference",
+                "SourceUrl",
+                "SourceSha256",
+                "DefinitionCount",
+                "SyntheticAccountCount",
+                "RangeCount",
+                "RetrievalSource",
+                "CachePath"
+            };
+
+            var values = new object[2, headers.Length];
+
+            for (int columnIndex = 0; columnIndex < headers.Length; columnIndex++)
+            {
+                values[0, columnIndex] = headers[columnIndex];
+            }
+
+            values[1, 0] = framework.FrameworkCode;
+            values[1, 1] = framework.FrameworkName;
+            values[1, 2] = framework.FrameworkVersionId;
+            values[1, 3] = framework.VersionCode;
+            values[1, 4] = frameworkLoad.FiscalYear;
+            values[1, 5] = framework.ValidFrom;
+            values[1, 6] = framework.ValidTo.HasValue ? (object)framework.ValidTo.Value : null;
+            values[1, 7] = framework.LegalReference;
+            values[1, 8] = framework.SourceUrl;
+            values[1, 9] = framework.SourceSha256;
+            values[1, 10] = definitions.Length;
+            values[1, 11] = syntheticAccountCount;
+            values[1, 12] = ranges.Length;
+            values[1, 13] = frameworkLoad.Source;
+            values[1, 14] = frameworkLoad.CachePath;
+
+            Excel.Range firstCell = (Excel.Range)worksheet.Cells[5, 1];
+            Excel.Range lastCell = (Excel.Range)worksheet.Cells[6, headers.Length];
+            Excel.Range tableRange = worksheet.Range[firstCell, lastCell];
+
+            int[] textColumns = { 1, 2, 4, 8, 9, 10, 14, 15 };
+
+            foreach (int columnNumber in textColumns)
+            {
+                Excel.Range cell = (Excel.Range)worksheet.Cells[6, columnNumber];
+                cell.NumberFormat = "@";
+            }
+
+            tableRange.Value2 = values;
+
+            Excel.Range versionIdCell = (Excel.Range)worksheet.Cells[6, 3];
+            Excel.Range fiscalYearCell = (Excel.Range)worksheet.Cells[6, 5];
+            Excel.Range validFromCell = (Excel.Range)worksheet.Cells[6, 6];
+            Excel.Range validToCell = (Excel.Range)worksheet.Cells[6, 7];
+            Excel.Range definitionCountCell = (Excel.Range)worksheet.Cells[6, 11];
+            Excel.Range syntheticCountCell = (Excel.Range)worksheet.Cells[6, 12];
+            Excel.Range rangeCountCell = (Excel.Range)worksheet.Cells[6, 13];
+
+            versionIdCell.NumberFormat = "0";
+            fiscalYearCell.NumberFormat = "0";
+            validFromCell.NumberFormat = "yyyy-mm-dd";
+            validToCell.NumberFormat = "yyyy-mm-dd";
+            definitionCountCell.NumberFormat = "#,##0";
+            syntheticCountCell.NumberFormat = "#,##0";
+            rangeCountCell.NumberFormat = "#,##0";
+
+            Excel.ListObject table = worksheet.ListObjects.Add(Excel.XlListObjectSourceType.xlSrcRange, tableRange, Type.Missing, Excel.XlYesNoGuess.xlYes, Type.Missing);
+
+            table.Name = "__AccountFramework";
+            table.TableStyle = "TableStyleMedium2";
         }
     }
 }
