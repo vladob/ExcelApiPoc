@@ -8,6 +8,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<AuditTemplateRepository>();
 builder.Services.AddScoped<AuditTemplatePackageRepository>();
+builder.Services.AddScoped<AccountFrameworkRepository>();
 
 var app = builder.Build();
 
@@ -83,6 +84,48 @@ app.MapGet(
         return Results.Ok(package);
     })
     .WithName("GetAuditTemplatePackageV1")
+    .WithOpenApi();
+
+app.MapGet(
+    "/api/v1/account-frameworks/{frameworkCode}/applicable",
+    async (
+        string frameworkCode,
+        int fiscalYear,
+        AccountFrameworkRepository repository,
+        CancellationToken cancellationToken) =>
+    {
+        if (string.IsNullOrWhiteSpace(frameworkCode))
+        {
+            return Results.BadRequest(new
+            {
+                message = "Framework code is required."
+            });
+        }
+
+        if (fiscalYear < 1900 || fiscalYear > 9999)
+        {
+            return Results.BadRequest(new
+            {
+                message = "Fiscal year must be between 1900 and 9999."
+            });
+        }
+
+        ApplicableAccountFramework? framework = await repository.GetApplicableAsync(frameworkCode.Trim(), fiscalYear, cancellationToken);
+
+        if (framework is null)
+        {
+            return Results.NotFound(new
+            {
+                message =
+                    $"No applicable version of framework " +
+                    $"'{frameworkCode}' was found for fiscal year " +
+                    $"{fiscalYear}."
+            });
+        }
+
+        return Results.Ok(framework);
+    })
+    .WithName("GetApplicableAccountFrameworkV1")
     .WithOpenApi();
 
 app.Run();
