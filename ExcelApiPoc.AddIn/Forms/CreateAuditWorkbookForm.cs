@@ -295,6 +295,11 @@ namespace ExcelApiPoc.AddIn.Forms
                 DateTime dateFrom = journalImport.Rows.Min(row => row.PostingDate);
                 DateTime dateTo = journalImport.Rows.Max(row => row.PostingDate);
                 List<AccountSummary> accountSummaries = JournalAccountSummaryBuilder.Build(journalImport);
+                AccountFrameworkLoadResult frameworkLoad = AccountFrameworkService.Load("GOV_LOCAL", selectedFiscalYear);
+                ApplicableAccountFrameworkResponse framework = frameworkLoad.Framework;
+                AccountFrameworkEnrichmentResult enrichmentResult = AccountFrameworkEnricher.Enrich(accountSummaries, framework);
+
+                int syntheticDefinitionCount = framework.Definitions.Count(definition => definition.AccountLevel == 3);
                 decimal totalDebitTurnover = accountSummaries.Sum(account => account.DebitTurnover);
                 decimal totalCreditTurnover = accountSummaries.Sum(account => account.CreditTurnover);
                 decimal journalDifference = totalDebitTurnover - totalCreditTurnover;
@@ -323,8 +328,26 @@ namespace ExcelApiPoc.AddIn.Forms
                 message.AppendLine($"Debit turnover: {totalDebitTurnover:N2}");
                 message.AppendLine($"Credit turnover: {totalCreditTurnover:N2}");
                 message.AppendLine($"Journal difference: {journalDifference:N2}");
+                message.AppendLine();
+                message.AppendLine($"Account framework: " + $"{framework.FrameworkCode} / " + $"{framework.VersionCode}");
+                message.AppendLine($"Framework definitions: " + $"{framework.Definitions.Length:N0}");
+                message.AppendLine($"Synthetic accounts: " + $"{syntheticDefinitionCount:N0}");
+                message.AppendLine($"Framework source: " + $"{frameworkLoad.Source}");
+                message.AppendLine($"Framework cache: " + $"{frameworkLoad.CachePath}");
+                message.AppendLine();
+                message.AppendLine($"Framework matched accounts: " + $"{enrichmentResult.MatchedCount:N0}");
+                message.AppendLine($"Exact synthetic matches: " + $"{enrichmentResult.ExactMatchCount:N0}");
+                message.AppendLine($"Range matches: " + $"{enrichmentResult.RangeMatchCount:N0}");
+                message.AppendLine($"Unmatched accounts: " + $"{enrichmentResult.UnmatchedCount:N0}");
 
-                MessageBoxIcon icon = fiscalYearMatches ? MessageBoxIcon.Information : MessageBoxIcon.Warning;
+                // Optionally include invalid codes only when present
+                if (enrichmentResult.InvalidSyntheticCodeCount > 0)
+                {
+                    message.AppendLine($"Invalid synthetic codes: " +$"{enrichmentResult.InvalidSyntheticCodeCount:N0}");
+                }
+
+//                MessageBoxIcon icon = fiscalYearMatches ? MessageBoxIcon.Information : MessageBoxIcon.Warning;
+                MessageBoxIcon icon = fiscalYearMatches && enrichmentResult.UnmatchedCount == 0 ? MessageBoxIcon.Information : MessageBoxIcon.Warning;
 
                 MessageBox.Show(message.ToString(), "Accounting Journal Preflight", MessageBoxButtons.OK, icon);
 

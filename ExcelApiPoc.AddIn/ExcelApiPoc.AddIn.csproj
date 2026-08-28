@@ -159,6 +159,7 @@
     </Compile>
     <Compile Include="Models\AccountSummary.cs" />
     <Compile Include="Models\AddInSettings.cs" />
+    <Compile Include="Models\ApplicableAccountFrameworkResponse.cs" />
     <Compile Include="Models\AuditTemplateMetadataResponse.cs" />
     <Compile Include="Models\AuditTemplatePackageResponse.cs" />
     <Compile Include="Models\JournalDetectionResult.cs" />
@@ -166,6 +167,9 @@
     <Compile Include="Models\JournalRow.cs" />
     <Compile Include="PocRibbon.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Services\AccountFrameworkCache.cs" />
+    <Compile Include="Services\AccountFrameworkEnricher.cs" />
+    <Compile Include="Services\AccountFrameworkService.cs" />
     <Compile Include="Services\AccountWorksheetWriter.cs" />
     <Compile Include="Services\AuditWorkbookWriter.cs" />
     <Compile Include="Services\IfoSoftCsvJournalDetector.cs" />

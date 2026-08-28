@@ -63,6 +63,18 @@ public sealed class AccountFrameworkRepository
             ORDER BY
                 d.[AccountLevel],
                 d.[AccountCode];
+
+            SELECT
+                CONVERT(int, r.[AccountLevel]) AS [AccountLevel],
+                r.[FromAccountCode],
+                r.[ToAccountCode],
+                r.[OfficialName]
+            FROM [Accounts].[AccountRangeDefinition] r
+            WHERE r.[AccountFrameworkVersionId] =
+                @AccountFrameworkVersionId
+            ORDER BY
+                r.[SortOrder],
+                r.[FromAccountCode];
             """;
 
         await using var connection = new SqlConnection(_connectionString);
@@ -103,6 +115,21 @@ public sealed class AccountFrameworkRepository
             });
         }
 
+        var ranges = new List<AccountRangeMetadata>();
+
+        await reader.NextResultAsync(cancellationToken);
+
+        while (await reader.ReadAsync(cancellationToken))
+        {
+            ranges.Add(new AccountRangeMetadata
+            {
+                AccountLevel = reader.GetInt32(0),
+                FromAccountCode = reader.GetString(1),
+                ToAccountCode = reader.GetString(2),
+                OfficialName = reader.IsDBNull(3) ? string.Empty : reader.GetString(3)
+            });
+        }
+
         return new ApplicableAccountFramework
         {
             FrameworkCode = framework.FrameworkCode,
@@ -114,7 +141,8 @@ public sealed class AccountFrameworkRepository
             LegalReference = framework.LegalReference,
             SourceUrl = framework.SourceUrl,
             SourceSha256 = framework.SourceSha256,
-            Definitions = definitions
+            Definitions = definitions,
+            Ranges = ranges
         };
     }
 }
