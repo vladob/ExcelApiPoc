@@ -159,6 +159,7 @@
     </Compile>
     <Compile Include="Models\AccountSummary.cs" />
     <Compile Include="Models\AddInSettings.cs" />
+    <Compile Include="Models\AnalyticalMappingData.cs" />
     <Compile Include="Models\ApplicableAccountFrameworkResponse.cs" />
     <Compile Include="Models\AuditReportCalculationResult.cs" />
     <Compile Include="Models\AuditReportContext.cs" />
@@ -173,6 +174,9 @@
     <Compile Include="Services\AccountFrameworkEnricher.cs" />
     <Compile Include="Services\AccountFrameworkService.cs" />
     <Compile Include="Services\AccountWorksheetWriter.cs" />
+    <Compile Include="Services\AnalyticalMappingBuilder.cs" />
+    <Compile Include="Services\AnalyticalMappingValidationWorksheetWriter.cs" />
+    <Compile Include="Services\AnalyticalMappingWorksheetWriter.cs" />
     <Compile Include="Services\AuditReportCalculationService.cs" />
     <Compile Include="Services\AuditTemplatePackageService.cs" />
     <Compile Include="Services\AuditWorkbookWriter.cs" />

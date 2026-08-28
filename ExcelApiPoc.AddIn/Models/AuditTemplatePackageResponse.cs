@@ -53,6 +53,7 @@ namespace ExcelApiPoc.AddIn.Models
         public string TextEn { get; set; }
         public bool IsSumRow { get; set; }
         public string CategorySk { get; set; }
+        public string MappingCaptionSk { get; set; }
     }
 
     public sealed class AuditAccountGroupDefinitionResponse
