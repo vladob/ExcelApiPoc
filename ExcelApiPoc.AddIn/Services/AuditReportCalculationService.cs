@@ -36,6 +36,10 @@ namespace ExcelApiPoc.AddIn.Services
 
             var result = new AuditReportCalculationResult();
             Dictionary<string, List<AccountSummary>> accountsBySyntheticCode = CreateAccountIndex(accounts);
+
+            // Account-side value sources are authoritative; legacy rule.Side is not.
+            Dictionary<string, AuditAccountGroupDefinitionResponse> accountGroupsByCode =
+                CreateAccountGroupIndex(package);
             Dictionary<string, AuditReportRowCalculation> rowsByKey = CreateReportRows(package, result);
             AuditReportMappingRuleDefinitionResponse[] mappingRules = package.ReportMappingRules ?? Array.Empty<AuditReportMappingRuleDefinitionResponse>();
             Dictionary<string, AnalyticalMappingSelection> selectionsByAccount =
@@ -70,14 +74,16 @@ namespace ExcelApiPoc.AddIn.Services
                         targetRow,
                         rule,
                         candidateAccounts,
-                        selectionsByAccount);
+                        selectionsByAccount,
+                        accountGroupsByCode);
 
                     continue;
                 }
 
                 result.AutomaticRuleCount++;
 
-                decimal value = candidateAccounts.Sum(account => ResolveValue(account, rule.Side, rule.ValueSource));
+                decimal value = candidateAccounts.Sum(account =>
+                    ResolveRuleValue(account, rule, accountGroupsByCode));
                 if (value != 0)
                     result.AutomaticRulesWithValues++;
 
@@ -85,14 +91,46 @@ namespace ExcelApiPoc.AddIn.Services
             }
 
             AddUnmappedAccounts(result, accounts, mappedSyntheticCodes);
-            ApplyCalculationPlan(package, rowsByKey);
 
             foreach (AuditReportRowCalculation row in result.Rows)
             {
-                row.CalculatedValue = primaryTables.Contains(row.TableErpId) ? row.PrimaryValue - row.SecondaryValue : row.SecondaryValue;
+                row.CalculatedValue = primaryTables.Contains(row.TableErpId)
+                    ? row.PrimaryValue - row.SecondaryValue
+                    : row.SecondaryValue;
             }
 
+            ApplyCalculationPlan(package, rowsByKey);
+
             return result;
+        }
+
+        private static Dictionary<string, AuditAccountGroupDefinitionResponse>
+            CreateAccountGroupIndex(AuditTemplatePackageResponse package)
+        {
+            var index = new Dictionary<string, AuditAccountGroupDefinitionResponse>(
+                StringComparer.Ordinal);
+
+            foreach (AuditAccountGroupDefinitionResponse accountGroup in
+                package.AccountGroups ?? Array.Empty<AuditAccountGroupDefinitionResponse>())
+            {
+                if (accountGroup == null ||
+                    string.IsNullOrWhiteSpace(accountGroup.Account))
+                {
+                    throw new InvalidOperationException(
+                        "The package contains an invalid account-group definition.");
+                }
+
+                if (index.ContainsKey(accountGroup.Account))
+                {
+                    throw new InvalidOperationException(
+                        $"The package contains duplicate account group " +
+                        $"{accountGroup.Account}.");
+                }
+
+                index.Add(accountGroup.Account, accountGroup);
+            }
+
+            return index;
         }
 
         private static Dictionary<string, List<AccountSummary>> CreateAccountIndex(IReadOnlyList<AccountSummary> accounts)
@@ -177,10 +215,14 @@ namespace ExcelApiPoc.AddIn.Services
             AuditReportRowCalculation targetRow,
             AuditReportMappingRuleDefinitionResponse rule,
             IEnumerable<AccountSummary> candidates,
-            IReadOnlyDictionary<string, AnalyticalMappingSelection> selectionsByAccount)
+            IReadOnlyDictionary<string, AnalyticalMappingSelection> selectionsByAccount,
+            IReadOnlyDictionary<string, AuditAccountGroupDefinitionResponse> accountGroupsByCode)
         {
             AccountSummary[] nonzeroCandidates = candidates
-                .Where(account => ResolveValue(account, rule.Side, rule.ValueSource) != 0)
+                .Where(account => ResolveRuleValue(
+                    account,
+                    rule,
+                    accountGroupsByCode) != 0)
                 .ToArray();
 
             if (nonzeroCandidates.Length == 0)
@@ -203,7 +245,10 @@ namespace ExcelApiPoc.AddIn.Services
                 if (selection.TableErpId == rule.TableErpId &&
                     selection.ReportRowNumber == rule.ReportRowNumber)
                 {
-                    mappedValue += ResolveValue(account, rule.Side, rule.ValueSource);
+                    mappedValue += ResolveRuleValue(
+                        account,
+                        rule,
+                        accountGroupsByCode);
                 }
             }
 
@@ -222,9 +267,44 @@ namespace ExcelApiPoc.AddIn.Services
                     IncludeInPrimary = rule.IncludeInBrutto,
                     IncludeInSecondary = rule.IncludeInCorrection,
                     CandidateAccountCodes = unresolved.Select(account => account.AccountCode).ToArray(),
-                    CandidateValue = unresolved.Sum(account => ResolveValue(account, rule.Side, rule.ValueSource))
+                    CandidateValue = unresolved.Sum(account =>
+                        ResolveRuleValue(account, rule, accountGroupsByCode))
                 });
             }
+        }
+
+        private static decimal ResolveRuleValue(
+            AccountSummary account,
+            AuditReportMappingRuleDefinitionResponse rule,
+            IReadOnlyDictionary<string, AuditAccountGroupDefinitionResponse> accountGroupsByCode)
+        {
+            if (!accountGroupsByCode.TryGetValue(
+                    rule.Account3,
+                    out AuditAccountGroupDefinitionResponse accountGroup))
+            {
+                throw new InvalidOperationException(
+                    $"Mapping rule references unknown account group " +
+                    $"{rule.Account3}.");
+            }
+
+            string balanceSide;
+            string valueSource;
+
+            if (rule.IncludeInBrutto)
+            {
+                balanceSide = "Assets";
+                valueSource = accountGroup.AssetsValueSource;
+            }
+            else
+            {
+                balanceSide = "Liabilities";
+                valueSource = accountGroup.LiabilitiesValueSource;
+            }
+
+            if (string.IsNullOrWhiteSpace(valueSource))
+                return 0;
+
+            return ResolveValue(account, balanceSide, valueSource);
         }
 
         private static Dictionary<string, AnalyticalMappingSelection> ValidateAnalyticalSelections(
@@ -312,6 +392,7 @@ namespace ExcelApiPoc.AddIn.Services
 
                 throw new InvalidOperationException($"Unsupported balance side '{balanceSide}'.");
             }
+
             throw new InvalidOperationException($"Unsupported value source '{valueSource}'.");
         }
 
@@ -331,6 +412,7 @@ namespace ExcelApiPoc.AddIn.Services
 
                     decimal primaryValue = 0;
                     decimal secondaryValue = 0;
+                    decimal calculatedValue = 0;
 
                     foreach (AuditCalculationDependencyDefinitionResponse dependency in target)
                     {
@@ -342,6 +424,7 @@ namespace ExcelApiPoc.AddIn.Services
 
                         primaryValue += dependency.Coefficient * sourceRow.PrimaryValue;
                         secondaryValue += dependency.Coefficient * sourceRow.SecondaryValue;
+                        calculatedValue += dependency.Coefficient * sourceRow.CalculatedValue;
                     }
 
                     calculatedTargets.Add(new AuditReportRowCalculation
@@ -349,7 +432,8 @@ namespace ExcelApiPoc.AddIn.Services
                         TableErpId = targetRow.TableErpId,
                         RowNumber = targetRow.RowNumber,
                         PrimaryValue = primaryValue,
-                        SecondaryValue = secondaryValue
+                        SecondaryValue = secondaryValue,
+                        CalculatedValue = calculatedValue
                     });
                 }
 
@@ -359,6 +443,7 @@ namespace ExcelApiPoc.AddIn.Services
                     AuditReportRowCalculation targetRow = rowsByKey[targetKey];
                     targetRow.PrimaryValue = calculated.PrimaryValue;
                     targetRow.SecondaryValue = calculated.SecondaryValue;
+                    targetRow.CalculatedValue = calculated.CalculatedValue;
                 }
             }
         }
