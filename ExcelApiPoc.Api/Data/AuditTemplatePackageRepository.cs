@@ -69,7 +69,8 @@ public sealed class AuditTemplatePackageRepository
                 r.[TextSk],
                 r.[TextEn],
                 r.[IsSumRow],
-                r.[CategorySk]
+                r.[CategorySk],
+                r.[MappingCaptionSk]
             FROM [Template].[Rows] r
             INNER JOIN [Template].[Tables] t
                 ON t.[Id] = r.[TableId]
@@ -214,7 +215,8 @@ public sealed class AuditTemplatePackageRepository
                 TextSk = reader.IsDBNull(3) ? null : reader.GetString(3),
                 TextEn = reader.IsDBNull(4) ? null : reader.GetString(4),
                 IsSumRow = !reader.IsDBNull(5) && reader.GetByte(5) != 0,
-                CategorySk = reader.IsDBNull(6) ? null : reader.GetString(6)
+                CategorySk = reader.IsDBNull(6) ? null : reader.GetString(6),
+                MappingCaptionSk = reader.IsDBNull(7) ? null : reader.GetString(7)
             });
         }
 
@@ -279,7 +281,7 @@ public sealed class AuditTemplatePackageRepository
 
         return new AuditTemplatePackage
         {
-            ContractVersion = 1,
+            ContractVersion = 2,
             GeneratedAtUtc = DateTime.UtcNow,
 
             Template = new AuditTemplateDefinition

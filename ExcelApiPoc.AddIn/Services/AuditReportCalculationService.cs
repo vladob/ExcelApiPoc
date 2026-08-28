@@ -9,11 +9,25 @@ namespace ExcelApiPoc.AddIn.Services
     {
         public static AuditReportCalculationResult Calculate(IReadOnlyList<AccountSummary> accounts, AuditTemplatePackageResponse package)
         {
+            return Calculate(
+                accounts,
+                package,
+                Array.Empty<AnalyticalMappingSelection>());
+        }
+
+        public static AuditReportCalculationResult Calculate(
+            IReadOnlyList<AccountSummary> accounts,
+            AuditTemplatePackageResponse package,
+            IReadOnlyList<AnalyticalMappingSelection> analyticalSelections)
+        {
             if (accounts == null)
                 throw new ArgumentNullException(nameof(accounts));
 
             if (package == null)
                 throw new ArgumentNullException(nameof(package));
+
+            if (analyticalSelections == null)
+                throw new ArgumentNullException(nameof(analyticalSelections));
 
             if (package.Template == null)
             {
@@ -23,7 +37,10 @@ namespace ExcelApiPoc.AddIn.Services
             var result = new AuditReportCalculationResult();
             Dictionary<string, List<AccountSummary>> accountsBySyntheticCode = CreateAccountIndex(accounts);
             Dictionary<string, AuditReportRowCalculation> rowsByKey = CreateReportRows(package, result);
-            AuditReportMappingRuleDefinitionResponse[] mappingRules = package.ReportMappingRules ?? Array.Empty <AuditReportMappingRuleDefinitionResponse>();
+            AuditReportMappingRuleDefinitionResponse[] mappingRules = package.ReportMappingRules ?? Array.Empty<AuditReportMappingRuleDefinitionResponse>();
+            Dictionary<string, AnalyticalMappingSelection> selectionsByAccount =
+                ValidateAnalyticalSelections(accounts, mappingRules, analyticalSelections);
+
             var mappedSyntheticCodes = new HashSet<string>(StringComparer.Ordinal);
             var primaryTables = new HashSet<int>();
 
@@ -43,12 +60,18 @@ namespace ExcelApiPoc.AddIn.Services
 
                 if (!accountsBySyntheticCode.TryGetValue(rule.Account3, out candidateAccounts))
                 {
-                    candidateAccounts =new List<AccountSummary>();
+                    candidateAccounts = new List<AccountSummary>();
                 }
 
                 if (rule.RequiresAnalyticalMapping)
                 {
-                    AddAnalyticalRequirement(result, rule, candidateAccounts);
+                    AddAnalyticalRuleResult(
+                        result,
+                        targetRow,
+                        rule,
+                        candidateAccounts,
+                        selectionsByAccount);
+
                     continue;
                 }
 
@@ -74,7 +97,7 @@ namespace ExcelApiPoc.AddIn.Services
 
         private static Dictionary<string, List<AccountSummary>> CreateAccountIndex(IReadOnlyList<AccountSummary> accounts)
         {
-            var index = new Dictionary<string, List<AccountSummary>>( StringComparer.Ordinal);
+            var index = new Dictionary<string, List<AccountSummary>>(StringComparer.Ordinal);
 
             foreach (AccountSummary account in accounts)
             {
@@ -108,11 +131,11 @@ namespace ExcelApiPoc.AddIn.Services
                     if (!row.RowNumber.HasValue)
                         continue;
 
-                    var calculation = new AuditReportRowCalculation{TableErpId = table.TableErpId, RowNumber = row.RowNumber.Value};
+                    var calculation = new AuditReportRowCalculation { TableErpId = table.TableErpId, RowNumber = row.RowNumber.Value };
                     string rowKey = CreateRowKey(calculation.TableErpId, calculation.RowNumber);
                     if (index.ContainsKey(rowKey))
                     {
-                        throw new InvalidOperationException( $"Duplicate report row '{rowKey}'.");
+                        throw new InvalidOperationException($"Duplicate report row '{rowKey}'.");
                     }
 
                     index.Add(rowKey, calculation);
@@ -149,14 +172,46 @@ namespace ExcelApiPoc.AddIn.Services
                 targetRow.SecondaryValue += value;
         }
 
-        private static void AddAnalyticalRequirement(AuditReportCalculationResult result, AuditReportMappingRuleDefinitionResponse rule, IEnumerable<AccountSummary> candidates)
+        private static void AddAnalyticalRuleResult(
+            AuditReportCalculationResult result,
+            AuditReportRowCalculation targetRow,
+            AuditReportMappingRuleDefinitionResponse rule,
+            IEnumerable<AccountSummary> candidates,
+            IReadOnlyDictionary<string, AnalyticalMappingSelection> selectionsByAccount)
         {
-            AccountSummary[] nonzeroCandidates = candidates.Where(account => ResolveValue(account, rule.Side, rule.ValueSource) != 0).ToArray();
+            AccountSummary[] nonzeroCandidates = candidates
+                .Where(account => ResolveValue(account, rule.Side, rule.ValueSource) != 0)
+                .ToArray();
 
             if (nonzeroCandidates.Length == 0)
                 return;
 
-            result.AnalyticalRequirements.Add(new AuditAnalyticalMappingRequirement
+            var unresolved = new List<AccountSummary>();
+            decimal mappedValue = 0;
+
+            foreach (AccountSummary account in nonzeroCandidates)
+            {
+                if (!selectionsByAccount.TryGetValue(account.AccountCode, out AnalyticalMappingSelection selection))
+                {
+                    unresolved.Add(account);
+                    continue;
+                }
+
+                if (selection.IsExcluded)
+                    continue;
+
+                if (selection.TableErpId == rule.TableErpId &&
+                    selection.ReportRowNumber == rule.ReportRowNumber)
+                {
+                    mappedValue += ResolveValue(account, rule.Side, rule.ValueSource);
+                }
+            }
+
+            AddMappedValue(targetRow, rule, mappedValue);
+
+            if (unresolved.Count > 0)
+            {
+                result.AnalyticalRequirements.Add(new AuditAnalyticalMappingRequirement
                 {
                     TableErpId = rule.TableErpId,
                     ReportRowNumber = rule.ReportRowNumber,
@@ -166,9 +221,69 @@ namespace ExcelApiPoc.AddIn.Services
                     ValueSource = rule.ValueSource,
                     IncludeInPrimary = rule.IncludeInBrutto,
                     IncludeInSecondary = rule.IncludeInCorrection,
-                    CandidateAccountCodes = nonzeroCandidates.Select(account => account.AccountCode).ToArray(),
-                    CandidateValue = nonzeroCandidates.Sum(account => ResolveValue(account, rule.Side, rule.ValueSource))
+                    CandidateAccountCodes = unresolved.Select(account => account.AccountCode).ToArray(),
+                    CandidateValue = unresolved.Sum(account => ResolveValue(account, rule.Side, rule.ValueSource))
                 });
+            }
+        }
+
+        private static Dictionary<string, AnalyticalMappingSelection> ValidateAnalyticalSelections(
+            IEnumerable<AccountSummary> accounts,
+            IEnumerable<AuditReportMappingRuleDefinitionResponse> mappingRules,
+            IEnumerable<AnalyticalMappingSelection> selections)
+        {
+            var accountsByCode = accounts.ToDictionary(
+                account => account.AccountCode,
+                StringComparer.Ordinal);
+
+            var permittedTargets = new HashSet<string>(
+                mappingRules
+                    .Where(rule => rule.RequiresAnalyticalMapping)
+                    .Select(rule => rule.Account3 + "\u001f" +
+                        CreateRowKey(rule.TableErpId, rule.ReportRowNumber)),
+                StringComparer.Ordinal);
+
+            var result = new Dictionary<string, AnalyticalMappingSelection>(StringComparer.Ordinal);
+
+            foreach (AnalyticalMappingSelection selection in selections)
+            {
+                if (selection == null || string.IsNullOrWhiteSpace(selection.AccountCode))
+                    throw new InvalidOperationException("An analytical mapping selection does not contain an account code.");
+
+                if (!accountsByCode.TryGetValue(selection.AccountCode, out AccountSummary account))
+                    throw new InvalidOperationException($"Analytical mapping references unknown account {selection.AccountCode}.");
+
+                if (!string.Equals(account.SyntheticAccountCode, selection.SyntheticAccountCode, StringComparison.Ordinal))
+                    throw new InvalidOperationException($"Analytical account {selection.AccountCode} has an invalid synthetic account.");
+
+                if (result.ContainsKey(selection.AccountCode))
+                    throw new InvalidOperationException($"Analytical account {selection.AccountCode} is mapped more than once.");
+
+                if (selection.IsExcluded)
+                {
+                    if (selection.TableErpId.HasValue || selection.ReportRowNumber.HasValue)
+                        throw new InvalidOperationException($"Excluded account {selection.AccountCode} contains a report-row target.");
+                }
+                else
+                {
+                    if (!selection.TableErpId.HasValue || !selection.ReportRowNumber.HasValue)
+                        throw new InvalidOperationException($"Analytical account {selection.AccountCode} does not contain a report-row target.");
+
+                    string permittedTarget = selection.SyntheticAccountCode + "\u001f" +
+                        CreateRowKey(selection.TableErpId.Value, selection.ReportRowNumber.Value);
+
+                    if (!permittedTargets.Contains(permittedTarget))
+                    {
+                        throw new InvalidOperationException(
+                            $"Report row {selection.TableErpId}/{selection.ReportRowNumber} " +
+                            $"is not valid for analytical account {selection.AccountCode}.");
+                    }
+                }
+
+                result.Add(selection.AccountCode, selection);
+            }
+
+            return result;
         }
 
         private static decimal ResolveValue(AccountSummary account, string balanceSide, string valueSource)
@@ -230,12 +345,12 @@ namespace ExcelApiPoc.AddIn.Services
                     }
 
                     calculatedTargets.Add(new AuditReportRowCalculation
-                        {
-                            TableErpId = targetRow.TableErpId,
-                            RowNumber = targetRow.RowNumber,
-                            PrimaryValue = primaryValue,
-                            SecondaryValue = secondaryValue
-                        });
+                    {
+                        TableErpId = targetRow.TableErpId,
+                        RowNumber = targetRow.RowNumber,
+                        PrimaryValue = primaryValue,
+                        SecondaryValue = secondaryValue
+                    });
                 }
 
                 foreach (AuditReportRowCalculation calculated in calculatedTargets)

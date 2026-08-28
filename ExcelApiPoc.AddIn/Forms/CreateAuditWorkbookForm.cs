@@ -321,6 +321,7 @@ namespace ExcelApiPoc.AddIn.Forms
                 AuditReportMappingRuleDefinitionResponse[] mappingRules = templatePackage.ReportMappingRules ?? Array.Empty<AuditReportMappingRuleDefinitionResponse>();
                 AuditCalculationDependencyDefinitionResponse[] calculationPlan = templatePackage.CalculationPlan ?? Array.Empty<AuditCalculationDependencyDefinitionResponse>();
                 AuditReportCalculationResult calculationResult = AuditReportCalculationService.Calculate(accountSummaries, templatePackage);
+                AnalyticalMappingData analyticalMapping = AnalyticalMappingBuilder.Build(accountSummaries, templatePackage, calculationResult);
 
                 var message = new System.Text.StringBuilder();
 
@@ -384,11 +385,13 @@ namespace ExcelApiPoc.AddIn.Forms
                 message.AppendLine($"Nonzero unmapped accounts: " + $"{calculationResult.UnmappedAccounts.Count:N0}");
                 message.AppendLine($"Calculation complete: " + $"{(calculationResult.IsComplete ? "Yes" : "No")}");
 
+                message.AppendLine($"Analytical accounts to map: " + $"{analyticalMapping.Rows.Count:N0}");
+
                 MessageBoxIcon icon = fiscalYearMatches && enrichmentResult.UnmatchedCount == 0 ? MessageBoxIcon.Information : MessageBoxIcon.Warning;
 
                 MessageBox.Show(message.ToString(), "Accounting Journal Preflight", MessageBoxButtons.OK, icon);
 
-                var workbook =AuditWorkbookWriter.CreateWorkbook(journalImport, accountSummaries, frameworkLoad);
+                var workbook = AuditWorkbookWriter.CreateWorkbook(journalImport, accountSummaries, frameworkLoad, analyticalMapping, templatePackage, reportContext, templatePackageLoad);
 
                 DialogResult = DialogResult.OK;
                 Close();

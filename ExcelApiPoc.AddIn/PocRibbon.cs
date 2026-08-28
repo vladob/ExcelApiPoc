@@ -1,4 +1,5 @@
-﻿using ExcelDna.Integration.CustomUI;
+﻿using ExcelDna.Integration;
+using ExcelDna.Integration.CustomUI;
 using System;
 using System.Net.Http;
 using System.Runtime.InteropServices;
@@ -9,6 +10,7 @@ using System.Text;
 using ExcelApiPoc.AddIn.Services;
 using System.Threading.Tasks;
 using ExcelApiPoc.AddIn.Forms;
+using Excel = Microsoft.Office.Interop.Excel;
 
 namespace ExcelApiPoc.AddIn
 {
@@ -16,7 +18,7 @@ namespace ExcelApiPoc.AddIn
     public class PocRibbon : ExcelRibbon
     {
         private const int PackageTemplateErpId = 690;
-        private const int PackageContractVersion = 1;
+        private const int PackageContractVersion = 2;
         private static readonly HttpClient HttpClient = new HttpClient
         {
             Timeout = TimeSpan.FromSeconds(10)
@@ -36,6 +38,11 @@ namespace ExcelApiPoc.AddIn
                 size='large'
                 imageMso='FileNew'
                 onAction='OnCreateAuditWorkbook'/>
+            <button
+                id='buttonRecalculateAuditReport'
+                label='Recalculate Report'
+                size='large'
+                onAction='OnRecalculateAuditReport'/>
         </group>
         <group id='groupApiConnection' label='API Connection'>
             <button
@@ -106,7 +113,7 @@ namespace ExcelApiPoc.AddIn
                     source = "Local cache";
                 }
 
-                AuditTemplateMetadataResponse template = JsonConvert.DeserializeObject<AuditTemplateMetadataResponse>(json) ?? 
+                AuditTemplateMetadataResponse template = JsonConvert.DeserializeObject<AuditTemplateMetadataResponse>(json) ??
                     throw new InvalidOperationException("The API returned an empty template response.");
 
                 var message = new StringBuilder();
@@ -136,11 +143,11 @@ namespace ExcelApiPoc.AddIn
                     message.AppendLine($"API unavailable: {apiFailureMessage}");
                 }
 
-                MessageBox.Show(message.ToString(),"Audit Template Metadata",MessageBoxButtons.OK,MessageBoxIcon.Information);
+                MessageBox.Show(message.ToString(), "Audit Template Metadata", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
             catch (Exception exception)
             {
-                MessageBox.Show($"Loading the audit template failed...\n\n{exception.Message}","Audit Template Error",MessageBoxButtons.OK,MessageBoxIcon.Error);
+                MessageBox.Show($"Loading the audit template failed...\n\n{exception.Message}", "Audit Template Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -168,7 +175,7 @@ namespace ExcelApiPoc.AddIn
                     json = TemplateMetadataCache.LoadPackage(PackageTemplateErpId, PackageContractVersion);
                     source = "Local cache";
                 }
-                AuditTemplatePackageResponse package = JsonConvert.DeserializeObject< AuditTemplatePackageResponse>(json)
+                AuditTemplatePackageResponse package = JsonConvert.DeserializeObject<AuditTemplatePackageResponse>(json)
                     ?? throw new InvalidOperationException("The API returned an empty template package.");
 
                 if (package.ContractVersion != PackageContractVersion)
@@ -178,7 +185,7 @@ namespace ExcelApiPoc.AddIn
 
                 if (package.Template == null)
                 {
-                    throw new InvalidOperationException( "The package does not contain a template.");
+                    throw new InvalidOperationException("The package does not contain a template.");
                 }
 
                 if (package.Template.TemplateErpId != PackageTemplateErpId)
@@ -188,7 +195,7 @@ namespace ExcelApiPoc.AddIn
 
                 if (downloadedFromApi)
                 {
-                    cachePath = TemplateMetadataCache.SavePackage(PackageTemplateErpId,PackageContractVersion,json);
+                    cachePath = TemplateMetadataCache.SavePackage(PackageTemplateErpId, PackageContractVersion, json);
                 }
 
                 AuditReportTableDefinitionResponse[] tables = package.Template.Tables ?? Array.Empty<AuditReportTableDefinitionResponse>();
@@ -206,11 +213,11 @@ namespace ExcelApiPoc.AddIn
                         analyticalRuleCount++;
                     }
 
-                    if (string.Equals(rule.Side,"Assets",StringComparison.OrdinalIgnoreCase))
+                    if (string.Equals(rule.Side, "Assets", StringComparison.OrdinalIgnoreCase))
                     {
                         assetsRuleCount++;
                     }
-                    else if (string.Equals(rule.Side,"Liabilities",StringComparison.OrdinalIgnoreCase))
+                    else if (string.Equals(rule.Side, "Liabilities", StringComparison.OrdinalIgnoreCase))
                     {
                         liabilitiesRuleCount++;
                     }
@@ -281,7 +288,7 @@ namespace ExcelApiPoc.AddIn
                     message.AppendLine($"API unavailable: {apiFailureMessage}");
                 }
 
-                MessageBox.Show(message.ToString(),"Audit Template Package",MessageBoxButtons.OK,MessageBoxIcon.Information);
+                MessageBox.Show(message.ToString(), "Audit Template Package", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
             catch (Exception exception)
             {
@@ -305,6 +312,45 @@ namespace ExcelApiPoc.AddIn
             using (var dialog = new CreateAuditWorkbookForm())
             {
                 dialog.ShowDialog();
+            }
+        }
+
+        public void OnRecalculateAuditReport(IRibbonControl control)
+        {
+            _ = control;
+
+            try
+            {
+                Excel.Application application = (Excel.Application)ExcelDnaUtil.Application;
+                Excel.Workbook workbook = application.ActiveWorkbook;
+
+                if (workbook == null)
+                    throw new InvalidOperationException("No active workbook was found.");
+
+                AuditWorkbookRecalculationResult result = AuditWorkbookRecalculationService.Recalculate(workbook);
+
+                var message = new StringBuilder();
+                message.AppendLine("Audit report calculation completed.");
+                message.AppendLine();
+                message.AppendLine($"Accounts: {result.AccountCount:N0}");
+                message.AppendLine($"Mapping rules: {result.MappingRuleCount:N0}");
+                message.AppendLine($"Calculation dependencies: {result.CalculationDependencyCount:N0}");
+                message.AppendLine();
+                message.AppendLine($"Mapped analytical accounts: {result.MappingSelections.MappedCount:N0}");
+                message.AppendLine($"Excluded analytical accounts: {result.MappingSelections.ExcludedCount:N0}");
+                message.AppendLine($"Unresolved analytical accounts: {result.MappingSelections.UnresolvedAccountCodes.Count:N0}");
+                message.AppendLine();
+                message.AppendLine($"Calculated report rows: {result.Calculation.Rows.Count:N0}");
+                message.AppendLine($"Pending analytical requirements: {result.Calculation.AnalyticalRequirements.Count:N0}");
+                message.AppendLine($"Calculation complete: {(result.Calculation.IsComplete ? "Yes" : "No")}");
+
+                MessageBoxIcon icon = result.Calculation.IsComplete ? MessageBoxIcon.Information : MessageBoxIcon.Warning;
+
+                MessageBox.Show(message.ToString(), "Audit Report Calculation", MessageBoxButtons.OK, icon);
+            }
+            catch (Exception exception)
+            {
+                MessageBox.Show($"Audit report calculation failed.\n\n{exception.Message}", "Audit Report Calculation", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
     }

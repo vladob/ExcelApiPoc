@@ -52,6 +52,7 @@ public sealed class AuditReportRowDefinition
     public string? TextEn { get; init; }
     public bool IsSumRow { get; init; }
     public string? CategorySk { get; init; }
+    public string? MappingCaptionSk { get; init; }
 }
 
 public sealed class AuditAccountGroupDefinition
