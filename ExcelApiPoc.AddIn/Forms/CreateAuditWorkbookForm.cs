@@ -2,6 +2,7 @@
 using ExcelApiPoc.AddIn.Services;
 using Microsoft.Office.Interop.Excel;
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -293,7 +294,10 @@ namespace ExcelApiPoc.AddIn.Forms
                 JournalImport journalImport =importer.Import(journalPath);
                 DateTime dateFrom = journalImport.Rows.Min(row => row.PostingDate);
                 DateTime dateTo = journalImport.Rows.Max(row => row.PostingDate);
-
+                List<AccountSummary> accountSummaries = JournalAccountSummaryBuilder.Build(journalImport);
+                decimal totalDebitTurnover = accountSummaries.Sum(account => account.DebitTurnover);
+                decimal totalCreditTurnover = accountSummaries.Sum(account => account.CreditTurnover);
+                decimal journalDifference = totalDebitTurnover - totalCreditTurnover;
                 bool fiscalYearMatches = dateFrom.Year == selectedFiscalYear && dateTo.Year == selectedFiscalYear;
 
                 var message = new System.Text.StringBuilder();
@@ -314,12 +318,18 @@ namespace ExcelApiPoc.AddIn.Forms
                 message.AppendLine($"Normalized text fields: " + $"{journalImport.NormalizedTextFieldCount:N0}");
                 message.AppendLine($"Company: {journalImport.CompanyName}");
                 message.AppendLine($"Source SHA-256: {journalImport.SourceFileHash}");
+                message.AppendLine();
+                message.AppendLine($"Distinct accounts: {accountSummaries.Count:N0}");
+                message.AppendLine($"Debit turnover: {totalDebitTurnover:N2}");
+                message.AppendLine($"Credit turnover: {totalCreditTurnover:N2}");
+                message.AppendLine($"Journal difference: {journalDifference:N2}");
 
                 MessageBoxIcon icon = fiscalYearMatches ? MessageBoxIcon.Information : MessageBoxIcon.Warning;
 
                 MessageBox.Show(message.ToString(), "Accounting Journal Preflight", MessageBoxButtons.OK, icon);
 
                 var workbook = AuditWorkbookWriter.CreateWorkbook(journalImport);
+                AccountWorksheetWriter.AddWorksheet(workbook, accountSummaries);
 
                 DialogResult = DialogResult.OK;
                 Close();
