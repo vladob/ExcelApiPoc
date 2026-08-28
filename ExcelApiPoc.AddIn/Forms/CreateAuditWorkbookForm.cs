@@ -305,48 +305,85 @@ namespace ExcelApiPoc.AddIn.Forms
                 decimal journalDifference = totalDebitTurnover - totalCreditTurnover;
                 bool fiscalYearMatches = dateFrom.Year == selectedFiscalYear && dateTo.Year == selectedFiscalYear;
 
+                var reportContext =
+                    new AuditReportContext
+                    {
+                        Ico = journalImport.Ico,
+                        FiscalYear = selectedFiscalYear,
+                        TemplateErpId = 690,
+                        SelectionSource = "ConfiguredTestFixture",
+                        RegisterUzReportId = string.Empty
+                    };
+
+                AuditTemplatePackageLoadResult templatePackageLoad = AuditTemplatePackageService.Load(reportContext);
+                AuditTemplatePackageResponse templatePackage = templatePackageLoad.Package;
+                AuditReportTableDefinitionResponse[] reportTables = templatePackage.Template.Tables ?? Array.Empty<AuditReportTableDefinitionResponse>();
+                AuditReportMappingRuleDefinitionResponse[] mappingRules = templatePackage.ReportMappingRules ?? Array.Empty<AuditReportMappingRuleDefinitionResponse>();
+                AuditCalculationDependencyDefinitionResponse[] calculationPlan = templatePackage.CalculationPlan ?? Array.Empty<AuditCalculationDependencyDefinitionResponse>();
+                AuditReportCalculationResult calculationResult = AuditReportCalculationService.Calculate(accountSummaries, templatePackage);
+
                 var message = new System.Text.StringBuilder();
 
                 message.AppendLine("Journal preflight completed.");
+
                 message.AppendLine();
                 message.AppendLine($"Source records: {journalImport.Rows.Count:N0}");
                 message.AppendLine($"Valid records: {journalImport.Rows.Count:N0}");
                 message.AppendLine("Rejected records: 0");
                 message.AppendLine($"Maximum supported: " + $"{IfoSoftCsvJournalImporter.MaximumJournalRows:N0}");
+
                 message.AppendLine();
                 message.AppendLine($"Date from: {dateFrom:yyyy-MM-dd}");
                 message.AppendLine($"Date to: {dateTo:yyyy-MM-dd}");
                 message.AppendLine($"Selected fiscal year: {selectedFiscalYear}");
                 message.AppendLine($"Fiscal year matches: " + $"{(fiscalYearMatches ? "Yes" : "No")}");
+
                 message.AppendLine();
                 message.AppendLine($"Canonical rows: {journalImport.Rows.Count:N0}");
                 message.AppendLine($"Normalized text fields: " + $"{journalImport.NormalizedTextFieldCount:N0}");
                 message.AppendLine($"Company: {journalImport.CompanyName}");
                 message.AppendLine($"Source SHA-256: {journalImport.SourceFileHash}");
+
                 message.AppendLine();
                 message.AppendLine($"Distinct accounts: {accountSummaries.Count:N0}");
                 message.AppendLine($"Debit turnover: {totalDebitTurnover:N2}");
                 message.AppendLine($"Credit turnover: {totalCreditTurnover:N2}");
                 message.AppendLine($"Journal difference: {journalDifference:N2}");
+
                 message.AppendLine();
                 message.AppendLine($"Account framework: " + $"{framework.FrameworkCode} / " + $"{framework.VersionCode}");
                 message.AppendLine($"Framework definitions: " + $"{framework.Definitions.Length:N0}");
                 message.AppendLine($"Synthetic accounts: " + $"{syntheticDefinitionCount:N0}");
                 message.AppendLine($"Framework source: " + $"{frameworkLoad.Source}");
                 message.AppendLine($"Framework cache: " + $"{frameworkLoad.CachePath}");
+
                 message.AppendLine();
                 message.AppendLine($"Framework matched accounts: " + $"{enrichmentResult.MatchedCount:N0}");
                 message.AppendLine($"Exact synthetic matches: " + $"{enrichmentResult.ExactMatchCount:N0}");
                 message.AppendLine($"Range matches: " + $"{enrichmentResult.RangeMatchCount:N0}");
                 message.AppendLine($"Unmatched accounts: " + $"{enrichmentResult.UnmatchedCount:N0}");
-
+                message.AppendLine();
                 // Optionally include invalid codes only when present
                 if (enrichmentResult.InvalidSyntheticCodeCount > 0)
                 {
                     message.AppendLine($"Invalid synthetic codes: " +$"{enrichmentResult.InvalidSyntheticCodeCount:N0}");
                 }
+                message.AppendLine($"Report template: " + $"{templatePackage.Template.TemplateErpId} / " + $"{templatePackage.Template.Name}");
+                message.AppendLine($"Template selection: " + $"{reportContext.SelectionSource}");
+                message.AppendLine($"Report tables: " + $"{reportTables.Length:N0}");
+                message.AppendLine($"Mapping rules: " + $"{mappingRules.Length:N0}");
+                message.AppendLine($"Calculation dependencies: " + $"{calculationPlan.Length:N0}");
+                message.AppendLine($"Template package source: " + $"{templatePackageLoad.Source}");
+                message.AppendLine($"Template package cache: " + $"{templatePackageLoad.CachePath}");
 
-//                MessageBoxIcon icon = fiscalYearMatches ? MessageBoxIcon.Information : MessageBoxIcon.Warning;
+                message.AppendLine();
+                message.AppendLine($"Calculated report rows: " + $"{calculationResult.Rows.Count:N0}");
+                message.AppendLine($"Automatic mapping rules: " + $"{calculationResult.AutomaticRuleCount:N0}");
+                message.AppendLine($"Automatic rules with values: " + $"{calculationResult.AutomaticRulesWithValues:N0}");
+                message.AppendLine($"Pending analytical mappings: " + $"{calculationResult.AnalyticalRequirements.Count:N0}");
+                message.AppendLine($"Nonzero unmapped accounts: " + $"{calculationResult.UnmappedAccounts.Count:N0}");
+                message.AppendLine($"Calculation complete: " + $"{(calculationResult.IsComplete ? "Yes" : "No")}");
+
                 MessageBoxIcon icon = fiscalYearMatches && enrichmentResult.UnmatchedCount == 0 ? MessageBoxIcon.Information : MessageBoxIcon.Warning;
 
                 MessageBox.Show(message.ToString(), "Accounting Journal Preflight", MessageBoxButtons.OK, icon);
