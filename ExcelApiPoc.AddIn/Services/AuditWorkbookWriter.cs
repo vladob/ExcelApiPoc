@@ -28,7 +28,13 @@ namespace ExcelApiPoc.AddIn.Services
                 }
                 AuditCalculationPackageWorksheetWriter.AddWorksheet(workbook, templatePackage, reportContext, templatePackageLoad);
 
-                ImportMetadataWorksheetWriter.AddWorksheet(workbook, journalImport, frameworkLoad);
+                ImportMetadataWorksheetWriter.AddWorksheet(
+                    workbook,
+                    journalImport,
+                    frameworkLoad,
+                    templatePackage,
+                    reportContext,
+                    templatePackageLoad);
 
                 journalWorksheet.Activate();
 

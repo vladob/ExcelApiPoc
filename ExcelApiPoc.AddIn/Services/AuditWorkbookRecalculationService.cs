@@ -18,6 +18,12 @@ namespace ExcelApiPoc.AddIn.Services
             AuditReportCalculationResult calculation = AuditReportCalculationService.Calculate(accounts, package, mappingSelections.Selections);
 
             AuditReportCalculationWorksheetWriter.Write(workbook, package, calculation);
+            AuditValidationResultsWorksheetWriter.Write(
+                workbook,
+                accounts,
+                mappingSelections,
+                package,
+                calculation);
 
             return new AuditWorkbookRecalculationResult
             {

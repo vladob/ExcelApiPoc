@@ -20,15 +20,40 @@ namespace ExcelApiPoc.AddIn.Services
             "AccountingFormat",
             "Ico",
             "CompanyName",
-            "FiscalYear",
+            "DetectedFiscalYear",
+            "SelectedFiscalYear",
             "DateFrom",
             "DateTo",
             "ImportedAtUtc",
             "RecordCount",
-            "NormalizedTextFieldCount"
+            "RejectedRecordCount",
+            "NormalizedTextFieldCount",
+            "FrameworkCode",
+            "FrameworkVersionCode",
+            "FrameworkFiscalYear",
+            "FrameworkRetrievalSource",
+            "FrameworkCachePath",
+            "FrameworkApiFailureMessage",
+            "TemplateContractVersion",
+            "TemplateGeneratedAtUtc",
+            "TemplateErpId",
+            "TemplateName",
+            "TemplateMfSpecification",
+            "TemplateAccountingModel",
+            "TemplateSelectionSource",
+            "RegisterUzReportId",
+            "TemplateRetrievalSource",
+            "TemplateCachePath",
+            "TemplateApiFailureMessage"
         };
 
-        public static Excel.Worksheet AddWorksheet(Excel.Workbook workbook,JournalImport journalImport, AccountFrameworkLoadResult frameworkLoad)
+        public static Excel.Worksheet AddWorksheet(
+            Excel.Workbook workbook,
+            JournalImport journalImport,
+            AccountFrameworkLoadResult frameworkLoad,
+            AuditTemplatePackageResponse templatePackage,
+            AuditReportContext reportContext,
+            AuditTemplatePackageLoadResult templatePackageLoad)
         {
             if (workbook == null)
             {
@@ -44,6 +69,15 @@ namespace ExcelApiPoc.AddIn.Services
             {
                 throw new ArgumentNullException(nameof(frameworkLoad));
             }
+
+            if (templatePackage == null || templatePackage.Template == null)
+                throw new ArgumentNullException(nameof(templatePackage));
+
+            if (reportContext == null)
+                throw new ArgumentNullException(nameof(reportContext));
+
+            if (templatePackageLoad == null)
+                throw new ArgumentNullException(nameof(templatePackageLoad));
 
             Excel.Worksheet lastWorksheet = (Excel.Worksheet)workbook.Worksheets[ workbook.Worksheets.Count];
             Excel.Worksheet worksheet = (Excel.Worksheet)workbook.Worksheets.Add( After: lastWorksheet);
@@ -69,38 +103,78 @@ namespace ExcelApiPoc.AddIn.Services
             values[1, 6] = journalImport.Ico;
             values[1, 7] = journalImport.CompanyName;
             values[1, 8] = journalImport.FiscalYear;
-            values[1, 9] = dateFrom;
-            values[1, 10] = dateTo;
-            values[1, 11] = journalImport.ImportedAtUtc;
-            values[1, 12] = journalImport.Rows.Count;
-            values[1, 13] = journalImport.NormalizedTextFieldCount;
+            values[1, 9] = reportContext.FiscalYear;
+            values[1, 10] = dateFrom;
+            values[1, 11] = dateTo;
+            values[1, 12] = journalImport.ImportedAtUtc;
+            values[1, 13] = journalImport.Rows.Count;
+            values[1, 14] = 0;
+            values[1, 15] = journalImport.NormalizedTextFieldCount;
+            values[1, 16] = frameworkLoad.Framework.FrameworkCode;
+            values[1, 17] = frameworkLoad.Framework.VersionCode;
+            values[1, 18] = frameworkLoad.FiscalYear;
+            values[1, 19] = frameworkLoad.Source;
+            values[1, 20] = frameworkLoad.CachePath;
+            values[1, 21] = frameworkLoad.ApiFailureMessage;
+            values[1, 22] = templatePackage.ContractVersion;
+            values[1, 23] = templatePackage.GeneratedAtUtc;
+            values[1, 24] = templatePackage.Template.TemplateErpId;
+            values[1, 25] = templatePackage.Template.Name;
+            values[1, 26] = templatePackage.Template.MfSpecification;
+            values[1, 27] = templatePackage.Template.AccountingModel;
+            values[1, 28] = reportContext.SelectionSource;
+            values[1, 29] = reportContext.RegisterUzReportId;
+            values[1, 30] = templatePackageLoad.Source;
+            values[1, 31] = templatePackageLoad.CachePath;
+            values[1, 32] = templatePackageLoad.ApiFailureMessage;
 
             Excel.Range firstCell = (Excel.Range)worksheet.Cells[1, 1];
             Excel.Range lastCell = (Excel.Range)worksheet.Cells[2, Headers.Length];
             Excel.Range tableRange = worksheet.Range[firstCell, lastCell];
 
             // Preserve identifiers and provenance values exactly.
-            Excel.Range textRange = worksheet.Range["A2:H2"];
-            textRange.NumberFormat = "@";
+            int[] textColumns =
+            {
+                1, 2, 3, 4, 5, 6, 7, 8,
+                17, 18, 20, 21, 22,
+                26, 27, 28, 29, 30, 31, 32, 33
+            };
+
+            foreach (int columnNumber in textColumns)
+                ((Excel.Range)worksheet.Cells[2, columnNumber]).NumberFormat = "@";
+
             tableRange.Value2 = values;
 
             Excel.Range fiscalYearCell = (Excel.Range)worksheet.Cells[2, 9];
-            Excel.Range dateFromCell = (Excel.Range)worksheet.Cells[2, 10];
-            Excel.Range dateToCell = (Excel.Range)worksheet.Cells[2, 11];
-            Excel.Range importedAtUtcCell = (Excel.Range)worksheet.Cells[2, 12];
-            Excel.Range recordCountCell = (Excel.Range)worksheet.Cells[2, 13];
-            Excel.Range normalizedCountCell = (Excel.Range)worksheet.Cells[2, 14];
+            Excel.Range selectedFiscalYearCell = (Excel.Range)worksheet.Cells[2, 10];
+            Excel.Range dateFromCell = (Excel.Range)worksheet.Cells[2, 11];
+            Excel.Range dateToCell = (Excel.Range)worksheet.Cells[2, 12];
+            Excel.Range importedAtUtcCell = (Excel.Range)worksheet.Cells[2, 13];
+            Excel.Range recordCountCell = (Excel.Range)worksheet.Cells[2, 14];
+            Excel.Range rejectedCountCell = (Excel.Range)worksheet.Cells[2, 15];
+            Excel.Range normalizedCountCell = (Excel.Range)worksheet.Cells[2, 16];
+            Excel.Range frameworkFiscalYearCell = (Excel.Range)worksheet.Cells[2, 19];
+            Excel.Range templateContractVersionCell = (Excel.Range)worksheet.Cells[2, 23];
+            Excel.Range templateGeneratedAtUtcCell = (Excel.Range)worksheet.Cells[2, 24];
+            Excel.Range templateErpIdCell = (Excel.Range)worksheet.Cells[2, 25];
 
             fiscalYearCell.NumberFormat = "0";
+            selectedFiscalYearCell.NumberFormat = "0";
             dateFromCell.NumberFormat = "yyyy-mm-dd";
             dateToCell.NumberFormat = "yyyy-mm-dd";
             importedAtUtcCell.NumberFormat = "yyyy-mm-dd hh:mm:ss";
             recordCountCell.NumberFormat = "#,##0";
+            rejectedCountCell.NumberFormat = "#,##0";
             normalizedCountCell.NumberFormat = "#,##0";
+            frameworkFiscalYearCell.NumberFormat = "0";
+            templateContractVersionCell.NumberFormat = "0";
+            templateGeneratedAtUtcCell.NumberFormat = "yyyy-mm-dd hh:mm:ss";
+            templateErpIdCell.NumberFormat = "0";
 
             Excel.ListObject table = worksheet.ListObjects.Add(Excel.XlListObjectSourceType.xlSrcRange, tableRange, Type.Missing, Excel.XlYesNoGuess.xlYes, Type.Missing);
             table.Name = TableName;
             table.TableStyle = "TableStyleMedium2";
+            AddAccountFrameworkTable(worksheet, frameworkLoad);
             // Users may unhide it for provenance inspection.
             worksheet.Visible = Excel.XlSheetVisibility.xlSheetHidden;
 

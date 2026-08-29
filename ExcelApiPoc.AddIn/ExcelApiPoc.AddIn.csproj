@@ -186,6 +186,8 @@
     <Compile Include="Services\AuditReportCalculationService.cs" />
     <Compile Include="Services\AuditReportCalculationWorksheetWriter.cs" />
     <Compile Include="Services\AuditTemplatePackageService.cs" />
+    <Compile Include="Services\AuditValidationResultsWorksheetWriter.cs" />
+    <Compile Include="Services\AuditWorkbookRecalculationDialog.cs" />
     <Compile Include="Services\AuditWorkbookRecalculationService.cs" />
     <Compile Include="Services\AuditWorkbookTableReader.cs" />
     <Compile Include="Services\AuditWorkbookWriter.cs" />
