@@ -1,11 +1,23 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.14.37411.7 d17.14
+VisualStudioVersion = 17.14.37411.7
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExcelApiPoc.AddIn", "ExcelApiPoc.AddIn\ExcelApiPoc.AddIn.csproj", "{A73DA429-59F9-4F60-A3B1-2108F7A6A825}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExcelApiPoc.Api", "ExcelApiPoc.Api\ExcelApiPoc.Api.csproj", "{17546955-0807-4D31-A95D-C1D833F4D244}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RegisterUz.Loader", "RegisterUz.Loader\RegisterUz.Loader.csproj", "{F18764DD-B410-5387-BA09-71A9842744F7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RegisterUz.Persistence.SqlServer", "RegisterUz.Persistence.SqlServer\RegisterUz.Persistence.SqlServer.csproj", "{DDBDCA7B-3A29-519E-85A8-A03912B2ED69}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RegisterUz.Sync", "RegisterUz.Sync\RegisterUz.Sync.csproj", "{274199D8-7344-692E-08C8-E98A39B35744}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RegisterUz.Tests", "RegisterUz.Tests\RegisterUz.Tests.csproj", "{7963300B-4A18-984C-D9A5-A30A4DC49AED}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RegisterUz.Core", "RegisterUz.Core\RegisterUz.Core.csproj", "{9E1261C8-7CDD-093C-D795-5606185269EC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RegisterUz.Client", "RegisterUz.Client\RegisterUz.Client.csproj", "{78A2BDA6-03BA-0653-23EA-028BD7052905}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +33,30 @@ Global
 		{17546955-0807-4D31-A95D-C1D833F4D244}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{17546955-0807-4D31-A95D-C1D833F4D244}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{17546955-0807-4D31-A95D-C1D833F4D244}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F18764DD-B410-5387-BA09-71A9842744F7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F18764DD-B410-5387-BA09-71A9842744F7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F18764DD-B410-5387-BA09-71A9842744F7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F18764DD-B410-5387-BA09-71A9842744F7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DDBDCA7B-3A29-519E-85A8-A03912B2ED69}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DDBDCA7B-3A29-519E-85A8-A03912B2ED69}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DDBDCA7B-3A29-519E-85A8-A03912B2ED69}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DDBDCA7B-3A29-519E-85A8-A03912B2ED69}.Release|Any CPU.Build.0 = Release|Any CPU
+		{274199D8-7344-692E-08C8-E98A39B35744}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{274199D8-7344-692E-08C8-E98A39B35744}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{274199D8-7344-692E-08C8-E98A39B35744}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{274199D8-7344-692E-08C8-E98A39B35744}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7963300B-4A18-984C-D9A5-A30A4DC49AED}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7963300B-4A18-984C-D9A5-A30A4DC49AED}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7963300B-4A18-984C-D9A5-A30A4DC49AED}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7963300B-4A18-984C-D9A5-A30A4DC49AED}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9E1261C8-7CDD-093C-D795-5606185269EC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9E1261C8-7CDD-093C-D795-5606185269EC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9E1261C8-7CDD-093C-D795-5606185269EC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9E1261C8-7CDD-093C-D795-5606185269EC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{78A2BDA6-03BA-0653-23EA-028BD7052905}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{78A2BDA6-03BA-0653-23EA-028BD7052905}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{78A2BDA6-03BA-0653-23EA-028BD7052905}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{78A2BDA6-03BA-0653-23EA-028BD7052905}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
