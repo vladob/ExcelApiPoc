@@ -132,3 +132,22 @@ The official API has no upper-bound timestamp. At the start of a new scan the
 collector records `ScanStartedAtUtc`; after its final page, that value becomes
 the next inclusive `ChangedSinceUtc`. This deliberate overlap prevents changes
 made during a long scan from being skipped.
+
+## Change processing
+
+Stage 2 separates observation resolution from entity refresh:
+
+1. `Sync.ObservedObject.ChangeObservationCount` is incremented only by an
+   official change-feed page. Package-detail observations cannot create a
+   processing feedback loop.
+2. `Sync.ObservedObjectWork` claims unseen change generations with expiring
+   leases and resolves every object to its accounting entity.
+3. `Sync.EntityRefreshQueue` groups any number of changed children by entity.
+   Its requested/completed generation counters preserve a change that arrives
+   while a refresh is running.
+4. The refresh worker loads the complete entity graph by RegisterUZ entity ID
+   and acknowledges only the generation covered by that successful load.
+
+Both phases are bounded independently by `RegisterUz.Loader process-changes`.
+Individual failures are retained for retry and do not prevent unrelated work
+items from completing.

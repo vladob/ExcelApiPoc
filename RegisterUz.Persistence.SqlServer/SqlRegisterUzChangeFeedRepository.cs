@@ -179,7 +179,8 @@ public sealed class SqlRegisterUzChangeFeedRepository : IRegisterUzChangeFeedRep
                 UPDATE o
                 SET [LastObservedAtUtc] = @CompletedAtUtc,
                     [LastObservedInRunId] = @SyncRunId,
-                    [ObservationCount] = [ObservationCount] + 1
+                    [ObservationCount] = [ObservationCount] + 1,
+                    [ChangeObservationCount] = [ChangeObservationCount] + 1
                 FROM [Sync].[ObservedObject] o
                 JOIN @Ids i
                   ON i.[RegisterUzObjectId] = o.[RegisterUzObjectId]
@@ -189,11 +190,12 @@ public sealed class SqlRegisterUzChangeFeedRepository : IRegisterUzChangeFeedRep
                 (
                     [ObjectTypeId], [RegisterUzObjectId],
                     [FirstObservedAtUtc], [LastObservedAtUtc],
-                    [FirstObservedInRunId], [LastObservedInRunId]
+                    [FirstObservedInRunId], [LastObservedInRunId],
+                    [ChangeObservationCount]
                 )
                 SELECT
                     @ObjectTypeId, i.[RegisterUzObjectId],
-                    @CompletedAtUtc, @CompletedAtUtc, @SyncRunId, @SyncRunId
+                    @CompletedAtUtc, @CompletedAtUtc, @SyncRunId, @SyncRunId, 1
                 FROM @Ids i
                 WHERE NOT EXISTS
                 (

@@ -11,11 +11,16 @@ using RegisterUz.Sync;
 
 bool isChangeFeed = args.Length > 0 &&
                     string.Equals(args[0], "changes", StringComparison.OrdinalIgnoreCase);
-if ((!isChangeFeed && args.Length != 1) || (isChangeFeed && args.Length is < 2 or > 4))
+bool isChangeProcessing = args.Length > 0 &&
+                          string.Equals(args[0], "process-changes", StringComparison.OrdinalIgnoreCase);
+if ((!isChangeFeed && !isChangeProcessing && args.Length != 1) ||
+    (isChangeFeed && args.Length is < 2 or > 4) ||
+    (isChangeProcessing && args.Length is < 1 or > 3))
 {
     Console.Error.WriteLine("Usage:");
     Console.Error.WriteLine("  RegisterUz.Loader <IČO>");
     Console.Error.WriteLine("  RegisterUz.Loader changes <initial-since-utc> [page-size] [max-pages-per-feed]");
+    Console.Error.WriteLine("  RegisterUz.Loader process-changes [observation-batch] [entity-batch]");
     Console.Error.WriteLine("Example: RegisterUz.Loader changes 2026-08-30T18:00:00Z 100 1");
     return 2;
 }
@@ -110,6 +115,36 @@ try
         }
 
         return 0;
+    }
+
+    if (isChangeProcessing)
+    {
+        int observationBatch = args.Length >= 2 && int.TryParse(args[1], out int parsedObservationBatch)
+            ? parsedObservationBatch
+            : 25;
+        int entityBatch = args.Length >= 3 && int.TryParse(args[2], out int parsedEntityBatch)
+            ? parsedEntityBatch
+            : 1;
+        if (observationBatch is < 0 or > 10_000 || entityBatch is < 0 or > 10_000)
+        {
+            Console.Error.WriteLine("observation-batch and entity-batch must be between 0 and 10000.");
+            return 5;
+        }
+
+        var processingRepository = new SqlRegisterUzChangeProcessingRepository(connectionString);
+        var processor = new RegisterUzChangeProcessor(client, processingRepository, loader);
+        RegisterUzChangeProcessingResult UzChangeresult = await processor.ProcessAsync(
+            observationBatch,
+            entityBatch,
+            TimeSpan.FromMinutes(15),
+            cancellation.Token);
+        Console.WriteLine(
+            $"Observations: claimed {UzChangeresult.ObservationsClaimed}; " +
+            $"resolved {UzChangeresult.ObservationsResolved}; failed {UzChangeresult.ObservationsFailed}");
+        Console.WriteLine(
+            $"Entities: claimed {UzChangeresult.EntitiesClaimed}; " +
+            $"refreshed {UzChangeresult.EntitiesRefreshed}; failed {UzChangeresult.EntitiesFailed}");
+        return UzChangeresult.ObservationsFailed == 0 && UzChangeresult.EntitiesFailed == 0 ? 0 : 1;
     }
 
     var result = await loader.LoadByIcoAsync(args[0], cancellation.Token);

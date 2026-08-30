@@ -3,7 +3,7 @@ using System.Text.Json;
 
 namespace RegisterUz.Sync;
 
-public sealed class RegisterUzAccountingEntityLoader
+public sealed class RegisterUzAccountingEntityLoader : IRegisterUzEntityPackageLoader
 {
     private readonly IRegisterUzClient _client;
     private readonly IRegisterUzPackageRepository _repository;
@@ -21,6 +21,48 @@ public sealed class RegisterUzAccountingEntityLoader
         CancellationToken cancellationToken = default)
     {
         string normalizedIco = NormalizeIco(ico);
+        IReadOnlyList<long> entityIds =
+            await _client.FindAccountingEntityIdsByIcoAsync(normalizedIco, cancellationToken);
+
+        if (entityIds.Count == 0)
+            throw new InvalidOperationException($"No RegisterUZ accounting entity was found for IČO {normalizedIco}.");
+
+        if (entityIds.Count != 1)
+            throw new InvalidOperationException(
+                $"RegisterUZ returned {entityIds.Count} accounting entities for IČO {normalizedIco}; exactly one is required.");
+
+        RegisterUzDocument<AccountingEntityDto> entity =
+            await _client.GetAccountingEntityAsync(entityIds[0], cancellationToken);
+
+        if (!string.Equals(entity.Value.Ico, normalizedIco, StringComparison.Ordinal))
+            throw new InvalidOperationException(
+                $"RegisterUZ entity {entity.Value.Id} has IČO '{entity.Value.Ico}', not requested IČO '{normalizedIco}'.");
+
+        return await LoadEntityAsync(normalizedIco, entity, cancellationToken);
+    }
+
+    public async Task<RegisterUzLoadResult> LoadByEntityIdAsync(
+        long entityId,
+        CancellationToken cancellationToken = default)
+    {
+        if (entityId <= 0)
+            throw new ArgumentOutOfRangeException(nameof(entityId));
+
+        RegisterUzDocument<AccountingEntityDto> entity =
+            await _client.GetAccountingEntityAsync(entityId, cancellationToken);
+        if (entity.Value.Id != entityId)
+            throw new InvalidOperationException(
+                $"RegisterUZ returned entity {entity.Value.Id} when entity {entityId} was requested.");
+
+        string normalizedIco = NormalizeIco(entity.Value.Ico ?? string.Empty);
+        return await LoadEntityAsync(normalizedIco, entity, cancellationToken);
+    }
+
+    private async Task<RegisterUzLoadResult> LoadEntityAsync(
+        string normalizedIco,
+        RegisterUzDocument<AccountingEntityDto> entity,
+        CancellationToken cancellationToken)
+    {
         long syncRunId = await _repository.BeginRunAsync(normalizedIco, cancellationToken);
 
         try
@@ -28,23 +70,6 @@ public sealed class RegisterUzAccountingEntityLoader
             RegisterUzCatalogPackage catalogs = await _client.GetCatalogsAsync(cancellationToken);
             RegisterUzCatalogSyncResult catalogResult =
                 await _repository.SaveCatalogsAsync(syncRunId, catalogs, cancellationToken);
-
-            IReadOnlyList<long> entityIds =
-                await _client.FindAccountingEntityIdsByIcoAsync(normalizedIco, cancellationToken);
-
-            if (entityIds.Count == 0)
-                throw new InvalidOperationException($"No RegisterUZ accounting entity was found for IČO {normalizedIco}.");
-
-            if (entityIds.Count != 1)
-                throw new InvalidOperationException(
-                    $"RegisterUZ returned {entityIds.Count} accounting entities for IČO {normalizedIco}; exactly one is required.");
-
-            RegisterUzDocument<AccountingEntityDto> entity =
-                await _client.GetAccountingEntityAsync(entityIds[0], cancellationToken);
-
-            if (!string.Equals(entity.Value.Ico, normalizedIco, StringComparison.Ordinal))
-                throw new InvalidOperationException(
-                    $"RegisterUZ entity {entity.Value.Id} has IČO '{entity.Value.Ico}', not requested IČO '{normalizedIco}'.");
 
             var statements = new List<RegisterUzDocument<FinancialStatementDto>>();
             foreach (long id in entity.Value.FinancialStatementIds.Distinct())
