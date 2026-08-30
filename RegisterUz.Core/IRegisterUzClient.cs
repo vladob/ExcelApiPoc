@@ -25,6 +25,9 @@ public interface IRegisterUzClient
     Task<RegisterUzDocument<FinancialReportTemplateDto>> GetTemplateAsync(
         long id,
         CancellationToken cancellationToken = default);
+
+    Task<RegisterUzCatalogPackage> GetCatalogsAsync(
+        CancellationToken cancellationToken = default);
 }
 
 public interface IRegisterUzPackageRepository
@@ -34,6 +37,11 @@ public interface IRegisterUzPackageRepository
     Task SavePackageAsync(
         long syncRunId,
         RegisterUzEntityPackage package,
+        CancellationToken cancellationToken = default);
+
+    Task<RegisterUzCatalogSyncResult> SaveCatalogsAsync(
+        long syncRunId,
+        RegisterUzCatalogPackage catalogs,
         CancellationToken cancellationToken = default);
 
     Task CompleteRunAsync(

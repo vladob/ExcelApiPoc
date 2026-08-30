@@ -79,6 +79,36 @@ public sealed class RegisterUzApiClient : IRegisterUzClient
         CancellationToken cancellationToken = default) =>
         GetAsync<FinancialReportTemplateDto>($"api/sablona?id={ValidateId(id)}", cancellationToken);
 
+    public async Task<RegisterUzCatalogPackage> GetCatalogsAsync(
+        CancellationToken cancellationToken = default)
+    {
+        // Catalog requests deliberately run sequentially. RegisterUZ is a public
+        // anonymous service and seven small requests add negligible latency.
+        RegisterUzDocument<TemplateCatalogDto> templates =
+            await GetAsync<TemplateCatalogDto>("api/sablony", cancellationToken);
+        RegisterUzDocument<ClassificationCatalogDto> legalForms =
+            await GetAsync<ClassificationCatalogDto>("api/pravne-formy", cancellationToken);
+        RegisterUzDocument<ClassificationCatalogDto> skNace =
+            await GetAsync<ClassificationCatalogDto>("api/sk-nace", cancellationToken);
+        RegisterUzDocument<ClassificationCatalogDto> ownershipTypes =
+            await GetAsync<ClassificationCatalogDto>("api/druhy-vlastnictva", cancellationToken);
+        RegisterUzDocument<ClassificationCatalogDto> organizationSizes =
+            await GetAsync<ClassificationCatalogDto>("api/velkosti-organizacie", cancellationToken);
+        RegisterUzDocument<LocationCatalogDto> regions =
+            await GetAsync<LocationCatalogDto>("api/kraje", cancellationToken);
+        RegisterUzDocument<LocationCatalogDto> districts =
+            await GetAsync<LocationCatalogDto>("api/okresy", cancellationToken);
+
+        return new RegisterUzCatalogPackage(
+            templates,
+            legalForms,
+            skNace,
+            ownershipTypes,
+            organizationSizes,
+            regions,
+            districts);
+    }
+
     private async Task<RegisterUzDocument<T>> GetAsync<T>(
         string relativePath,
         CancellationToken cancellationToken)

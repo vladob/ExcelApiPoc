@@ -1,5 +1,6 @@
 using System.Net;
 using System.Text;
+using System.Text.Json;
 using RegisterUz.Client;
 using Xunit;
 
@@ -55,6 +56,61 @@ public sealed class RegisterUzApiClientTests
         Assert.Equal("Strana pasív", document.Value.Content.Tables[1].Name!.Sk);
     }
 
+    [Fact]
+    public async Task Catalog_bundle_loads_seven_useful_endpoints_and_excludes_registered_offices()
+    {
+        var responses = new Dictionary<string, string>(StringComparer.Ordinal)
+        {
+            ["/cruz-public/api/sablony"] = """{"sablony":[{"id":15181,"nazov":"Výkaz"}]}""",
+            ["/cruz-public/api/pravne-formy"] = Classification("801", "Obec"),
+            ["/cruz-public/api/sk-nace"] = Classification("84110", "Všeobecná verejná správa"),
+            ["/cruz-public/api/druhy-vlastnictva"] = Classification("5", "Samospráva"),
+            ["/cruz-public/api/velkosti-organizacie"] = Classification("04", "3-4 zamestnanci"),
+            ["/cruz-public/api/kraje"] = Location("SK042", "Košický kraj", null),
+            ["/cruz-public/api/okresy"] = Location("SK0427", "Michalovce", "SK042")
+        };
+        var handler = new RoutingStubHandler(responses);
+        var client = new RegisterUzApiClient(new HttpClient(handler)
+        {
+            BaseAddress = new Uri(RegisterUzApiClient.DefaultBaseAddress)
+        });
+
+        RegisterUz.Core.RegisterUzCatalogPackage catalogs = await client.GetCatalogsAsync();
+
+        Assert.Single(catalogs.Templates.Value.Templates);
+        Assert.Equal(15181, catalogs.Templates.Value.Templates[0].Id);
+        Assert.Equal("801", Assert.Single(catalogs.LegalForms.Value.Classifications).Code);
+        Assert.Equal("SK0427", Assert.Single(catalogs.Districts.Value.Locations).Code);
+        Assert.Equal(7, handler.RequestPaths.Count);
+        Assert.DoesNotContain(handler.RequestPaths, path => path.Contains("sidla", StringComparison.Ordinal));
+    }
+
+    private static string Classification(string code, string name) =>
+        JsonSerializer.Serialize(new
+        {
+            klasifikacie = new[]
+            {
+                new { kod = code, nazov = new { sk = name } }
+            }
+        });
+
+    private static string Location(string code, string name, string? parent) =>
+        parent is null
+            ? JsonSerializer.Serialize(new
+            {
+                lokacie = new[]
+                {
+                    new { kod = code, nazov = new { sk = name } }
+                }
+            })
+            : JsonSerializer.Serialize(new
+            {
+                lokacie = new[]
+                {
+                    new { nadradenaLokacia = parent, kod = code, nazov = new { sk = name } }
+                }
+            });
+
     private static RegisterUzApiClient CreateClient(string json)
     {
         var handler = new StubHandler(json);
@@ -74,5 +130,27 @@ public sealed class RegisterUzApiClientTests
                 Content = new StringContent(content, Encoding.UTF8, "application/json"),
                 RequestMessage = request
             });
+    }
+
+    private sealed class RoutingStubHandler(IReadOnlyDictionary<string, string> responses) : HttpMessageHandler
+    {
+        public List<string> RequestPaths { get; } = [];
+
+        protected override Task<HttpResponseMessage> SendAsync(
+            HttpRequestMessage request,
+            CancellationToken cancellationToken)
+        {
+            string path = request.RequestUri?.AbsolutePath
+                          ?? throw new InvalidOperationException("Request URI is missing.");
+            RequestPaths.Add(path);
+            if (!responses.TryGetValue(path, out string? content))
+                return Task.FromResult(new HttpResponseMessage(HttpStatusCode.NotFound));
+
+            return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)
+            {
+                Content = new StringContent(content, Encoding.UTF8, "application/json"),
+                RequestMessage = request
+            });
+        }
     }
 }

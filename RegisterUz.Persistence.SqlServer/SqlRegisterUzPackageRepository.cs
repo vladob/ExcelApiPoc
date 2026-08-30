@@ -3,6 +3,7 @@ using System.Globalization;
 using System.IO.Compression;
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.Json;
 using Microsoft.Data.SqlClient;
 using RegisterUz.Core;
 
@@ -23,6 +24,19 @@ public sealed class SqlRegisterUzPackageRepository : IRegisterUzPackageRepositor
     }
 
     private sealed record RawSaveResult(long PayloadVersionId, PersistenceOutcome Outcome);
+
+    private enum CatalogItemOutcome : byte
+    {
+        Unchanged = 0,
+        Inserted = 1,
+        Updated = 2,
+        Reappeared = 3
+    }
+
+    private sealed record CatalogCounters(
+        int Inserted,
+        int Updated,
+        int Removed);
 
     private readonly string _connectionString;
 
@@ -154,6 +168,103 @@ public sealed class SqlRegisterUzPackageRepository : IRegisterUzPackageRepositor
         }
     }
 
+    public async Task<RegisterUzCatalogSyncResult> SaveCatalogsAsync(
+        long syncRunId,
+        RegisterUzCatalogPackage catalogs,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(catalogs);
+
+        await using var connection = new SqlConnection(_connectionString);
+        await connection.OpenAsync(cancellationToken);
+        await using SqlTransaction transaction =
+            (SqlTransaction)await connection.BeginTransactionAsync(IsolationLevel.ReadCommitted, cancellationToken);
+
+        try
+        {
+            int inserted = 0;
+            int updated = 0;
+            int removed = 0;
+
+            await SaveCatalogObservationAsync(connection, transaction, syncRunId, "Templates",
+                catalogs.Templates, catalogs.Templates.Value.Templates.Length,
+                JsonSerializer.Serialize(catalogs.Templates.Value.Templates.OrderBy(item => item.Id)), cancellationToken);
+            await SaveCatalogObservationAsync(connection, transaction, syncRunId, "LegalForms",
+                catalogs.LegalForms, catalogs.LegalForms.Value.Classifications.Length,
+                SerializeClassificationCatalog(catalogs.LegalForms.Value.Classifications), cancellationToken);
+            await SaveCatalogObservationAsync(connection, transaction, syncRunId, "SkNace",
+                catalogs.SkNace, catalogs.SkNace.Value.Classifications.Length,
+                SerializeClassificationCatalog(catalogs.SkNace.Value.Classifications), cancellationToken);
+            await SaveCatalogObservationAsync(connection, transaction, syncRunId, "OwnershipTypes",
+                catalogs.OwnershipTypes, catalogs.OwnershipTypes.Value.Classifications.Length,
+                SerializeClassificationCatalog(catalogs.OwnershipTypes.Value.Classifications), cancellationToken);
+            await SaveCatalogObservationAsync(connection, transaction, syncRunId, "OrganizationSizes",
+                catalogs.OrganizationSizes, catalogs.OrganizationSizes.Value.Classifications.Length,
+                SerializeClassificationCatalog(catalogs.OrganizationSizes.Value.Classifications), cancellationToken);
+            await SaveCatalogObservationAsync(connection, transaction, syncRunId, "Regions",
+                catalogs.Regions, catalogs.Regions.Value.Locations.Length,
+                SerializeLocationCatalog(catalogs.Regions.Value.Locations), cancellationToken);
+            await SaveCatalogObservationAsync(connection, transaction, syncRunId, "Districts",
+                catalogs.Districts, catalogs.Districts.Value.Locations.Length,
+                SerializeLocationCatalog(catalogs.Districts.Value.Locations), cancellationToken);
+
+            foreach (FinancialReportTemplateDto template in catalogs.Templates.Value.Templates)
+            {
+                string itemJson = JsonSerializer.Serialize(template);
+                string scope = template.Tables.Length == 0 ? "Metadata" : "Structure";
+                CatalogItemOutcome outcome = await SaveCatalogItemStateAsync(
+                    connection, transaction, syncRunId, "Templates", template.Id.ToString(CultureInfo.InvariantCulture),
+                    itemJson, scope, catalogs.Templates.RetrievedAtUtc, cancellationToken);
+                CountCatalogOutcome(outcome, ref inserted, ref updated);
+                if (outcome != CatalogItemOutcome.Unchanged)
+                {
+                    var document = new RegisterUzDocument<FinancialReportTemplateDto>(
+                        template, itemJson, catalogs.Templates.RetrievedAtUtc,
+                        catalogs.Templates.HttpStatusCode, catalogs.Templates.ApiVersion);
+                    await SaveTemplateAsync(connection, transaction, document, cancellationToken);
+                }
+            }
+            removed += await MarkMissingCatalogItemsAsync(
+                connection, transaction, syncRunId, "Templates", "Metadata",
+                catalogs.Templates.RetrievedAtUtc, cancellationToken);
+            await MarkMissingTemplatesAsync(connection, transaction, cancellationToken);
+
+            AddCatalogCounters(await SaveClassificationCatalogAsync(connection, transaction, syncRunId,
+                "LegalForms", "LegalForm", catalogs.LegalForms, cancellationToken),
+                ref inserted, ref updated, ref removed);
+            AddCatalogCounters(await SaveClassificationCatalogAsync(connection, transaction, syncRunId,
+                "SkNace", "SkNace", catalogs.SkNace, cancellationToken),
+                ref inserted, ref updated, ref removed);
+            AddCatalogCounters(await SaveClassificationCatalogAsync(connection, transaction, syncRunId,
+                "OwnershipTypes", "OwnershipType", catalogs.OwnershipTypes, cancellationToken),
+                ref inserted, ref updated, ref removed);
+            AddCatalogCounters(await SaveClassificationCatalogAsync(connection, transaction, syncRunId,
+                "OrganizationSizes", "OrganizationSize", catalogs.OrganizationSizes, cancellationToken),
+                ref inserted, ref updated, ref removed);
+            AddCatalogCounters(await SaveLocationCatalogAsync(connection, transaction, syncRunId,
+                "Regions", catalogs.Regions, cancellationToken),
+                ref inserted, ref updated, ref removed);
+            AddCatalogCounters(await SaveLocationCatalogAsync(connection, transaction, syncRunId,
+                "Districts", catalogs.Districts, cancellationToken),
+                ref inserted, ref updated, ref removed);
+            await DeleteNonCatalogLocationsAsync(connection, transaction, cancellationToken);
+
+            int reviewRequired = await GetCatalogReviewRequiredCountAsync(
+                connection, transaction, syncRunId, cancellationToken);
+            await UpdateCatalogRunStatisticsAsync(
+                connection, transaction, syncRunId, 7, inserted, updated, removed,
+                reviewRequired, cancellationToken);
+
+            await transaction.CommitAsync(cancellationToken);
+            return new RegisterUzCatalogSyncResult(7, inserted, updated, removed, reviewRequired);
+        }
+        catch
+        {
+            await transaction.RollbackAsync(CancellationToken.None);
+            throw;
+        }
+    }
+
     public async Task CompleteRunAsync(
         long syncRunId,
         RegisterUzLoadResult result,
@@ -183,7 +294,520 @@ public sealed class SqlRegisterUzPackageRepository : IRegisterUzPackageRepositor
         Add(command, "@CompletedAtUtc", SqlDbType.DateTime2, result.CompletedAtUtc);
         Add(command, "@DetailRequestCount", SqlDbType.BigInt,
             1L + result.FinancialStatementCount + result.AnnualReportCount +
-            result.FinancialReportCount + result.TemplateCount);
+            result.FinancialReportCount + result.TemplateDetailRequestCount);
+        await command.ExecuteNonQueryAsync(cancellationToken);
+    }
+
+    private static async Task SaveCatalogObservationAsync<T>(
+        SqlConnection connection,
+        SqlTransaction transaction,
+        long syncRunId,
+        string catalogCode,
+        RegisterUzDocument<T> document,
+        int recordCount,
+        string canonicalJson,
+        CancellationToken cancellationToken)
+    {
+        byte[] utf8 = Encoding.UTF8.GetBytes(document.RawJson);
+        byte[] payloadHash = SHA256.HashData(utf8);
+        byte[] canonicalHash = RegisterUzCanonicalJson.ComputeSha256(canonicalJson);
+        byte[] compressed = Compress(utf8);
+
+        await using var command = CreateCommand(connection, transaction, """
+            DECLARE @PreviousCanonicalHash binary(32) =
+            (
+                SELECT TOP (1) [CanonicalSha256]
+                FROM [Sync].[CatalogObservation]
+                WHERE [CatalogCode] = @CatalogCode
+                ORDER BY [CatalogObservationId] DESC
+            );
+
+            INSERT INTO [Sync].[CatalogObservation]
+            (
+                [SyncRunId], [CatalogCode], [RetrievedAtUtc], [HttpStatusCode],
+                [RecordCount], [PayloadSha256], [CanonicalSha256],
+                [PayloadCompressed], [CompressionCode], [UncompressedLengthBytes],
+                [ApiVersion], [HasChanged]
+            )
+            VALUES
+            (
+                @SyncRunId, @CatalogCode, @RetrievedAtUtc, @HttpStatusCode,
+                @RecordCount, @PayloadHash, @CanonicalHash,
+                @Payload, 'GZIP', @Length,
+                @ApiVersion,
+                CASE WHEN @PreviousCanonicalHash = @CanonicalHash THEN 0 ELSE 1 END
+            );
+            """);
+        Add(command, "@SyncRunId", SqlDbType.BigInt, syncRunId);
+        Add(command, "@CatalogCode", SqlDbType.VarChar, catalogCode, 40);
+        Add(command, "@RetrievedAtUtc", SqlDbType.DateTime2, document.RetrievedAtUtc);
+        Add(command, "@HttpStatusCode", SqlDbType.Int, document.HttpStatusCode);
+        Add(command, "@RecordCount", SqlDbType.Int, recordCount);
+        Add(command, "@PayloadHash", SqlDbType.Binary, payloadHash, 32);
+        Add(command, "@CanonicalHash", SqlDbType.Binary, canonicalHash, 32);
+        Add(command, "@Payload", SqlDbType.VarBinary, compressed, -1);
+        Add(command, "@Length", SqlDbType.BigInt, utf8.LongLength);
+        Add(command, "@ApiVersion", SqlDbType.VarChar, document.ApiVersion, 50);
+        await command.ExecuteNonQueryAsync(cancellationToken);
+    }
+
+    private static async Task<CatalogItemOutcome> SaveCatalogItemStateAsync(
+        SqlConnection connection,
+        SqlTransaction transaction,
+        long syncRunId,
+        string catalogCode,
+        string sourceObjectKey,
+        string itemJson,
+        string changeScope,
+        DateTime observedAtUtc,
+        CancellationToken cancellationToken)
+    {
+        byte[] canonicalHash = RegisterUzCanonicalJson.ComputeSha256(itemJson);
+        await using var command = CreateCommand(connection, transaction, """
+            DECLARE @OldHash binary(32);
+            DECLARE @WasPresent bit;
+            DECLARE @Outcome tinyint;
+            DECLARE @ChangeType varchar(20);
+
+            SELECT @OldHash = [CanonicalSha256], @WasPresent = [IsPresent]
+            FROM [Sync].[CatalogItemState] WITH (UPDLOCK, HOLDLOCK)
+            WHERE [CatalogCode] = @CatalogCode
+              AND [SourceObjectKey] = @SourceObjectKey;
+
+            IF @OldHash IS NULL
+            BEGIN
+                INSERT INTO [Sync].[CatalogItemState]
+                (
+                    [CatalogCode], [SourceObjectKey], [CanonicalSha256],
+                    [FirstObservedAtUtc], [LastObservedAtUtc],
+                    [FirstObservedInRunId], [LastObservedInRunId], [IsPresent]
+                )
+                VALUES
+                (
+                    @CatalogCode, @SourceObjectKey, @CanonicalHash,
+                    @ObservedAtUtc, @ObservedAtUtc,
+                    @SyncRunId, @SyncRunId, 1
+                );
+                SET @Outcome = 1;
+                SET @ChangeType = 'Inserted';
+            END
+            ELSE IF @OldHash <> @CanonicalHash OR @WasPresent = 0
+            BEGIN
+                SET @Outcome = CASE WHEN @WasPresent = 0 THEN 3 ELSE 2 END;
+                SET @ChangeType = CASE WHEN @WasPresent = 0 THEN 'Reappeared' ELSE 'Updated' END;
+                UPDATE [Sync].[CatalogItemState]
+                SET [CanonicalSha256] = @CanonicalHash,
+                    [LastObservedAtUtc] = @ObservedAtUtc,
+                    [LastObservedInRunId] = @SyncRunId,
+                    [IsPresent] = 1
+                WHERE [CatalogCode] = @CatalogCode
+                  AND [SourceObjectKey] = @SourceObjectKey;
+            END
+            ELSE
+            BEGIN
+                SET @Outcome = 0;
+                UPDATE [Sync].[CatalogItemState]
+                SET [LastObservedAtUtc] = @ObservedAtUtc,
+                    [LastObservedInRunId] = @SyncRunId
+                WHERE [CatalogCode] = @CatalogCode
+                  AND [SourceObjectKey] = @SourceObjectKey;
+            END;
+
+            IF @Outcome <> 0
+                INSERT INTO [Sync].[CatalogChange]
+                (
+                    [SyncRunId], [CatalogCode], [SourceObjectKey],
+                    [ChangeType], [ChangeScope],
+                    [OldCanonicalSha256], [NewCanonicalSha256],
+                    [ChangeDescription], [RequiresReview]
+                )
+                VALUES
+                (
+                    @SyncRunId, @CatalogCode, @SourceObjectKey,
+                    @ChangeType, @ChangeScope,
+                    @OldHash, @CanonicalHash,
+                    CONCAT(@CatalogCode, ' ', @SourceObjectKey, ' ', LOWER(@ChangeType), '.'),
+                    CASE WHEN EXISTS
+                    (
+                        SELECT 1
+                        FROM [Sync].[CatalogObservation]
+                        WHERE [CatalogCode] = @CatalogCode
+                          AND [SyncRunId] <> @SyncRunId
+                    ) THEN 1 ELSE 0 END
+                );
+
+            SELECT @Outcome;
+            """);
+        Add(command, "@SyncRunId", SqlDbType.BigInt, syncRunId);
+        Add(command, "@CatalogCode", SqlDbType.VarChar, catalogCode, 40);
+        Add(command, "@SourceObjectKey", SqlDbType.VarChar, sourceObjectKey, 100);
+        Add(command, "@CanonicalHash", SqlDbType.Binary, canonicalHash, 32);
+        Add(command, "@ChangeScope", SqlDbType.VarChar, changeScope, 20);
+        Add(command, "@ObservedAtUtc", SqlDbType.DateTime2, observedAtUtc);
+        object? result = await command.ExecuteScalarAsync(cancellationToken);
+        return (CatalogItemOutcome)Convert.ToByte(result, CultureInfo.InvariantCulture);
+    }
+
+    private static async Task<int> MarkMissingCatalogItemsAsync(
+        SqlConnection connection,
+        SqlTransaction transaction,
+        long syncRunId,
+        string catalogCode,
+        string changeScope,
+        DateTime observedAtUtc,
+        CancellationToken cancellationToken)
+    {
+        await using var command = CreateCommand(connection, transaction, """
+            DECLARE @MissingCount int =
+            (
+                SELECT COUNT(*)
+                FROM [Sync].[CatalogItemState]
+                WHERE [CatalogCode] = @CatalogCode
+                  AND [IsPresent] = 1
+                  AND [LastObservedInRunId] <> @SyncRunId
+            );
+
+            INSERT INTO [Sync].[CatalogChange]
+            (
+                [SyncRunId], [CatalogCode], [SourceObjectKey],
+                [ChangeType], [ChangeScope],
+                [OldCanonicalSha256], [NewCanonicalSha256],
+                [ChangeDescription], [RequiresReview]
+            )
+            SELECT
+                @SyncRunId, [CatalogCode], [SourceObjectKey],
+                'Removed', @ChangeScope,
+                [CanonicalSha256], NULL,
+                CONCAT([CatalogCode], ' ', [SourceObjectKey], ' removed from the official response.'), 1
+            FROM [Sync].[CatalogItemState]
+            WHERE [CatalogCode] = @CatalogCode
+              AND [IsPresent] = 1
+              AND [LastObservedInRunId] <> @SyncRunId;
+
+            UPDATE [Sync].[CatalogItemState]
+            SET [IsPresent] = 0,
+                [LastObservedAtUtc] = @ObservedAtUtc,
+                [LastObservedInRunId] = @SyncRunId
+            WHERE [CatalogCode] = @CatalogCode
+              AND [IsPresent] = 1
+              AND [LastObservedInRunId] <> @SyncRunId;
+
+            SELECT @MissingCount;
+            """);
+        Add(command, "@SyncRunId", SqlDbType.BigInt, syncRunId);
+        Add(command, "@CatalogCode", SqlDbType.VarChar, catalogCode, 40);
+        Add(command, "@ChangeScope", SqlDbType.VarChar, changeScope, 20);
+        Add(command, "@ObservedAtUtc", SqlDbType.DateTime2, observedAtUtc);
+        object? result = await command.ExecuteScalarAsync(cancellationToken);
+        return Convert.ToInt32(result, CultureInfo.InvariantCulture);
+    }
+
+    private static async Task<CatalogCounters> SaveClassificationCatalogAsync(
+        SqlConnection connection,
+        SqlTransaction transaction,
+        long syncRunId,
+        string catalogCode,
+        string tableName,
+        RegisterUzDocument<ClassificationCatalogDto> document,
+        CancellationToken cancellationToken)
+    {
+        int inserted = 0;
+        int updated = 0;
+
+        foreach (ClassificationDto item in document.Value.Classifications)
+        {
+            ValidateCatalogCode(item.Code, catalogCode);
+            string itemJson = JsonSerializer.Serialize(item);
+            CatalogItemOutcome outcome = await SaveCatalogItemStateAsync(
+                connection, transaction, syncRunId, catalogCode, item.Code,
+                itemJson, "Caption", document.RetrievedAtUtc, cancellationToken);
+            CountCatalogOutcome(outcome, ref inserted, ref updated);
+            if (outcome != CatalogItemOutcome.Unchanged)
+            {
+                await SaveClassificationAsync(
+                    connection, transaction, tableName, item, document.RetrievedAtUtc, cancellationToken);
+            }
+        }
+
+        int removed = await MarkMissingCatalogItemsAsync(
+            connection, transaction, syncRunId, catalogCode, "Metadata",
+            document.RetrievedAtUtc, cancellationToken);
+        await MarkNormalizedMissingAsync(connection, transaction, catalogCode, tableName, cancellationToken);
+        return new CatalogCounters(inserted, updated, removed);
+    }
+
+    private static async Task<CatalogCounters> SaveLocationCatalogAsync(
+        SqlConnection connection,
+        SqlTransaction transaction,
+        long syncRunId,
+        string catalogCode,
+        RegisterUzDocument<LocationCatalogDto> document,
+        CancellationToken cancellationToken)
+    {
+        int inserted = 0;
+        int updated = 0;
+
+        foreach (LocationDto item in document.Value.Locations)
+        {
+            ValidateCatalogCode(item.Code, catalogCode);
+            string itemJson = JsonSerializer.Serialize(item);
+            CatalogItemOutcome outcome = await SaveCatalogItemStateAsync(
+                connection, transaction, syncRunId, catalogCode, item.Code,
+                itemJson, "Metadata", document.RetrievedAtUtc, cancellationToken);
+            CountCatalogOutcome(outcome, ref inserted, ref updated);
+            if (outcome != CatalogItemOutcome.Unchanged)
+            {
+                await SaveLocationAsync(connection, transaction, item, document.RetrievedAtUtc, cancellationToken);
+            }
+        }
+
+        int removed = await MarkMissingCatalogItemsAsync(
+            connection, transaction, syncRunId, catalogCode, "Metadata",
+            document.RetrievedAtUtc, cancellationToken);
+        await MarkNormalizedMissingAsync(connection, transaction, catalogCode, "Location", cancellationToken);
+        return new CatalogCounters(inserted, updated, removed);
+    }
+
+    private static async Task SaveClassificationAsync(
+        SqlConnection connection,
+        SqlTransaction transaction,
+        string tableName,
+        ClassificationDto item,
+        DateTime observedAtUtc,
+        CancellationToken cancellationToken)
+    {
+        string qualifiedTable = tableName switch
+        {
+            "LegalForm" => "[Reference].[LegalForm]",
+            "SkNace" => "[Reference].[SkNace]",
+            "OwnershipType" => "[Reference].[OwnershipType]",
+            "OrganizationSize" => "[Reference].[OrganizationSize]",
+            _ => throw new ArgumentOutOfRangeException(nameof(tableName), tableName, "Unsupported classification table.")
+        };
+
+        await using var command = CreateCommand(connection, transaction, $"""
+            UPDATE {qualifiedTable}
+            SET [TitleSk] = @TitleSk,
+                [TitleEn] = @TitleEn,
+                [IsDeleted] = 0,
+                [LastObservedAtUtc] = @ObservedAtUtc,
+                [UpdatedAtUtc] = SYSUTCDATETIME()
+            WHERE [SourceCode] = @SourceCode;
+
+            IF @@ROWCOUNT = 0
+                INSERT INTO {qualifiedTable}
+                (
+                    [SourceCode], [TitleSk], [TitleEn], [IsDeleted],
+                    [FirstObservedAtUtc], [LastObservedAtUtc]
+                )
+                VALUES
+                (
+                    @SourceCode, @TitleSk, @TitleEn, 0,
+                    @ObservedAtUtc, @ObservedAtUtc
+                );
+            """);
+        Add(command, "@SourceCode", SqlDbType.VarChar, item.Code, 100);
+        Add(command, "@TitleSk", SqlDbType.NVarChar, item.Name?.Sk, 250);
+        Add(command, "@TitleEn", SqlDbType.NVarChar, item.Name?.En, 250);
+        Add(command, "@ObservedAtUtc", SqlDbType.DateTime2, observedAtUtc);
+        await command.ExecuteNonQueryAsync(cancellationToken);
+    }
+
+    private static async Task SaveLocationAsync(
+        SqlConnection connection,
+        SqlTransaction transaction,
+        LocationDto item,
+        DateTime observedAtUtc,
+        CancellationToken cancellationToken)
+    {
+        await using var command = CreateCommand(connection, transaction, """
+            UPDATE [Reference].[Location]
+            SET [ParentSourceCode] = @ParentSourceCode,
+                [TitleSk] = @TitleSk,
+                [TitleEn] = @TitleEn,
+                [IsDeleted] = 0,
+                [LastObservedAtUtc] = @ObservedAtUtc,
+                [UpdatedAtUtc] = SYSUTCDATETIME()
+            WHERE [SourceCode] = @SourceCode;
+
+            IF @@ROWCOUNT = 0
+                INSERT INTO [Reference].[Location]
+                (
+                    [SourceCode], [ParentSourceCode], [TitleSk], [TitleEn], [IsDeleted],
+                    [FirstObservedAtUtc], [LastObservedAtUtc]
+                )
+                VALUES
+                (
+                    @SourceCode, @ParentSourceCode, @TitleSk, @TitleEn, 0,
+                    @ObservedAtUtc, @ObservedAtUtc
+                );
+            """);
+        Add(command, "@SourceCode", SqlDbType.VarChar, item.Code, 100);
+        Add(command, "@ParentSourceCode", SqlDbType.VarChar, item.ParentCode, 100);
+        Add(command, "@TitleSk", SqlDbType.NVarChar, item.Name?.Sk, 250);
+        Add(command, "@TitleEn", SqlDbType.NVarChar, item.Name?.En, 250);
+        Add(command, "@ObservedAtUtc", SqlDbType.DateTime2, observedAtUtc);
+        await command.ExecuteNonQueryAsync(cancellationToken);
+    }
+
+    private static async Task MarkNormalizedMissingAsync(
+        SqlConnection connection,
+        SqlTransaction transaction,
+        string catalogCode,
+        string tableName,
+        CancellationToken cancellationToken)
+    {
+        string qualifiedTable = tableName switch
+        {
+            "LegalForm" => "[Reference].[LegalForm]",
+            "SkNace" => "[Reference].[SkNace]",
+            "OwnershipType" => "[Reference].[OwnershipType]",
+            "OrganizationSize" => "[Reference].[OrganizationSize]",
+            "Location" => "[Reference].[Location]",
+            _ => throw new ArgumentOutOfRangeException(nameof(tableName), tableName, "Unsupported catalog table.")
+        };
+
+        await using var command = CreateCommand(connection, transaction, $"""
+            UPDATE target
+            SET [IsDeleted] = 1,
+                [UpdatedAtUtc] = SYSUTCDATETIME()
+            FROM {qualifiedTable} target
+            JOIN [Sync].[CatalogItemState] state
+              ON state.[SourceObjectKey] = target.[SourceCode]
+            WHERE state.[CatalogCode] = @CatalogCode
+              AND state.[IsPresent] = 0
+              AND target.[IsDeleted] = 0;
+            """);
+        Add(command, "@CatalogCode", SqlDbType.VarChar, catalogCode, 40);
+        await command.ExecuteNonQueryAsync(cancellationToken);
+    }
+
+    private static async Task MarkMissingTemplatesAsync(
+        SqlConnection connection,
+        SqlTransaction transaction,
+        CancellationToken cancellationToken)
+    {
+        await using var command = CreateCommand(connection, transaction, """
+            UPDATE template
+            SET [IsDeleted] = 1,
+                [UpdatedAtUtc] = SYSUTCDATETIME()
+            FROM [Templates].[FinancialReportTemplate] template
+            JOIN [Sync].[CatalogItemState] state
+              ON TRY_CONVERT(bigint, state.[SourceObjectKey]) = template.[RegisterUzTemplateId]
+            WHERE state.[CatalogCode] = 'Templates'
+              AND state.[IsPresent] = 0
+              AND template.[IsDeleted] = 0;
+            """);
+        await command.ExecuteNonQueryAsync(cancellationToken);
+    }
+
+    private static async Task DeleteNonCatalogLocationsAsync(
+        SqlConnection connection,
+        SqlTransaction transaction,
+        CancellationToken cancellationToken)
+    {
+        await using var command = CreateCommand(connection, transaction, """
+            DELETE location
+            FROM [Reference].[Location] location
+            WHERE NOT EXISTS
+            (
+                SELECT 1
+                FROM [Sync].[CatalogItemState] state
+                WHERE state.[CatalogCode] IN ('Regions', 'Districts')
+                  AND state.[SourceObjectKey] = location.[SourceCode]
+                  AND state.[IsPresent] = 1
+            );
+            """);
+        await command.ExecuteNonQueryAsync(cancellationToken);
+    }
+
+    private static void ValidateCatalogCode(string code, string catalogCode)
+    {
+        if (string.IsNullOrWhiteSpace(code) || code.Length > 100)
+            throw new InvalidOperationException($"RegisterUZ catalog {catalogCode} returned an invalid source code.");
+    }
+
+    private static string SerializeClassificationCatalog(IEnumerable<ClassificationDto> items) =>
+        JsonSerializer.Serialize(items.OrderBy(item => item.Code, StringComparer.Ordinal));
+
+    private static string SerializeLocationCatalog(IEnumerable<LocationDto> items) =>
+        JsonSerializer.Serialize(items.OrderBy(item => item.Code, StringComparer.Ordinal));
+
+    private static void CountCatalogOutcome(
+        CatalogItemOutcome outcome,
+        ref int inserted,
+        ref int updated)
+    {
+        switch (outcome)
+        {
+            case CatalogItemOutcome.Unchanged:
+                return;
+            case CatalogItemOutcome.Inserted:
+                inserted++;
+                return;
+            case CatalogItemOutcome.Updated:
+            case CatalogItemOutcome.Reappeared:
+                updated++;
+                return;
+            default:
+                throw new ArgumentOutOfRangeException(nameof(outcome), outcome, null);
+        }
+    }
+
+    private static void AddCatalogCounters(
+        CatalogCounters counters,
+        ref int inserted,
+        ref int updated,
+        ref int removed)
+    {
+        inserted += counters.Inserted;
+        updated += counters.Updated;
+        removed += counters.Removed;
+    }
+
+    private static async Task<int> GetCatalogReviewRequiredCountAsync(
+        SqlConnection connection,
+        SqlTransaction transaction,
+        long syncRunId,
+        CancellationToken cancellationToken)
+    {
+        await using var command = CreateCommand(connection, transaction, """
+            SELECT COUNT(*)
+            FROM [Sync].[CatalogChange]
+            WHERE [SyncRunId] = @SyncRunId
+              AND [RequiresReview] = 1;
+            """);
+        Add(command, "@SyncRunId", SqlDbType.BigInt, syncRunId);
+        object? result = await command.ExecuteScalarAsync(cancellationToken);
+        return Convert.ToInt32(result, CultureInfo.InvariantCulture);
+    }
+
+    private static async Task UpdateCatalogRunStatisticsAsync(
+        SqlConnection connection,
+        SqlTransaction transaction,
+        long syncRunId,
+        int observationCount,
+        int insertedCount,
+        int updatedCount,
+        int removedCount,
+        int reviewRequiredCount,
+        CancellationToken cancellationToken)
+    {
+        await using var command = CreateCommand(connection, transaction, """
+            UPDATE [Sync].[Run]
+            SET [CatalogObservationCount] = @ObservationCount,
+                [CatalogInsertedCount] = @InsertedCount,
+                [CatalogUpdatedCount] = @UpdatedCount,
+                [CatalogRemovedCount] = @RemovedCount,
+                [CatalogReviewRequiredCount] = @ReviewRequiredCount
+            WHERE [SyncRunId] = @SyncRunId;
+            """);
+        Add(command, "@SyncRunId", SqlDbType.BigInt, syncRunId);
+        Add(command, "@ObservationCount", SqlDbType.BigInt, observationCount);
+        Add(command, "@InsertedCount", SqlDbType.BigInt, insertedCount);
+        Add(command, "@UpdatedCount", SqlDbType.BigInt, updatedCount);
+        Add(command, "@RemovedCount", SqlDbType.BigInt, removedCount);
+        Add(command, "@ReviewRequiredCount", SqlDbType.BigInt, reviewRequiredCount);
         await command.ExecuteNonQueryAsync(cancellationToken);
     }
 
@@ -423,7 +1047,6 @@ public sealed class SqlRegisterUzPackageRepository : IRegisterUzPackageRepositor
         await EnsureReferenceCodeAsync(connection, transaction, "OwnershipType", entity.OwnershipTypeCode, observedAtUtc, cancellationToken);
         await EnsureReferenceCodeAsync(connection, transaction, "Location", entity.RegionCode, observedAtUtc, cancellationToken);
         await EnsureReferenceCodeAsync(connection, transaction, "Location", entity.DistrictCode, observedAtUtc, cancellationToken);
-        await EnsureReferenceCodeAsync(connection, transaction, "Location", entity.RegisteredOfficeCode, observedAtUtc, cancellationToken);
     }
 
     private static async Task EnsureReferenceCodeAsync(
@@ -545,6 +1168,7 @@ public sealed class SqlRegisterUzPackageRepository : IRegisterUzPackageRepositor
             UPDATE [Templates].[FinancialReportTemplate]
             SET [Name] = @Name, [MinistrySpecification] = @Specification,
                 [ValidFrom] = @ValidFrom, [ValidTo] = @ValidTo,
+                [IsDeleted] = 0,
                 [LastObservedAtUtc] = @ObservedAtUtc, [UpdatedAtUtc] = SYSUTCDATETIME()
             WHERE [RegisterUzTemplateId] = @Id;
             IF @@ROWCOUNT = 0

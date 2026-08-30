@@ -62,6 +62,10 @@ try
     Console.WriteLine($"Annual reports: {result.AnnualReportCount}");
     Console.WriteLine($"Financial reports: {result.FinancialReportCount}");
     Console.WriteLine($"Templates: {result.TemplateCount}");
+    Console.WriteLine($"Catalog observations: {result.Catalogs.ObservationCount}");
+    Console.WriteLine($"Catalog changes: inserted {result.Catalogs.InsertedCount}, " +
+                      $"updated {result.Catalogs.UpdatedCount}, removed {result.Catalogs.RemovedCount}");
+    Console.WriteLine($"Catalog changes requiring review: {result.Catalogs.ReviewRequiredCount}");
     Console.WriteLine($"Sync run: {result.SyncRunId}");
     return 0;
 }

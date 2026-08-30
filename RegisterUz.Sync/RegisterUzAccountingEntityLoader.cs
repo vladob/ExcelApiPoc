@@ -1,4 +1,5 @@
 using RegisterUz.Core;
+using System.Text.Json;
 
 namespace RegisterUz.Sync;
 
@@ -24,6 +25,10 @@ public sealed class RegisterUzAccountingEntityLoader
 
         try
         {
+            RegisterUzCatalogPackage catalogs = await _client.GetCatalogsAsync(cancellationToken);
+            RegisterUzCatalogSyncResult catalogResult =
+                await _repository.SaveCatalogsAsync(syncRunId, catalogs, cancellationToken);
+
             IReadOnlyList<long> entityIds =
                 await _client.FindAccountingEntityIdsByIcoAsync(normalizedIco, cancellationToken);
 
@@ -91,6 +96,9 @@ public sealed class RegisterUzAccountingEntityLoader
             }
 
             var templates = new List<RegisterUzDocument<FinancialReportTemplateDto>>();
+            int templateDetailRequestCount = 0;
+            IReadOnlyDictionary<long, FinancialReportTemplateDto> catalogTemplates =
+                catalogs.Templates.Value.Templates.ToDictionary(template => template.Id);
             foreach (long templateId in reports
                          .Select(report => report.Value.TemplateId)
                          .Where(id => id.HasValue)
@@ -98,7 +106,20 @@ public sealed class RegisterUzAccountingEntityLoader
                          .Distinct()
                          .OrderBy(id => id))
             {
-                templates.Add(await _client.GetTemplateAsync(templateId, cancellationToken));
+                if (catalogTemplates.TryGetValue(templateId, out FinancialReportTemplateDto? template))
+                {
+                    templates.Add(new RegisterUzDocument<FinancialReportTemplateDto>(
+                        template,
+                        JsonSerializer.Serialize(template),
+                        catalogs.Templates.RetrievedAtUtc,
+                        catalogs.Templates.HttpStatusCode,
+                        catalogs.Templates.ApiVersion));
+                }
+                else
+                {
+                    templates.Add(await _client.GetTemplateAsync(templateId, cancellationToken));
+                    templateDetailRequestCount++;
+                }
             }
 
             var package = new RegisterUzEntityPackage(entity, statements, annualReports, reports, templates);
@@ -111,6 +132,8 @@ public sealed class RegisterUzAccountingEntityLoader
                 annualReports.Count,
                 reports.Count,
                 templates.Count,
+                templateDetailRequestCount,
+                catalogResult,
                 syncRunId,
                 DateTime.UtcNow);
 

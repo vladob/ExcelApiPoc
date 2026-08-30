@@ -16,6 +16,22 @@ public sealed record RegisterUzEntityPackage(
     IReadOnlyList<RegisterUzDocument<FinancialReportDto>> FinancialReports,
     IReadOnlyList<RegisterUzDocument<FinancialReportTemplateDto>> Templates);
 
+public sealed record RegisterUzCatalogPackage(
+    RegisterUzDocument<TemplateCatalogDto> Templates,
+    RegisterUzDocument<ClassificationCatalogDto> LegalForms,
+    RegisterUzDocument<ClassificationCatalogDto> SkNace,
+    RegisterUzDocument<ClassificationCatalogDto> OwnershipTypes,
+    RegisterUzDocument<ClassificationCatalogDto> OrganizationSizes,
+    RegisterUzDocument<LocationCatalogDto> Regions,
+    RegisterUzDocument<LocationCatalogDto> Districts);
+
+public sealed record RegisterUzCatalogSyncResult(
+    int ObservationCount,
+    int InsertedCount,
+    int UpdatedCount,
+    int RemovedCount,
+    int ReviewRequiredCount);
+
 public sealed record RegisterUzLoadResult(
     string Ico,
     long RegisterUzEntityId,
@@ -23,8 +39,41 @@ public sealed record RegisterUzLoadResult(
     int AnnualReportCount,
     int FinancialReportCount,
     int TemplateCount,
+    int TemplateDetailRequestCount,
+    RegisterUzCatalogSyncResult Catalogs,
     long SyncRunId,
     DateTime CompletedAtUtc);
+
+public sealed class TemplateCatalogDto
+{
+    [JsonPropertyName("sablony")]
+    public FinancialReportTemplateDto[] Templates { get; init; } = [];
+}
+
+public sealed class ClassificationCatalogDto
+{
+    [JsonPropertyName("klasifikacie")]
+    public ClassificationDto[] Classifications { get; init; } = [];
+}
+
+public sealed class LocationCatalogDto
+{
+    [JsonPropertyName("lokacie")]
+    public LocationDto[] Locations { get; init; } = [];
+}
+
+public sealed class ClassificationDto
+{
+    [JsonPropertyName("kod")] public string Code { get; init; } = string.Empty;
+    [JsonPropertyName("nazov")] public LocalizedTextDto? Name { get; init; }
+}
+
+public sealed class LocationDto
+{
+    [JsonPropertyName("kod")] public string Code { get; init; } = string.Empty;
+    [JsonPropertyName("nadradenaLokacia")] public string? ParentCode { get; init; }
+    [JsonPropertyName("nazov")] public LocalizedTextDto? Name { get; init; }
+}
 
 public sealed class IdListDto
 {
