@@ -234,7 +234,8 @@ public sealed class SqlRegisterUzPackageRepository : IRegisterUzPackageRepositor
         CancellationToken cancellationToken)
     {
         byte[] utf8 = Encoding.UTF8.GetBytes(document.RawJson);
-        byte[] hash = SHA256.HashData(utf8);
+        byte[] payloadHash = SHA256.HashData(utf8);
+        byte[] canonicalHash = RegisterUzCanonicalJson.ComputeSha256(document.RawJson);
         byte[] compressed = Compress(utf8);
 
         await using var command = CreateCommand(connection, transaction, """
@@ -253,13 +254,14 @@ public sealed class SqlRegisterUzPackageRepository : IRegisterUzPackageRepositor
             FROM [Raw].[PayloadVersion] WITH (UPDLOCK, HOLDLOCK)
             WHERE [ObjectTypeId] = @ObjectTypeId
               AND [RegisterUzObjectId] = @ObjectId
-              AND [PayloadSha256] = @Hash;
+              AND [CanonicalSha256] = @CanonicalHash;
 
             IF @PayloadVersionId IS NULL
             BEGIN
                 INSERT INTO [Raw].[PayloadVersion]
                 (
-                    [ObjectTypeId], [RegisterUzObjectId], [PayloadSha256],
+                    [ObjectTypeId], [RegisterUzObjectId],
+                    [PayloadSha256], [CanonicalSha256],
                     [PayloadCompressed], [CompressionCode], [UncompressedLengthBytes],
                     [RetrievedAtUtc], [FirstObservedAtUtc], [LastObservedAtUtc],
                     [SourceLastModifiedDate], [SourceStatus], [IsDeleted],
@@ -268,7 +270,8 @@ public sealed class SqlRegisterUzPackageRepository : IRegisterUzPackageRepositor
                 )
                 VALUES
                 (
-                    @ObjectTypeId, @ObjectId, @Hash,
+                    @ObjectTypeId, @ObjectId,
+                    @PayloadHash, @CanonicalHash,
                     @Payload, 'GZIP', @Length,
                     @RetrievedAtUtc, @RetrievedAtUtc, @RetrievedAtUtc,
                     @SourceLastModifiedDate, @SourceStatus, @IsDeleted,
@@ -291,7 +294,8 @@ public sealed class SqlRegisterUzPackageRepository : IRegisterUzPackageRepositor
             """);
         Add(command, "@ObjectTypeId", SqlDbType.TinyInt, objectTypeId);
         Add(command, "@ObjectId", SqlDbType.BigInt, objectId);
-        Add(command, "@Hash", SqlDbType.Binary, hash, 32);
+        Add(command, "@PayloadHash", SqlDbType.Binary, payloadHash, 32);
+        Add(command, "@CanonicalHash", SqlDbType.Binary, canonicalHash, 32);
         Add(command, "@Payload", SqlDbType.VarBinary, compressed, -1);
         Add(command, "@Length", SqlDbType.BigInt, utf8.LongLength);
         Add(command, "@RetrievedAtUtc", SqlDbType.DateTime2, document.RetrievedAtUtc);
@@ -538,13 +542,13 @@ public sealed class SqlRegisterUzPackageRepository : IRegisterUzPackageRepositor
     {
         FinancialReportTemplateDto template = document.Value;
         await using (var command = CreateCommand(connection, transaction, """
-            UPDATE [Reference].[FinancialReportTemplate]
+            UPDATE [Templates].[FinancialReportTemplate]
             SET [Name] = @Name, [MinistrySpecification] = @Specification,
                 [ValidFrom] = @ValidFrom, [ValidTo] = @ValidTo,
                 [LastObservedAtUtc] = @ObservedAtUtc, [UpdatedAtUtc] = SYSUTCDATETIME()
             WHERE [RegisterUzTemplateId] = @Id;
             IF @@ROWCOUNT = 0
-                INSERT INTO [Reference].[FinancialReportTemplate]
+                INSERT INTO [Templates].[FinancialReportTemplate]
                 (
                     [RegisterUzTemplateId], [Name], [MinistrySpecification],
                     [ValidFrom], [ValidTo], [FirstObservedAtUtc], [LastObservedAtUtc]
@@ -571,13 +575,13 @@ public sealed class SqlRegisterUzPackageRepository : IRegisterUzPackageRepositor
             int? numberOfColumns = CalculateColumnCount(table.Headers);
             long tableId;
             await using (var command = CreateCommand(connection, transaction, """
-                UPDATE [Reference].[TemplateTable]
+                UPDATE [Templates].[TemplateTable]
                 SET [NameSk] = @NameSk, [NameEn] = @NameEn,
                     [NumberOfColumns] = @NumberOfColumns,
                     [UpdatedAtUtc] = SYSUTCDATETIME()
                 WHERE [RegisterUzTemplateId] = @TemplateId AND [TableOrdinal] = @Ordinal;
                 IF @@ROWCOUNT = 0
-                    INSERT INTO [Reference].[TemplateTable]
+                    INSERT INTO [Templates].[TemplateTable]
                     (
                         [RegisterUzTemplateId], [TableOrdinal], [NameSk], [NameEn], [NumberOfColumns]
                     )
@@ -586,7 +590,7 @@ public sealed class SqlRegisterUzPackageRepository : IRegisterUzPackageRepositor
                         @TemplateId, @Ordinal, @NameSk, @NameEn, @NumberOfColumns
                     );
                 SELECT [TemplateTableId]
-                FROM [Reference].[TemplateTable]
+                FROM [Templates].[TemplateTable]
                 WHERE [RegisterUzTemplateId] = @TemplateId AND [TableOrdinal] = @Ordinal;
                 """))
             {
@@ -610,8 +614,8 @@ public sealed class SqlRegisterUzPackageRepository : IRegisterUzPackageRepositor
         CancellationToken cancellationToken)
     {
         await using (var delete = CreateCommand(connection, transaction, """
-            DELETE FROM [Reference].[TemplateHeader] WHERE [TemplateTableId] = @TableId;
-            DELETE FROM [Reference].[TemplateRow] WHERE [TemplateTableId] = @TableId;
+            DELETE FROM [Templates].[TemplateHeader] WHERE [TemplateTableId] = @TableId;
+            DELETE FROM [Templates].[TemplateRow] WHERE [TemplateTableId] = @TableId;
             """))
         {
             Add(delete, "@TableId", SqlDbType.BigInt, templateTableId);
@@ -622,7 +626,7 @@ public sealed class SqlRegisterUzPackageRepository : IRegisterUzPackageRepositor
         {
             TemplateHeaderDto header = table.Headers[ordinal];
             await using var command = CreateCommand(connection, transaction, """
-                INSERT INTO [Reference].[TemplateHeader]
+                INSERT INTO [Templates].[TemplateHeader]
                 (
                     [TemplateTableId], [HeaderOrdinal], [TextSk], [TextEn],
                     [RowPosition], [ColumnPosition], [ColumnSpan], [RowSpan]
@@ -648,7 +652,7 @@ public sealed class SqlRegisterUzPackageRepository : IRegisterUzPackageRepositor
         {
             TemplateRowDto row = table.Rows[ordinal];
             await using var command = CreateCommand(connection, transaction, """
-                INSERT INTO [Reference].[TemplateRow]
+                INSERT INTO [Templates].[TemplateRow]
                 (
                     [TemplateTableId], [RowOrdinal], [RowNumber], [Designation], [TextSk], [TextEn]
                 )
@@ -1072,7 +1076,7 @@ public sealed class SqlRegisterUzPackageRepository : IRegisterUzPackageRepositor
     {
         await using var command = CreateCommand(connection, transaction, """
             SELECT [TemplateTableId]
-            FROM [Reference].[TemplateTable]
+            FROM [Templates].[TemplateTable]
             WHERE [RegisterUzTemplateId] = @TemplateId AND [TableOrdinal] = @Ordinal;
             """);
         Add(command, "@TemplateId", SqlDbType.BigInt, templateId);
@@ -1091,7 +1095,7 @@ public sealed class SqlRegisterUzPackageRepository : IRegisterUzPackageRepositor
         CancellationToken cancellationToken)
     {
         await using var command = CreateCommand(connection, transaction, """
-            UPDATE [Reference].[TemplateTable]
+            UPDATE [Templates].[TemplateTable]
             SET [NumberOfDataColumns] = @Count, [UpdatedAtUtc] = SYSUTCDATETIME()
             WHERE [TemplateTableId] = @TableId
               AND ([NumberOfDataColumns] IS NULL OR [NumberOfDataColumns] = @Count);
