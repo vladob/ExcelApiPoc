@@ -9,6 +9,35 @@ namespace RegisterUz.Tests;
 
 public sealed class RegisterUzApiClientTests
 {
+    [Theory]
+    [InlineData(RegisterUzObjectType.AccountingEntity, "/cruz-public/api/uctovne-jednotky")]
+    [InlineData(RegisterUzObjectType.FinancialStatement, "/cruz-public/api/uctovne-zavierky")]
+    [InlineData(RegisterUzObjectType.FinancialReport, "/cruz-public/api/uctovne-vykazy")]
+    [InlineData(RegisterUzObjectType.AnnualReport, "/cruz-public/api/vyrocne-spravy")]
+    public async Task Change_feed_uses_the_correct_list_path_and_exact_utc_cursor(
+        RegisterUzObjectType objectType,
+        string expectedPath)
+    {
+        var handler = new CapturingStubHandler("""{"id":[101,205],"existujeDalsieId":true}""");
+        var client = new RegisterUzApiClient(new HttpClient(handler)
+        {
+            BaseAddress = new Uri(RegisterUzApiClient.DefaultBaseAddress)
+        });
+
+        RegisterUzChangeFeedPage page = await client.GetChangedIdsAsync(
+            objectType,
+            new DateTime(2026, 8, 30, 18, 33, 56, DateTimeKind.Utc),
+            100,
+            250);
+
+        Assert.Equal(expectedPath, handler.RequestUri!.AbsolutePath);
+        Assert.Contains("zmenene-od=2026-08-30T18%3A33%3A56Z", handler.RequestUri.Query);
+        Assert.Contains("max-zaznamov=250", handler.RequestUri.Query);
+        Assert.Contains("pokracovat-za-id=100", handler.RequestUri.Query);
+        Assert.Equal(new long[] { 101, 205 }, page.Document.Value.Ids);
+        Assert.True(page.Document.Value.HasMoreIds);
+    }
+
     [Fact]
     public async Task AccountingEntity_detail_is_deserialized_with_natural_child_order()
     {
@@ -134,6 +163,23 @@ public sealed class RegisterUzApiClientTests
                 Content = new StringContent(content, Encoding.UTF8, "application/json"),
                 RequestMessage = request
             });
+    }
+
+    private sealed class CapturingStubHandler(string content) : HttpMessageHandler
+    {
+        public Uri? RequestUri { get; private set; }
+
+        protected override Task<HttpResponseMessage> SendAsync(
+            HttpRequestMessage request,
+            CancellationToken cancellationToken)
+        {
+            RequestUri = request.RequestUri;
+            return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)
+            {
+                Content = new StringContent(content, Encoding.UTF8, "application/json"),
+                RequestMessage = request
+            });
+        }
     }
 
     private sealed class RoutingStubHandler(IReadOnlyDictionary<string, string> responses) : HttpMessageHandler

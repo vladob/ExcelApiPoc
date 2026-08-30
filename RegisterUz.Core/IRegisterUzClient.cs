@@ -2,6 +2,13 @@ namespace RegisterUz.Core;
 
 public interface IRegisterUzClient
 {
+    Task<RegisterUzChangeFeedPage> GetChangedIdsAsync(
+        RegisterUzObjectType objectType,
+        DateTime changedSinceUtc,
+        long? continueAfterId,
+        int pageSize,
+        CancellationToken cancellationToken = default);
+
     Task<IReadOnlyList<long>> FindAccountingEntityIdsByIcoAsync(
         string ico,
         CancellationToken cancellationToken = default);

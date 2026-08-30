@@ -1,15 +1,22 @@
 using System.IO.Compression;
+using System.Globalization;
 using System.Net;
 using System.Reflection;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using RegisterUz.Client;
+using RegisterUz.Core;
 using RegisterUz.Persistence.SqlServer;
 using RegisterUz.Sync;
 
-if (args.Length != 1)
+bool isChangeFeed = args.Length > 0 &&
+                    string.Equals(args[0], "changes", StringComparison.OrdinalIgnoreCase);
+if ((!isChangeFeed && args.Length != 1) || (isChangeFeed && args.Length is < 2 or > 4))
 {
-    Console.Error.WriteLine("Usage: RegisterUz.Loader <IČO>");
+    Console.Error.WriteLine("Usage:");
+    Console.Error.WriteLine("  RegisterUz.Loader <IČO>");
+    Console.Error.WriteLine("  RegisterUz.Loader changes <initial-since-utc> [page-size] [max-pages-per-feed]");
+    Console.Error.WriteLine("Example: RegisterUz.Loader changes 2026-08-30T18:00:00Z 100 1");
     return 2;
 }
 
@@ -55,6 +62,56 @@ Console.CancelKeyPress += (_, eventArgs) =>
 
 try
 {
+    if (isChangeFeed)
+    {
+        if (!DateTimeOffset.TryParse(
+                args[1],
+                CultureInfo.InvariantCulture,
+                DateTimeStyles.AssumeUniversal | DateTimeStyles.AdjustToUniversal,
+                out DateTimeOffset sinceOffset))
+        {
+            Console.Error.WriteLine("initial-since-utc is not a valid ISO 8601 timestamp.");
+            return 5;
+        }
+
+        int pageSize = args.Length >= 3 && int.TryParse(args[2], out int parsedPageSize)
+            ? parsedPageSize
+            : 100;
+        int maxPages = args.Length >= 4 && int.TryParse(args[3], out int parsedMaxPages)
+            ? parsedMaxPages
+            : 1;
+        if (pageSize is < 1 or > 10_000 || maxPages < 1)
+        {
+            Console.Error.WriteLine("page-size must be 1-10000 and max-pages-per-feed must be positive.");
+            return 5;
+        }
+
+        DateTime initialSinceUtc = TruncateToSecond(sinceOffset.UtcDateTime);
+        var changeFeedRepository = new SqlRegisterUzChangeFeedRepository(connectionString);
+        var collector = new RegisterUzChangeFeedCollector(client, changeFeedRepository);
+        RegisterUzObjectType[] objectTypes =
+        [
+            RegisterUzObjectType.AccountingEntity,
+            RegisterUzObjectType.FinancialStatement,
+            RegisterUzObjectType.FinancialReport,
+            RegisterUzObjectType.AnnualReport
+        ];
+
+        foreach (RegisterUzObjectType objectType in objectTypes)
+        {
+            RegisterUzChangeFeedResult feed = await collector.CollectAsync(
+                objectType, initialSinceUtc, pageSize, maxPages, cancellation.Token);
+            Console.WriteLine(
+                $"{feed.ObjectType}: run {feed.SyncRunId}; pages {feed.PagesRetrieved}; " +
+                $"IDs {feed.ObservedIdCount}; " +
+                (feed.FeedCompleted
+                    ? "feed completed"
+                    : $"resume after ID {feed.ContinueAfterId}"));
+        }
+
+        return 0;
+    }
+
     var result = await loader.LoadByIcoAsync(args[0], cancellation.Token);
     Console.WriteLine($"RegisterUZ load completed for IČO {result.Ico}.");
     Console.WriteLine($"Entity: {result.RegisterUzEntityId}");
@@ -79,3 +136,6 @@ catch (Exception exception)
     Console.Error.WriteLine(exception);
     return 1;
 }
+
+static DateTime TruncateToSecond(DateTime value) =>
+    new(value.Ticks - value.Ticks % TimeSpan.TicksPerSecond, DateTimeKind.Utc);
