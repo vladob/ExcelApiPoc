@@ -43,7 +43,7 @@ public sealed class AuditTemplatePackageRepository
                 [DontHaveRowNumbers]
             FROM [Template].[Tables]
             WHERE [TemplateErpId] = @TemplateErpId
-            ORDER BY CONVERT(int, [TableErpId]);
+            ORDER BY [TableOrdinal];
 
             SELECT
                 h.[TableErpId],
@@ -58,9 +58,8 @@ public sealed class AuditTemplatePackageRepository
                 ON t.[Id] = h.[TableId]
             WHERE t.[TemplateErpId] = @TemplateErpId
             ORDER BY
-                h.[TableErpId],
-                h.[RowPosition],
-                h.[ColumnPosition];
+                t.[TableOrdinal],
+                h.[HeaderOrdinal];
 
             SELECT
                 r.[TableErpId],
@@ -76,8 +75,8 @@ public sealed class AuditTemplatePackageRepository
                 ON t.[Id] = r.[TableId]
             WHERE t.[TemplateErpId] = @TemplateErpId
             ORDER BY
-                r.[TableErpId],
-                r.[RowNumber];
+                t.[TableOrdinal],
+                r.[RowOrdinal];
 
             SELECT
                 ag.[Account],

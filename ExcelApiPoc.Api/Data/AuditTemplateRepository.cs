@@ -33,7 +33,7 @@ public sealed class AuditTemplateRepository
                 [DontHaveRowNumbers]
             FROM [Template].[Tables]
             WHERE [TemplateErpId] = @TemplateErpId
-            ORDER BY CONVERT(int, [TableErpId]);
+            ORDER BY [TableOrdinal];
             """;
 
         await using var connection = new SqlConnection(_connectionString);

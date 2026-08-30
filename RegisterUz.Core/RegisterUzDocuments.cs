@@ -256,6 +256,8 @@ public sealed class TemplateTableDto
 {
     [JsonPropertyName("nazov")] public LocalizedTextDto? Name { get; init; }
     [JsonPropertyName("hlavicka")] public TemplateHeaderDto[] Headers { get; init; } = [];
+    [JsonPropertyName("pocetStlpcov")] public int? NumberOfColumns { get; init; }
+    [JsonPropertyName("pocetDatovychStlpcov")] public int? NumberOfDataColumns { get; init; }
     [JsonPropertyName("riadky")] public TemplateRowDto[] Rows { get; init; } = [];
 }
 

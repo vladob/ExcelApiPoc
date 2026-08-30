@@ -2,6 +2,7 @@ using System.Net;
 using System.Text;
 using System.Text.Json;
 using RegisterUz.Client;
+using RegisterUz.Core;
 using Xunit;
 
 namespace RegisterUz.Tests;
@@ -61,7 +62,7 @@ public sealed class RegisterUzApiClientTests
     {
         var responses = new Dictionary<string, string>(StringComparer.Ordinal)
         {
-            ["/cruz-public/api/sablony"] = """{"sablony":[{"id":15181,"nazov":"Výkaz"}]}""",
+            ["/cruz-public/api/sablony"] = """{"sablony":[{"id":15181,"nazov":"Výkaz","tabulky":[{"nazov":{"sk":"Súvaha"},"hlavicka":[],"pocetStlpcov":7,"pocetDatovychStlpcov":4,"riadky":[]}]}]}""",
             ["/cruz-public/api/pravne-formy"] = Classification("801", "Obec"),
             ["/cruz-public/api/sk-nace"] = Classification("84110", "Všeobecná verejná správa"),
             ["/cruz-public/api/druhy-vlastnictva"] = Classification("5", "Samospráva"),
@@ -79,6 +80,9 @@ public sealed class RegisterUzApiClientTests
 
         Assert.Single(catalogs.Templates.Value.Templates);
         Assert.Equal(15181, catalogs.Templates.Value.Templates[0].Id);
+        TemplateTableDto table = Assert.Single(catalogs.Templates.Value.Templates[0].Tables);
+        Assert.Equal(7, table.NumberOfColumns);
+        Assert.Equal(4, table.NumberOfDataColumns);
         Assert.Equal("801", Assert.Single(catalogs.LegalForms.Value.Classifications).Code);
         Assert.Equal("SK0427", Assert.Single(catalogs.Districts.Value.Locations).Code);
         Assert.Equal(7, handler.RequestPaths.Count);

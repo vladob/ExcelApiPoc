@@ -1196,22 +1196,24 @@ public sealed class SqlRegisterUzPackageRepository : IRegisterUzPackageRepositor
         for (int tableOrdinal = 0; tableOrdinal < template.Tables.Length; tableOrdinal++)
         {
             TemplateTableDto table = template.Tables[tableOrdinal];
-            int? numberOfColumns = CalculateColumnCount(table.Headers);
             long tableId;
             await using (var command = CreateCommand(connection, transaction, """
                 UPDATE [Templates].[TemplateTable]
                 SET [NameSk] = @NameSk, [NameEn] = @NameEn,
                     [NumberOfColumns] = @NumberOfColumns,
+                    [NumberOfDataColumns] = @NumberOfDataColumns,
                     [UpdatedAtUtc] = SYSUTCDATETIME()
                 WHERE [RegisterUzTemplateId] = @TemplateId AND [TableOrdinal] = @Ordinal;
                 IF @@ROWCOUNT = 0
                     INSERT INTO [Templates].[TemplateTable]
                     (
-                        [RegisterUzTemplateId], [TableOrdinal], [NameSk], [NameEn], [NumberOfColumns]
+                        [RegisterUzTemplateId], [TableOrdinal], [NameSk], [NameEn],
+                        [NumberOfColumns], [NumberOfDataColumns]
                     )
                     VALUES
                     (
-                        @TemplateId, @Ordinal, @NameSk, @NameEn, @NumberOfColumns
+                        @TemplateId, @Ordinal, @NameSk, @NameEn,
+                        @NumberOfColumns, @NumberOfDataColumns
                     );
                 SELECT [TemplateTableId]
                 FROM [Templates].[TemplateTable]
@@ -1222,7 +1224,8 @@ public sealed class SqlRegisterUzPackageRepository : IRegisterUzPackageRepositor
                 Add(command, "@Ordinal", SqlDbType.Int, tableOrdinal);
                 Add(command, "@NameSk", SqlDbType.NVarChar, table.Name?.Sk, 250);
                 Add(command, "@NameEn", SqlDbType.NVarChar, table.Name?.En, 250);
-                Add(command, "@NumberOfColumns", SqlDbType.Int, numberOfColumns);
+                Add(command, "@NumberOfColumns", SqlDbType.Int, table.NumberOfColumns);
+                Add(command, "@NumberOfDataColumns", SqlDbType.Int, table.NumberOfDataColumns);
                 tableId = Convert.ToInt64(await command.ExecuteScalarAsync(cancellationToken), CultureInfo.InvariantCulture);
             }
 
@@ -1293,19 +1296,6 @@ public sealed class SqlRegisterUzPackageRepository : IRegisterUzPackageRepositor
             Add(command, "@TextEn", SqlDbType.NVarChar, row.Text?.En, -1);
             await command.ExecuteNonQueryAsync(cancellationToken);
         }
-    }
-
-    private static int? CalculateColumnCount(IEnumerable<TemplateHeaderDto> headers)
-    {
-        int? maximum = null;
-        foreach (TemplateHeaderDto header in headers)
-        {
-            if (!header.ColumnPosition.HasValue)
-                continue;
-            int end = header.ColumnPosition.Value + Math.Max(header.ColumnSpan ?? 1, 1) - 1;
-            maximum = !maximum.HasValue || end > maximum.Value ? end : maximum;
-        }
-        return maximum;
     }
 
     private static async Task SaveStatementAsync(
