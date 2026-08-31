@@ -86,6 +86,53 @@ public sealed class RegisterUzApiClientTests
         Assert.Equal("Strana pasív", document.Value.Content.Tables[1].Name!.Sk);
     }
 
+    [Theory]
+    [InlineData("true", true)]
+    [InlineData("false", false)]
+    [InlineData("\"true\"", true)]
+    [InlineData("\"false\"", false)]
+    [InlineData("null", null)]
+    public async Task Financial_report_accepts_native_and_legacy_title_page_booleans(
+        string jsonValue,
+        bool? expected)
+    {
+        string json = $$"""
+            {
+              "id": 7642955,
+              "idUctovnejZavierky": 3543641,
+              "obsah": {
+                "titulnaStrana": { "konsolidovana": {{jsonValue}} },
+                "tabulky": []
+              }
+            }
+            """;
+        RegisterUzApiClient client = CreateClient(json);
+
+        RegisterUzDocument<FinancialReportDto> document =
+            await client.GetFinancialReportAsync(7642955);
+
+        Assert.Equal(expected, document.Value.Content!.TitlePage!.IsConsolidated);
+    }
+
+    [Fact]
+    public async Task Financial_report_rejects_an_unknown_title_page_boolean_string()
+    {
+        const string json = """
+            {
+              "id": 7642955,
+              "idUctovnejZavierky": 3543641,
+              "obsah": {
+                "titulnaStrana": { "konsolidovana": "yes" },
+                "tabulky": []
+              }
+            }
+            """;
+        RegisterUzApiClient client = CreateClient(json);
+
+        await Assert.ThrowsAsync<RegisterUzApiException>(
+            () => client.GetFinancialReportAsync(7642955));
+    }
+
     [Fact]
     public async Task Catalog_bundle_loads_seven_useful_endpoints_and_excludes_registered_offices()
     {

@@ -71,3 +71,19 @@ Apply `SQL code/RegisterUZ_EntityRefreshRunTypeV1.sql` once to relabel package
 runs already completed through the queue. New queue loads use the
 `EntityRefresh` run type and remain separate from manual `SingleIco` load
 targets and error stages.
+
+## Bounded change synchronization
+
+Collect one bounded pass from all four feeds and drain the work produced so far:
+
+```powershell
+dotnet run --project .\RegisterUz.Loader -- `
+  sync-changes 2026-08-30T18:00:00Z 100 1 100 10 100
+```
+
+The optional numbers are page size, maximum pages per feed, observation batch,
+entity batch, and maximum processing passes. A feed that reaches its page bound
+is reported as paused and resumes on the next invocation. Processing stops when
+a pass claims no work, when the pass limit is reached, or immediately after any
+failure. Exit code 6 means healthy work remains only because the processing pass
+limit was reached; exit code 1 means at least one work item failed.

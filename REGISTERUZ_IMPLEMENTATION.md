@@ -162,3 +162,9 @@ Manual IČO package loads are recorded as `Sync.Run.RunType = 'SingleIco'` and
 maintain `Sync.LoadTarget`. Queue-driven package loads are recorded as
 `EntityRefresh`; they do not create or update manual load targets, and their
 errors use the separate `EntityRefresh` stage.
+
+`RegisterUz.Loader sync-changes` composes the two stages without removing their
+independent bounds. It collects a bounded pass from each of the four feeds, then
+processes batches until a pass claims no work. Feed pauses, the processing-pass
+cap, and failures are reported separately. Processing stops after the first
+failing pass so a deterministic error cannot create a tight retry loop.

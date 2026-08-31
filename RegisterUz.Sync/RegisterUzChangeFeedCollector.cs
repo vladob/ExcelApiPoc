@@ -2,7 +2,7 @@ using RegisterUz.Core;
 
 namespace RegisterUz.Sync;
 
-public sealed class RegisterUzChangeFeedCollector
+public sealed class RegisterUzChangeFeedCollector : IRegisterUzChangeFeedCollector
 {
     private readonly IRegisterUzClient _client;
     private readonly IRegisterUzChangeFeedRepository _repository;

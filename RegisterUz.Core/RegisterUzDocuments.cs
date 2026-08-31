@@ -224,7 +224,9 @@ public sealed class TitlePageDto
     [JsonPropertyName("pravnaForma")] public string? LegalFormCode { get; init; }
     [JsonPropertyName("skNace")] public string? SkNaceCode { get; init; }
     [JsonPropertyName("typZavierky")] public string? ReportType { get; init; }
-    [JsonPropertyName("konsolidovana")] public bool? IsConsolidated { get; init; }
+    [JsonPropertyName("konsolidovana")]
+    [JsonConverter(typeof(BooleanOrStringJsonConverter))]
+    public bool? IsConsolidated { get; init; }
     [JsonPropertyName("konsolidovanaZavierkaUstrednejStatnejSpravy")] public bool? IsConsolidatedCentralGovernment { get; init; }
     [JsonPropertyName("suhrnnaUctovnaZavierkaVerejnejSpravy")] public bool? IsSummaryPublicAdministration { get; init; }
     [JsonPropertyName("typUctovnejJednotky")] public string? EntityType { get; init; }

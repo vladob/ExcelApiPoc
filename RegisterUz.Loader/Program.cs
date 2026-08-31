@@ -13,14 +13,18 @@ bool isChangeFeed = args.Length > 0 &&
                     string.Equals(args[0], "changes", StringComparison.OrdinalIgnoreCase);
 bool isChangeProcessing = args.Length > 0 &&
                           string.Equals(args[0], "process-changes", StringComparison.OrdinalIgnoreCase);
-if ((!isChangeFeed && !isChangeProcessing && args.Length != 1) ||
+bool isChangeSynchronization = args.Length > 0 &&
+                               string.Equals(args[0], "sync-changes", StringComparison.OrdinalIgnoreCase);
+if ((!isChangeFeed && !isChangeProcessing && !isChangeSynchronization && args.Length != 1) ||
     (isChangeFeed && args.Length is < 2 or > 4) ||
-    (isChangeProcessing && args.Length is < 1 or > 3))
+    (isChangeProcessing && args.Length is < 1 or > 3) ||
+    (isChangeSynchronization && args.Length is < 2 or > 7))
 {
     Console.Error.WriteLine("Usage:");
     Console.Error.WriteLine("  RegisterUz.Loader <IČO>");
     Console.Error.WriteLine("  RegisterUz.Loader changes <initial-since-utc> [page-size] [max-pages-per-feed]");
     Console.Error.WriteLine("  RegisterUz.Loader process-changes [observation-batch] [entity-batch]");
+    Console.Error.WriteLine("  RegisterUz.Loader sync-changes <initial-since-utc> [page-size] [max-pages-per-feed] [observation-batch] [entity-batch] [max-processing-passes]");
     Console.Error.WriteLine("Example: RegisterUz.Loader changes 2026-08-30T18:00:00Z 100 1");
     return 2;
 }
@@ -133,18 +137,88 @@ try
 
         var processingRepository = new SqlRegisterUzChangeProcessingRepository(connectionString);
         var processor = new RegisterUzChangeProcessor(client, processingRepository, loader);
-        RegisterUzChangeProcessingResult UzChangeresult = await processor.ProcessAsync(
+        RegisterUzChangeProcessingResult registerUzChangeresult = await processor.ProcessAsync(
             observationBatch,
             entityBatch,
             TimeSpan.FromMinutes(15),
             cancellation.Token);
         Console.WriteLine(
-            $"Observations: claimed {UzChangeresult.ObservationsClaimed}; " +
-            $"resolved {UzChangeresult.ObservationsResolved}; failed {UzChangeresult.ObservationsFailed}");
+            $"Observations: claimed {registerUzChangeresult.ObservationsClaimed}; " +
+            $"resolved {registerUzChangeresult.ObservationsResolved}; failed {registerUzChangeresult.ObservationsFailed}");
         Console.WriteLine(
-            $"Entities: claimed {UzChangeresult.EntitiesClaimed}; " +
-            $"refreshed {UzChangeresult.EntitiesRefreshed}; failed {UzChangeresult.EntitiesFailed}");
-        return UzChangeresult.ObservationsFailed == 0 && UzChangeresult.EntitiesFailed == 0 ? 0 : 1;
+            $"Entities: claimed {registerUzChangeresult.EntitiesClaimed}; " +
+            $"refreshed {registerUzChangeresult.EntitiesRefreshed}; failed {registerUzChangeresult.EntitiesFailed}");
+        return registerUzChangeresult.ObservationsFailed == 0 && registerUzChangeresult.EntitiesFailed == 0 ? 0 : 1;
+    }
+
+    if (isChangeSynchronization)
+    {
+        if (!DateTimeOffset.TryParse(
+                args[1],
+                CultureInfo.InvariantCulture,
+                DateTimeStyles.AssumeUniversal | DateTimeStyles.AdjustToUniversal,
+                out DateTimeOffset sinceOffset))
+        {
+            Console.Error.WriteLine("initial-since-utc is not a valid ISO 8601 timestamp.");
+            return 5;
+        }
+
+        int pageSize = ParseOptionalInt(args, 2, 100);
+        int maxPages = ParseOptionalInt(args, 3, 1);
+        int observationBatch = ParseOptionalInt(args, 4, 100);
+        int entityBatch = ParseOptionalInt(args, 5, 10);
+        int maxProcessingPasses = ParseOptionalInt(args, 6, 100);
+        if (pageSize is < 1 or > 10_000 ||
+            maxPages < 1 ||
+            observationBatch is < 1 or > 10_000 ||
+            entityBatch is < 1 or > 10_000 ||
+            maxProcessingPasses < 1)
+        {
+            Console.Error.WriteLine(
+                "page-size and batch sizes must be 1-10000; page and processing-pass limits must be positive.");
+            return 5;
+        }
+
+        var changeFeedRepository = new SqlRegisterUzChangeFeedRepository(connectionString);
+        var processingRepository = new SqlRegisterUzChangeProcessingRepository(connectionString);
+        var collector = new RegisterUzChangeFeedCollector(client, changeFeedRepository);
+        var processor = new RegisterUzChangeProcessor(client, processingRepository, loader);
+        var orchestrator = new RegisterUzChangeOrchestrator(collector, processor);
+
+        RegisterUzChangeOrchestrationResult orchestrationResult = await orchestrator.RunAsync(
+            TruncateToSecond(sinceOffset.UtcDateTime),
+            pageSize,
+            maxPages,
+            observationBatch,
+            entityBatch,
+            maxProcessingPasses,
+            TimeSpan.FromMinutes(15),
+            cancellation.Token);
+
+        foreach (RegisterUzChangeFeedResult feed in orchestrationResult.Feeds)
+        {
+            Console.WriteLine(
+                $"{feed.ObjectType}: run {feed.SyncRunId}; pages {feed.PagesRetrieved}; " +
+                $"IDs {feed.ObservedIdCount}; " +
+                (feed.FeedCompleted
+                    ? "feed completed"
+                    : $"feed paused after ID {feed.ContinueAfterId}"));
+        }
+
+        Console.WriteLine(
+            $"Feeds: completed {orchestrationResult.CompletedFeedCount}; paused {orchestrationResult.PausedFeedCount}");
+        Console.WriteLine(
+            $"Processing: passes {orchestrationResult.ProcessingPasses}; " +
+            $"observations resolved {orchestrationResult.ObservationsResolved}; " +
+            $"entities refreshed {orchestrationResult.EntitiesRefreshed}; " +
+            $"failures {orchestrationResult.ObservationFailures + orchestrationResult.EntityFailures}; " +
+            (orchestrationResult.WorkDrained
+                ? "work drained"
+                : orchestrationResult.ProcessingPassLimitReached
+                    ? "work remains after pass limit"
+                    : "stopped after failure"));
+
+        return orchestrationResult.HasFailures ? 1 : orchestrationResult.ProcessingPassLimitReached ? 6 : 0;
     }
 
     var result = await loader.LoadByIcoAsync(args[0], cancellation.Token);
@@ -174,3 +248,8 @@ catch (Exception exception)
 
 static DateTime TruncateToSecond(DateTime value) =>
     new(value.Ticks - value.Ticks % TimeSpan.TicksPerSecond, DateTimeKind.Utc);
+
+static int ParseOptionalInt(string[] values, int index, int defaultValue) =>
+    values.Length > index && int.TryParse(values[index], out int parsed)
+        ? parsed
+        : defaultValue;

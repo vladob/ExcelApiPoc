@@ -2,7 +2,7 @@ using RegisterUz.Core;
 
 namespace RegisterUz.Sync;
 
-public sealed class RegisterUzChangeProcessor
+public sealed class RegisterUzChangeProcessor : IRegisterUzChangeProcessor
 {
     private readonly IRegisterUzClient _client;
     private readonly IRegisterUzChangeProcessingRepository _repository;
