@@ -1,5 +1,6 @@
 using ExcelApiPoc.Api.Models;
 using ExcelApiPoc.Api.Models.AccountingEntities;
+using RegisterUz.Sync;
 
 namespace ExcelApiPoc.Api.Data;
 
@@ -38,9 +39,16 @@ public sealed class AccountingEntityPackageService
 
         if (graph is null)
         {
-            await _registerUzOnDemandLoadService.LoadByIcoAsync(
-                ico,
-                cancellationToken);
+            try
+            {
+                await _registerUzOnDemandLoadService.LoadByIcoAsync(
+                    ico,
+                    cancellationToken);
+            }
+            catch (RegisterUzAccountingEntityNotFoundException)
+            {
+                return null;
+            }
 
             graph =
                 await _registerUzRepository.GetByIcoAsync(
