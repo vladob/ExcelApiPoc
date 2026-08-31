@@ -33,6 +33,11 @@ public sealed class RegisterUzAccountingEntityLoader : IRegisterUzEntityPackageL
                 normalizedIco);
         }
 
+        if (candidateEntityIds.Count > 1)
+        {
+            throw new RegisterUzMultipleAccountingEntitiesException(normalizedIco, candidateEntityIds);
+        }
+
         var matchingEntities =
             new List<RegisterUzDocument<AccountingEntityDto>>();
 

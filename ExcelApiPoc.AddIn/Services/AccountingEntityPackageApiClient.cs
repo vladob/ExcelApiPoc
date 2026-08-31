@@ -39,6 +39,12 @@ namespace ExcelApiPoc.AddIn.Services
                         normalizedIco);
                 }
 
+                if (response.StatusCode == HttpStatusCode.Conflict)
+                {
+                    throw new AccountingEntityPackageAmbiguousException(
+                        normalizedIco);
+                }
+
                 response.EnsureSuccessStatusCode();
 
                 string json = response.Content
@@ -71,4 +77,18 @@ namespace ExcelApiPoc.AddIn.Services
 
         public string Ico { get; }
     }
+
+    internal sealed class AccountingEntityPackageAmbiguousException : Exception
+    {
+        public AccountingEntityPackageAmbiguousException(string ico)
+            : base(
+                "There are multiple accounting entities with this IČO.\r\n" +
+                "This functionality is not supported in this version!")
+        {
+            Ico = ico;
+        }
+
+        public string Ico { get; }
+    }
+
 }

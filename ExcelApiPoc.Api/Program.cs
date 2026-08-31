@@ -1,7 +1,8 @@
-using ExcelApiPoc.Api.Models;
-using Microsoft.Data.SqlClient;
 using ExcelApiPoc.Api.Data;
+using ExcelApiPoc.Api.Models;
 using ExcelApiPoc.Api.Models.AccountingEntities;
+using Microsoft.Data.SqlClient;
+using RegisterUz.Sync;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -233,22 +234,33 @@ app.MapGet(
                 });
         }
 
-        AccountingEntityPackageV1? package =
-            await service.GetPackageAsync(
-                ico.Trim(),
-                cancellationToken);
-
-        if (package is null)
+        try
         {
-            return Results.NotFound(
+            AccountingEntityPackageV1? package =
+                await service.GetPackageAsync(
+                    ico.Trim(),
+                    cancellationToken);
+
+            if (package is null)
+            {
+                return Results.NotFound(
+                    new
+                    {
+                        message =
+                            $"Accounting entity '{ico}' was not found in RegisterUZ."
+                    });
+            }
+
+            return Results.Ok(package);
+        }
+        catch (RegisterUzMultipleAccountingEntitiesException ex)
+        {
+            return Results.Conflict(
                 new
                 {
-                    message =
-                        $"Accounting entity '{ico}' was not found in RegisterUZ."
+                    message = ex.Message
                 });
         }
-
-        return Results.Ok(package);
     })
     .WithName("GetAccountingEntityPackageV1")
     .WithOpenApi();

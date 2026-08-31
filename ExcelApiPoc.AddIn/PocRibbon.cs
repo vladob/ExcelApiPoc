@@ -98,7 +98,7 @@ namespace ExcelApiPoc.AddIn
         {
             try
             {
-                AccountingEntityPackageDto package = AccountingEntityPackageApiClient.GetPackage("23451234");
+                AccountingEntityPackageDto package = AccountingEntityPackageApiClient.GetPackage("99999999");
 
                 MessageBox.Show(
                     BuildAccountingEntityPackageSummary(package),
@@ -107,6 +107,14 @@ namespace ExcelApiPoc.AddIn
                     MessageBoxIcon.Information);
             }
             catch (AccountingEntityPackageNotFoundException ex)
+            {
+                MessageBox.Show(
+                    ex.Message,
+                    "Accounting Entity Package",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning);
+            }
+            catch (AccountingEntityPackageAmbiguousException ex)
             {
                 MessageBox.Show(
                     ex.Message,
