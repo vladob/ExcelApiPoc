@@ -38,7 +38,11 @@ public sealed class RegisterUzAccountingEntityLoader : IRegisterUzEntityPackageL
             throw new InvalidOperationException(
                 $"RegisterUZ entity {entity.Value.Id} has IČO '{entity.Value.Ico}', not requested IČO '{normalizedIco}'.");
 
-        return await LoadEntityAsync(normalizedIco, entity, cancellationToken);
+        RegisterUzCatalogPackage catalogs = await _client.GetCatalogsAsync(cancellationToken);
+        return await LoadEntityAsync(
+            normalizedIco, entity, catalogs,
+            synchronizeCatalogs: true,
+            cancellationToken: cancellationToken);
     }
 
     public async Task<RegisterUzLoadResult> LoadByEntityIdAsync(
@@ -55,21 +59,50 @@ public sealed class RegisterUzAccountingEntityLoader : IRegisterUzEntityPackageL
                 $"RegisterUZ returned entity {entity.Value.Id} when entity {entityId} was requested.");
 
         string normalizedIco = NormalizeIco(entity.Value.Ico ?? string.Empty);
-        return await LoadEntityAsync(normalizedIco, entity, cancellationToken);
+        RegisterUzCatalogPackage catalogs = await _client.GetCatalogsAsync(cancellationToken);
+        return await LoadEntityAsync(
+            normalizedIco, entity, catalogs,
+            synchronizeCatalogs: true,
+            cancellationToken: cancellationToken);
+    }
+
+    public async Task<RegisterUzLoadResult> LoadByEntityIdAsync(
+        long entityId,
+        RegisterUzCatalogPackage catalogs,
+        bool synchronizeCatalogs,
+        CancellationToken cancellationToken = default)
+    {
+        if (entityId <= 0)
+            throw new ArgumentOutOfRangeException(nameof(entityId));
+        ArgumentNullException.ThrowIfNull(catalogs);
+
+        RegisterUzDocument<AccountingEntityDto> entity =
+            await _client.GetAccountingEntityAsync(entityId, cancellationToken);
+        if (entity.Value.Id != entityId)
+            throw new InvalidOperationException(
+                $"RegisterUZ returned entity {entity.Value.Id} when entity {entityId} was requested.");
+
+        string normalizedIco = NormalizeIco(entity.Value.Ico ?? string.Empty);
+        return await LoadEntityAsync(
+            normalizedIco, entity, catalogs,
+            synchronizeCatalogs: synchronizeCatalogs,
+            cancellationToken: cancellationToken);
     }
 
     private async Task<RegisterUzLoadResult> LoadEntityAsync(
         string normalizedIco,
         RegisterUzDocument<AccountingEntityDto> entity,
+        RegisterUzCatalogPackage catalogs,
+        bool synchronizeCatalogs,
         CancellationToken cancellationToken)
     {
         long syncRunId = await _repository.BeginRunAsync(normalizedIco, cancellationToken);
 
         try
         {
-            RegisterUzCatalogPackage catalogs = await _client.GetCatalogsAsync(cancellationToken);
-            RegisterUzCatalogSyncResult catalogResult =
-                await _repository.SaveCatalogsAsync(syncRunId, catalogs, cancellationToken);
+            RegisterUzCatalogSyncResult catalogResult = synchronizeCatalogs
+                ? await _repository.SaveCatalogsAsync(syncRunId, catalogs, cancellationToken)
+                : new RegisterUzCatalogSyncResult(0, 0, 0, 0, 0);
 
             var statements = new List<RegisterUzDocument<FinancialStatementDto>>();
             foreach (long id in entity.Value.FinancialStatementIds.Distinct())

@@ -5,6 +5,12 @@ public interface IRegisterUzEntityPackageLoader
     Task<RegisterUzLoadResult> LoadByEntityIdAsync(
         long entityId,
         CancellationToken cancellationToken = default);
+
+    Task<RegisterUzLoadResult> LoadByEntityIdAsync(
+        long entityId,
+        RegisterUzCatalogPackage catalogs,
+        bool synchronizeCatalogs,
+        CancellationToken cancellationToken = default);
 }
 
 public sealed record RegisterUzObservationClaim(

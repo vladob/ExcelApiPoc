@@ -63,15 +63,46 @@ public sealed class RegisterUzChangeProcessor
             : await _repository.ClaimEntityRefreshesAsync(
                 entityBatchSize, leaseDuration, cancellationToken);
 
+        RegisterUzCatalogPackage? catalogs = null;
+        if (entities.Count > 0)
+        {
+            try
+            {
+                catalogs = await _client.GetCatalogsAsync(cancellationToken);
+            }
+            catch (Exception exception) when (exception is not OperationCanceledException)
+            {
+                foreach (RegisterUzEntityRefreshClaim entity in entities)
+                {
+                    await _repository.FailEntityRefreshAsync(
+                        entity, exception, CancellationToken.None);
+                    refreshFailures++;
+                }
+
+                return new RegisterUzChangeProcessingResult(
+                    observations.Count,
+                    resolved,
+                    resolutionFailures,
+                    entities.Count,
+                    refreshed,
+                    refreshFailures);
+            }
+        }
+
+        bool catalogsSynchronized = false;
         foreach (RegisterUzEntityRefreshClaim entity in entities)
         {
             cancellationToken.ThrowIfCancellationRequested();
             try
             {
                 RegisterUzLoadResult result = await _loader.LoadByEntityIdAsync(
-                    entity.RegisterUzEntityId, cancellationToken);
+                    entity.RegisterUzEntityId,
+                    catalogs!,
+                    synchronizeCatalogs: !catalogsSynchronized,
+                    cancellationToken: cancellationToken);
                 await _repository.CompleteEntityRefreshAsync(
                     entity, result.SyncRunId, cancellationToken);
+                catalogsSynchronized = true;
                 refreshed++;
             }
             catch (Exception exception) when (exception is not OperationCanceledException)

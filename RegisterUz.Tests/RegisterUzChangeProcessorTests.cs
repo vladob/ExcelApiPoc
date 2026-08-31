@@ -85,7 +85,8 @@ public sealed class RegisterUzChangeProcessorTests
         ];
         var repository = new FakeRepository([], entities);
         var loader = new FakeLoader(200);
-        var processor = new RegisterUzChangeProcessor(new FakeClient(), repository, loader);
+        var client = new FakeClient();
+        var processor = new RegisterUzChangeProcessor(client, repository, loader);
 
         RegisterUzChangeProcessingResult result = await processor.ProcessAsync(
             0, 10, TimeSpan.FromMinutes(5));
@@ -96,6 +97,29 @@ public sealed class RegisterUzChangeProcessorTests
         Assert.Single(repository.CompletedEntities);
         Assert.Single(repository.FailedEntities);
         Assert.Equal(100, repository.CompletedEntities[0].RegisterUzEntityId);
+        Assert.Equal(1, client.CatalogRequestCount);
+        Assert.Equal(new[] { true, false }, loader.SynchronizeCatalogCalls);
+    }
+
+    [Fact]
+    public async Task Processor_fails_all_claimed_entities_when_the_shared_catalog_request_fails()
+    {
+        RegisterUzEntityRefreshClaim[] entities =
+        [
+            new(Guid.NewGuid(), 100, 1),
+            new(Guid.NewGuid(), 200, 1)
+        ];
+        var repository = new FakeRepository([], entities);
+        var client = new FakeClient { CatalogFailure = new InvalidOperationException("Catalog failure.") };
+        var loader = new FakeLoader();
+        var processor = new RegisterUzChangeProcessor(client, repository, loader);
+
+        RegisterUzChangeProcessingResult result = await processor.ProcessAsync(
+            0, 10, TimeSpan.FromMinutes(5));
+
+        Assert.Equal(2, result.EntitiesFailed);
+        Assert.Equal(2, repository.FailedEntities.Count);
+        Assert.Empty(loader.SynchronizeCatalogCalls);
     }
 
     private static RegisterUzObservationClaim Claim(RegisterUzObjectType type, long id) =>
@@ -154,10 +178,21 @@ public sealed class RegisterUzChangeProcessorTests
     private sealed class FakeLoader(params long[] failingEntityIds) : IRegisterUzEntityPackageLoader
     {
         private readonly HashSet<long> _failingEntityIds = failingEntityIds.ToHashSet();
+        public List<bool> SynchronizeCatalogCalls { get; } = [];
 
         public Task<RegisterUzLoadResult> LoadByEntityIdAsync(
             long entityId, CancellationToken cancellationToken = default)
         {
+            throw new NotSupportedException("The batch-aware overload is required by this test.");
+        }
+
+        public Task<RegisterUzLoadResult> LoadByEntityIdAsync(
+            long entityId,
+            RegisterUzCatalogPackage catalogs,
+            bool synchronizeCatalogs,
+            CancellationToken cancellationToken = default)
+        {
+            SynchronizeCatalogCalls.Add(synchronizeCatalogs);
             if (_failingEntityIds.Contains(entityId))
                 throw new InvalidOperationException("Synthetic load failure.");
             return Task.FromResult(new RegisterUzLoadResult(
@@ -172,6 +207,8 @@ public sealed class RegisterUzChangeProcessorTests
         public Dictionary<long, FinancialStatementDto> Statements { get; } = [];
         public Dictionary<long, AnnualReportDto> AnnualReports { get; } = [];
         public Dictionary<long, FinancialReportDto> FinancialReports { get; } = [];
+        public Exception? CatalogFailure { get; init; }
+        public int CatalogRequestCount { get; private set; }
 
         public Task<RegisterUzDocument<FinancialStatementDto>> GetFinancialStatementAsync(
             long id, CancellationToken cancellationToken = default) =>
@@ -192,6 +229,19 @@ public sealed class RegisterUzChangeProcessorTests
         public Task<IReadOnlyList<long>> FindAccountingEntityIdsByIcoAsync(string ico, CancellationToken cancellationToken = default) => throw new NotSupportedException();
         public Task<RegisterUzDocument<AccountingEntityDto>> GetAccountingEntityAsync(long id, CancellationToken cancellationToken = default) => throw new NotSupportedException();
         public Task<RegisterUzDocument<FinancialReportTemplateDto>> GetTemplateAsync(long id, CancellationToken cancellationToken = default) => throw new NotSupportedException();
-        public Task<RegisterUzCatalogPackage> GetCatalogsAsync(CancellationToken cancellationToken = default) => throw new NotSupportedException();
+        public Task<RegisterUzCatalogPackage> GetCatalogsAsync(CancellationToken cancellationToken = default)
+        {
+            CatalogRequestCount++;
+            if (CatalogFailure is not null)
+                throw CatalogFailure;
+            return Task.FromResult(new RegisterUzCatalogPackage(
+                Document(new TemplateCatalogDto()),
+                Document(new ClassificationCatalogDto()),
+                Document(new ClassificationCatalogDto()),
+                Document(new ClassificationCatalogDto()),
+                Document(new ClassificationCatalogDto()),
+                Document(new LocationCatalogDto()),
+                Document(new LocationCatalogDto())));
+        }
     }
 }

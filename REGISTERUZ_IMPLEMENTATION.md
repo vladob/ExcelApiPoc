@@ -151,3 +151,9 @@ Stage 2 separates observation resolution from entity refresh:
 Both phases are bounded independently by `RegisterUz.Loader process-changes`.
 Individual failures are retained for retry and do not prevent unrelated work
 items from completing.
+
+One `process-changes` entity batch retrieves the seven shared catalogs once.
+All claimed entities use that same snapshot, and only the first successful
+entity run persists its catalog observation. This avoids seven repeated HTTP
+requests and repeated catalog comparisons for every additional entity in the
+batch while retaining the existing per-entity transaction and failure model.

@@ -60,3 +60,9 @@ annual reports expose their entity ID. A financial report is resolved through
 exactly one statement or annual-report parent. Resolved observations enqueue
 an entity generation; multiple changed children therefore collapse into one
 complete, idempotent entity-package refresh.
+
+Every entity-refresh batch retrieves the seven shared catalogs once. The same
+immutable snapshot is used for template resolution in every claimed entity;
+the first successful entity run synchronizes it to SQL. If that entity fails,
+the next entity safely retries catalog synchronization without repeating the
+seven HTTP requests.
