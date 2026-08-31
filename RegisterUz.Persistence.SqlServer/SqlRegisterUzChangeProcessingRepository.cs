@@ -24,8 +24,17 @@ public sealed class SqlRegisterUzChangeProcessingRepository : IRegisterUzChangeP
         int leaseSeconds = ValidateLease(leaseDuration);
         await using var connection = new SqlConnection(_connectionString);
         await connection.OpenAsync(cancellationToken);
-        await using var command = connection.CreateCommand();
-        command.CommandText = """
+        // A pooled session can retain Serializable after CompleteObservationAsync.
+        // READPAST is valid only at ReadCommitted or RepeatableRead, so make the
+        // claim isolation explicit instead of relying on the pooled session state.
+        await using SqlTransaction transaction =
+            (SqlTransaction)await connection.BeginTransactionAsync(
+                IsolationLevel.ReadCommitted, cancellationToken);
+        try
+        {
+            await using var command = connection.CreateCommand();
+            command.Transaction = transaction;
+            command.CommandText = """
             SET XACT_ABORT ON;
 
             INSERT INTO [Sync].[ObservedObjectWork]
@@ -33,7 +42,12 @@ public sealed class SqlRegisterUzChangeProcessingRepository : IRegisterUzChangeP
                 [ObjectTypeId], [RegisterUzObjectId],
                 [AcknowledgedObservationCount], [Status]
             )
-            SELECT o.[ObjectTypeId], o.[RegisterUzObjectId], 0, 'Pending'
+            SELECT
+                o.[ObjectTypeId],
+                o.[RegisterUzObjectId],
+                0,
+                CASE WHEN o.[ChangeObservationCount] > 0
+                     THEN 'Pending' ELSE 'Resolved' END
             FROM [Sync].[ObservedObject] o
             WHERE NOT EXISTS
             (
@@ -74,20 +88,28 @@ public sealed class SqlRegisterUzChangeProcessingRepository : IRegisterUzChangeP
               ON candidates.[ObjectTypeId] = w.[ObjectTypeId]
              AND candidates.[RegisterUzObjectId] = w.[RegisterUzObjectId];
             """;
-        Add(command, "@BatchSize", SqlDbType.Int, batchSize);
-        Add(command, "@LeaseSeconds", SqlDbType.Int, leaseSeconds);
+            Add(command, "@BatchSize", SqlDbType.Int, batchSize);
+            Add(command, "@LeaseSeconds", SqlDbType.Int, leaseSeconds);
 
-        var result = new List<RegisterUzObservationClaim>();
-        await using SqlDataReader reader = await command.ExecuteReaderAsync(cancellationToken);
-        while (await reader.ReadAsync(cancellationToken))
-        {
-            result.Add(new RegisterUzObservationClaim(
-                reader.GetGuid(0),
-                (RegisterUzObjectType)reader.GetByte(1),
-                reader.GetInt64(2),
-                reader.GetInt64(3)));
+            var result = new List<RegisterUzObservationClaim>();
+            await using SqlDataReader reader = await command.ExecuteReaderAsync(cancellationToken);
+            while (await reader.ReadAsync(cancellationToken))
+            {
+                result.Add(new RegisterUzObservationClaim(
+                    reader.GetGuid(0),
+                    (RegisterUzObjectType)reader.GetByte(1),
+                    reader.GetInt64(2),
+                    reader.GetInt64(3)));
+            }
+            await reader.CloseAsync();
+            await transaction.CommitAsync(cancellationToken);
+            return result;
         }
-        return result;
+        catch
+        {
+            await transaction.RollbackAsync(CancellationToken.None);
+            throw;
+        }
     }
 
     public async Task CompleteObservationAsync(
@@ -190,8 +212,15 @@ public sealed class SqlRegisterUzChangeProcessingRepository : IRegisterUzChangeP
         int leaseSeconds = ValidateLease(leaseDuration);
         await using var connection = new SqlConnection(_connectionString);
         await connection.OpenAsync(cancellationToken);
-        await using var command = connection.CreateCommand();
-        command.CommandText = """
+        // Do not inherit Serializable from a previously pooled connection.
+        await using SqlTransaction transaction =
+            (SqlTransaction)await connection.BeginTransactionAsync(
+                IsolationLevel.ReadCommitted, cancellationToken);
+        try
+        {
+            await using var command = connection.CreateCommand();
+            command.Transaction = transaction;
+            command.CommandText = """
             ;WITH candidates AS
             (
                 SELECT TOP (@BatchSize) *
@@ -216,14 +245,23 @@ public sealed class SqlRegisterUzChangeProcessingRepository : IRegisterUzChangeP
             OUTPUT INSERTED.[LeaseToken], INSERTED.[RegisterUzEntityId],
                    INSERTED.[ClaimGeneration];
             """;
-        Add(command, "@BatchSize", SqlDbType.Int, batchSize);
-        Add(command, "@LeaseSeconds", SqlDbType.Int, leaseSeconds);
+            Add(command, "@BatchSize", SqlDbType.Int, batchSize);
+            Add(command, "@LeaseSeconds", SqlDbType.Int, leaseSeconds);
 
-        var result = new List<RegisterUzEntityRefreshClaim>();
-        await using SqlDataReader reader = await command.ExecuteReaderAsync(cancellationToken);
-        while (await reader.ReadAsync(cancellationToken))
-            result.Add(new RegisterUzEntityRefreshClaim(reader.GetGuid(0), reader.GetInt64(1), reader.GetInt64(2)));
-        return result;
+            var result = new List<RegisterUzEntityRefreshClaim>();
+            await using SqlDataReader reader = await command.ExecuteReaderAsync(cancellationToken);
+            while (await reader.ReadAsync(cancellationToken))
+                result.Add(new RegisterUzEntityRefreshClaim(
+                    reader.GetGuid(0), reader.GetInt64(1), reader.GetInt64(2)));
+            await reader.CloseAsync();
+            await transaction.CommitAsync(cancellationToken);
+            return result;
+        }
+        catch
+        {
+            await transaction.RollbackAsync(CancellationToken.None);
+            throw;
+        }
     }
 
     public async Task CompleteEntityRefreshAsync(
