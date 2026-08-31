@@ -12,6 +12,7 @@ builder.Services.AddScoped<AuditTemplatePackageRepository>();
 builder.Services.AddScoped<AccountFrameworkRepository>();
 builder.Services.AddSingleton<RegisterUzAccountingEntityRepository>();
 builder.Services.AddScoped<AccountingEntityPackageService>();
+builder.Services.AddScoped<RegisterUzOnDemandLoadService>();
 
 var app = builder.Build();
 

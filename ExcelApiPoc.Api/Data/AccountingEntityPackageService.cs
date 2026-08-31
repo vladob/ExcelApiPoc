@@ -11,12 +11,18 @@ public sealed class AccountingEntityPackageService
     private readonly AuditTemplatePackageRepository
         _auditTemplateRepository;
 
+    private readonly RegisterUzOnDemandLoadService
+        _registerUzOnDemandLoadService;
+
     public AccountingEntityPackageService(
         RegisterUzAccountingEntityRepository registerUzRepository,
-        AuditTemplatePackageRepository auditTemplateRepository)
+        AuditTemplatePackageRepository auditTemplateRepository,
+        RegisterUzOnDemandLoadService registerUzOnDemandLoadService)
     {
         _registerUzRepository = registerUzRepository;
         _auditTemplateRepository = auditTemplateRepository;
+        _registerUzOnDemandLoadService =
+            registerUzOnDemandLoadService;
     }
 
     public async Task<AccountingEntityPackageV1?> GetPackageAsync(
@@ -29,6 +35,18 @@ public sealed class AccountingEntityPackageService
             await _registerUzRepository.GetByIcoAsync(
                 ico,
                 cancellationToken);
+
+        if (graph is null)
+        {
+            await _registerUzOnDemandLoadService.LoadByIcoAsync(
+                ico,
+                cancellationToken);
+
+            graph =
+                await _registerUzRepository.GetByIcoAsync(
+                    ico,
+                    cancellationToken);
+        }
 
         if (graph is null)
         {
@@ -60,7 +78,9 @@ public sealed class AccountingEntityPackageService
             if (registerUzTemplateId < int.MinValue ||
                 registerUzTemplateId > int.MaxValue)
             {
-                missingTemplateIds.Add(registerUzTemplateId);
+                missingTemplateIds.Add(
+                    registerUzTemplateId);
+
                 continue;
             }
 
@@ -71,7 +91,9 @@ public sealed class AccountingEntityPackageService
 
             if (template is null)
             {
-                missingTemplateIds.Add(registerUzTemplateId);
+                missingTemplateIds.Add(
+                    registerUzTemplateId);
+
                 continue;
             }
 
@@ -82,10 +104,13 @@ public sealed class AccountingEntityPackageService
         {
             GeneratedAtUtc = DateTimeOffset.UtcNow,
             Entity = graph.Entity,
-            FinancialStatements = graph.FinancialStatements,
-            AnnualReports = graph.AnnualReports,
+            FinancialStatements =
+                graph.FinancialStatements,
+            AnnualReports =
+                graph.AnnualReports,
             Templates = templates,
-            MissingTemplateIds = missingTemplateIds
+            MissingTemplateIds =
+                missingTemplateIds
         };
     }
 }
