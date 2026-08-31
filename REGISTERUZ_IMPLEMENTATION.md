@@ -157,3 +157,8 @@ All claimed entities use that same snapshot, and only the first successful
 entity run persists its catalog observation. This avoids seven repeated HTTP
 requests and repeated catalog comparisons for every additional entity in the
 batch while retaining the existing per-entity transaction and failure model.
+
+Manual IČO package loads are recorded as `Sync.Run.RunType = 'SingleIco'` and
+maintain `Sync.LoadTarget`. Queue-driven package loads are recorded as
+`EntityRefresh`; they do not create or update manual load targets, and their
+errors use the separate `EntityRefresh` stage.

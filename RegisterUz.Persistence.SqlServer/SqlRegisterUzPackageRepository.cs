@@ -47,25 +47,38 @@ public sealed class SqlRegisterUzPackageRepository : IRegisterUzPackageRepositor
         _connectionString = connectionString;
     }
 
-    public async Task<long> BeginRunAsync(string ico, CancellationToken cancellationToken = default)
+    public async Task<long> BeginRunAsync(
+        string ico,
+        RegisterUzLoadOrigin origin,
+        CancellationToken cancellationToken = default)
     {
+        string runType = origin switch
+        {
+            RegisterUzLoadOrigin.SingleIco => "SingleIco",
+            RegisterUzLoadOrigin.EntityRefresh => "EntityRefresh",
+            _ => throw new ArgumentOutOfRangeException(nameof(origin))
+        };
         await using var connection = new SqlConnection(_connectionString);
         await connection.OpenAsync(cancellationToken);
         await using var command = connection.CreateCommand();
         command.CommandText = """
             INSERT INTO [Sync].[Run] ([RunType], [RequestedBy], [Notes])
             OUTPUT INSERTED.[SyncRunId]
-            VALUES ('SingleIco', ORIGINAL_LOGIN(), N'IČO: ' + @Ico);
+            VALUES (@RunType, ORIGINAL_LOGIN(), N'IČO: ' + @Ico);
 
-            IF NOT EXISTS (SELECT 1 FROM [Sync].[LoadTarget] WHERE [Ico] = @Ico)
-                INSERT INTO [Sync].[LoadTarget] ([Ico], [RequestedBy]) VALUES (@Ico, ORIGINAL_LOGIN());
-            ELSE
-                UPDATE [Sync].[LoadTarget]
-                SET [LastAttemptAtUtc] = SYSUTCDATETIME(), [LastStatus] = 'Running',
-                    [LastError] = NULL, [UpdatedAtUtc] = SYSUTCDATETIME()
-                WHERE [Ico] = @Ico;
+            IF @RunType = 'SingleIco'
+            BEGIN
+                IF NOT EXISTS (SELECT 1 FROM [Sync].[LoadTarget] WHERE [Ico] = @Ico)
+                    INSERT INTO [Sync].[LoadTarget] ([Ico], [RequestedBy]) VALUES (@Ico, ORIGINAL_LOGIN());
+                ELSE
+                    UPDATE [Sync].[LoadTarget]
+                    SET [LastAttemptAtUtc] = SYSUTCDATETIME(), [LastStatus] = 'Running',
+                        [LastError] = NULL, [UpdatedAtUtc] = SYSUTCDATETIME()
+                    WHERE [Ico] = @Ico;
+            END;
             """;
         Add(command, "@Ico", SqlDbType.VarChar, ico, 20);
+        Add(command, "@RunType", SqlDbType.VarChar, runType, 30);
         object? value = await command.ExecuteScalarAsync(cancellationToken);
         return Convert.ToInt64(value, CultureInfo.InvariantCulture);
     }
@@ -281,12 +294,15 @@ public sealed class SqlRegisterUzPackageRepository : IRegisterUzPackageRepositor
                 [Notes] = N'IČO: ' + @Ico + N'; entity: ' + CONVERT(nvarchar(30), @EntityId)
             WHERE [SyncRunId] = @SyncRunId;
 
-            UPDATE [Sync].[LoadTarget]
+            UPDATE lt
             SET [LastAttemptAtUtc] = @CompletedAtUtc,
                 [LastSuccessfulLoadAtUtc] = @CompletedAtUtc,
                 [LastStatus] = 'Completed', [LastError] = NULL,
                 [UpdatedAtUtc] = SYSUTCDATETIME()
-            WHERE [Ico] = @Ico;
+            FROM [Sync].[LoadTarget] lt
+            JOIN [Sync].[Run] r ON r.[SyncRunId] = @SyncRunId
+            WHERE lt.[Ico] = @Ico
+              AND r.[RunType] = 'SingleIco';
             """;
         Add(command, "@SyncRunId", SqlDbType.BigInt, syncRunId);
         Add(command, "@Ico", SqlDbType.VarChar, result.Ico, 20);
@@ -823,6 +839,8 @@ public sealed class SqlRegisterUzPackageRepository : IRegisterUzPackageRepositor
             DECLARE @Ico varchar(20) =
                 (SELECT REPLACE(CONVERT(varchar(20), [Notes]), 'IČO: ', '')
                  FROM [Sync].[Run] WHERE [SyncRunId] = @SyncRunId);
+            DECLARE @RunType varchar(30) =
+                (SELECT [RunType] FROM [Sync].[Run] WHERE [SyncRunId] = @SyncRunId);
 
             UPDATE [Sync].[Run]
             SET [CompletedAtUtc] = SYSUTCDATETIME(), [Status] = 'Failed',
@@ -832,12 +850,16 @@ public sealed class SqlRegisterUzPackageRepository : IRegisterUzPackageRepositor
             INSERT INTO [Sync].[Error]
                 ([SyncRunId], [ErrorStage], [ErrorCode], [Message], [Details])
             VALUES
-                (@SyncRunId, 'SingleIcoLoad', @ErrorCode, @Message, @Details);
+                (@SyncRunId,
+                 CASE WHEN @RunType = 'EntityRefresh'
+                      THEN 'EntityRefresh' ELSE 'SingleIcoLoad' END,
+                 @ErrorCode, @Message, @Details);
 
             UPDATE [Sync].[LoadTarget]
             SET [LastAttemptAtUtc] = SYSUTCDATETIME(), [LastStatus] = 'Failed',
                 [LastError] = @Message, [UpdatedAtUtc] = SYSUTCDATETIME()
-            WHERE [Ico] = @Ico;
+            WHERE [Ico] = @Ico
+              AND @RunType = 'SingleIco';
             """;
         Add(command, "@SyncRunId", SqlDbType.BigInt, syncRunId);
         Add(command, "@ErrorCode", SqlDbType.VarChar, exception.GetType().Name, 100);

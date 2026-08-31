@@ -39,7 +39,10 @@ public interface IRegisterUzClient
 
 public interface IRegisterUzPackageRepository
 {
-    Task<long> BeginRunAsync(string ico, CancellationToken cancellationToken = default);
+    Task<long> BeginRunAsync(
+        string ico,
+        RegisterUzLoadOrigin origin,
+        CancellationToken cancellationToken = default);
 
     Task SavePackageAsync(
         long syncRunId,

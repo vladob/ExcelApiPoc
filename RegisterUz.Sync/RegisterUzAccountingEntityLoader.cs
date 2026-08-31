@@ -41,6 +41,7 @@ public sealed class RegisterUzAccountingEntityLoader : IRegisterUzEntityPackageL
         RegisterUzCatalogPackage catalogs = await _client.GetCatalogsAsync(cancellationToken);
         return await LoadEntityAsync(
             normalizedIco, entity, catalogs,
+            RegisterUzLoadOrigin.SingleIco,
             synchronizeCatalogs: true,
             cancellationToken: cancellationToken);
     }
@@ -62,6 +63,7 @@ public sealed class RegisterUzAccountingEntityLoader : IRegisterUzEntityPackageL
         RegisterUzCatalogPackage catalogs = await _client.GetCatalogsAsync(cancellationToken);
         return await LoadEntityAsync(
             normalizedIco, entity, catalogs,
+            RegisterUzLoadOrigin.EntityRefresh,
             synchronizeCatalogs: true,
             cancellationToken: cancellationToken);
     }
@@ -85,6 +87,7 @@ public sealed class RegisterUzAccountingEntityLoader : IRegisterUzEntityPackageL
         string normalizedIco = NormalizeIco(entity.Value.Ico ?? string.Empty);
         return await LoadEntityAsync(
             normalizedIco, entity, catalogs,
+            RegisterUzLoadOrigin.EntityRefresh,
             synchronizeCatalogs: synchronizeCatalogs,
             cancellationToken: cancellationToken);
     }
@@ -93,10 +96,12 @@ public sealed class RegisterUzAccountingEntityLoader : IRegisterUzEntityPackageL
         string normalizedIco,
         RegisterUzDocument<AccountingEntityDto> entity,
         RegisterUzCatalogPackage catalogs,
+        RegisterUzLoadOrigin origin,
         bool synchronizeCatalogs,
         CancellationToken cancellationToken)
     {
-        long syncRunId = await _repository.BeginRunAsync(normalizedIco, cancellationToken);
+        long syncRunId = await _repository.BeginRunAsync(
+            normalizedIco, origin, cancellationToken);
 
         try
         {

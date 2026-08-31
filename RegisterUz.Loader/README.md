@@ -66,3 +66,8 @@ immutable snapshot is used for template resolution in every claimed entity;
 the first successful entity run synchronizes it to SQL. If that entity fails,
 the next entity safely retries catalog synchronization without repeating the
 seven HTTP requests.
+
+Apply `SQL code/RegisterUZ_EntityRefreshRunTypeV1.sql` once to relabel package
+runs already completed through the queue. New queue loads use the
+`EntityRefresh` run type and remain separate from manual `SingleIco` load
+targets and error stages.

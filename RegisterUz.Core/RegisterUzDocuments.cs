@@ -2,6 +2,12 @@ using System.Text.Json.Serialization;
 
 namespace RegisterUz.Core;
 
+public enum RegisterUzLoadOrigin : byte
+{
+    SingleIco = 1,
+    EntityRefresh = 2
+}
+
 public sealed record RegisterUzDocument<T>(
     T Value,
     string RawJson,
