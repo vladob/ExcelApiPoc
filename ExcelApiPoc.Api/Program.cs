@@ -13,7 +13,6 @@ builder.Services.AddSingleton<RegisterUzAccountingEntityRepository>();
 
 var app = builder.Build();
 
-
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -82,9 +81,16 @@ app.MapGet(
 
 app.MapGet(
     "/api/templates/{templateErpId:int}/metadata",
-    async (int templateErpId, AuditTemplateRepository repository, CancellationToken cancellationToken) =>
+    async (
+        int templateErpId,
+        AuditTemplateRepository repository,
+        CancellationToken cancellationToken) =>
     {
-        AuditTemplateMetadata? template = await repository.GetMetadataAsync(templateErpId, cancellationToken);
+        AuditTemplateMetadata? template =
+            await repository.GetMetadataAsync(
+                templateErpId,
+                cancellationToken);
+
         if (template is null)
         {
             return Results.NotFound(new
@@ -98,34 +104,62 @@ app.MapGet(
     .WithName("GetAuditTemplateMetadata")
     .WithOpenApi();
 
-app.MapGet("/api/health/database",
+app.MapGet(
+    "/api/health/database",
     async (IConfiguration configuration) =>
     {
-        string? connectionString = configuration.GetConnectionString("AuditAddIn");
+        string? connectionString =
+            configuration.GetConnectionString("AuditAddIn");
 
         if (string.IsNullOrWhiteSpace(connectionString))
         {
-            return Results.Problem(title: "Database connection is not configured.", statusCode: StatusCodes.Status503ServiceUnavailable);
+            return Results.Problem(
+                title: "Database connection is not configured.",
+                statusCode: StatusCodes.Status503ServiceUnavailable);
         }
-        await using var connection = new SqlConnection(connectionString);
-        await connection.OpenAsync();
-        await using var command = new SqlCommand("SELECT DB_NAME();", connection);
-        object? databaseName = await command.ExecuteScalarAsync();
 
-        return Results.Ok(new {status = "Healthy", server = "SRVHPV", database = databaseName?.ToString()});
+        await using var connection =
+            new SqlConnection(connectionString);
+
+        await connection.OpenAsync();
+
+        await using var command =
+            new SqlCommand("SELECT DB_NAME();", connection);
+
+        object? databaseName =
+            await command.ExecuteScalarAsync();
+
+        return Results.Ok(
+            new
+            {
+                status = "Healthy",
+                server = "SRVHPV",
+                database = databaseName?.ToString()
+            });
     })
-.WithName("GetDatabaseHealth")
-.WithOpenApi();
+    .WithName("GetDatabaseHealth")
+    .WithOpenApi();
 
 app.MapGet(
     "/api/v1/templates/{templateErpId:int}/package",
-    async (int templateErpId,AuditTemplatePackageRepository repository,CancellationToken cancellationToken) =>
+    async (
+        int templateErpId,
+        AuditTemplatePackageRepository repository,
+        CancellationToken cancellationToken) =>
     {
-        AuditTemplatePackage? package = await repository.GetPackageAsync( templateErpId, cancellationToken);
+        AuditTemplatePackage? package =
+            await repository.GetPackageAsync(
+                templateErpId,
+                cancellationToken);
 
         if (package is null)
         {
-            return Results.NotFound(new{message = $"Template package {templateErpId} was not found."});
+            return Results.NotFound(
+                new
+                {
+                    message =
+                        $"Template package {templateErpId} was not found."
+                });
         }
 
         return Results.Ok(package);
@@ -157,7 +191,11 @@ app.MapGet(
             });
         }
 
-        ApplicableAccountFramework? framework = await repository.GetApplicableAsync(frameworkCode.Trim(), fiscalYear, cancellationToken);
+        ApplicableAccountFramework? framework =
+            await repository.GetApplicableAsync(
+                frameworkCode.Trim(),
+                fiscalYear,
+                cancellationToken);
 
         if (framework is null)
         {
@@ -192,43 +230,50 @@ app.MapGet(
             return Results.NotFound();
         }
 
-        int financialReportCount =
-            graph.FinancialStatements
-                .Sum(x => x.FinancialReports.Count)
-            +
-            graph.AnnualReports
-                .Sum(x => x.FinancialReports.Count);
-
-        int distinctTemplateCount =
+        var financialReports =
             graph.FinancialStatements
                 .SelectMany(x => x.FinancialReports)
                 .Concat(
                     graph.AnnualReports
                         .SelectMany(x => x.FinancialReports))
+                .ToList();
+
+        int financialReportCount =
+            financialReports.Count;
+
+        int distinctTemplateCount =
+            financialReports
                 .Where(x => x.TemplateId.HasValue)
                 .Select(x => x.TemplateId!.Value)
                 .Distinct()
                 .Count();
 
         int titlePageCount =
-            graph.FinancialStatements
-                .SelectMany(x => x.FinancialReports)
-                .Concat(
-                    graph.AnnualReports
-                        .SelectMany(x => x.FinancialReports))
+            financialReports
                 .Count(x => x.TitlePage is not null);
 
         int financialReportAttachmentCount =
-            graph.FinancialStatements
-                .SelectMany(x => x.FinancialReports)
-                .Concat(
-                    graph.AnnualReports
-                        .SelectMany(x => x.FinancialReports))
+            financialReports
                 .Sum(x => x.Attachments.Count);
 
         int annualReportAttachmentCount =
             graph.AnnualReports
                 .Sum(x => x.Attachments.Count);
+
+        int financialReportTableCount =
+            financialReports
+                .Sum(x => x.Tables.Count);
+
+        int financialReportValueCount =
+            financialReports
+                .SelectMany(x => x.Tables)
+                .Sum(x => x.Values.Count);
+
+        int explicitZeroValueCount =
+            financialReports
+                .SelectMany(x => x.Tables)
+                .SelectMany(x => x.Values)
+                .Count(x => x.NumericValue == 0m);
 
         return Results.Ok(
             new
@@ -236,13 +281,26 @@ app.MapGet(
                 graph.Entity.Id,
                 graph.Entity.Ico,
                 graph.Entity.Name,
-                FinancialStatementCount = graph.FinancialStatements.Count,
-                AnnualReportCount = graph.AnnualReports.Count,
-                FinancialReportCount = financialReportCount,
-                DistinctTemplateCount = distinctTemplateCount,
-                TitlePageCount = titlePageCount,
-                FinancialReportAttachmentCount = financialReportAttachmentCount,
-                AnnualReportAttachmentCount = annualReportAttachmentCount
+                FinancialStatementCount =
+                    graph.FinancialStatements.Count,
+                AnnualReportCount =
+                    graph.AnnualReports.Count,
+                FinancialReportCount =
+                    financialReportCount,
+                DistinctTemplateCount =
+                    distinctTemplateCount,
+                TitlePageCount =
+                    titlePageCount,
+                FinancialReportAttachmentCount =
+                    financialReportAttachmentCount,
+                AnnualReportAttachmentCount =
+                    annualReportAttachmentCount,
+                FinancialReportTableCount =
+                    financialReportTableCount,
+                FinancialReportValueCount =
+                    financialReportValueCount,
+                ExplicitZeroValueCount =
+                    explicitZeroValueCount
             });
     })
     .WithName("DebugGetRegisterUzAccountingEntity")
