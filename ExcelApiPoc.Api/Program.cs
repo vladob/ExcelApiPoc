@@ -9,6 +9,7 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<AuditTemplateRepository>();
 builder.Services.AddScoped<AuditTemplatePackageRepository>();
 builder.Services.AddScoped<AccountFrameworkRepository>();
+builder.Services.AddSingleton<RegisterUzAccountingEntityRepository>();
 
 var app = builder.Build();
 
@@ -32,6 +33,52 @@ app.MapGet("/api/health", () =>
 })
 .WithName("GetHealth")
 .WithOpenApi();
+
+app.MapGet(
+    "/api/health/registeruz-database",
+    async (
+        IConfiguration configuration,
+        CancellationToken cancellationToken) =>
+    {
+        string? connectionString =
+            configuration.GetConnectionString("RegisterUz");
+
+        if (string.IsNullOrWhiteSpace(connectionString))
+        {
+            return Results.Problem(
+                title: "RegisterUZ database connection is not configured.",
+                statusCode: StatusCodes.Status503ServiceUnavailable);
+        }
+
+        await using var connection =
+            new SqlConnection(connectionString);
+
+        await connection.OpenAsync(cancellationToken);
+
+        await using var command =
+            new SqlCommand(
+                """
+                SELECT
+                    CAST(SERVERPROPERTY('ServerName') AS nvarchar(128)),
+                    DB_NAME();
+                """,
+                connection);
+
+        await using SqlDataReader reader =
+            await command.ExecuteReaderAsync(cancellationToken);
+
+        await reader.ReadAsync(cancellationToken);
+
+        return Results.Ok(
+            new
+            {
+                status = "Healthy",
+                server = reader.GetString(0),
+                database = reader.GetString(1)
+            });
+    })
+    .WithName("GetRegisterUzDatabaseHealth")
+    .WithOpenApi();
 
 app.MapGet(
     "/api/templates/{templateErpId:int}/metadata",
@@ -126,6 +173,79 @@ app.MapGet(
         return Results.Ok(framework);
     })
     .WithName("GetApplicableAccountFrameworkV1")
+    .WithOpenApi();
+
+app.MapGet(
+    "/api/debug/registeruz/accounting-entities/{ico}",
+    async (
+        string ico,
+        RegisterUzAccountingEntityRepository repository,
+        CancellationToken cancellationToken) =>
+    {
+        RegisterUzAccountingEntityGraph? graph =
+            await repository.GetByIcoAsync(
+                ico,
+                cancellationToken);
+
+        if (graph is null)
+        {
+            return Results.NotFound();
+        }
+
+        int financialReportCount =
+            graph.FinancialStatements
+                .Sum(x => x.FinancialReports.Count)
+            +
+            graph.AnnualReports
+                .Sum(x => x.FinancialReports.Count);
+
+        int distinctTemplateCount =
+            graph.FinancialStatements
+                .SelectMany(x => x.FinancialReports)
+                .Concat(
+                    graph.AnnualReports
+                        .SelectMany(x => x.FinancialReports))
+                .Where(x => x.TemplateId.HasValue)
+                .Select(x => x.TemplateId!.Value)
+                .Distinct()
+                .Count();
+
+        int titlePageCount =
+            graph.FinancialStatements
+                .SelectMany(x => x.FinancialReports)
+                .Concat(
+                    graph.AnnualReports
+                        .SelectMany(x => x.FinancialReports))
+                .Count(x => x.TitlePage is not null);
+
+        int financialReportAttachmentCount =
+            graph.FinancialStatements
+                .SelectMany(x => x.FinancialReports)
+                .Concat(
+                    graph.AnnualReports
+                        .SelectMany(x => x.FinancialReports))
+                .Sum(x => x.Attachments.Count);
+
+        int annualReportAttachmentCount =
+            graph.AnnualReports
+                .Sum(x => x.Attachments.Count);
+
+        return Results.Ok(
+            new
+            {
+                graph.Entity.Id,
+                graph.Entity.Ico,
+                graph.Entity.Name,
+                FinancialStatementCount = graph.FinancialStatements.Count,
+                AnnualReportCount = graph.AnnualReports.Count,
+                FinancialReportCount = financialReportCount,
+                DistinctTemplateCount = distinctTemplateCount,
+                TitlePageCount = titlePageCount,
+                FinancialReportAttachmentCount = financialReportAttachmentCount,
+                AnnualReportAttachmentCount = annualReportAttachmentCount
+            });
+    })
+    .WithName("DebugGetRegisterUzAccountingEntity")
     .WithOpenApi();
 
 app.Run();
