@@ -1637,11 +1637,15 @@ public sealed class SqlRegisterUzPackageRepository : IRegisterUzPackageRepositor
 
             for (int valueOrdinal = 0; valueOrdinal < reportTable.Data.Length; valueOrdinal++)
             {
+                string? sourceValue = reportTable.Data[valueOrdinal];
+                if (string.IsNullOrWhiteSpace(sourceValue))
+                    continue;
+
                 int rowOrdinal = valueOrdinal / dataColumnCount;
                 int dataColumnOrdinal = valueOrdinal % dataColumnCount;
                 await InsertReportValueAsync(
                     connection, transaction, reportTableId, valueOrdinal,
-                    rowOrdinal, dataColumnOrdinal, reportTable.Data[valueOrdinal], cancellationToken);
+                    rowOrdinal, dataColumnOrdinal, sourceValue, cancellationToken);
             }
         }
     }
@@ -1774,16 +1778,13 @@ public sealed class SqlRegisterUzPackageRepository : IRegisterUzPackageRepositor
         int valueOrdinal,
         int rowOrdinal,
         int dataColumnOrdinal,
-        string? sourceValue,
+        string sourceValue,
         CancellationToken cancellationToken)
     {
-        decimal? numericValue = null;
-        if (!string.IsNullOrWhiteSpace(sourceValue))
-        {
-            if (!decimal.TryParse(sourceValue, NumberStyles.Number, CultureInfo.InvariantCulture, out decimal parsed))
-                throw new InvalidOperationException($"Financial report value '{sourceValue}' is not a valid invariant decimal.");
-            numericValue = parsed;
-        }
+        if (string.IsNullOrWhiteSpace(sourceValue))
+            throw new ArgumentException("Financial report source value must not be blank.", nameof(sourceValue));
+        if (!decimal.TryParse(sourceValue, NumberStyles.Number, CultureInfo.InvariantCulture, out decimal numericValue))
+            throw new InvalidOperationException($"Financial report value '{sourceValue}' is not a valid invariant decimal.");
 
         await using var command = CreateCommand(connection, transaction, """
             INSERT INTO [Reporting].[FinancialReportValue]
@@ -1804,7 +1805,7 @@ public sealed class SqlRegisterUzPackageRepository : IRegisterUzPackageRepositor
         SqlParameter numeric = command.Parameters.Add("@NumericValue", SqlDbType.Decimal);
         numeric.Precision = 38;
         numeric.Scale = 10;
-        numeric.Value = numericValue.HasValue ? numericValue.Value : DBNull.Value;
+        numeric.Value = numericValue;
         Add(command, "@SourceValue", SqlDbType.NVarChar, sourceValue, 100);
         await command.ExecuteNonQueryAsync(cancellationToken);
     }

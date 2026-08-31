@@ -168,3 +168,9 @@ independent bounds. It collects a bounded pass from each of the four feeds, then
 processes batches until a pass claims no work. Feed pauses, the processing-pass
 cap, and failures are reported separately. Processing stops after the first
 failing pass so a deterministic error cannot create a tight retry loop.
+
+Normalized financial-report values are stored sparsely. Empty source cells are
+recoverable from the canonical raw JSON and are omitted from
+`Reporting.FinancialReportValue`; explicit zero and non-zero values retain their
+source text and row/column ordinals. Consumers allocate a table from its
+template dimensions and treat a missing coordinate as blank.
