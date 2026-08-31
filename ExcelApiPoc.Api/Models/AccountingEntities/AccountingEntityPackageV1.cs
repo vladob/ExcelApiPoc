@@ -1,4 +1,6 @@
-﻿namespace ExcelApiPoc.Api.Models.AccountingEntities;
+using ExcelApiPoc.Api.Models;
+
+namespace ExcelApiPoc.Api.Models.AccountingEntities;
 
 public sealed record AccountingEntityPackageV1
 {
@@ -21,6 +23,12 @@ public sealed record AccountingEntityPackageV1
     }
 
     public required IReadOnlyList<AuditTemplatePackage> Templates
+    {
+        get;
+        init;
+    }
+
+    public required IReadOnlyList<long> MissingTemplateIds
     {
         get;
         init;

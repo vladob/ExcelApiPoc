@@ -1,6 +1,7 @@
 using ExcelApiPoc.Api.Models;
 using Microsoft.Data.SqlClient;
 using ExcelApiPoc.Api.Data;
+using ExcelApiPoc.Api.Models.AccountingEntities;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,6 +11,7 @@ builder.Services.AddScoped<AuditTemplateRepository>();
 builder.Services.AddScoped<AuditTemplatePackageRepository>();
 builder.Services.AddScoped<AccountFrameworkRepository>();
 builder.Services.AddSingleton<RegisterUzAccountingEntityRepository>();
+builder.Services.AddScoped<AccountingEntityPackageService>();
 
 var app = builder.Build();
 
@@ -211,6 +213,43 @@ app.MapGet(
         return Results.Ok(framework);
     })
     .WithName("GetApplicableAccountFrameworkV1")
+    .WithOpenApi();
+
+
+app.MapGet(
+    "/api/v1/accounting-entities/{ico}/package",
+    async (
+        string ico,
+        AccountingEntityPackageService service,
+        CancellationToken cancellationToken) =>
+    {
+        if (string.IsNullOrWhiteSpace(ico))
+        {
+            return Results.BadRequest(
+                new
+                {
+                    message = "IČO is required."
+                });
+        }
+
+        AccountingEntityPackageV1? package =
+            await service.GetPackageAsync(
+                ico.Trim(),
+                cancellationToken);
+
+        if (package is null)
+        {
+            return Results.NotFound(
+                new
+                {
+                    message =
+                        $"Accounting entity '{ico}' was not found in RegisterUZ."
+                });
+        }
+
+        return Results.Ok(package);
+    })
+    .WithName("GetAccountingEntityPackageV1")
     .WithOpenApi();
 
 app.MapGet(
