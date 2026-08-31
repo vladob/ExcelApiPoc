@@ -157,6 +157,7 @@
     <Compile Include="Forms\SettingsForm.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="Models\AccountingEntityPackageDto.cs" />
     <Compile Include="Models\AccountSummary.cs" />
     <Compile Include="Models\AddInSettings.cs" />
     <Compile Include="Models\AnalyticalMappingData.cs" />
@@ -175,6 +176,7 @@
     <Compile Include="Services\AccountFrameworkCache.cs" />
     <Compile Include="Services\AccountFrameworkEnricher.cs" />
     <Compile Include="Services\AccountFrameworkService.cs" />
+    <Compile Include="Services\AccountingEntityPackageApiClient.cs" />
     <Compile Include="Services\AccountWorksheetReader.cs" />
     <Compile Include="Services\AccountWorksheetWriter.cs" />
     <Compile Include="Services\AnalyticalMappingBuilder.cs" />
