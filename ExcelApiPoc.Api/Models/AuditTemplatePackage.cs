@@ -1,4 +1,4 @@
-﻿namespace ExcelApiPoc.Api.Models;
+namespace ExcelApiPoc.Api.Models;
 
 public sealed class AuditTemplatePackage
 {
@@ -25,6 +25,7 @@ public sealed class AuditTemplateDefinition
 public sealed class AuditReportTableDefinition
 {
     public int TableErpId { get; init; }
+    public int TableOrdinal { get; init; }
     public string? NameSk { get; init; }
     public string? NameEn { get; init; }
     public int? NumberOfColumns { get; init; }
@@ -46,6 +47,7 @@ public sealed class AuditReportHeaderDefinition
 
 public sealed class AuditReportRowDefinition
 {
+    public int RowOrdinal { get; init; }
     public int? RowNumber { get; init; }
     public string? Designation { get; init; }
     public string? TextSk { get; init; }

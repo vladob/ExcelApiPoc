@@ -1,4 +1,4 @@
-﻿using ExcelApiPoc.AddIn.Models;
+using ExcelApiPoc.AddIn.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -32,7 +32,7 @@ namespace ExcelApiPoc.AddIn.Services
                 CalculationPlan = ReadCalculationPlan(workbook)
             };
 
-            if (package.ContractVersion != 2)
+            if (package.ContractVersion != 3)
                 throw new InvalidOperationException($"Unsupported embedded package contract version {package.ContractVersion}.");
 
             return package;
@@ -61,6 +61,7 @@ namespace ExcelApiPoc.AddIn.Services
 
                 AuditReportRowDefinitionResponse[] rows = reportRows.Where(row => AuditWorkbookTableReader.GetInt32(row, "TableErpId") == tableErpId).Select(row => new AuditReportRowDefinitionResponse
                     {
+                        RowOrdinal = AuditWorkbookTableReader.GetInt32(row, "RowOrdinal"),
                         RowNumber = AuditWorkbookTableReader.GetNullableInt32(row, "RowNumber"),
                         Designation = AuditWorkbookTableReader.GetString(row, "Designation"),
                         TextSk = AuditWorkbookTableReader.GetString(row, "TextSk"),
@@ -73,6 +74,7 @@ namespace ExcelApiPoc.AddIn.Services
                 result.Add(new AuditReportTableDefinitionResponse
                 {
                     TableErpId = tableErpId,
+                    TableOrdinal = AuditWorkbookTableReader.GetInt32(tableRow, "TableOrdinal"),
                     NameSk = AuditWorkbookTableReader.GetString(tableRow, "NameSk"),
                     NameEn = AuditWorkbookTableReader.GetString(tableRow, "NameEn"),
                     NumberOfColumns = AuditWorkbookTableReader.GetNullableInt32(tableRow, "NumberOfColumns"),

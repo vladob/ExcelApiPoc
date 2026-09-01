@@ -8,7 +8,7 @@ namespace ExcelApiPoc.AddIn.Services
 {
     internal static class AuditTemplatePackageService
     {
-        private const int ContractVersion = 2;
+        private const int ContractVersion = 3;
         private static readonly HttpClient HttpClient = new HttpClient {Timeout = TimeSpan.FromSeconds(10)};
 
         public static AuditTemplatePackageLoadResult Load(AuditReportContext reportContext)

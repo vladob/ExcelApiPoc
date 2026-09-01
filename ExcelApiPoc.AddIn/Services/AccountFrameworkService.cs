@@ -9,7 +9,7 @@ namespace ExcelApiPoc.AddIn.Services
 {
     internal static class AccountFrameworkService
     {
-        private const int ContractVersion = 1;
+        private const int ContractVersion = 3;
         private static readonly HttpClient HttpClient = new HttpClient{Timeout = TimeSpan.FromSeconds(10)};
 
         public static AccountFrameworkLoadResult Load(string frameworkCode, int fiscalYear)

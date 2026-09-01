@@ -1,4 +1,4 @@
-﻿using ExcelApiPoc.AddIn.Models;
+using ExcelApiPoc.AddIn.Models;
 using System;
 using System.Collections.Generic;
 using Excel = Microsoft.Office.Interop.Excel;
@@ -82,8 +82,8 @@ namespace ExcelApiPoc.AddIn.Services
         {
             string[] headers =
             {
-                "TableErpId", "NameSk", "NameEn", "NumberOfColumns",
-                "NumberOfDataColumns", "DontHaveRowNumbers"
+                "TableErpId", "TableOrdinal", "NameSk", "NameEn",
+                "NumberOfColumns", "NumberOfDataColumns", "DontHaveRowNumbers"
             };
             var rows = new List<object[]>();
 
@@ -92,6 +92,7 @@ namespace ExcelApiPoc.AddIn.Services
                 rows.Add(new object[]
                 {
                     table.TableErpId,
+                    table.TableOrdinal,
                     table.NameSk,
                     table.NameEn,
                     table.NumberOfColumns,
@@ -99,7 +100,7 @@ namespace ExcelApiPoc.AddIn.Services
                     table.DontHaveRowNumbers
                 });
             }
-            AddTable(worksheet, ref nextRow, "__ReportTables", headers, rows, new[] { 2, 3 });
+            AddTable(worksheet, ref nextRow, "__ReportTables", headers, rows, new[] { 3, 4 });
         }
 
         private static void AddReportHeadersTable(Excel.Worksheet worksheet, ref int nextRow, AuditTemplatePackageResponse package)
@@ -134,8 +135,8 @@ namespace ExcelApiPoc.AddIn.Services
         {
             string[] headers =
             {
-                "TableErpId", "RowNumber", "Designation", "TextSk", "TextEn",
-                "IsSumRow", "CategorySk", "MappingCaptionSk"
+                "TableErpId", "RowOrdinal", "RowNumber", "Designation",
+                "TextSk", "TextEn", "IsSumRow", "CategorySk", "MappingCaptionSk"
             };
 
             var rows = new List<object[]>();
@@ -147,6 +148,7 @@ namespace ExcelApiPoc.AddIn.Services
                     rows.Add(new object[]
                     {
                         table.TableErpId,
+                        row.RowOrdinal,
                         row.RowNumber,
                         row.Designation,
                         row.TextSk,
@@ -157,7 +159,7 @@ namespace ExcelApiPoc.AddIn.Services
                     });
                 }
             }
-            AddTable(worksheet, ref nextRow, "__ReportRows", headers, rows, new[] { 3, 4, 5, 7, 8 });
+            AddTable(worksheet, ref nextRow, "__ReportRows", headers, rows, new[] { 4, 5, 6, 8, 9 });
         }
 
         private static void AddAccountGroupsTable(Excel.Worksheet worksheet, ref int nextRow, AuditTemplatePackageResponse package)

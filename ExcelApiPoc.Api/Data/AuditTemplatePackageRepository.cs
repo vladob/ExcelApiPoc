@@ -1,4 +1,4 @@
-﻿using ExcelApiPoc.Api.Models;
+using ExcelApiPoc.Api.Models;
 using Microsoft.Data.SqlClient;
 
 namespace ExcelApiPoc.Api.Data;
@@ -36,6 +36,7 @@ public sealed class AuditTemplatePackageRepository
 
             SELECT
                 CONVERT(int, [TableErpId]),
+                [TableOrdinal],
                 [NameSk],
                 [NameEn],
                 [NumberOfColumns],
@@ -63,6 +64,7 @@ public sealed class AuditTemplatePackageRepository
 
             SELECT
                 r.[TableErpId],
+                r.[RowOrdinal],
                 r.[RowNumber],
                 r.[Designation],
                 r.[TextSk],
@@ -166,11 +168,12 @@ public sealed class AuditTemplatePackageRepository
             tables.Add(new AuditReportTableDefinition
             {
                 TableErpId = tableErpId,
-                NameSk = reader.IsDBNull(1) ? null : reader.GetString(1),
-                NameEn = reader.IsDBNull(2) ? null : reader.GetString(2),
-                NumberOfColumns = reader.IsDBNull(3) ? null : reader.GetInt32(3),
-                NumberOfDataColumns = reader.IsDBNull(4) ? null : reader.GetInt32(4),
-                DontHaveRowNumbers = !reader.IsDBNull(5) && reader.GetByte(5) != 0,
+                TableOrdinal = reader.GetInt32(1),
+                NameSk = reader.IsDBNull(2) ? null : reader.GetString(2),
+                NameEn = reader.IsDBNull(3) ? null : reader.GetString(3),
+                NumberOfColumns = reader.IsDBNull(4) ? null : reader.GetInt32(4),
+                NumberOfDataColumns = reader.IsDBNull(5) ? null : reader.GetInt32(5),
+                DontHaveRowNumbers = !reader.IsDBNull(6) && reader.GetByte(6) != 0,
                 Headers = headers,
                 Rows = rows
             });
@@ -209,13 +212,14 @@ public sealed class AuditTemplatePackageRepository
 
             rows.Add(new AuditReportRowDefinition
             {
-                RowNumber = reader.IsDBNull(1) ? null : reader.GetInt32(1),
-                Designation = reader.IsDBNull(2) ? null : reader.GetString(2),
-                TextSk = reader.IsDBNull(3) ? null : reader.GetString(3),
-                TextEn = reader.IsDBNull(4) ? null : reader.GetString(4),
-                IsSumRow = !reader.IsDBNull(5) && reader.GetByte(5) != 0,
-                CategorySk = reader.IsDBNull(6) ? null : reader.GetString(6),
-                MappingCaptionSk = reader.IsDBNull(7) ? null : reader.GetString(7)
+                RowOrdinal = reader.GetInt32(1),
+                RowNumber = reader.IsDBNull(2) ? null : reader.GetInt32(2),
+                Designation = reader.IsDBNull(3) ? null : reader.GetString(3),
+                TextSk = reader.IsDBNull(4) ? null : reader.GetString(4),
+                TextEn = reader.IsDBNull(5) ? null : reader.GetString(5),
+                IsSumRow = !reader.IsDBNull(6) && reader.GetByte(6) != 0,
+                CategorySk = reader.IsDBNull(7) ? null : reader.GetString(7),
+                MappingCaptionSk = reader.IsDBNull(8) ? null : reader.GetString(8)
             });
         }
 
@@ -280,7 +284,7 @@ public sealed class AuditTemplatePackageRepository
 
         return new AuditTemplatePackage
         {
-            ContractVersion = 2,
+            ContractVersion = 3,
             GeneratedAtUtc = DateTime.UtcNow,
 
             Template = new AuditTemplateDefinition

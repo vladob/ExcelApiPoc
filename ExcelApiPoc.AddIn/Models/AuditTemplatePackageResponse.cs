@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 namespace ExcelApiPoc.AddIn.Models
 {
@@ -26,6 +26,7 @@ namespace ExcelApiPoc.AddIn.Models
     public sealed class AuditReportTableDefinitionResponse
     {
         public int TableErpId { get; set; }
+        public int TableOrdinal { get; set; }
         public string NameSk { get; set; }
         public string NameEn { get; set; }
         public int? NumberOfColumns { get; set; }
@@ -47,6 +48,7 @@ namespace ExcelApiPoc.AddIn.Models
 
     public sealed class AuditReportRowDefinitionResponse
     {
+        public int RowOrdinal { get; set; }
         public int? RowNumber { get; set; }
         public string Designation { get; set; }
         public string TextSk { get; set; }
