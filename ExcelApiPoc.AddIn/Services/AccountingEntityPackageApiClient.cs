@@ -64,6 +64,35 @@ namespace ExcelApiPoc.AddIn.Services
                 return package;
             }
         }
+
+        public static AccountingEntityPackageEnvelope GetEnvelope(string ico)
+        {
+            AccountingEntityPackageDto package =
+                GetPackage(ico);
+
+            return AccountingEntityPackageEnvelopeBuilder.Build(package);
+        }
+
+        public static string GetEnvelopeSummary(string ico)
+        {
+            AccountingEntityPackageEnvelope envelope =
+                GetEnvelope(ico);
+
+            return string.Join(
+                Environment.NewLine,
+                $"Entity: {envelope.Entity?.Ico} - {envelope.Entity?.Name}",
+                $"Financial statements: {envelope.FinancialStatements.Count}",
+                $"Annual reports: {envelope.AnnualReports.Count}",
+                $"Financial reports: {envelope.FinancialReportCount}",
+                $"  from statements: {envelope.FinancialStatementReportCount}",
+                $"  from annual reports: {envelope.AnnualReportFinancialReportCount}",
+                $"Annual-report attachments: {envelope.AnnualReportAttachmentCount}",
+                $"Financial-report attachments: {envelope.FinancialReportAttachmentCount}",
+                $"Tables: {envelope.FinancialReportTableCount}",
+                $"Templates loaded: {envelope.TemplatesById.Count}",
+                $"Missing template IDs: {envelope.MissingTemplateIds.Count}",
+                $"Reports with unresolved template: {envelope.UnresolvedTemplateReportCount}");
+        }
     }
 
     internal sealed class AccountingEntityPackageNotFoundException

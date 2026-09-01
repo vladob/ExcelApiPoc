@@ -3,11 +3,12 @@ using ExcelApiPoc.AddIn.Models;
 using ExcelApiPoc.AddIn.Services;
 using ExcelDna.Integration;
 using ExcelDna.Integration.CustomUI;
+using Microsoft.Office.Interop.Excel;
 using System;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using Excel = Microsoft.Office.Interop.Excel;
-using System.Linq;
 
 namespace ExcelApiPoc.AddIn
 {
@@ -98,11 +99,27 @@ namespace ExcelApiPoc.AddIn
         {
             try
             {
-                AccountingEntityPackageDto package = AccountingEntityPackageApiClient.GetPackage("99999999");
+                string ico = "36206075"; // CONSULTING, s.r.o.
+                // string ico = "00325554"; // Obec Oreské
+                // string ico = "00312011"; // Obec Svinná
+                // string ico = "36601837"; // BOJKUN spol. s r.o.
+                /*
+
+                AccountingEntityPackageDto package = AccountingEntityPackageApiClient.GetPackage(ico);
+
+                                MessageBox.Show(
+                                    BuildAccountingEntityPackageSummary(package),
+                                    "Accounting Entity Package",
+                                    MessageBoxButtons.OK,
+                                    MessageBoxIcon.Information);
+                */
+
+
+                string summary = AccountingEntityPackageApiClient.GetEnvelopeSummary(ico);
 
                 MessageBox.Show(
-                    BuildAccountingEntityPackageSummary(package),
-                    "Accounting Entity Package",
+                    summary,
+                    "Accounting Entity Graph",
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Information);
             }

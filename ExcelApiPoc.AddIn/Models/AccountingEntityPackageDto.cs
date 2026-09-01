@@ -12,11 +12,17 @@ namespace ExcelApiPoc.AddIn.Models
         public AccountingEntityDto Entity { get; set; }
 
         public List<FinancialStatementDto> FinancialStatements { get; set; }
+
+        public List<AnnualReportDto> AnnualReports { get; set; }
+
+        public List<AuditTemplatePackageResponse> Templates { get; set; }
+
+        public List<long> MissingTemplateIds { get; set; }
     }
 
     internal sealed class AccountingEntityDto
     {
-        public int Id { get; set; }
+        public long Id { get; set; }
 
         public string Ico { get; set; }
 
@@ -34,13 +40,15 @@ namespace ExcelApiPoc.AddIn.Models
 
         public DateTime? EstablishedDate { get; set; }
 
-        public DateTime? TerminatedDate { get; set; }
+        public DateTime? CancellationDate { get; set; }
 
         public string LegalFormCode { get; set; }
 
         public string SkNaceCode { get; set; }
 
-        public string SkNaceName { get; set; }
+        public string OrganizationSizeCode { get; set; }
+
+        public string OwnershipTypeCode { get; set; }
 
         public string RegionCode { get; set; }
 
@@ -48,20 +56,26 @@ namespace ExcelApiPoc.AddIn.Models
 
         public string RegisteredOfficeCode { get; set; }
 
-        public bool IsConsolidated { get; set; }
+        public bool? IsConsolidated { get; set; }
     }
 
     internal sealed class FinancialStatementDto
     {
-        public int Id { get; set; }
+        public long Id { get; set; }
 
         public string PeriodFrom { get; set; }
 
         public string PeriodTo { get; set; }
 
-        public string ReportType { get; set; }
+        public DateTime? SubmissionDate { get; set; }
 
-        public string StatementType { get; set; }
+        public DateTime? PreparationDate { get; set; }
+
+        public DateTime? ApprovalDate { get; set; }
+
+        public DateTime? AssemblyDate { get; set; }
+
+        public DateTime? AuditorReportAttachmentDate { get; set; }
 
         public string FundName { get; set; }
 
@@ -73,7 +87,47 @@ namespace ExcelApiPoc.AddIn.Models
 
         public bool? IsSummaryPublicAdministration { get; set; }
 
+        public string StatementType { get; set; }
+
         public List<FinancialReportDto> FinancialReports { get; set; }
+    }
+
+    internal sealed class AnnualReportDto
+    {
+        public long Id { get; set; }
+
+        public string EntityNameAtSubmission { get; set; }
+
+        public string AnnualReportType { get; set; }
+
+        public string FundName { get; set; }
+
+        public string LeiCode { get; set; }
+
+        public string PeriodFrom { get; set; }
+
+        public string PeriodTo { get; set; }
+
+        public DateTime? SubmissionDate { get; set; }
+
+        public DateTime? AssemblyDate { get; set; }
+
+        public List<AnnualReportAttachmentDto> Attachments { get; set; }
+
+        public List<FinancialReportDto> FinancialReports { get; set; }
+    }
+
+    internal sealed class AnnualReportAttachmentDto
+    {
+        public long Id { get; set; }
+
+        public string FileName { get; set; }
+
+        public string MimeType { get; set; }
+
+        public long? FileSizeBytes { get; set; }
+
+        public string LanguageCode { get; set; }
     }
 
     internal sealed class FinancialReportDto
