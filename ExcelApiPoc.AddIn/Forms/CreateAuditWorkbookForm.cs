@@ -304,14 +304,25 @@ namespace ExcelApiPoc.AddIn.Forms
                 decimal journalDifference = totalDebitTurnover - totalCreditTurnover;
                 bool fiscalYearMatches = dateFrom.Year == selectedFiscalYear && dateTo.Year == selectedFiscalYear;
 
+                AccountingEntityPackageEnvelope accountingEntityEnvelope =
+                    AccountingEntityPackageApiClient.GetEnvelope(
+                        journalImport.Ico);
+
+                RegisterUzFinancialReportSelection reportSelection =
+                    RegisterUzFinancialReportSelector.Select(
+                        accountingEntityEnvelope,
+                        selectedFiscalYear);
+
                 var reportContext =
                     new AuditReportContext
                     {
                         Ico = journalImport.Ico,
                         FiscalYear = selectedFiscalYear,
-                        TemplateErpId = 690,
-                        SelectionSource = "ConfiguredTestFixture",
-                        RegisterUzReportId = string.Empty
+                        TemplateErpId = reportSelection.TemplateErpId,
+                        SelectionSource = "RegisterUZ",
+                        RegisterUzReportId =
+                            reportSelection.RegisterUzReportId.ToString(
+                                CultureInfo.InvariantCulture)
                     };
 
                 AuditTemplatePackageLoadResult templatePackageLoad = AuditTemplatePackageService.Load(reportContext);
@@ -383,7 +394,15 @@ namespace ExcelApiPoc.AddIn.Forms
 
                 MessageBox.Show(message.ToString(), "Accounting Journal Preflight", MessageBoxButtons.OK, icon);
 
-                var workbook = AuditWorkbookWriter.CreateWorkbook(journalImport, accountSummaries, frameworkLoad, analyticalMapping, templatePackage, reportContext, templatePackageLoad);
+                var workbook = AuditWorkbookWriter.CreateWorkbook(
+                    journalImport,
+                    accountSummaries,
+                    frameworkLoad,
+                    analyticalMapping,
+                    templatePackage,
+                    reportContext,
+                    templatePackageLoad,
+                    reportSelection);
 
                 AuditWorkbookRecalculationDialog.Show(
                     AuditWorkbookRecalculationService.Recalculate(workbook));

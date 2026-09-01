@@ -1,4 +1,4 @@
-﻿using ExcelApiPoc.AddIn.Models;
+using ExcelApiPoc.AddIn.Models;
 using ExcelDna.Integration;
 using System.Collections.Generic;
 using Excel = Microsoft.Office.Interop.Excel;
@@ -7,25 +7,42 @@ namespace ExcelApiPoc.AddIn.Services
 {
     internal static class AuditWorkbookWriter
     {
-
-        public static Excel.Workbook CreateWorkbook(JournalImport journalImport, IReadOnlyList<AccountSummary> accountSummaries, 
-            AccountFrameworkLoadResult frameworkLoad, AnalyticalMappingData analyticalMapping,
-            AuditTemplatePackageResponse templatePackage, AuditReportContext reportContext, AuditTemplatePackageLoadResult templatePackageLoad)
+        public static Excel.Workbook CreateWorkbook(
+            JournalImport journalImport,
+            IReadOnlyList<AccountSummary> accountSummaries,
+            AccountFrameworkLoadResult frameworkLoad,
+            AnalyticalMappingData analyticalMapping,
+            AuditTemplatePackageResponse templatePackage,
+            AuditReportContext reportContext,
+            AuditTemplatePackageLoadResult templatePackageLoad,
+            RegisterUzFinancialReportSelection registerUzReportSelection)
         {
-            Excel.Application application = (Excel.Application)ExcelDnaUtil.Application;
+            Excel.Application application =
+                (Excel.Application)ExcelDnaUtil.Application;
+
             Excel.Workbook workbook = application.Workbooks.Add();
 
             try
             {
-                Excel.Worksheet journalWorksheet = JournalWorksheetWriter.AddWorksheet(workbook, journalImport);
+                Excel.Worksheet journalWorksheet =
+                    JournalWorksheetWriter.AddWorksheet(workbook, journalImport);
 
-                AccountWorksheetWriter.AddWorksheet(workbook,accountSummaries);
+                AccountWorksheetWriter.AddWorksheet(workbook, accountSummaries);
+
                 if (analyticalMapping != null && analyticalMapping.Rows.Count > 0)
                 {
-                    AnalyticalMappingValidationWorksheetWriter.AddWorksheet(workbook, analyticalMapping.Options);
-                    AnalyticalMappingWorksheetWriter.AddWorksheet(workbook, analyticalMapping.Rows);
+                    AnalyticalMappingValidationWorksheetWriter.AddWorksheet(
+                        workbook, analyticalMapping.Options);
+
+                    AnalyticalMappingWorksheetWriter.AddWorksheet(
+                        workbook, analyticalMapping.Rows);
                 }
-                AuditCalculationPackageWorksheetWriter.AddWorksheet(workbook, templatePackage, reportContext, templatePackageLoad);
+
+                AuditCalculationPackageWorksheetWriter.AddWorksheet(
+                    workbook, templatePackage, reportContext, templatePackageLoad);
+
+                RegisterUzReferenceWorksheetWriter.AddWorksheet(
+                    workbook, registerUzReportSelection);
 
                 ImportMetadataWorksheetWriter.AddWorksheet(
                     workbook,
@@ -36,7 +53,6 @@ namespace ExcelApiPoc.AddIn.Services
                     templatePackageLoad);
 
                 journalWorksheet.Activate();
-
                 return workbook;
             }
             catch

@@ -202,6 +202,8 @@
     <Compile Include="Services\JournalAccountSummaryBuilder.cs" />
     <Compile Include="Services\JournalTextNormalizer.cs" />
     <Compile Include="Services\JournalWorksheetWriter.cs" />
+    <Compile Include="Services\RegisterUzFinancialReportSelector.cs" />
+    <Compile Include="Services\RegisterUzReferenceWorksheetWriter.cs" />
     <Compile Include="Services\SettingsService.cs" />
     <Compile Include="Services\TemplateMetadataCache.cs" />
   </ItemGroup>

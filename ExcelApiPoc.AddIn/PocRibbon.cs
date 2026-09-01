@@ -99,9 +99,9 @@ namespace ExcelApiPoc.AddIn
         {
             try
             {
-                string ico = "36206075"; // CONSULTING, s.r.o.
+                // string ico = "36206075"; // CONSULTING, s.r.o.
                 // string ico = "00325554"; // Obec Oreské
-                // string ico = "00312011"; // Obec Svinná
+                 string ico = "00312011"; // Obec Svinná
                 // string ico = "36601837"; // BOJKUN spol. s r.o.
                 /*
 
