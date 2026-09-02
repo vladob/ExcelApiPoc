@@ -210,8 +210,10 @@
     <Compile Include="Services\RegisterUzAttachmentsWorksheetWriter.cs" />
     <Compile Include="Services\RegisterUzFinancialReportSelector.cs" />
     <Compile Include="Services\RegisterUzReferenceWorksheetWriter.cs" />
+    <Compile Include="Services\RegisterUzReportRenderingService.cs" />
     <Compile Include="Services\RegisterUzReportsWorksheetBuilder.cs" />
     <Compile Include="Services\RegisterUzReportsWorksheetWriter.cs" />
+    <Compile Include="Services\RegisterUzReportWorksheetWriter.cs" />
     <Compile Include="Services\SettingsService.cs" />
     <Compile Include="Services\TemplateMetadataCache.cs" />
   </ItemGroup>

@@ -36,6 +36,12 @@ namespace ExcelApiPoc.AddIn
                 imageMso='RefreshAll'
                 onAction='OnRecalculateAuditReport'/>
             <button
+                id='buttonOpenRegisterUzReport'
+                label='Open RegisterUZ Report'
+                size='large'
+                imageMso='FileOpen'
+                onAction='OnOpenRegisterUzReport'/>
+            <button
                 id=""btnGetAccountingEntityPackage""
                 label=""Get Entity Package""
                 onAction=""OnGetAccountingEntityPackage""
@@ -92,6 +98,24 @@ namespace ExcelApiPoc.AddIn
             catch (Exception exception)
             {
                 MessageBox.Show($"Audit report calculation failed.\n\n{exception.Message}", "Audit Report Calculation", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        public void OnOpenRegisterUzReport(IRibbonControl control)
+        {
+            _ = control;
+
+            try
+            {
+                RegisterUzReportRenderingService.RenderSelectedReportTable();
+            }
+            catch (Exception exception)
+            {
+                MessageBox.Show(
+                    $"RegisterUZ report rendering failed.\n\n{exception.Message}",
+                    "Open RegisterUZ Report",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
             }
         }
 
