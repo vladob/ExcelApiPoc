@@ -48,6 +48,9 @@ namespace ExcelApiPoc.AddIn.Services
                 RegisterUzReportsWorksheetWriter.AddWorksheet(
                     workbook, accountingEntityPackage);
 
+                RegisterUzAttachmentsWorksheetWriter.AddWorksheet(
+                    workbook, accountingEntityPackage);
+
                 ImportMetadataWorksheetWriter.AddWorksheet(
                     workbook,
                     journalImport,

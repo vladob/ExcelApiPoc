@@ -173,6 +173,7 @@
     <Compile Include="Models\JournalDetectionResult.cs" />
     <Compile Include="Models\JournalImport.cs" />
     <Compile Include="Models\JournalRow.cs" />
+    <Compile Include="Models\RegisterUzAttachmentListRow.cs" />
     <Compile Include="Models\RegisterUzReportListRow.cs" />
     <Compile Include="PocRibbon.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -205,6 +206,8 @@
     <Compile Include="Services\JournalAccountSummaryBuilder.cs" />
     <Compile Include="Services\JournalTextNormalizer.cs" />
     <Compile Include="Services\JournalWorksheetWriter.cs" />
+    <Compile Include="Services\RegisterUzAttachmentsWorksheetBuilder.cs" />
+    <Compile Include="Services\RegisterUzAttachmentsWorksheetWriter.cs" />
     <Compile Include="Services\RegisterUzFinancialReportSelector.cs" />
     <Compile Include="Services\RegisterUzReferenceWorksheetWriter.cs" />
     <Compile Include="Services\RegisterUzReportsWorksheetBuilder.cs" />
