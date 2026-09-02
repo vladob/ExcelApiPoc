@@ -90,6 +90,8 @@ namespace ExcelApiPoc.AddIn.Services
                     worksheet,
                     totalColumns);
 
+                RemoveTables(worksheet);
+
                 Excel.Range usedRange = worksheet.UsedRange;
                 usedRange.UnMerge();
                 usedRange.Clear();
@@ -116,6 +118,13 @@ namespace ExcelApiPoc.AddIn.Services
                 descriptiveColumnCount,
                 headerRowCount,
                 renderedLastRow);
+
+            CreateTable(
+                workbook,
+                worksheet,
+                firstDataRow,
+                renderedLastRow,
+                totalColumns);
 
             MergeHeaders(
                 worksheet,
@@ -494,10 +503,44 @@ namespace ExcelApiPoc.AddIn.Services
                     sumRow.Font.Bold = true;
                 }
 
-                data.Rows.AutoFit();
+                data.Rows.RowHeight = 15;
             }
 
             header.Rows.AutoFit();
+        }
+
+        private static void CreateTable(
+            Excel.Workbook workbook,
+            Excel.Worksheet worksheet,
+            int firstDataRow,
+            int lastRow,
+            int totalColumns)
+        {
+            int tableHeaderRow = firstDataRow - 1;
+            Excel.Range tableRange = worksheet.Range[
+                worksheet.Cells[tableHeaderRow, 1],
+                worksheet.Cells[lastRow, totalColumns]];
+
+            Excel.ListObject table = worksheet.ListObjects.Add(
+                Excel.XlListObjectSourceType.xlSrcRange,
+                tableRange,
+                Type.Missing,
+                Excel.XlYesNoGuess.xlYes,
+                Type.Missing);
+
+            table.Name = ExcelTableNameHelper.CreateUniqueName(
+                workbook,
+                worksheet.Name);
+            table.TableStyle = "TableStyleMedium2";
+        }
+
+        private static void RemoveTables(Excel.Worksheet worksheet)
+        {
+            for (int index = worksheet.ListObjects.Count; index >= 1; index--)
+            {
+                Excel.ListObject table = worksheet.ListObjects[index];
+                table.Unlist();
+            }
         }
 
         private static void ApplyBorders(Excel.Range range)

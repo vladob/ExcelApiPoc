@@ -41,11 +41,6 @@ namespace ExcelApiPoc.AddIn
                 size='large'
                 imageMso='FileOpen'
                 onAction='OnOpenRegisterUzReport'/>
-            <button
-                id=""btnGetAccountingEntityPackage""
-                label=""Get Entity Package""
-                onAction=""OnGetAccountingEntityPackage""
-                size=""large"" />
         </group>
         <group id='groupTools' label='Tools'>
             <button

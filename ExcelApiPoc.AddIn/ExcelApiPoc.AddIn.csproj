@@ -175,6 +175,7 @@
     <Compile Include="Models\JournalDetectionResult.cs" />
     <Compile Include="Models\JournalImport.cs" />
     <Compile Include="Models\JournalRow.cs" />
+    <Compile Include="Models\MultiYearBalanceSheet.cs" />
     <Compile Include="Models\RegisterUzAttachmentListRow.cs" />
     <Compile Include="Models\RegisterUzReportListRow.cs" />
     <Compile Include="PocRibbon.cs" />
@@ -204,6 +205,7 @@
     <Compile Include="Services\AuditWorkbookRecalculationService.cs" />
     <Compile Include="Services\AuditWorkbookTableReader.cs" />
     <Compile Include="Services\AuditWorkbookWriter.cs" />
+    <Compile Include="Services\ExcelTableNameHelper.cs" />
     <Compile Include="Services\GeneralLedgerReconciliationService.cs" />
     <Compile Include="Services\GeneralLedgerWorksheetWriter.cs" />
     <Compile Include="Services\IfoSoftCsvAccountingFrameworkImporter.cs" />
@@ -215,6 +217,8 @@
     <Compile Include="Services\JournalAccountSummaryBuilder.cs" />
     <Compile Include="Services\JournalTextNormalizer.cs" />
     <Compile Include="Services\JournalWorksheetWriter.cs" />
+    <Compile Include="Services\MultiYearBalanceSheetBuilder.cs" />
+    <Compile Include="Services\MultiYearBalanceSheetWorksheetWriter.cs" />
     <Compile Include="Services\RegisterUzAttachmentsWorksheetBuilder.cs" />
     <Compile Include="Services\RegisterUzAttachmentsWorksheetWriter.cs" />
     <Compile Include="Services\RegisterUzFinancialReportSelector.cs" />
