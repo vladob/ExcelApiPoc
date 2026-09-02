@@ -3,6 +3,40 @@
   <ExternalLibrary Path="ExcelApiPoc.AddIn.dll" ExplicitExports="false" LoadFromBytes="true" Pack="true" IncludePdb="false" />
 
   <!--
+       Classic .NET Framework projects do not produce the .deps.json file used
+       by Excel-DNA's automatic managed-dependency discovery. Keep the runtime
+       dependencies explicit so the packed XLL is genuinely self-contained.
+  -->
+  <Reference Path="Microsoft.Bcl.AsyncInterfaces.dll" Pack="true" />
+  <Reference Path="Microsoft.Bcl.Cryptography.dll" Pack="true" />
+  <Reference Path="Microsoft.Bcl.TimeProvider.dll" Pack="true" />
+  <Reference Path="Microsoft.Extensions.Caching.Abstractions.dll" Pack="true" />
+  <Reference Path="Microsoft.Extensions.Caching.Memory.dll" Pack="true" />
+  <Reference Path="Microsoft.Extensions.DependencyInjection.Abstractions.dll" Pack="true" />
+  <Reference Path="Microsoft.Extensions.Logging.Abstractions.dll" Pack="true" />
+  <Reference Path="Microsoft.Extensions.Options.dll" Pack="true" />
+  <Reference Path="Microsoft.Extensions.Primitives.dll" Pack="true" />
+  <Reference Path="Microsoft.IdentityModel.Abstractions.dll" Pack="true" />
+  <Reference Path="Microsoft.IdentityModel.JsonWebTokens.dll" Pack="true" />
+  <Reference Path="Microsoft.IdentityModel.Logging.dll" Pack="true" />
+  <Reference Path="Microsoft.IdentityModel.Protocols.dll" Pack="true" />
+  <Reference Path="Microsoft.IdentityModel.Protocols.OpenIdConnect.dll" Pack="true" />
+  <Reference Path="Microsoft.IdentityModel.Tokens.dll" Pack="true" />
+  <Reference Path="Newtonsoft.Json.dll" Pack="true" />
+  <Reference Path="System.Buffers.dll" Pack="true" />
+  <Reference Path="System.Diagnostics.DiagnosticSource.dll" Pack="true" />
+  <Reference Path="System.IdentityModel.Tokens.Jwt.dll" Pack="true" />
+  <Reference Path="System.IO.Pipelines.dll" Pack="true" />
+  <Reference Path="System.Memory.dll" Pack="true" />
+  <Reference Path="System.Numerics.Vectors.dll" Pack="true" />
+  <Reference Path="System.Runtime.CompilerServices.Unsafe.dll" Pack="true" />
+  <Reference Path="System.Security.Cryptography.Pkcs.dll" Pack="true" />
+  <Reference Path="System.Text.Encodings.Web.dll" Pack="true" />
+  <Reference Path="System.Text.Json.dll" Pack="true" />
+  <Reference Path="System.Threading.Channels.dll" Pack="true" />
+  <Reference Path="System.Threading.Tasks.Extensions.dll" Pack="true" />
+
+  <!--
        The RuntimeVersion attribute above allows the following settings:
        * RuntimeVersion="v4.0" - for .NET Framework 4.6.2 or higher
        * v6.0, v7.0, v8.0 etc. for .NET

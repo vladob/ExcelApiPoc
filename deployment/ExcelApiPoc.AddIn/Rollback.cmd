@@ -1,0 +1,6 @@
+@echo off
+PowerShell.exe -NoProfile -ExecutionPolicy Bypass -File "%~dp0Rollback.ps1"
+set result=%errorlevel%
+echo.
+pause
+exit /b %result%

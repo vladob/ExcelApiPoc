@@ -23,9 +23,13 @@ namespace ExcelApiPoc.AddIn.Forms
         private readonly TextBox _icoTextBox;
         private readonly TextBox _fiscalYearTextBox;
         private readonly Button _continueButton;
+        private readonly Workbook _auditWorkbook;
 
-        public CreateAuditWorkbookForm()
+        public CreateAuditWorkbookForm(Workbook auditWorkbook)
         {
+            _auditWorkbook = auditWorkbook ??
+                throw new ArgumentNullException(nameof(auditWorkbook));
+
             Text = "Create Audit Workbook";
             StartPosition = FormStartPosition.CenterScreen;
             FormBorderStyle = FormBorderStyle.FixedDialog;
@@ -286,6 +290,8 @@ namespace ExcelApiPoc.AddIn.Forms
 
         private void ContinueButton_Click(object sender, EventArgs e)
         {
+            bool workbookPopulationStarted = false;
+
             try
             {
                 string journalPath = _journalPathTextBox.Text.Trim();
@@ -496,7 +502,9 @@ namespace ExcelApiPoc.AddIn.Forms
 
                 MessageBox.Show(message.ToString(), "Accounting Journal Preflight", MessageBoxButtons.OK, icon);
 
+                workbookPopulationStarted = true;
                 var workbook = AuditWorkbookWriter.CreateWorkbook(
+                    _auditWorkbook,
                     journalImport,
                     accountSummaries,
                     frameworkLoad,
@@ -514,11 +522,16 @@ namespace ExcelApiPoc.AddIn.Forms
 
                 DialogResult = DialogResult.OK;
                 Close();
-                workbook.Activate();
             }
             catch (Exception exception)
             {
                 MessageBox.Show($"Accounting journal processing failed.\n\n" + exception.Message, "Create Audit Workbook", MessageBoxButtons.OK, MessageBoxIcon.Error);
+
+                if (workbookPopulationStarted)
+                {
+                    DialogResult = DialogResult.Abort;
+                    Close();
+                }
             }
         }
 

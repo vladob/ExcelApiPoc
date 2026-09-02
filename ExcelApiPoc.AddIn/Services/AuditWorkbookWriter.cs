@@ -1,5 +1,4 @@
 using ExcelApiPoc.AddIn.Models;
-using ExcelDna.Integration;
 using System.Collections.Generic;
 using Excel = Microsoft.Office.Interop.Excel;
 
@@ -8,6 +7,7 @@ namespace ExcelApiPoc.AddIn.Services
     internal static class AuditWorkbookWriter
     {
         public static Excel.Workbook CreateWorkbook(
+            Excel.Workbook workbook,
             JournalImport journalImport,
             IReadOnlyList<AccountSummary> accountSummaries,
             AccountFrameworkLoadResult frameworkLoad,
@@ -20,68 +20,55 @@ namespace ExcelApiPoc.AddIn.Services
             AccountingFrameworkImport accountingFrameworkImport,
             GeneralLedgerImport generalLedgerImport)
         {
-            Excel.Application application =
-                (Excel.Application)ExcelDnaUtil.Application;
+            Excel.Worksheet journalWorksheet =
+                JournalWorksheetWriter.AddWorksheet(workbook, journalImport);
 
-            Excel.Workbook workbook = application.Workbooks.Add();
+            AccountWorksheetWriter.AddWorksheet(workbook, accountSummaries);
 
-            try
+            if (accountingFrameworkImport != null)
+                AccountingFrameworkWorksheetWriter.AddWorksheet(
+                    workbook, accountingFrameworkImport);
+
+            if (generalLedgerImport != null)
+                GeneralLedgerWorksheetWriter.AddWorksheet(
+                    workbook, generalLedgerImport);
+
+            if (analyticalMapping != null && analyticalMapping.Rows.Count > 0)
             {
-                Excel.Worksheet journalWorksheet =
-                    JournalWorksheetWriter.AddWorksheet(workbook, journalImport);
+                AnalyticalMappingValidationWorksheetWriter.AddWorksheet(
+                    workbook, analyticalMapping.Options);
 
-                AccountWorksheetWriter.AddWorksheet(workbook, accountSummaries);
-
-                if (accountingFrameworkImport != null)
-                    AccountingFrameworkWorksheetWriter.AddWorksheet(
-                        workbook, accountingFrameworkImport);
-
-                if (generalLedgerImport != null)
-                    GeneralLedgerWorksheetWriter.AddWorksheet(
-                        workbook, generalLedgerImport);
-
-                if (analyticalMapping != null && analyticalMapping.Rows.Count > 0)
-                {
-                    AnalyticalMappingValidationWorksheetWriter.AddWorksheet(
-                        workbook, analyticalMapping.Options);
-
-                    AnalyticalMappingWorksheetWriter.AddWorksheet(
-                        workbook, analyticalMapping.Rows);
-                }
-
-                AuditCalculationPackageWorksheetWriter.AddWorksheet(
-                    workbook, templatePackage, reportContext, templatePackageLoad);
-
-                RegisterUzReferenceWorksheetWriter.AddWorksheet(
-                    workbook, registerUzReportSelection);
-
-                RegisterUzReportsWorksheetWriter.AddWorksheet(
-                    workbook, accountingEntityPackage);
-
-                MultiYearBalanceSheetWorksheetWriter.AddWorksheet(
-                    workbook, accountingEntityPackage);
-
-                RegisterUzAttachmentsWorksheetWriter.AddWorksheet(
-                    workbook, accountingEntityPackage);
-
-                ImportMetadataWorksheetWriter.AddWorksheet(
-                    workbook,
-                    journalImport,
-                    frameworkLoad,
-                    templatePackage,
-                    reportContext,
-                    templatePackageLoad,
-                    accountingFrameworkImport,
-                    generalLedgerImport);
-
-                journalWorksheet.Activate();
-                return workbook;
+                AnalyticalMappingWorksheetWriter.AddWorksheet(
+                    workbook, analyticalMapping.Rows);
             }
-            catch
-            {
-                workbook.Close(SaveChanges: false);
-                throw;
-            }
+
+            AuditCalculationPackageWorksheetWriter.AddWorksheet(
+                workbook, templatePackage, reportContext, templatePackageLoad);
+
+            RegisterUzReferenceWorksheetWriter.AddWorksheet(
+                workbook, registerUzReportSelection);
+
+            RegisterUzReportsWorksheetWriter.AddWorksheet(
+                workbook, accountingEntityPackage);
+
+            MultiYearBalanceSheetWorksheetWriter.AddWorksheet(
+                workbook, accountingEntityPackage);
+
+            RegisterUzAttachmentsWorksheetWriter.AddWorksheet(
+                workbook, accountingEntityPackage);
+
+            ImportMetadataWorksheetWriter.AddWorksheet(
+                workbook,
+                journalImport,
+                frameworkLoad,
+                templatePackage,
+                reportContext,
+                templatePackageLoad,
+                accountingFrameworkImport,
+                generalLedgerImport);
+
+            journalWorksheet.Activate();
+            return workbook;
         }
     }
 }

@@ -69,9 +69,21 @@ namespace ExcelApiPoc.AddIn
         public void OnCreateAuditWorkbook(IRibbonControl control)
         {
             _ = control;
-            using (var dialog = new CreateAuditWorkbookForm())
+
+            Excel.Application application =
+                (Excel.Application)ExcelDnaUtil.Application;
+
+            Excel.Workbook auditWorkbook =
+                application.Workbooks.Add();
+
+            auditWorkbook.Activate();
+
+            using (var dialog = new CreateAuditWorkbookForm(auditWorkbook))
             {
-                dialog.ShowDialog();
+                if (dialog.ShowDialog() != DialogResult.OK)
+                {
+                    auditWorkbook.Close(SaveChanges: false);
+                }
             }
         }
 
