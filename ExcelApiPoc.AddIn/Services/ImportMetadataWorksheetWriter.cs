@@ -44,7 +44,15 @@ namespace ExcelApiPoc.AddIn.Services
             "RegisterUzReportId",
             "TemplateRetrievalSource",
             "TemplateCachePath",
-            "TemplateApiFailureMessage"
+            "TemplateApiFailureMessage",
+            "AccountingFrameworkSourceFileName",
+            "AccountingFrameworkSourceFilePath",
+            "AccountingFrameworkSourceFileHash",
+            "AccountingFrameworkIco",
+            "AccountingFrameworkFiscalYear",
+            "AccountingFrameworkImportedAtUtc",
+            "AccountingFrameworkRecordCount",
+            "AccountingFrameworkNormalizedTextFieldCount"
         };
 
         public static Excel.Worksheet AddWorksheet(
@@ -53,7 +61,8 @@ namespace ExcelApiPoc.AddIn.Services
             AccountFrameworkLoadResult frameworkLoad,
             AuditTemplatePackageResponse templatePackage,
             AuditReportContext reportContext,
-            AuditTemplatePackageLoadResult templatePackageLoad)
+            AuditTemplatePackageLoadResult templatePackageLoad,
+            AccountingFrameworkImport accountingFrameworkImport)
         {
             if (workbook == null)
             {
@@ -127,6 +136,17 @@ namespace ExcelApiPoc.AddIn.Services
             values[1, 30] = templatePackageLoad.Source;
             values[1, 31] = templatePackageLoad.CachePath;
             values[1, 32] = templatePackageLoad.ApiFailureMessage;
+            if (accountingFrameworkImport != null)
+            {
+                values[1, 33] = accountingFrameworkImport.SourceFileName;
+                values[1, 34] = accountingFrameworkImport.SourceFilePath;
+                values[1, 35] = accountingFrameworkImport.SourceFileHash;
+                values[1, 36] = accountingFrameworkImport.Ico;
+                values[1, 37] = accountingFrameworkImport.FiscalYear;
+                values[1, 38] = accountingFrameworkImport.ImportedAtUtc;
+                values[1, 39] = accountingFrameworkImport.Rows.Count;
+                values[1, 40] = accountingFrameworkImport.NormalizedTextFieldCount;
+            }
 
             Excel.Range firstCell = (Excel.Range)worksheet.Cells[1, 1];
             Excel.Range lastCell = (Excel.Range)worksheet.Cells[2, Headers.Length];
@@ -137,7 +157,8 @@ namespace ExcelApiPoc.AddIn.Services
             {
                 1, 2, 3, 4, 5, 6, 7, 8,
                 17, 18, 20, 21, 22,
-                26, 27, 28, 29, 30, 31, 32, 33
+                26, 27, 28, 29, 30, 31, 32, 33,
+                34, 35, 36, 37
             };
 
             foreach (int columnNumber in textColumns)
@@ -170,6 +191,10 @@ namespace ExcelApiPoc.AddIn.Services
             templateContractVersionCell.NumberFormat = "0";
             templateGeneratedAtUtcCell.NumberFormat = "yyyy-mm-dd hh:mm:ss";
             templateErpIdCell.NumberFormat = "0";
+            ((Excel.Range)worksheet.Cells[2, 38]).NumberFormat = "0";
+            ((Excel.Range)worksheet.Cells[2, 39]).NumberFormat = "yyyy-mm-dd hh:mm:ss";
+            ((Excel.Range)worksheet.Cells[2, 40]).NumberFormat = "#,##0";
+            ((Excel.Range)worksheet.Cells[2, 41]).NumberFormat = "#,##0";
 
             Excel.ListObject table = worksheet.ListObjects.Add(Excel.XlListObjectSourceType.xlSrcRange, tableRange, Type.Missing, Excel.XlYesNoGuess.xlYes, Type.Missing);
             table.Name = TableName;

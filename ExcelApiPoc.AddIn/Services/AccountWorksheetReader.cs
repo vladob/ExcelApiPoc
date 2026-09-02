@@ -17,6 +17,8 @@ namespace ExcelApiPoc.AddIn.Services
                 {
                     AccountCode = AuditWorkbookTableReader.GetString(row, "AccountCode"),
                     AccountName = AuditWorkbookTableReader.GetString(row, "AccountName"),
+                    AccountNameSource = AuditWorkbookTableReader.GetString(row, "AccountNameSource"),
+                    EntityAccountName = AuditWorkbookTableReader.GetString(row, "EntityAccountName"),
                     SyntheticAccountCode = AuditWorkbookTableReader.GetString(row, "SyntheticAccountCode"),
                     FrameworkAccountCode = AuditWorkbookTableReader.GetString(row, "FrameworkAccountCode"),
                     FrameworkAccountName = AuditWorkbookTableReader.GetString(row, "FrameworkAccountName"),

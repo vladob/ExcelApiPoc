@@ -78,6 +78,7 @@ namespace ExcelApiPoc.AddIn.Services
             table.Name = TableName;
             table.TableStyle = "TableStyleMedium2";
 
+            AddSubtotalCount(worksheet);
             ApplyFormats(worksheet, table, rows.Count);
             ApplyLayout(worksheet, table);
 
@@ -91,6 +92,14 @@ namespace ExcelApiPoc.AddIn.Services
                 previousWorksheet.Activate();
 
             return worksheet;
+        }
+
+        private static void AddSubtotalCount(Excel.Worksheet worksheet)
+        {
+            Excel.Range countCell = (Excel.Range)worksheet.Cells[3, 1];
+            countCell.Formula = "=SUBTOTAL(3,RegisterUzReports[Action])";
+            countCell.NumberFormat = "0";
+            countCell.Font.Bold = true;
         }
 
         private static object[,] CreateValues(

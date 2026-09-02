@@ -35,6 +35,8 @@ namespace ExcelApiPoc.AddIn.Services
                 {
                     account.FrameworkAccountCode = definition.AccountCode;
                     account.FrameworkAccountName = definition.OfficialName;
+                    account.AccountName = definition.OfficialName;
+                    account.AccountNameSource = "StatutoryFramework";
                     account.IsFrameworkMatch = true;
                     result.ExactMatchCount++;
                     continue;
@@ -46,6 +48,8 @@ namespace ExcelApiPoc.AddIn.Services
                 {
                     account.FrameworkAccountCode = $"{matchingRange.FromAccountCode}-" + $"{matchingRange.ToAccountCode}";
                     account.FrameworkAccountName = matchingRange.OfficialName;
+                    account.AccountName = matchingRange.OfficialName;
+                    account.AccountNameSource = "StatutoryFramework";
                     account.IsFrameworkMatch = true;
                     result.RangeMatchCount++;
                     continue;
@@ -98,6 +102,8 @@ namespace ExcelApiPoc.AddIn.Services
         {
             account.FrameworkAccountCode = string.Empty;
             account.FrameworkAccountName = string.Empty;
+            account.AccountName = string.Empty;
+            account.AccountNameSource = "Synthetic";
             account.IsFrameworkMatch = null;
         }
     }

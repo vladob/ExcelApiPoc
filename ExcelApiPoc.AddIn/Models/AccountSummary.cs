@@ -4,6 +4,8 @@
     {
         public string AccountCode { get; set; }
         public string AccountName { get; set; }
+        public string AccountNameSource { get; set; }
+        public string EntityAccountName { get; set; }
         public string SyntheticAccountCode { get; set; }
         public string FrameworkAccountCode { get; set; }
         public string FrameworkAccountName { get; set; }

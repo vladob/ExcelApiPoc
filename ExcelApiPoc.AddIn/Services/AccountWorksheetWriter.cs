@@ -17,6 +17,8 @@ namespace ExcelApiPoc.AddIn.Services
         {
             "AccountCode",
             "AccountName",
+            "AccountNameSource",
+            "EntityAccountName",
             "SyntheticAccountCode",
             "FrameworkAccountCode",
             "FrameworkAccountName",
@@ -34,9 +36,11 @@ namespace ExcelApiPoc.AddIn.Services
         {
             1, // AccountCode
             2, // AccountName
-            3, // SyntheticAccountCode
-            4, // FrameworkAccountCode
-            5  // FrameworkAccountName
+            3, // AccountNameSource
+            4, // EntityAccountName
+            5, // SyntheticAccountCode
+            6, // FrameworkAccountCode
+            7  // FrameworkAccountName
         };
 
         public static Excel.Worksheet AddWorksheet(Excel.Workbook workbook,IReadOnlyList<AccountSummary> accounts)
@@ -109,17 +113,19 @@ namespace ExcelApiPoc.AddIn.Services
 
                 values[targetRow, 0] = account.AccountCode;
                 values[targetRow, 1] = account.AccountName;
-                values[targetRow, 2] = account.SyntheticAccountCode;
-                values[targetRow, 3] = account.FrameworkAccountCode;
-                values[targetRow, 4] = account.FrameworkAccountName;
-                values[targetRow, 5] = account.IsFrameworkMatch.HasValue ? (object)account.IsFrameworkMatch.Value : null;
-                values[targetRow, 6] = account.DebitEntryCount;
-                values[targetRow, 7] = ToExcelNumber(account.DebitTurnover);
-                values[targetRow, 8] = account.CreditEntryCount;
-                values[targetRow, 9] = ToExcelNumber(account.CreditTurnover);
-                values[targetRow, 10] = ToExcelNumber(account.NetBalance);
-                values[targetRow, 11] = ToExcelNumber(account.DebitBalance);
-                values[targetRow, 12] = ToExcelNumber(account.CreditBalance);
+                values[targetRow, 2] = account.AccountNameSource;
+                values[targetRow, 3] = account.EntityAccountName;
+                values[targetRow, 4] = account.SyntheticAccountCode;
+                values[targetRow, 5] = account.FrameworkAccountCode;
+                values[targetRow, 6] = account.FrameworkAccountName;
+                values[targetRow, 7] = account.IsFrameworkMatch.HasValue ? (object)account.IsFrameworkMatch.Value : null;
+                values[targetRow, 8] = account.DebitEntryCount;
+                values[targetRow, 9] = ToExcelNumber(account.DebitTurnover);
+                values[targetRow, 10] = account.CreditEntryCount;
+                values[targetRow, 11] = ToExcelNumber(account.CreditTurnover);
+                values[targetRow, 12] = ToExcelNumber(account.NetBalance);
+                values[targetRow, 13] = ToExcelNumber(account.DebitBalance);
+                values[targetRow, 14] = ToExcelNumber(account.CreditBalance);
             }
 
             return values;
@@ -139,15 +145,15 @@ namespace ExcelApiPoc.AddIn.Services
                 // Preserve analytical and synthetic account identifiers.
                 column.NumberFormat = "@";
             }
-            Excel.Range debitEntryCountColumn = (Excel.Range)dataRange.Columns[7];
-            Excel.Range creditEntryCountColumn = (Excel.Range)dataRange.Columns[9];
+            Excel.Range debitEntryCountColumn = (Excel.Range)dataRange.Columns[9];
+            Excel.Range creditEntryCountColumn = (Excel.Range)dataRange.Columns[11];
 
             debitEntryCountColumn.NumberFormat = "0";
             creditEntryCountColumn.NumberFormat = "0";
 
-            for (int columnNumber = 8; columnNumber <= 13; columnNumber++)
+            for (int columnNumber = 10; columnNumber <= 15; columnNumber++)
             {
-                if (columnNumber == 9)
+                if (columnNumber == 11)
                     continue;
 
                 Excel.Range amountColumn = (Excel.Range)dataRange.Columns[columnNumber];
@@ -158,13 +164,13 @@ namespace ExcelApiPoc.AddIn.Services
         private static void AddSubtotalFormulas(Excel.Worksheet worksheet)
         {
             SetSubtotalFormula(worksheet, 1, "=SUBTOTAL(3,AccountRows[AccountCode])", "0");
-            SetSubtotalFormula(worksheet, 7, "=SUBTOTAL(109,AccountRows[DebitEntryCount])", "#,##0");
-            SetSubtotalFormula(worksheet, 8, "=SUBTOTAL(109,AccountRows[DebitTurnover])", "#,##0.00;[Red]-#,##0.00");
-            SetSubtotalFormula(worksheet, 9, "=SUBTOTAL(109,AccountRows[CreditEntryCount])", "#,##0");
-            SetSubtotalFormula(worksheet, 10, "=SUBTOTAL(109,AccountRows[CreditTurnover])", "#,##0.00;[Red]-#,##0.00");
-            SetSubtotalFormula(worksheet, 11, "=SUBTOTAL(109,AccountRows[NetBalance])", "#,##0.00;[Red]-#,##0.00");
-            SetSubtotalFormula(worksheet, 12, "=SUBTOTAL(109,AccountRows[DebitBalance])", "#,##0.00;[Red]-#,##0.00");
-            SetSubtotalFormula(worksheet, 13, "=SUBTOTAL(109,AccountRows[CreditBalance])", "#,##0.00;[Red]-#,##0.00");
+            SetSubtotalFormula(worksheet, 9, "=SUBTOTAL(109,AccountRows[DebitEntryCount])", "#,##0");
+            SetSubtotalFormula(worksheet, 10, "=SUBTOTAL(109,AccountRows[DebitTurnover])", "#,##0.00;[Red]-#,##0.00");
+            SetSubtotalFormula(worksheet, 11, "=SUBTOTAL(109,AccountRows[CreditEntryCount])", "#,##0");
+            SetSubtotalFormula(worksheet, 12, "=SUBTOTAL(109,AccountRows[CreditTurnover])", "#,##0.00;[Red]-#,##0.00");
+            SetSubtotalFormula(worksheet, 13, "=SUBTOTAL(109,AccountRows[NetBalance])", "#,##0.00;[Red]-#,##0.00");
+            SetSubtotalFormula(worksheet, 14, "=SUBTOTAL(109,AccountRows[DebitBalance])", "#,##0.00;[Red]-#,##0.00");
+            SetSubtotalFormula(worksheet, 15, "=SUBTOTAL(109,AccountRows[CreditBalance])", "#,##0.00;[Red]-#,##0.00");
         }
 
         private static void SetSubtotalFormula(Excel.Worksheet worksheet, int columnNumber, string formula, string numberFormat)
@@ -193,9 +199,11 @@ namespace ExcelApiPoc.AddIn.Services
 
             SetMinimumColumnWidth(worksheet, 1, 14);
             SetMinimumColumnWidth(worksheet, 2, 30);
-            SetMinimumColumnWidth(worksheet, 3, 20);
-            SetMinimumColumnWidth(worksheet, 4, 22);
-            SetMinimumColumnWidth(worksheet, 5, 30);
+            SetMinimumColumnWidth(worksheet, 3, 22);
+            SetMinimumColumnWidth(worksheet, 4, 30);
+            SetMinimumColumnWidth(worksheet, 5, 20);
+            SetMinimumColumnWidth(worksheet, 6, 22);
+            SetMinimumColumnWidth(worksheet, 7, 30);
 
             Excel.Range accountCodeColumn = (Excel.Range)dataRange.Columns[1];
             Excel.Range accountNameColumn = (Excel.Range)dataRange.Columns[2];

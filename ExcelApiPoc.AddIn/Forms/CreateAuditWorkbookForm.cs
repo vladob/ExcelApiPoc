@@ -50,8 +50,8 @@ namespace ExcelApiPoc.AddIn.Forms
             journalBrowseButton.SetBounds(605, 18, 45, 25);
             journalBrowseButton.Click += JournalBrowseButton_Click;
 
-            // Accounts list
-            AddLabel("Accounts list:",15,62,145);
+            // Entity-specific accounting framework
+            AddLabel("Accounting framework:",15,62,145);
 
             _accountsPathTextBox = new TextBox();
             _accountsPathTextBox.SetBounds(165, 59, 430, 23);
@@ -188,7 +188,7 @@ namespace ExcelApiPoc.AddIn.Forms
         {
             using (var dialog = CreateOpenFileDialog())
             {
-                dialog.Title = "Select Accounts List";
+                dialog.Title = "Select Accounting Framework";
                 if (dialog.ShowDialog() == DialogResult.OK)
                 {
                     _accountsPathTextBox.Text = dialog.FileName;
@@ -292,12 +292,33 @@ namespace ExcelApiPoc.AddIn.Forms
                     throw new InvalidOperationException("No compatible journal importer was found.");
                 }
                 JournalImport journalImport =importer.Import(journalPath);
+                AccountingFrameworkImport accountingFrameworkImport = null;
+                AccountingFrameworkAccountEnrichmentResult accountingFrameworkEnrichment = null;
+
+                if (!string.IsNullOrWhiteSpace(accountsPath))
+                {
+                    accountingFrameworkImport =
+                        new IfoSoftCsvAccountingFrameworkImporter().Import(accountsPath);
+
+                    if (!string.Equals(accountingFrameworkImport.Ico, journalImport.Ico, StringComparison.Ordinal))
+                        throw new InvalidOperationException(
+                            "The accounting framework belongs to IČO " + accountingFrameworkImport.Ico +
+                            ", but the journal belongs to IČO " + journalImport.Ico + ".");
+
+                    if (accountingFrameworkImport.FiscalYear != selectedFiscalYear)
+                        throw new InvalidOperationException(
+                            "The accounting framework is for fiscal year " + accountingFrameworkImport.FiscalYear +
+                            ", but fiscal year " + selectedFiscalYear + " is selected.");
+                }
                 DateTime dateFrom = journalImport.Rows.Min(row => row.PostingDate);
                 DateTime dateTo = journalImport.Rows.Max(row => row.PostingDate);
                 List<AccountSummary> accountSummaries = JournalAccountSummaryBuilder.Build(journalImport);
                 AccountFrameworkLoadResult frameworkLoad = AccountFrameworkService.Load("GOV_LOCAL", selectedFiscalYear);
                 ApplicableAccountFrameworkResponse framework = frameworkLoad.Framework;
                 AccountFrameworkEnrichmentResult enrichmentResult = AccountFrameworkEnricher.Enrich(accountSummaries, framework);
+                if (accountingFrameworkImport != null)
+                    accountingFrameworkEnrichment = AccountingFrameworkAccountEnricher.Enrich(
+                        accountSummaries, accountingFrameworkImport);
 
                 decimal totalDebitTurnover = accountSummaries.Sum(account => account.DebitTurnover);
                 decimal totalCreditTurnover = accountSummaries.Sum(account => account.CreditTurnover);
@@ -366,6 +387,15 @@ namespace ExcelApiPoc.AddIn.Forms
                 if (enrichmentResult.InvalidSyntheticCodeCount > 0)
                     message.AppendLine($"Invalid account codes: " + $"{enrichmentResult.InvalidSyntheticCodeCount:N0}");
 
+                if (accountingFrameworkImport != null)
+                {
+                    message.AppendLine();
+                    message.AppendLine($"Accounting-framework rows: {accountingFrameworkImport.Rows.Count:N0}");
+                    message.AppendLine($"Accounts matched by exact code: {accountingFrameworkEnrichment.MatchedAccountCount:N0}");
+                    message.AppendLine($"Accounts absent from accounting framework: {accountingFrameworkEnrichment.UnmatchedAccountCount:N0}");
+                    message.AppendLine($"Normalized duplicate account codes: {accountingFrameworkEnrichment.DuplicateNormalizedAccountCount:N0}");
+                }
+
                 message.AppendLine();
                 message.AppendLine($"Account framework: " + $"{framework.FrameworkCode} / " + $"{framework.VersionCode}");
                 message.AppendLine($"Report template: " + $"{templatePackage.Template.TemplateErpId} / " + $"{templatePackage.Template.Name}");
@@ -387,7 +417,10 @@ namespace ExcelApiPoc.AddIn.Forms
                     rejectedRecordCount > 0 ||
                     journalDifference != 0 ||
                     enrichmentResult.UnmatchedCount > 0 ||
-                    enrichmentResult.InvalidSyntheticCodeCount > 0;
+                    enrichmentResult.InvalidSyntheticCodeCount > 0 ||
+                    (accountingFrameworkEnrichment != null &&
+                     (accountingFrameworkEnrichment.UnmatchedAccountCount > 0 ||
+                      accountingFrameworkEnrichment.ConflictingDuplicateAccountCount > 0));
                 MessageBoxIcon icon = hasWarning
                     ? MessageBoxIcon.Warning
                     : MessageBoxIcon.Information;
@@ -403,7 +436,8 @@ namespace ExcelApiPoc.AddIn.Forms
                     reportContext,
                     templatePackageLoad,
                     reportSelection,
-                    accountingEntityEnvelope);
+                    accountingEntityEnvelope,
+                    accountingFrameworkImport);
 
                 AuditWorkbookRecalculationDialog.Show(
                     AuditWorkbookRecalculationService.Recalculate(workbook));

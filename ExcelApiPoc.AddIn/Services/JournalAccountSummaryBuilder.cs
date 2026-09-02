@@ -61,6 +61,8 @@ namespace ExcelApiPoc.AddIn.Services
             {
                 AccountCode = normalizedCode,
                 AccountName = string.Empty,
+                AccountNameSource = "Synthetic",
+                EntityAccountName = string.Empty,
                 SyntheticAccountCode = GetSyntheticAccountCode(normalizedCode),
                 FrameworkAccountCode = string.Empty,
                 FrameworkAccountName = string.Empty,

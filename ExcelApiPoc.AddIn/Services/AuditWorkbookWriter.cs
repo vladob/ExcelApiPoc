@@ -16,7 +16,8 @@ namespace ExcelApiPoc.AddIn.Services
             AuditReportContext reportContext,
             AuditTemplatePackageLoadResult templatePackageLoad,
             RegisterUzFinancialReportSelection registerUzReportSelection,
-            AccountingEntityPackageEnvelope accountingEntityPackage)
+            AccountingEntityPackageEnvelope accountingEntityPackage,
+            AccountingFrameworkImport accountingFrameworkImport)
         {
             Excel.Application application =
                 (Excel.Application)ExcelDnaUtil.Application;
@@ -29,6 +30,10 @@ namespace ExcelApiPoc.AddIn.Services
                     JournalWorksheetWriter.AddWorksheet(workbook, journalImport);
 
                 AccountWorksheetWriter.AddWorksheet(workbook, accountSummaries);
+
+                if (accountingFrameworkImport != null)
+                    AccountingFrameworkWorksheetWriter.AddWorksheet(
+                        workbook, accountingFrameworkImport);
 
                 if (analyticalMapping != null && analyticalMapping.Rows.Count > 0)
                 {
@@ -57,7 +62,8 @@ namespace ExcelApiPoc.AddIn.Services
                     frameworkLoad,
                     templatePackage,
                     reportContext,
-                    templatePackageLoad);
+                    templatePackageLoad,
+                    accountingFrameworkImport);
 
                 journalWorksheet.Activate();
                 return workbook;
