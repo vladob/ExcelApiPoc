@@ -15,7 +15,8 @@ namespace ExcelApiPoc.AddIn.Services
             AuditTemplatePackageResponse templatePackage,
             AuditReportContext reportContext,
             AuditTemplatePackageLoadResult templatePackageLoad,
-            RegisterUzFinancialReportSelection registerUzReportSelection)
+            RegisterUzFinancialReportSelection registerUzReportSelection,
+            AccountingEntityPackageEnvelope accountingEntityPackage)
         {
             Excel.Application application =
                 (Excel.Application)ExcelDnaUtil.Application;
@@ -43,6 +44,9 @@ namespace ExcelApiPoc.AddIn.Services
 
                 RegisterUzReferenceWorksheetWriter.AddWorksheet(
                     workbook, registerUzReportSelection);
+
+                RegisterUzReportsWorksheetWriter.AddWorksheet(
+                    workbook, accountingEntityPackage);
 
                 ImportMetadataWorksheetWriter.AddWorksheet(
                     workbook,

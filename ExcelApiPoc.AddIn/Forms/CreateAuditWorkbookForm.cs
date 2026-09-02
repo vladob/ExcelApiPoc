@@ -402,7 +402,8 @@ namespace ExcelApiPoc.AddIn.Forms
                     templatePackage,
                     reportContext,
                     templatePackageLoad,
-                    reportSelection);
+                    reportSelection,
+                    accountingEntityEnvelope);
 
                 AuditWorkbookRecalculationDialog.Show(
                     AuditWorkbookRecalculationService.Recalculate(workbook));
