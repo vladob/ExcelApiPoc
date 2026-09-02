@@ -36,6 +36,9 @@ namespace ExcelApiPoc.AddIn.Services
             "CreditCostCenter",
             "CreditOrder",
 
+            "RecordKind",
+            "UsedForReportCalculation",
+
             "SourceRecordNumber",
             "SourceStartLineNumber",
             "SourceEndLineNumber",
@@ -63,7 +66,9 @@ namespace ExcelApiPoc.AddIn.Services
             18, // CreditCostCenter
             19, // CreditOrder
 
-            23  // SourceLocation
+            20, // RecordKind
+
+            25  // SourceLocation
         };
 
         public static Excel.Worksheet AddWorksheet(Excel.Workbook workbook,JournalImport journalImport)
@@ -156,11 +161,13 @@ namespace ExcelApiPoc.AddIn.Services
                 values[targetRow, 16] = row.CreditFundingSource;
                 values[targetRow, 17] = row.CreditCostCenter;
                 values[targetRow, 18] = row.CreditOrder;
-                values[targetRow, 19] = row.SourceRecordNumber;
-                values[targetRow, 20] = row.SourceStartLineNumber.HasValue ? (object)row.SourceStartLineNumber.Value : null;
-                values[targetRow, 21] = row.SourceEndLineNumber.HasValue ? (object)row.SourceEndLineNumber.Value : null;
-                values[targetRow, 22] = row.SourceLocation;
-                values[targetRow, 23] = row.TextNormalizationApplied;
+                values[targetRow, 19] = row.RecordKind.ToString();
+                values[targetRow, 20] = row.UsedForReportCalculation;
+                values[targetRow, 21] = row.SourceRecordNumber;
+                values[targetRow, 22] = row.SourceStartLineNumber.HasValue ? (object)row.SourceStartLineNumber.Value : null;
+                values[targetRow, 23] = row.SourceEndLineNumber.HasValue ? (object)row.SourceEndLineNumber.Value : null;
+                values[targetRow, 24] = row.SourceLocation;
+                values[targetRow, 25] = row.TextNormalizationApplied;
             }
             return values;
         }
@@ -185,9 +192,9 @@ namespace ExcelApiPoc.AddIn.Services
             Excel.Range postingDateColumn = (Excel.Range)dataRange.Columns[2];
             Excel.Range debitAmountColumn = (Excel.Range)dataRange.Columns[7];
             Excel.Range creditAmountColumn = (Excel.Range)dataRange.Columns[14];
-            Excel.Range sourceRecordColumn = (Excel.Range)dataRange.Columns[20];
-            Excel.Range sourceStartLineColumn = (Excel.Range)dataRange.Columns[21];
-            Excel.Range sourceEndLineColumn = (Excel.Range)dataRange.Columns[22];
+            Excel.Range sourceRecordColumn = (Excel.Range)dataRange.Columns[22];
+            Excel.Range sourceStartLineColumn = (Excel.Range)dataRange.Columns[23];
+            Excel.Range sourceEndLineColumn = (Excel.Range)dataRange.Columns[24];
 
             sequenceColumn.NumberFormat = "0";
             postingDateColumn.NumberFormat = "yyyy-mm-dd";
@@ -238,7 +245,7 @@ namespace ExcelApiPoc.AddIn.Services
 
             // Preserve row-level source traceability in the table,
             // but keep technical columns out of the auditor's default view.
-            Excel.Range technicalColumns = worksheet.Range["T:X"];
+            Excel.Range technicalColumns = worksheet.Range["V:Z"];
             technicalColumns.EntireColumn.Hidden = true;
         }
 

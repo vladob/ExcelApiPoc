@@ -2,6 +2,13 @@
 
 namespace ExcelApiPoc.AddIn.Models
 {
+    internal enum JournalRecordKind
+    {
+        Normal = 0,
+        Opening = 1,
+        Closing = 2
+    }
+
     internal sealed class JournalRow
     {
         public int SequenceNumber { get; set; }
@@ -14,6 +21,11 @@ namespace ExcelApiPoc.AddIn.Models
         public string DocumentNumber { get; set; }
         public DateTime PostingDate { get; set; }
         public string Description { get; set; }
+        public JournalRecordKind RecordKind { get; set; }
+        public bool UsedForReportCalculation
+        {
+            get { return RecordKind != JournalRecordKind.Closing; }
+        }
         public string DebitAccount { get; set; }
         public decimal? DebitAmount { get; set; }
         public string DebitSection { get; set; }

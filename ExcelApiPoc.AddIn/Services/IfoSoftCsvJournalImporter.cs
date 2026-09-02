@@ -147,7 +147,64 @@ namespace ExcelApiPoc.AddIn.Services
                 CreditAmount = ParseNullableDecimal(fields[16], source.Location, "credit amount")
             };
             row.TextNormalizationApplied = rowNormalized;
+            row.RecordKind = ClassifyRecord(row);
             return row;
+        }
+
+        private static JournalRecordKind ClassifyRecord(JournalRow row)
+        {
+            if (IsOpeningRecord(row))
+                return JournalRecordKind.Opening;
+
+            if (IsClosingRecord(row))
+                return JournalRecordKind.Closing;
+
+            return JournalRecordKind.Normal;
+        }
+
+        private static bool IsOpeningRecord(JournalRow row)
+        {
+            return
+                row.PostingDate.Month == 1 &&
+                row.PostingDate.Day == 1 &&
+                (IsSyntheticAccount(row.DebitAccount, "701") ||
+                 IsSyntheticAccount(row.CreditAccount, "701"));
+        }
+
+        private static bool IsClosingRecord(JournalRow row)
+        {
+            if (row.PostingDate.Month != 12 ||
+                row.PostingDate.Day != 31)
+            {
+                return false;
+            }
+
+            return
+                IsClosingAccount(row.DebitAccount) ||
+                IsClosingAccount(row.CreditAccount);
+        }
+
+        private static bool IsClosingAccount(string account)
+        {
+            return
+                IsSyntheticAccount(account, "702") ||
+                IsSyntheticAccount(account, "710");
+        }
+
+        private static bool IsSyntheticAccount(
+            string account,
+            string syntheticAccount)
+        {
+            if (string.IsNullOrWhiteSpace(account) ||
+                account.Length < 3)
+            {
+                return false;
+            }
+
+            return string.Equals(
+                account.Substring(0, 3),
+                syntheticAccount,
+                StringComparison.Ordinal);
         }
 
         private static string Normalize(string value, JournalImport journalImport, ref bool rowNormalized)
