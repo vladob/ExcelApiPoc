@@ -22,10 +22,23 @@ namespace ExcelApiPoc.AddIn.Services
                     SyntheticAccountCode = AuditWorkbookTableReader.GetString(row, "SyntheticAccountCode"),
                     FrameworkAccountCode = AuditWorkbookTableReader.GetString(row, "FrameworkAccountCode"),
                     FrameworkAccountName = AuditWorkbookTableReader.GetString(row, "FrameworkAccountName"),
+                    GeneralLedgerAccountName = AuditWorkbookTableReader.GetString(row, "GeneralLedgerAccountName"),
+                    AccountNameComparisonStatus = AuditWorkbookTableReader.GetString(row, "AccountNameComparisonStatus"),
                     DebitEntryCount = AuditWorkbookTableReader.GetInt32(row, "DebitEntryCount"),
                     DebitTurnover = AuditWorkbookTableReader.GetDecimal(row, "DebitTurnover"),
                     CreditEntryCount = AuditWorkbookTableReader.GetInt32(row, "CreditEntryCount"),
-                    CreditTurnover = AuditWorkbookTableReader.GetDecimal(row, "CreditTurnover")
+                    CreditTurnover = AuditWorkbookTableReader.GetDecimal(row, "CreditTurnover"),
+                    JournalLedgerOpeningDebit = AuditWorkbookTableReader.GetDecimal(row, "JournalLedgerOpeningDebit"),
+                    JournalLedgerOpeningCredit = AuditWorkbookTableReader.GetDecimal(row, "JournalLedgerOpeningCredit"),
+                    JournalLedgerDebitTurnover = AuditWorkbookTableReader.GetDecimal(row, "JournalLedgerDebitTurnover"),
+                    JournalLedgerCreditTurnover = AuditWorkbookTableReader.GetDecimal(row, "JournalLedgerCreditTurnover"),
+                    LedgerOpeningDebit = AuditWorkbookTableReader.GetDecimal(row, "LedgerOpeningDebit"),
+                    LedgerOpeningCredit = AuditWorkbookTableReader.GetDecimal(row, "LedgerOpeningCredit"),
+                    LedgerDebitTurnover = AuditWorkbookTableReader.GetDecimal(row, "LedgerDebitTurnover"),
+                    LedgerCreditTurnover = AuditWorkbookTableReader.GetDecimal(row, "LedgerCreditTurnover"),
+                    LedgerClosingDebit = AuditWorkbookTableReader.GetDecimal(row, "LedgerClosingDebit"),
+                    LedgerClosingCredit = AuditWorkbookTableReader.GetDecimal(row, "LedgerClosingCredit"),
+                    LedgerReconciliationStatus = AuditWorkbookTableReader.GetString(row, "LedgerReconciliationStatus")
                 });
             }
             return result;

@@ -50,7 +50,7 @@ namespace ExcelApiPoc.AddIn.Services
 
         private static AccountSummary GetOrCreate(IDictionary<string, AccountSummary> accounts,string accountCode)
         {
-            string normalizedCode = accountCode.Trim();
+            string normalizedCode = AccountCodeNormalizer.Normalize(accountCode);
 
             if (accounts.TryGetValue(normalizedCode, out AccountSummary account))
             {

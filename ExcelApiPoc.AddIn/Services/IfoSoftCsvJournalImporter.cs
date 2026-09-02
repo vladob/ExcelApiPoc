@@ -180,8 +180,34 @@ namespace ExcelApiPoc.AddIn.Services
             }
 
             return
+                IsIfoSoftClosingOperation(row) ||
                 IsClosingAccount(row.DebitAccount) ||
                 IsClosingAccount(row.CreditAccount);
+        }
+
+        private static bool IsIfoSoftClosingOperation(JournalRow row)
+        {
+            if (!string.Equals(row.DocumentType, "ID", StringComparison.OrdinalIgnoreCase))
+                return false;
+
+            string description = row.Description ?? string.Empty;
+            switch (row.DocumentNumber)
+            {
+                case "999990":
+                    return description.StartsWith(
+                        "Uzatvorenie účtov - PRÍJEM/VÝDAJ za",
+                        StringComparison.OrdinalIgnoreCase);
+                case "999998":
+                    return description.StartsWith(
+                        "Výsledok hospodárenia za",
+                        StringComparison.OrdinalIgnoreCase);
+                case "999999":
+                    return description.StartsWith(
+                        "Uzatvorenie účtovných kníh",
+                        StringComparison.OrdinalIgnoreCase);
+                default:
+                    return false;
+            }
         }
 
         private static bool IsClosingAccount(string account)

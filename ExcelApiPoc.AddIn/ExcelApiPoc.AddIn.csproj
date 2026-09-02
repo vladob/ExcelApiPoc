@@ -171,6 +171,7 @@
     <Compile Include="Models\AuditTemplateMetadataResponse.cs" />
     <Compile Include="Models\AuditTemplatePackageResponse.cs" />
     <Compile Include="Models\AuditWorkbookRecalculationResult.cs" />
+    <Compile Include="Models\GeneralLedgerImport.cs" />
     <Compile Include="Models\JournalDetectionResult.cs" />
     <Compile Include="Models\JournalImport.cs" />
     <Compile Include="Models\JournalRow.cs" />
@@ -178,6 +179,7 @@
     <Compile Include="Models\RegisterUzReportListRow.cs" />
     <Compile Include="PocRibbon.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Services\AccountCodeNormalizer.cs" />
     <Compile Include="Services\AccountFrameworkCache.cs" />
     <Compile Include="Services\AccountFrameworkEnricher.cs" />
     <Compile Include="Services\AccountFrameworkService.cs" />
@@ -202,7 +204,10 @@
     <Compile Include="Services\AuditWorkbookRecalculationService.cs" />
     <Compile Include="Services\AuditWorkbookTableReader.cs" />
     <Compile Include="Services\AuditWorkbookWriter.cs" />
+    <Compile Include="Services\GeneralLedgerReconciliationService.cs" />
+    <Compile Include="Services\GeneralLedgerWorksheetWriter.cs" />
     <Compile Include="Services\IfoSoftCsvAccountingFrameworkImporter.cs" />
+    <Compile Include="Services\IfoSoftCsvGeneralLedgerImporter.cs" />
     <Compile Include="Services\IfoSoftCsvJournalDetector.cs" />
     <Compile Include="Services\IfoSoftCsvJournalImporter.cs" />
     <Compile Include="Services\IJournalImporter.cs" />

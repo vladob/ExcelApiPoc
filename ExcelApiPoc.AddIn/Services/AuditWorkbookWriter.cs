@@ -17,7 +17,8 @@ namespace ExcelApiPoc.AddIn.Services
             AuditTemplatePackageLoadResult templatePackageLoad,
             RegisterUzFinancialReportSelection registerUzReportSelection,
             AccountingEntityPackageEnvelope accountingEntityPackage,
-            AccountingFrameworkImport accountingFrameworkImport)
+            AccountingFrameworkImport accountingFrameworkImport,
+            GeneralLedgerImport generalLedgerImport)
         {
             Excel.Application application =
                 (Excel.Application)ExcelDnaUtil.Application;
@@ -34,6 +35,10 @@ namespace ExcelApiPoc.AddIn.Services
                 if (accountingFrameworkImport != null)
                     AccountingFrameworkWorksheetWriter.AddWorksheet(
                         workbook, accountingFrameworkImport);
+
+                if (generalLedgerImport != null)
+                    GeneralLedgerWorksheetWriter.AddWorksheet(
+                        workbook, generalLedgerImport);
 
                 if (analyticalMapping != null && analyticalMapping.Rows.Count > 0)
                 {
@@ -63,7 +68,8 @@ namespace ExcelApiPoc.AddIn.Services
                     templatePackage,
                     reportContext,
                     templatePackageLoad,
-                    accountingFrameworkImport);
+                    accountingFrameworkImport,
+                    generalLedgerImport);
 
                 journalWorksheet.Activate();
                 return workbook;

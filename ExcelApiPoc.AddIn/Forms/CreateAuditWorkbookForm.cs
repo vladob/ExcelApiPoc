@@ -17,6 +17,7 @@ namespace ExcelApiPoc.AddIn.Forms
     {
         private readonly TextBox _journalPathTextBox;
         private readonly TextBox _accountsPathTextBox;
+        private readonly TextBox _generalLedgerPathTextBox;
         private readonly ComboBox _technicalTypeComboBox;
         private readonly ComboBox _accountingFormatComboBox;
         private readonly TextBox _icoTextBox;
@@ -32,7 +33,7 @@ namespace ExcelApiPoc.AddIn.Forms
             MinimizeBox = false;
             ShowInTaskbar = false;
             Width = 690;
-            Height = 410;
+            Height = 460;
 
             // Accounting journal
             AddLabel("Accounting journal: *",15,22,145);
@@ -72,53 +73,66 @@ namespace ExcelApiPoc.AddIn.Forms
 
             accountsOptionalLabel.SetBounds(165, 85, 100, 20);
 
+            // General ledger
+            AddLabel("General ledger:",15,112,145);
+
+            _generalLedgerPathTextBox = new TextBox();
+            _generalLedgerPathTextBox.SetBounds(165,109,430,23);
+
+            var generalLedgerBrowseButton = new Button { Text = "..." };
+            generalLedgerBrowseButton.SetBounds(605,108,45,25);
+            generalLedgerBrowseButton.Click += GeneralLedgerBrowseButton_Click;
+
+            var generalLedgerOptionalLabel = new Label { Text = "Optional", AutoSize = true };
+            generalLedgerOptionalLabel.SetBounds(165,135,100,20);
+
             // Technical file type
-            AddLabel("Technical type:",15,125,145);
+            AddLabel("Technical type:",15,175,145);
 
             _technicalTypeComboBox = new ComboBox
             {
                 DropDownStyle = ComboBoxStyle.DropDownList
             };
 
-            _technicalTypeComboBox.SetBounds(165,122,200,25);
+            _technicalTypeComboBox.SetBounds(165,172,200,25);
 
             _technicalTypeComboBox.Items.AddRange(new object[] {"Unknown", "CSV", "XML", "JSON", "PDF", "Excel"});
 
             _technicalTypeComboBox.SelectedIndex = 0;
 
             // Accounting-system format
-            AddLabel("Accounting format:",15,165,145);
+            AddLabel("Accounting format:",15,215,145);
 
             _accountingFormatComboBox = new ComboBox
             {
                 DropDownStyle = ComboBoxStyle.DropDownList
             };
 
-            _accountingFormatComboBox.SetBounds(165,162,200,25);
+            _accountingFormatComboBox.SetBounds(165,212,200,25);
 
             _accountingFormatComboBox.Items.AddRange(new object[] {"Unknown", "IfoSoft", "MkSoft", "Pohoda"});
 
             _accountingFormatComboBox.SelectedIndex = 0;
 
             // IČO
-            AddLabel("IČO:",15,205,145);
+            AddLabel("IČO:",15,255,145);
 
             _icoTextBox = new TextBox
             {
                 MaxLength = 8
             };
 
-            _icoTextBox.SetBounds(165, 202, 200, 23);
+            _icoTextBox.SetBounds(165, 252, 200, 23);
 
             // Fiscal year
-            AddLabel("Fiscal year:",15,245,145);
+            AddLabel("Fiscal year:",15,295,145);
 
             _fiscalYearTextBox = new TextBox
             {
                 MaxLength = 4
             };
 
-            _fiscalYearTextBox.SetBounds(165,242,100,23);
+            _fiscalYearTextBox.SetBounds(165,292,100,23);
 
             // Bottom buttons
             var settingsButton = new Button
@@ -126,7 +140,7 @@ namespace ExcelApiPoc.AddIn.Forms
                 Text = "Settings..."
             };
 
-            settingsButton.SetBounds(15, 310, 105, 30);
+            settingsButton.SetBounds(15, 360, 105, 30);
             settingsButton.Click += SettingsButton_Click;
 
             var cancelButton = new Button
@@ -135,7 +149,7 @@ namespace ExcelApiPoc.AddIn.Forms
                 DialogResult = DialogResult.Cancel
             };
 
-            cancelButton.SetBounds(470, 310, 85, 30);
+            cancelButton.SetBounds(470, 360, 85, 30);
 
             _continueButton = new Button
             {
@@ -143,7 +157,7 @@ namespace ExcelApiPoc.AddIn.Forms
                 Enabled = false
             };
 
-            _continueButton.SetBounds(565, 310, 85, 30);
+            _continueButton.SetBounds(565, 360, 85, 30);
             _continueButton.Click += ContinueButton_Click;
 
             Controls.Add(_journalPathTextBox);
@@ -151,6 +165,9 @@ namespace ExcelApiPoc.AddIn.Forms
             Controls.Add(_accountsPathTextBox);
             Controls.Add(accountsBrowseButton);
             Controls.Add(accountsOptionalLabel);
+            Controls.Add(_generalLedgerPathTextBox);
+            Controls.Add(generalLedgerBrowseButton);
+            Controls.Add(generalLedgerOptionalLabel);
             Controls.Add(_technicalTypeComboBox);
             Controls.Add(_accountingFormatComboBox);
             Controls.Add(_icoTextBox);
@@ -193,6 +210,16 @@ namespace ExcelApiPoc.AddIn.Forms
                 {
                     _accountsPathTextBox.Text = dialog.FileName;
                 }
+            }
+        }
+
+        private void GeneralLedgerBrowseButton_Click(object sender, EventArgs e)
+        {
+            using (var dialog = CreateOpenFileDialog())
+            {
+                dialog.Title = "Select General Ledger";
+                if (dialog.ShowDialog() == DialogResult.OK)
+                    _generalLedgerPathTextBox.Text = dialog.FileName;
             }
         }
 
@@ -269,11 +296,14 @@ namespace ExcelApiPoc.AddIn.Forms
                 }
 
                 string accountsPath = _accountsPathTextBox.Text.Trim();
+                string generalLedgerPath = _generalLedgerPathTextBox.Text.Trim();
 
                 if (!string.IsNullOrWhiteSpace(accountsPath) && !File.Exists(accountsPath))
                 {
                     throw new InvalidOperationException( "The selected accounts-list file does not exist.");
                 }
+                if (!string.IsNullOrWhiteSpace(generalLedgerPath) && !File.Exists(generalLedgerPath))
+                    throw new InvalidOperationException("The selected general-ledger file does not exist.");
 
                 if (!string.Equals(_accountingFormatComboBox.Text, "IfoSoft", StringComparison.OrdinalIgnoreCase))
                 {
@@ -294,6 +324,21 @@ namespace ExcelApiPoc.AddIn.Forms
                 JournalImport journalImport =importer.Import(journalPath);
                 AccountingFrameworkImport accountingFrameworkImport = null;
                 AccountingFrameworkAccountEnrichmentResult accountingFrameworkEnrichment = null;
+                GeneralLedgerImport generalLedgerImport = null;
+                GeneralLedgerReconciliationResult generalLedgerReconciliation = null;
+
+                if (!string.IsNullOrWhiteSpace(generalLedgerPath))
+                {
+                    generalLedgerImport = new IfoSoftCsvGeneralLedgerImporter().Import(generalLedgerPath);
+                    if (!string.Equals(generalLedgerImport.Ico, journalImport.Ico, StringComparison.Ordinal))
+                        throw new InvalidOperationException(
+                            "The general ledger belongs to IČO " + generalLedgerImport.Ico +
+                            ", but the journal belongs to IČO " + journalImport.Ico + ".");
+                    if (generalLedgerImport.FiscalYear != selectedFiscalYear)
+                        throw new InvalidOperationException(
+                            "The general ledger is for fiscal year " + generalLedgerImport.FiscalYear +
+                            ", but fiscal year " + selectedFiscalYear + " is selected.");
+                }
 
                 if (!string.IsNullOrWhiteSpace(accountsPath))
                 {
@@ -313,12 +358,18 @@ namespace ExcelApiPoc.AddIn.Forms
                 DateTime dateFrom = journalImport.Rows.Min(row => row.PostingDate);
                 DateTime dateTo = journalImport.Rows.Max(row => row.PostingDate);
                 List<AccountSummary> accountSummaries = JournalAccountSummaryBuilder.Build(journalImport);
+                int journalReportAccountCount = accountSummaries.Count;
+                if (generalLedgerImport != null)
+                    generalLedgerReconciliation = GeneralLedgerReconciliationService.Reconcile(
+                        journalImport, generalLedgerImport, accountSummaries);
                 AccountFrameworkLoadResult frameworkLoad = AccountFrameworkService.Load("GOV_LOCAL", selectedFiscalYear);
                 ApplicableAccountFrameworkResponse framework = frameworkLoad.Framework;
                 AccountFrameworkEnrichmentResult enrichmentResult = AccountFrameworkEnricher.Enrich(accountSummaries, framework);
                 if (accountingFrameworkImport != null)
                     accountingFrameworkEnrichment = AccountingFrameworkAccountEnricher.Enrich(
                         accountSummaries, accountingFrameworkImport);
+                if (generalLedgerImport != null)
+                    GeneralLedgerReconciliationService.ResolveNames(accountSummaries, generalLedgerImport);
 
                 decimal totalDebitTurnover = accountSummaries.Sum(account => account.DebitTurnover);
                 decimal totalCreditTurnover = accountSummaries.Sum(account => account.CreditTurnover);
@@ -373,7 +424,7 @@ namespace ExcelApiPoc.AddIn.Forms
                 message.AppendLine();
                 message.AppendLine($"Source records: {journalImport.Rows.Count:N0}");
                 message.AppendLine($"Rejected records: {rejectedRecordCount:N0}");
-                message.AppendLine($"Distinct accounts: {accountSummaries.Count:N0}");
+                message.AppendLine($"Distinct journal report accounts: {journalReportAccountCount:N0}");
 
                 message.AppendLine();
                 message.AppendLine($"Debit turnover: {totalDebitTurnover:N2}");
@@ -394,6 +445,22 @@ namespace ExcelApiPoc.AddIn.Forms
                     message.AppendLine($"Accounts matched by exact code: {accountingFrameworkEnrichment.MatchedAccountCount:N0}");
                     message.AppendLine($"Accounts absent from accounting framework: {accountingFrameworkEnrichment.UnmatchedAccountCount:N0}");
                     message.AppendLine($"Normalized duplicate account codes: {accountingFrameworkEnrichment.DuplicateNormalizedAccountCount:N0}");
+                }
+
+                if (generalLedgerImport != null)
+                {
+                    message.AppendLine();
+                    message.AppendLine($"General-ledger rows: {generalLedgerImport.Rows.Count:N0}");
+                    message.AppendLine($"Journal accounts: {generalLedgerReconciliation.JournalAccountCount:N0}");
+                    message.AppendLine($"General-ledger accounts: {generalLedgerReconciliation.LedgerAccountCount:N0}");
+                    message.AppendLine($"Matched accounts: {generalLedgerReconciliation.MatchedAccountCount:N0}");
+                    message.AppendLine($"Journal-only accounts: {generalLedgerReconciliation.JournalOnlyAccountCount:N0}");
+                    message.AppendLine($"Ledger-only accounts: {generalLedgerReconciliation.LedgerOnlyAccountCount:N0}");
+                    message.AppendLine($"Reconciled accounts: {generalLedgerReconciliation.ReconciledAccountCount:N0}");
+                    message.AppendLine($"Accounts with differences: {generalLedgerReconciliation.DifferentAccountCount:N0}");
+                    message.AppendLine($"Debit-turnover difference: {generalLedgerReconciliation.DebitTurnoverDifference:N2}");
+                    message.AppendLine($"Credit-turnover difference: {generalLedgerReconciliation.CreditTurnoverDifference:N2}");
+                    message.AppendLine($"Closing-balance difference: {generalLedgerReconciliation.ClosingBalanceDifference:N2}");
                 }
 
                 message.AppendLine();
@@ -421,6 +488,8 @@ namespace ExcelApiPoc.AddIn.Forms
                     (accountingFrameworkEnrichment != null &&
                      (accountingFrameworkEnrichment.UnmatchedAccountCount > 0 ||
                       accountingFrameworkEnrichment.ConflictingDuplicateAccountCount > 0));
+                hasWarning = hasWarning ||
+                    (generalLedgerReconciliation != null && !generalLedgerReconciliation.IsReconciled);
                 MessageBoxIcon icon = hasWarning
                     ? MessageBoxIcon.Warning
                     : MessageBoxIcon.Information;
@@ -437,7 +506,8 @@ namespace ExcelApiPoc.AddIn.Forms
                     templatePackageLoad,
                     reportSelection,
                     accountingEntityEnvelope,
-                    accountingFrameworkImport);
+                    accountingFrameworkImport,
+                    generalLedgerImport);
 
                 AuditWorkbookRecalculationDialog.Show(
                     AuditWorkbookRecalculationService.Recalculate(workbook));

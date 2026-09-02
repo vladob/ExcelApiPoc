@@ -52,7 +52,16 @@ namespace ExcelApiPoc.AddIn.Services
             "AccountingFrameworkFiscalYear",
             "AccountingFrameworkImportedAtUtc",
             "AccountingFrameworkRecordCount",
-            "AccountingFrameworkNormalizedTextFieldCount"
+            "AccountingFrameworkNormalizedTextFieldCount",
+            "GeneralLedgerSourceFileName",
+            "GeneralLedgerSourceFilePath",
+            "GeneralLedgerSourceFileHash",
+            "GeneralLedgerIco",
+            "GeneralLedgerFiscalYear",
+            "GeneralLedgerThroughMonth",
+            "GeneralLedgerImportedAtUtc",
+            "GeneralLedgerRecordCount",
+            "GeneralLedgerNormalizedTextFieldCount"
         };
 
         public static Excel.Worksheet AddWorksheet(
@@ -62,7 +71,8 @@ namespace ExcelApiPoc.AddIn.Services
             AuditTemplatePackageResponse templatePackage,
             AuditReportContext reportContext,
             AuditTemplatePackageLoadResult templatePackageLoad,
-            AccountingFrameworkImport accountingFrameworkImport)
+            AccountingFrameworkImport accountingFrameworkImport,
+            GeneralLedgerImport generalLedgerImport)
         {
             if (workbook == null)
             {
@@ -147,6 +157,18 @@ namespace ExcelApiPoc.AddIn.Services
                 values[1, 39] = accountingFrameworkImport.Rows.Count;
                 values[1, 40] = accountingFrameworkImport.NormalizedTextFieldCount;
             }
+            if (generalLedgerImport != null)
+            {
+                values[1, 41] = generalLedgerImport.SourceFileName;
+                values[1, 42] = generalLedgerImport.SourceFilePath;
+                values[1, 43] = generalLedgerImport.SourceFileHash;
+                values[1, 44] = generalLedgerImport.Ico;
+                values[1, 45] = generalLedgerImport.FiscalYear;
+                values[1, 46] = generalLedgerImport.ThroughMonth;
+                values[1, 47] = generalLedgerImport.ImportedAtUtc;
+                values[1, 48] = generalLedgerImport.Rows.Count;
+                values[1, 49] = generalLedgerImport.NormalizedTextFieldCount;
+            }
 
             Excel.Range firstCell = (Excel.Range)worksheet.Cells[1, 1];
             Excel.Range lastCell = (Excel.Range)worksheet.Cells[2, Headers.Length];
@@ -158,7 +180,8 @@ namespace ExcelApiPoc.AddIn.Services
                 1, 2, 3, 4, 5, 6, 7, 8,
                 17, 18, 20, 21, 22,
                 26, 27, 28, 29, 30, 31, 32, 33,
-                34, 35, 36, 37
+                34, 35, 36, 37,
+                42, 43, 44, 45
             };
 
             foreach (int columnNumber in textColumns)
@@ -195,6 +218,11 @@ namespace ExcelApiPoc.AddIn.Services
             ((Excel.Range)worksheet.Cells[2, 39]).NumberFormat = "yyyy-mm-dd hh:mm:ss";
             ((Excel.Range)worksheet.Cells[2, 40]).NumberFormat = "#,##0";
             ((Excel.Range)worksheet.Cells[2, 41]).NumberFormat = "#,##0";
+            ((Excel.Range)worksheet.Cells[2, 46]).NumberFormat = "0";
+            ((Excel.Range)worksheet.Cells[2, 47]).NumberFormat = "0";
+            ((Excel.Range)worksheet.Cells[2, 48]).NumberFormat = "yyyy-mm-dd hh:mm:ss";
+            ((Excel.Range)worksheet.Cells[2, 49]).NumberFormat = "#,##0";
+            ((Excel.Range)worksheet.Cells[2, 50]).NumberFormat = "#,##0";
 
             Excel.ListObject table = worksheet.ListObjects.Add(Excel.XlListObjectSourceType.xlSrcRange, tableRange, Type.Missing, Excel.XlYesNoGuess.xlYes, Type.Missing);
             table.Name = TableName;

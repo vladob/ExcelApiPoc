@@ -61,7 +61,7 @@ namespace ExcelApiPoc.AddIn.Services
                 dateFrom.Year == fiscalYear && dateTo.Year == fiscalYear;
             DateTime checkedAtUtc = DateTime.UtcNow;
 
-            ValidationRow[] rows =
+            var rows = new List<ValidationRow>
             {
                 Check(
                     "Journal", "FiscalYearMatches", fiscalYearMatches,
@@ -123,6 +123,44 @@ namespace ExcelApiPoc.AddIn.Services
                         "The report calculation requires additional analytical mapping.",
                     checkedAtUtc)
             };
+
+            bool hasGeneralLedger = accounts.Any(account =>
+                !string.IsNullOrWhiteSpace(account.LedgerReconciliationStatus));
+            if (hasGeneralLedger)
+            {
+                int journalOnly = accounts.Count(account =>
+                    account.LedgerReconciliationStatus == "JournalOnly");
+                int ledgerOnly = accounts.Count(account =>
+                    account.LedgerReconciliationStatus == "LedgerOnly");
+                int different = accounts.Count(account =>
+                    account.LedgerReconciliationStatus == "Different");
+                decimal closingDifference = accounts.Sum(account =>
+                    account.ClosingBalanceDifference);
+
+                rows.Add(Check(
+                    "GeneralLedger", "AccountCoverage",
+                    journalOnly == 0 && ledgerOnly == 0,
+                    $"JournalOnly={journalOnly}; LedgerOnly={ledgerOnly}",
+                    "JournalOnly=0; LedgerOnly=0",
+                    journalOnly == 0 && ledgerOnly == 0 ? string.Empty :
+                        "Journal and imported general-ledger account sets differ.",
+                    checkedAtUtc));
+                rows.Add(Check(
+                    "GeneralLedger", "AccountAmountsReconciled",
+                    different == 0,
+                    different.ToString(CultureInfo.InvariantCulture), "0",
+                    different == 0 ? string.Empty :
+                        "One or more account-level ledger amounts differ.",
+                    checkedAtUtc));
+                rows.Add(Check(
+                    "GeneralLedger", "ClosingBalanceReconciled",
+                    Math.Abs(closingDifference) <= 0.01m,
+                    closingDifference.ToString("0.00", CultureInfo.InvariantCulture),
+                    "0.00",
+                    Math.Abs(closingDifference) <= 0.01m ? string.Empty :
+                        "The aggregate closing balance differs.",
+                    checkedAtUtc));
+            }
 
             WriteTable(FindMetadataWorksheet(workbook), rows);
         }

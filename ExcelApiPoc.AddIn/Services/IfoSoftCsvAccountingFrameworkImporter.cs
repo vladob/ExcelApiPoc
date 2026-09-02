@@ -83,7 +83,7 @@ namespace ExcelApiPoc.AddIn.Services
         private static string CreateAccountCode(string synthetic, string analytical)
         {
             if (string.IsNullOrWhiteSpace(synthetic) || analytical == "****") return string.Empty;
-            return synthetic + analytical;
+            return AccountCodeNormalizer.Normalize(synthetic + analytical);
         }
 
         private static AccountingFrameworkRowKind Classify(string synthetic, string analytical)

@@ -29,7 +29,26 @@ namespace ExcelApiPoc.AddIn.Services
             "CreditTurnover",
             "NetBalance",
             "DebitBalance",
-            "CreditBalance"
+            "CreditBalance",
+            "GeneralLedgerAccountName",
+            "AccountNameComparisonStatus",
+            "JournalLedgerOpeningDebit",
+            "JournalLedgerOpeningCredit",
+            "JournalLedgerDebitTurnover",
+            "JournalLedgerCreditTurnover",
+            "JournalLedgerClosingBalance",
+            "LedgerOpeningDebit",
+            "LedgerOpeningCredit",
+            "LedgerDebitTurnover",
+            "LedgerCreditTurnover",
+            "LedgerClosingDebit",
+            "LedgerClosingCredit",
+            "OpeningDebitDifference",
+            "OpeningCreditDifference",
+            "DebitTurnoverDifference",
+            "CreditTurnoverDifference",
+            "ClosingBalanceDifference",
+            "LedgerReconciliationStatus"
         };
 
         private static readonly int[] TextColumns =
@@ -40,7 +59,10 @@ namespace ExcelApiPoc.AddIn.Services
             4, // EntityAccountName
             5, // SyntheticAccountCode
             6, // FrameworkAccountCode
-            7  // FrameworkAccountName
+            7, // FrameworkAccountName
+            16, // GeneralLedgerAccountName
+            17, // AccountNameComparisonStatus
+            34  // LedgerReconciliationStatus
         };
 
         public static Excel.Worksheet AddWorksheet(Excel.Workbook workbook,IReadOnlyList<AccountSummary> accounts)
@@ -126,6 +148,25 @@ namespace ExcelApiPoc.AddIn.Services
                 values[targetRow, 12] = ToExcelNumber(account.NetBalance);
                 values[targetRow, 13] = ToExcelNumber(account.DebitBalance);
                 values[targetRow, 14] = ToExcelNumber(account.CreditBalance);
+                values[targetRow, 15] = account.GeneralLedgerAccountName;
+                values[targetRow, 16] = account.AccountNameComparisonStatus;
+                values[targetRow, 17] = ToExcelNumber(account.JournalLedgerOpeningDebit);
+                values[targetRow, 18] = ToExcelNumber(account.JournalLedgerOpeningCredit);
+                values[targetRow, 19] = ToExcelNumber(account.JournalLedgerDebitTurnover);
+                values[targetRow, 20] = ToExcelNumber(account.JournalLedgerCreditTurnover);
+                values[targetRow, 21] = ToExcelNumber(account.JournalLedgerClosingBalance);
+                values[targetRow, 22] = ToExcelNumber(account.LedgerOpeningDebit);
+                values[targetRow, 23] = ToExcelNumber(account.LedgerOpeningCredit);
+                values[targetRow, 24] = ToExcelNumber(account.LedgerDebitTurnover);
+                values[targetRow, 25] = ToExcelNumber(account.LedgerCreditTurnover);
+                values[targetRow, 26] = ToExcelNumber(account.LedgerClosingDebit);
+                values[targetRow, 27] = ToExcelNumber(account.LedgerClosingCredit);
+                values[targetRow, 28] = ToExcelNumber(account.OpeningDebitDifference);
+                values[targetRow, 29] = ToExcelNumber(account.OpeningCreditDifference);
+                values[targetRow, 30] = ToExcelNumber(account.DebitTurnoverDifference);
+                values[targetRow, 31] = ToExcelNumber(account.CreditTurnoverDifference);
+                values[targetRow, 32] = ToExcelNumber(account.ClosingBalanceDifference);
+                values[targetRow, 33] = account.LedgerReconciliationStatus;
             }
 
             return values;
@@ -159,6 +200,9 @@ namespace ExcelApiPoc.AddIn.Services
                 Excel.Range amountColumn = (Excel.Range)dataRange.Columns[columnNumber];
                 amountColumn.NumberFormat = "#,##0.00;[Red]-#,##0.00";
             }
+            for (int columnNumber = 18; columnNumber <= 33; columnNumber++)
+                ((Excel.Range)dataRange.Columns[columnNumber]).NumberFormat =
+                    "#,##0.00;[Red]-#,##0.00";
         }
 
         private static void AddSubtotalFormulas(Excel.Worksheet worksheet)
@@ -171,6 +215,12 @@ namespace ExcelApiPoc.AddIn.Services
             SetSubtotalFormula(worksheet, 13, "=SUBTOTAL(109,AccountRows[NetBalance])", "#,##0.00;[Red]-#,##0.00");
             SetSubtotalFormula(worksheet, 14, "=SUBTOTAL(109,AccountRows[DebitBalance])", "#,##0.00;[Red]-#,##0.00");
             SetSubtotalFormula(worksheet, 15, "=SUBTOTAL(109,AccountRows[CreditBalance])", "#,##0.00;[Red]-#,##0.00");
+            for (int columnNumber = 18; columnNumber <= 33; columnNumber++)
+                SetSubtotalFormula(
+                    worksheet,
+                    columnNumber,
+                    "=SUBTOTAL(109,AccountRows[" + Headers[columnNumber - 1] + "])",
+                    "#,##0.00;[Red]-#,##0.00");
         }
 
         private static void SetSubtotalFormula(Excel.Worksheet worksheet, int columnNumber, string formula, string numberFormat)
@@ -204,6 +254,9 @@ namespace ExcelApiPoc.AddIn.Services
             SetMinimumColumnWidth(worksheet, 5, 20);
             SetMinimumColumnWidth(worksheet, 6, 22);
             SetMinimumColumnWidth(worksheet, 7, 30);
+            SetMinimumColumnWidth(worksheet, 16, 30);
+            SetMinimumColumnWidth(worksheet, 17, 24);
+            SetMinimumColumnWidth(worksheet, 34, 24);
 
             Excel.Range accountCodeColumn = (Excel.Range)dataRange.Columns[1];
             Excel.Range accountNameColumn = (Excel.Range)dataRange.Columns[2];
