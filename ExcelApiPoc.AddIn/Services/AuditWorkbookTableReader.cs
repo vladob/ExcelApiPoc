@@ -11,7 +11,6 @@ namespace ExcelApiPoc.AddIn.Services
         {
             Excel.ListObject table = FindTable(workbook, tableName);
             var rows = new List<IDictionary<string, object>>();
-
             if (table.DataBodyRange == null)
                 return rows;
 
@@ -20,7 +19,6 @@ namespace ExcelApiPoc.AddIn.Services
 
             for (int columnIndex = 1; columnIndex <= table.ListColumns.Count; columnIndex++)
                 headers[columnIndex - 1] = table.ListColumns[columnIndex].Name;
-
             for (int rowIndex = 1; rowIndex <= table.DataBodyRange.Rows.Count; rowIndex++)
             {
                 var row = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
@@ -31,18 +29,36 @@ namespace ExcelApiPoc.AddIn.Services
             return rows;
         }
 
+        public static bool ContainsTable(Excel.Workbook workbook, string tableName)
+        {
+            if (workbook == null)
+                throw new ArgumentNullException(nameof(workbook));
+
+            if (string.IsNullOrWhiteSpace(tableName))
+                throw new ArgumentException("Table name is required.", nameof(tableName));
+
+            foreach (Excel.Worksheet worksheet in workbook.Worksheets)
+            {
+                foreach (Excel.ListObject table in worksheet.ListObjects)
+                {
+                    if (string.Equals(table.Name, tableName, StringComparison.OrdinalIgnoreCase))
+                        return true;
+                }
+            }
+
+            return false;
+        }
+
         public static string GetString(IDictionary<string, object> row, string columnName)
         {
             object value = GetValue(row, columnName);
             return value == null ? string.Empty : Convert.ToString(value, CultureInfo.InvariantCulture);
         }
-
         public static int GetInt32(IDictionary<string, object> row, string columnName)
         {
             object value = GetRequiredValue(row, columnName);
             return Convert.ToInt32(value, CultureInfo.InvariantCulture);
         }
-
         public static int? GetNullableInt32(IDictionary<string, object> row, string columnName)
         {
             object value = GetValue(row, columnName);
@@ -50,7 +66,6 @@ namespace ExcelApiPoc.AddIn.Services
                 ? (int?)null
                 : Convert.ToInt32(value, CultureInfo.InvariantCulture);
         }
-
         public static decimal GetDecimal(IDictionary<string, object> row, string columnName)
         {
             return Convert.ToDecimal(GetRequiredValue(row, columnName), CultureInfo.InvariantCulture);
@@ -62,7 +77,6 @@ namespace ExcelApiPoc.AddIn.Services
 
             if (value is bool booleanValue)
                 return booleanValue;
-
             string text = Convert.ToString(value, CultureInfo.InvariantCulture);
 
             if (string.Equals(text, "TRUE", StringComparison.OrdinalIgnoreCase))
@@ -73,7 +87,6 @@ namespace ExcelApiPoc.AddIn.Services
 
             return Convert.ToDouble(value, CultureInfo.InvariantCulture) != 0;
         }
-
         public static DateTime GetDateTime(IDictionary<string, object> row, string columnName)
         {
             object value = GetRequiredValue(row, columnName);
@@ -86,7 +99,6 @@ namespace ExcelApiPoc.AddIn.Services
 
             return Convert.ToDateTime(value, CultureInfo.InvariantCulture);
         }
-
         public static DateTime? GetNullableDateTime(IDictionary<string, object> row, string columnName)
         {
             object value = GetValue(row, columnName);
@@ -99,7 +111,6 @@ namespace ExcelApiPoc.AddIn.Services
 
             if (value is double serialNumber)
                 return DateTime.FromOADate(serialNumber);
-
             return Convert.ToDateTime(value, CultureInfo.InvariantCulture);
         }
 
@@ -107,7 +118,6 @@ namespace ExcelApiPoc.AddIn.Services
         {
             if (workbook == null)
                 throw new ArgumentNullException(nameof(workbook));
-
             foreach (Excel.Worksheet worksheet in workbook.Worksheets)
             {
                 foreach (Excel.ListObject table in worksheet.ListObjects)
@@ -118,7 +128,6 @@ namespace ExcelApiPoc.AddIn.Services
             }
             throw new InvalidOperationException($"The active workbook does not contain table '{tableName}'.");
         }
-
         private static object GetRequiredValue(IDictionary<string, object> row, string columnName)
         {
             object value = GetValue(row, columnName);
@@ -128,7 +137,6 @@ namespace ExcelApiPoc.AddIn.Services
 
             return value;
         }
-
         private static object GetValue(IDictionary<string, object> row, string columnName)
         {
             if (!row.TryGetValue(columnName, out object value))
@@ -141,7 +149,6 @@ namespace ExcelApiPoc.AddIn.Services
         {
             if (value is object[,] array)
                 return array;
-
             var result = new object[rowCount + 1, columnCount + 1];
             result[1, 1] = value;
             return result;
