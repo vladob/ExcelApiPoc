@@ -184,7 +184,11 @@ namespace ExcelApiPoc.AddIn.Services
             SetColumnWidth(worksheet, 9, 16);
 
             Excel.Range mappedToRange = table.ListColumns["MappedTo"].DataBodyRange;
-            mappedToRange.Style = "Input";
+
+            // Pale-yellow fill indicating auditor-editable input cells.
+            // Avoid Excel built-in style names because they are localized.
+            mappedToRange.Interior.Color = 13434879;
+            mappedToRange.Locked = false;
         }
 
         private static void SetColumnWidth(Excel.Worksheet worksheet, int columnNumber, double width)
