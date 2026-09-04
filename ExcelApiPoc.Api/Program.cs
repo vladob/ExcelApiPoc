@@ -172,6 +172,63 @@ app.MapGet(
     .WithOpenApi();
 
 app.MapGet(
+    "/api/v2/templates/{templateErpId:int}/package",
+    async (
+        int templateErpId,
+        string? frameworkCode,
+        int? fiscalYear,
+        AuditTemplatePackageRepository repository,
+        CancellationToken cancellationToken) =>
+    {
+        if (templateErpId <= 0)
+        {
+            return Results.BadRequest(new { message = "Template ERP ID must be positive." });
+        }
+
+        if (string.IsNullOrWhiteSpace(frameworkCode))
+        {
+            return Results.BadRequest(new { message = "Framework code is required." });
+        }
+
+        if (!fiscalYear.HasValue)
+        {
+            return Results.BadRequest(new { message = "Fiscal year is required." });
+        }
+
+        if (fiscalYear.Value < 1900 || fiscalYear.Value > 9999)
+        {
+            return Results.BadRequest(new { message = "Fiscal year must be between 1900 and 9999." });
+        }
+
+        try
+        {
+            AuditTemplatePackageV2 package = await repository.GetPackageV2Async(
+                templateErpId,
+                frameworkCode.Trim(),
+                fiscalYear.Value,
+                cancellationToken);
+
+            return Results.Ok(package);
+        }
+        catch (AuditTemplatePackageV2ResolutionException exception)
+        {
+            return exception.Failure switch
+            {
+                AuditTemplatePackageV2ResolutionFailure.TemplateNotFound => Results.NotFound(new { message = exception.Message }),
+                AuditTemplatePackageV2ResolutionFailure.FrameworkNotFound => Results.NotFound(new { message = exception.Message }),
+                AuditTemplatePackageV2ResolutionFailure.TemplateNotApplicable => Results.NotFound(new { message = exception.Message }),
+                AuditTemplatePackageV2ResolutionFailure.AssociationNotFound => Results.NotFound(new { message = exception.Message }),
+                AuditTemplatePackageV2ResolutionFailure.MultipleAssociations => Results.Conflict(new { message = exception.Message }),
+                AuditTemplatePackageV2ResolutionFailure.InconsistentFrameworkVersionReferences => Results.Conflict(new { message = exception.Message }),
+                AuditTemplatePackageV2ResolutionFailure.InconsistentConfiguration => Results.Conflict(new { message = exception.Message }),
+                _ => throw new InvalidOperationException("Unsupported template-package resolution failure.")
+            };
+        }
+    })
+    .WithName("GetAuditTemplatePackageV2")
+    .WithOpenApi();
+
+app.MapGet(
     "/api/v1/account-frameworks/{frameworkCode}/applicable",
     async (
         string frameworkCode,
