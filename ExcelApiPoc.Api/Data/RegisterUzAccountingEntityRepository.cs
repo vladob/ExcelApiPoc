@@ -580,6 +580,30 @@ public sealed class RegisterUzAccountingEntityRepository
     {
         const string sql =
             """
+            ;WITH [EntityFinancialReports] AS
+            (
+                SELECT
+                    fr.[RegisterUzFinancialReportId]
+                FROM [Reporting].[FinancialStatement] fs
+                INNER JOIN [Reporting].[FinancialReport] fr
+                    ON fr.[RegisterUzStatementId] =
+                       fs.[RegisterUzStatementId]
+                WHERE fs.[RegisterUzEntityId] = @EntityId
+                  AND fs.[IsDeleted] = 0
+                  AND fr.[IsDeleted] = 0
+
+                UNION ALL
+
+                SELECT
+                    fr.[RegisterUzFinancialReportId]
+                FROM [Reporting].[AnnualReport] ar
+                INNER JOIN [Reporting].[FinancialReport] fr
+                    ON fr.[RegisterUzAnnualReportId] =
+                       ar.[RegisterUzAnnualReportId]
+                WHERE ar.[RegisterUzEntityId] = @EntityId
+                  AND ar.[IsDeleted] = 0
+                  AND fr.[IsDeleted] = 0
+            )
             SELECT
                 frv.[FinancialReportTableId],
                 frv.[ValueOrdinal],
@@ -587,36 +611,13 @@ public sealed class RegisterUzAccountingEntityRepository
                 frv.[DataColumnOrdinal],
                 frv.[NumericValue],
                 frv.[SourceValue]
-            FROM [Reporting].[FinancialReportValue] frv
+            FROM [EntityFinancialReports] efr
             INNER JOIN [Reporting].[FinancialReportTable] frt
-                ON frt.[FinancialReportTableId] =
-                   frv.[FinancialReportTableId]
-            INNER JOIN [Reporting].[FinancialReport] fr
-                ON fr.[RegisterUzFinancialReportId] =
-                   frt.[RegisterUzFinancialReportId]
-            WHERE fr.[IsDeleted] = 0
-              AND
-              (
-                  EXISTS
-                  (
-                      SELECT 1
-                      FROM [Reporting].[FinancialStatement] fs
-                      WHERE fs.[RegisterUzStatementId] =
-                            fr.[RegisterUzStatementId]
-                        AND fs.[RegisterUzEntityId] = @EntityId
-                        AND fs.[IsDeleted] = 0
-                  )
-                  OR
-                  EXISTS
-                  (
-                      SELECT 1
-                      FROM [Reporting].[AnnualReport] ar
-                      WHERE ar.[RegisterUzAnnualReportId] =
-                            fr.[RegisterUzAnnualReportId]
-                        AND ar.[RegisterUzEntityId] = @EntityId
-                        AND ar.[IsDeleted] = 0
-                  )
-              )
+                ON frt.[RegisterUzFinancialReportId] =
+                   efr.[RegisterUzFinancialReportId]
+            INNER JOIN [Reporting].[FinancialReportValue] frv
+                ON frv.[FinancialReportTableId] =
+                   frt.[FinancialReportTableId]
             ORDER BY
                 frv.[FinancialReportTableId],
                 frv.[ValueOrdinal];
