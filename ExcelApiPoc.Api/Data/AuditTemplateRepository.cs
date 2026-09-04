@@ -17,7 +17,7 @@ public sealed class AuditTemplateRepository
         const string sql = """
             SELECT
                 [ErpId],
-                [Name],
+                [Name_sk] AS [Name],
                 [MfSpecification],
                 [ValidFrom],
                 [ValidTo]
@@ -25,15 +25,17 @@ public sealed class AuditTemplateRepository
             WHERE [ErpId] = @TemplateErpId;
 
             SELECT
-                CONVERT(int, [TableErpId]) AS [TableErpId],
-                [NameSk],
-                [NameEn],
-                [NumberOfColumns],
-                [NumberOfDataColumns],
-                [DontHaveRowNumbers]
-            FROM [Template].[Tables]
-            WHERE [TemplateErpId] = @TemplateErpId
-            ORDER BY [TableOrdinal];
+                tt.[TableErpId],
+                tt.[Name_sk] AS [NameSk],
+                tt.[Name_en] AS [NameEn],
+                tt.[NumberOfColumns],
+                tt.[NumberOfDataColumns],
+                tt.[DontHaveRowNumbers]
+            FROM [Template].[Tables] tt
+            INNER JOIN [Template].[Templates] t
+                ON t.[Id] = tt.[TemplateId]
+            WHERE t.[ErpId] = @TemplateErpId
+            ORDER BY tt.[TableOrdinal];
             """;
 
         await using var connection = new SqlConnection(_connectionString);
@@ -65,7 +67,7 @@ public sealed class AuditTemplateRepository
                 NameEn = reader.IsDBNull(2) ? null : reader.GetString(2),
                 NumberOfColumns = reader.GetInt32(3),
                 NumberOfDataColumns = reader.GetInt32(4),
-                DontHaveRowNumbers = !reader.IsDBNull(5) && reader.GetByte(5) != 0
+                DontHaveRowNumbers = !reader.IsDBNull(5) && reader.GetBoolean(5)
             });
         }
 

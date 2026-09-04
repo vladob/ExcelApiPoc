@@ -40,7 +40,7 @@ public sealed class AccountFrameworkRepository
 
             SELECT
                 af.[Code] AS [FrameworkCode],
-                af.[Name] AS [FrameworkName],
+                af.[Name_sk] AS [FrameworkName],
                 afv.[Id] AS [FrameworkVersionId],
                 afv.[VersionCode],
                 afv.[ValidFrom],
@@ -56,10 +56,12 @@ public sealed class AccountFrameworkRepository
             SELECT
                 CONVERT(int, d.[AccountLevel]) AS [AccountLevel],
                 d.[AccountCode],
-                d.[OfficialName]
-            FROM [Accounts].[AccountDefinition] d
-            WHERE d.[AccountFrameworkVersionId] =
-                @AccountFrameworkVersionId
+                d.[AccountName_sk] AS [OfficialName]
+            FROM [Accounts].[GetAccounts]
+            (
+                @FrameworkCode,
+                @ApplicableDate
+            ) d
             ORDER BY
                 d.[AccountLevel],
                 d.[AccountCode];
@@ -68,10 +70,12 @@ public sealed class AccountFrameworkRepository
                 CONVERT(int, r.[AccountLevel]) AS [AccountLevel],
                 r.[FromAccountCode],
                 r.[ToAccountCode],
-                r.[OfficialName]
-            FROM [Accounts].[AccountRangeDefinition] r
-            WHERE r.[AccountFrameworkVersionId] =
-                @AccountFrameworkVersionId
+                r.[AccountName_sk] AS [OfficialName]
+            FROM [Accounts].[GetAccountRanges]
+            (
+                @FrameworkCode,
+                @ApplicableDate
+            ) r
             ORDER BY
                 r.[SortOrder],
                 r.[FromAccountCode];

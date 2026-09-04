@@ -17,39 +17,41 @@ public sealed class AuditTemplatePackageRepository
         const string sql = """
             SELECT
                 t.[ErpId],
-                t.[Name],
+                t.[Name_sk] AS [Name],
                 t.[MfSpecification],
                 t.[ValidFrom],
                 t.[ValidTo],
                 (
                     SELECT
-                        CASE
-                            WHEN COUNT(DISTINCT agu.[Type]) = 1
-                                THEN MIN(agu.[Type])
-                            ELSE NULL
-                        END
-                    FROM [Accounts].[AcountGroupsUsage] agu
-                    WHERE agu.[TemplateErpId] = t.[ErpId]
+                        CASE WHEN COUNT(DISTINCT ccv.[AccountingModelCode]) = 1
+                            THEN MIN(ccv.[AccountingModelCode]) END
+                    FROM [Accounts].[TemplateFrameworkVersion] tfv
+                    INNER JOIN [Accounts].[CalculationConfigurationVersion] ccv
+                        ON ccv.[Id] = tfv.[CalculationConfigurationVersionId]
+                    WHERE tfv.[TemplateId] = t.[Id]
+                      AND ccv.[ValidTo] IS NULL
                 ) AS [AccountingModel]
             FROM [Template].[Templates] t
             WHERE t.[ErpId] = @TemplateErpId;
 
             SELECT
-                CONVERT(int, [TableErpId]),
-                [TableOrdinal],
-                [NameSk],
-                [NameEn],
-                [NumberOfColumns],
-                [NumberOfDataColumns],
-                [DontHaveRowNumbers]
-            FROM [Template].[Tables]
-            WHERE [TemplateErpId] = @TemplateErpId
-            ORDER BY [TableOrdinal];
+                tt.[TableErpId],
+                tt.[TableOrdinal],
+                tt.[Name_sk] AS [NameSk],
+                tt.[Name_en] AS [NameEn],
+                tt.[NumberOfColumns],
+                tt.[NumberOfDataColumns],
+                tt.[DontHaveRowNumbers]
+            FROM [Template].[Tables] tt
+            INNER JOIN [Template].[Templates] t
+                ON t.[Id] = tt.[TemplateId]
+            WHERE t.[ErpId] = @TemplateErpId
+            ORDER BY tt.[TableOrdinal];
 
             SELECT
-                h.[TableErpId],
-                h.[TextSk],
-                h.[TextEn],
+                t.[TableErpId],
+                h.[Text_sk] AS [TextSk],
+                h.[Text_en] AS [TextEn],
                 h.[RowPosition],
                 h.[ColumnPosition],
                 h.[RowSpan],
@@ -57,61 +59,65 @@ public sealed class AuditTemplatePackageRepository
             FROM [Template].[Headers] h
             INNER JOIN [Template].[Tables] t
                 ON t.[Id] = h.[TableId]
-            WHERE t.[TemplateErpId] = @TemplateErpId
+            INNER JOIN [Template].[Templates] template
+                ON template.[Id] = t.[TemplateId]
+            WHERE template.[ErpId] = @TemplateErpId
             ORDER BY
                 t.[TableOrdinal],
                 h.[HeaderOrdinal];
 
             SELECT
-                r.[TableErpId],
+                t.[TableErpId],
                 r.[RowOrdinal],
                 r.[RowNumber],
                 r.[Designation],
-                r.[TextSk],
-                r.[TextEn],
+                r.[Text_sk] AS [TextSk],
+                r.[Text_en] AS [TextEn],
                 r.[IsSumRow],
-                r.[CategorySk],
-                r.[MappingCaptionSk]
+                r.[Category_sk] AS [CategorySk],
+                r.[MappingCaption_sk] AS [MappingCaptionSk]
             FROM [Template].[Rows] r
             INNER JOIN [Template].[Tables] t
                 ON t.[Id] = r.[TableId]
-            WHERE t.[TemplateErpId] = @TemplateErpId
+            INNER JOIN [Template].[Templates] template
+                ON template.[Id] = t.[TemplateId]
+            WHERE template.[ErpId] = @TemplateErpId
             ORDER BY
                 t.[TableOrdinal],
                 r.[RowOrdinal];
 
             SELECT
-                ag.[Account],
-                ag.[Title],
-                ag.[Legend],
-                ag.[ForAssets],
-                ag.[ForLiabilities]
-            FROM [Accounts].[AccountGroups] ag
-            WHERE ag.[Type] =
+                r.[AccountCode] AS [Account],
+                r.[AccountName_sk] AS [Title],
+                r.[Legend],
+                r.[AssetsValueSourceCode] AS [ForAssets],
+                r.[LiabilitiesValueSourceCode] AS [ForLiabilities]
+            FROM [Accounts].[AccountCalculationRuleDetails] r
+            WHERE r.[CalculationConfigurationVersionId] IN
             (
-                SELECT
-                    CASE
-                        WHEN COUNT(DISTINCT agu.[Type]) = 1
-                            THEN MIN(agu.[Type])
-                        ELSE NULL
-                    END
-                FROM [Accounts].[AcountGroupsUsage] agu
-                WHERE agu.[TemplateErpId] = @TemplateErpId
+                SELECT tfv.[CalculationConfigurationVersionId]
+                FROM [Accounts].[TemplateFrameworkVersion] tfv
+                INNER JOIN [Template].[Templates] t
+                    ON t.[Id] = tfv.[TemplateId]
+                INNER JOIN [Accounts].[CalculationConfigurationVersion] ccv
+                    ON ccv.[Id] = tfv.[CalculationConfigurationVersionId]
+                WHERE t.[ErpId] = @TemplateErpId
+                  AND ccv.[ValidTo] IS NULL
             )
             ORDER BY
-                LEN(ag.[Account]),
-                ag.[Account];
+                LEN(r.[AccountCode]),
+                r.[AccountCode];
 
             SELECT
                 [TableErpId],
-                [Account3],
-                [SumRow],
-                [AccountTitle],
-                [Au],
-                [InBrutto],
-                [InCorrection],
-                [Usage]
-            FROM [Accounts].[AcountGroupsUsage]
+                [AccountCode] AS [Account3],
+                [ReportRowNumber] AS [SumRow],
+                [AccountName_sk] AS [AccountTitle],
+                [RequiresAnalyticalMapping] AS [Au],
+                [IncludeInBrutto] AS [InBrutto],
+                [IncludeInCorrection] AS [InCorrection],
+                CONCAT([Side], ' ', [ValueSourceCode]) AS [Usage]
+            FROM [Accounts].[ReportAccountMappingDetails]
             WHERE [TemplateErpId] = @TemplateErpId
             ORDER BY
                 [TableErpId],
@@ -125,8 +131,7 @@ public sealed class AuditTemplatePackageRepository
                 [SourceRow],
                 [Coefficient],
                 [CalculationLevel]
-            FROM [Template].[SumCalculationPlan]
-            WHERE [TemplateErpId] = @TemplateErpId
+            FROM [Template].[GetCalculationPlan](@TemplateErpId)
             ORDER BY
                 [CalculationLevel],
                 [SumTableErpId],
@@ -173,7 +178,7 @@ public sealed class AuditTemplatePackageRepository
                 NameEn = reader.IsDBNull(3) ? null : reader.GetString(3),
                 NumberOfColumns = reader.IsDBNull(4) ? null : reader.GetInt32(4),
                 NumberOfDataColumns = reader.IsDBNull(5) ? null : reader.GetInt32(5),
-                DontHaveRowNumbers = !reader.IsDBNull(6) && reader.GetByte(6) != 0,
+                DontHaveRowNumbers = !reader.IsDBNull(6) && reader.GetBoolean(6),
                 Headers = headers,
                 Rows = rows
             });
@@ -217,7 +222,7 @@ public sealed class AuditTemplatePackageRepository
                 Designation = reader.IsDBNull(3) ? null : reader.GetString(3),
                 TextSk = reader.IsDBNull(4) ? null : reader.GetString(4),
                 TextEn = reader.IsDBNull(5) ? null : reader.GetString(5),
-                IsSumRow = !reader.IsDBNull(6) && reader.GetByte(6) != 0,
+                IsSumRow = !reader.IsDBNull(6) && reader.GetBoolean(6),
                 CategorySk = reader.IsDBNull(7) ? null : reader.GetString(7),
                 MappingCaptionSk = reader.IsDBNull(8) ? null : reader.GetString(8)
             });
@@ -256,9 +261,9 @@ public sealed class AuditTemplatePackageRepository
                     Account3 = reader.GetString(1),
                     ReportRowNumber = reader.GetInt32(2),
                     AccountTitle = reader.GetString(3),
-                    RequiresAnalyticalMapping = !reader.IsDBNull(4) && reader.GetInt16(4) != 0,
-                    IncludeInBrutto = !reader.IsDBNull(5) && reader.GetInt16(5) != 0,
-                    IncludeInCorrection = !reader.IsDBNull(6) && reader.GetInt16(6) != 0,
+                    RequiresAnalyticalMapping = !reader.IsDBNull(4) && reader.GetBoolean(4),
+                    IncludeInBrutto = !reader.IsDBNull(5) && reader.GetBoolean(5),
+                    IncludeInCorrection = !reader.IsDBNull(6) && reader.GetBoolean(6),
                     Side = usageParts[0],
                     ValueSource = usageParts[1]
                 });
