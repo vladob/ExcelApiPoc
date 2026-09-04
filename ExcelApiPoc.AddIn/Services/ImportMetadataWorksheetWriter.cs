@@ -61,7 +61,11 @@ namespace ExcelApiPoc.AddIn.Services
             "GeneralLedgerThroughMonth",
             "GeneralLedgerImportedAtUtc",
             "GeneralLedgerRecordCount",
-            "GeneralLedgerNormalizedTextFieldCount"
+            "GeneralLedgerNormalizedTextFieldCount",
+            "TemplatePackageFrameworkCode",
+            "TemplatePackageFrameworkVersionCode",
+            "TemplateCalculationConfigurationCode",
+            "TemplatePackageApplicableDate"
         };
 
         public static Excel.Worksheet AddWorksheet(
@@ -169,6 +173,10 @@ namespace ExcelApiPoc.AddIn.Services
                 values[1, 48] = generalLedgerImport.Rows.Count;
                 values[1, 49] = generalLedgerImport.NormalizedTextFieldCount;
             }
+            values[1, 50] = templatePackage.FrameworkCode;
+            values[1, 51] = templatePackage.FrameworkVersionCode;
+            values[1, 52] = templatePackage.CalculationConfigurationCode;
+            values[1, 53] = templatePackage.ApplicableDate;
 
             Excel.Range firstCell = (Excel.Range)worksheet.Cells[1, 1];
             Excel.Range lastCell = (Excel.Range)worksheet.Cells[2, Headers.Length];
@@ -181,7 +189,8 @@ namespace ExcelApiPoc.AddIn.Services
                 17, 18, 20, 21, 22,
                 26, 27, 28, 29, 30, 31, 32, 33,
                 34, 35, 36, 37,
-                42, 43, 44, 45
+                42, 43, 44, 45,
+                51, 52, 53
             };
 
             foreach (int columnNumber in textColumns)
@@ -223,6 +232,7 @@ namespace ExcelApiPoc.AddIn.Services
             ((Excel.Range)worksheet.Cells[2, 48]).NumberFormat = "yyyy-mm-dd hh:mm:ss";
             ((Excel.Range)worksheet.Cells[2, 49]).NumberFormat = "#,##0";
             ((Excel.Range)worksheet.Cells[2, 50]).NumberFormat = "#,##0";
+            ((Excel.Range)worksheet.Cells[2, 54]).NumberFormat = "yyyy-mm-dd";
 
             Excel.ListObject table = worksheet.ListObjects.Add(Excel.XlListObjectSourceType.xlSrcRange, tableRange, Type.Missing, Excel.XlYesNoGuess.xlYes, Type.Missing);
             table.Name = TableName;

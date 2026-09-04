@@ -6,6 +6,10 @@ namespace ExcelApiPoc.AddIn.Models
     {
         public int ContractVersion { get; set; }
         public DateTime GeneratedAtUtc { get; set; }
+        public string FrameworkCode { get; set; }
+        public string FrameworkVersionCode { get; set; }
+        public string CalculationConfigurationCode { get; set; }
+        public DateTime? ApplicableDate { get; set; }
         public AuditTemplateDefinitionResponse Template { get; set; }
         public AuditAccountGroupDefinitionResponse[] AccountGroups { get; set; }
         public AuditReportMappingRuleDefinitionResponse[] ReportMappingRules { get; set; }

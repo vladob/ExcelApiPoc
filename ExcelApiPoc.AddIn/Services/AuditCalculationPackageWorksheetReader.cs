@@ -13,9 +13,10 @@ namespace ExcelApiPoc.AddIn.Services
             IDictionary<string, object> metadata = AuditWorkbookTableReader.ReadRows(workbook, "__TemplatePackage").Single();
             AuditReportTableDefinitionResponse[] tables = ReadTables(workbook);
 
+            int contractVersion = AuditWorkbookTableReader.GetInt32(metadata, "ContractVersion");
             var package = new AuditTemplatePackageResponse
             {
-                ContractVersion = AuditWorkbookTableReader.GetInt32(metadata, "ContractVersion"),
+                ContractVersion = contractVersion,
                 GeneratedAtUtc = AuditWorkbookTableReader.GetDateTime(metadata, "GeneratedAtUtc"),
                 Template = new AuditTemplateDefinitionResponse
                 {
@@ -32,7 +33,32 @@ namespace ExcelApiPoc.AddIn.Services
                 CalculationPlan = ReadCalculationPlan(workbook)
             };
 
-            if (package.ContractVersion != 3)
+            if (contractVersion == 4)
+            {
+                package.FrameworkCode = AuditWorkbookTableReader.GetString(metadata, "FrameworkCode");
+                package.FrameworkVersionCode = AuditWorkbookTableReader.GetString(metadata, "FrameworkVersionCode");
+                package.CalculationConfigurationCode = AuditWorkbookTableReader.GetString(metadata, "CalculationConfigurationCode");
+                package.ApplicableDate = AuditWorkbookTableReader.GetNullableDateTime(metadata, "ApplicableDate");
+                int fiscalYear = AuditWorkbookTableReader.GetInt32(metadata, "FiscalYear");
+
+                if (string.IsNullOrWhiteSpace(package.FrameworkCode) ||
+                    string.IsNullOrWhiteSpace(package.FrameworkVersionCode) ||
+                    string.IsNullOrWhiteSpace(package.CalculationConfigurationCode) ||
+                    !package.ApplicableDate.HasValue)
+                {
+                    throw new InvalidOperationException(
+                        "The embedded contract-4 template package has incomplete framework metadata.");
+                }
+
+                DateTime expectedApplicableDate = new DateTime(fiscalYear, 12, 31);
+                if (package.ApplicableDate.Value.Date != expectedApplicableDate ||
+                    package.ApplicableDate.Value.TimeOfDay != TimeSpan.Zero)
+                {
+                    throw new InvalidOperationException(
+                        $"The embedded template-package applicable date must be {expectedApplicableDate:yyyy-MM-dd} with no time component.");
+                }
+            }
+            else if (contractVersion != 3)
                 throw new InvalidOperationException($"Unsupported embedded package contract version {package.ContractVersion}.");
 
             return package;

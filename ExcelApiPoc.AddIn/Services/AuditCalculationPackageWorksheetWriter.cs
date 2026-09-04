@@ -52,7 +52,9 @@ namespace ExcelApiPoc.AddIn.Services
                 "ContractVersion", "GeneratedAtUtc", "TemplateErpId",
                 "TemplateName", "MfSpecification", "ValidFrom", "ValidTo",
                 "AccountingModel", "Ico", "FiscalYear", "SelectionSource",
-                "RegisterUzReportId", "RetrievalSource", "CachePath"
+                "RegisterUzReportId", "RetrievalSource", "CachePath",
+                "FrameworkCode", "FrameworkVersionCode",
+                "CalculationConfigurationCode", "ApplicableDate"
             };
 
             var rows = new List<object[]>
@@ -72,10 +74,14 @@ namespace ExcelApiPoc.AddIn.Services
                     reportContext.SelectionSource,
                     reportContext.RegisterUzReportId,
                     packageLoad.Source,
-                    packageLoad.CachePath
+                    packageLoad.CachePath,
+                    package.FrameworkCode,
+                    package.FrameworkVersionCode,
+                    package.CalculationConfigurationCode,
+                    package.ApplicableDate
                 }
             };
-            AddTable(worksheet, ref nextRow, "__TemplatePackage", headers, rows, new[] { 4, 5, 8, 9, 11, 12, 13, 14 });
+            AddTable(worksheet, ref nextRow, "__TemplatePackage", headers, rows, new[] { 4, 5, 8, 9, 11, 12, 13, 14, 15, 16, 17 });
         }
 
         private static void AddReportTablesTable(Excel.Worksheet worksheet, ref int nextRow, AuditTemplatePackageResponse package)

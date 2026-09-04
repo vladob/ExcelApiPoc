@@ -397,6 +397,7 @@ namespace ExcelApiPoc.AddIn.Forms
                         Ico = journalImport.Ico,
                         FiscalYear = selectedFiscalYear,
                         TemplateErpId = reportSelection.TemplateErpId,
+                        FrameworkCode = framework.FrameworkCode,
                         SelectionSource = "RegisterUZ",
                         RegisterUzReportId =
                             reportSelection.RegisterUzReportId.ToString(
