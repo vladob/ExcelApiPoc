@@ -41,7 +41,7 @@ namespace ExcelApiPoc.AddIn.Services
             return LoadJson(GetPackagePath(templateErpId, contractVersion), "audit-template package");
         }
 
-        public static string GetPackageV5Path(int templateErpId, string frameworkCode, int fiscalYear)
+        public static string GetPackageV4Path(int templateErpId, string frameworkCode, int fiscalYear)
         {
             if (fiscalYear < 1900 || fiscalYear > 9999)
                 throw new ArgumentOutOfRangeException(nameof(fiscalYear));
@@ -51,18 +51,18 @@ namespace ExcelApiPoc.AddIn.Services
                 GetTemplateDirectory(templateErpId),
                 canonicalFrameworkCode,
                 fiscalYear.ToString(),
-                "package-v5.json");
+                "package-v4.json");
         }
 
-        public static string SavePackageV5(int templateErpId, string frameworkCode, int fiscalYear, string json)
+        public static string SavePackageV4(int templateErpId, string frameworkCode, int fiscalYear, string json)
         {
-            return SaveJson(GetPackageV5Path(templateErpId, frameworkCode, fiscalYear), json);
+            return SaveJson(GetPackageV4Path(templateErpId, frameworkCode, fiscalYear), json);
         }
 
-        public static string LoadPackageV5(int templateErpId, string frameworkCode, int fiscalYear)
+        public static string LoadPackageV4(int templateErpId, string frameworkCode, int fiscalYear)
         {
             return LoadJson(
-                GetPackageV5Path(templateErpId, frameworkCode, fiscalYear),
+                GetPackageV4Path(templateErpId, frameworkCode, fiscalYear),
                 "framework-aware audit-template package");
         }
 

@@ -19,8 +19,7 @@ namespace ExcelApiPoc.AddIn.Services
 
         public static Excel.Worksheet AddWorksheet(
             Excel.Workbook workbook,
-            AccountingEntityPackageEnvelope package,
-            RegisterUzFinancialReportSelection auditedReport)
+            AccountingEntityPackageEnvelope package)
         {
             if (workbook == null)
                 throw new ArgumentNullException(nameof(workbook));
@@ -29,7 +28,7 @@ namespace ExcelApiPoc.AddIn.Services
                 throw new ArgumentNullException(nameof(package));
 
             MultiYearBalanceSheet balanceSheet =
-                MultiYearBalanceSheetBuilder.Build(package, auditedReport);
+                MultiYearBalanceSheetBuilder.Build(package);
 
             Excel.Application application =
                 (Excel.Application)ExcelDnaUtil.Application;

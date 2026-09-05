@@ -33,15 +33,8 @@ namespace ExcelApiPoc.AddIn.Services
                 CalculationPlan = ReadCalculationPlan(workbook)
             };
 
-            if (contractVersion == 4 || contractVersion == 5)
+            if (contractVersion == 4)
             {
-                if (contractVersion == 5)
-                {
-                    package.TemplateFrameworkVersionId = AuditWorkbookTableReader.GetInt32(metadata, "TemplateFrameworkVersionId");
-                    package.AccountFrameworkId = AuditWorkbookTableReader.GetInt32(metadata, "AccountFrameworkId");
-                    package.AccountFrameworkVersionId = AuditWorkbookTableReader.GetInt32(metadata, "AccountFrameworkVersionId");
-                    package.CalculationConfigurationVersionId = AuditWorkbookTableReader.GetInt32(metadata, "CalculationConfigurationVersionId");
-                }
                 package.FrameworkCode = AuditWorkbookTableReader.GetString(metadata, "FrameworkCode");
                 package.FrameworkVersionCode = AuditWorkbookTableReader.GetString(metadata, "FrameworkVersionCode");
                 package.CalculationConfigurationCode = AuditWorkbookTableReader.GetString(metadata, "CalculationConfigurationCode");
@@ -54,7 +47,7 @@ namespace ExcelApiPoc.AddIn.Services
                     !package.ApplicableDate.HasValue)
                 {
                     throw new InvalidOperationException(
-                        $"The embedded contract-{contractVersion} template package has incomplete framework metadata.");
+                        "The embedded contract-4 template package has incomplete framework metadata.");
                 }
 
                 DateTime expectedApplicableDate = new DateTime(fiscalYear, 12, 31);

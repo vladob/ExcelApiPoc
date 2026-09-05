@@ -8,6 +8,7 @@ namespace ExcelApiPoc.AddIn.Services
 {
     internal static class MultiYearBalanceSheetBuilder
     {
+        private const long SupportedTemplateId = 690;
         private const int FirstSupportedFiscalYear = 2014;
         private const int AssetsTableOrdinal = 0;
         private const int LiabilitiesTableOrdinal = 1;
@@ -22,22 +23,17 @@ namespace ExcelApiPoc.AddIn.Services
         private const int LiabilitiesNetDataColumnOrdinal = 0;
 
         public static MultiYearBalanceSheet Build(
-            AccountingEntityPackageEnvelope package,
-            RegisterUzFinancialReportSelection auditedReport)
+            AccountingEntityPackageEnvelope package)
         {
             if (package == null)
                 throw new ArgumentNullException(nameof(package));
-            if (auditedReport == null)
-                throw new ArgumentNullException(nameof(auditedReport));
 
-            int auditedFiscalYear = GetStatementFiscalYear(auditedReport.Statement.Statement);
-            List<YearlyReport> reports = SelectYearlyReports(
-                package, auditedReport.TemplateErpId, auditedFiscalYear);
+            List<YearlyReport> reports = SelectYearlyReports(package);
 
             if (reports.Count == 0)
             {
                 throw new InvalidOperationException(
-                    $"No compatible RegisterUZ financial report with template {auditedReport.TemplateErpId} was found.");
+                    "No RegisterUZ financial report with template 690 was found.");
             }
 
             YearlyReport newest = reports[0];
@@ -132,17 +128,13 @@ namespace ExcelApiPoc.AddIn.Services
         }
 
         private static List<YearlyReport> SelectYearlyReports(
-            AccountingEntityPackageEnvelope package,
-            int auditedTemplateErpId,
-            int auditedFiscalYear)
+            AccountingEntityPackageEnvelope package)
         {
             var candidates = new List<YearlyReport>();
 
             foreach (FinancialReportEnvelope report in package.ReportsById.Values)
             {
-                // Until compatibility groups are configured, a template is
-                // explicitly compatible only with itself.
-                if (report.Report.TemplateId != auditedTemplateErpId ||
+                if (report.Report.TemplateId != SupportedTemplateId ||
                     !report.HasTemplate)
                 {
                     continue;
@@ -152,7 +144,7 @@ namespace ExcelApiPoc.AddIn.Services
                 if (!TryGetFiscalYear(report, out fiscalYear))
                     continue;
 
-                if (fiscalYear < FirstSupportedFiscalYear || fiscalYear > auditedFiscalYear)
+                if (fiscalYear < FirstSupportedFiscalYear)
                     continue;
 
                 candidates.Add(
@@ -172,19 +164,6 @@ namespace ExcelApiPoc.AddIn.Services
                     .First())
                 .OrderByDescending(x => x.FiscalYear)
                 .ToList();
-        }
-
-        private static int GetStatementFiscalYear(FinancialStatementDto statement)
-        {
-            if (statement == null || string.IsNullOrWhiteSpace(statement.PeriodTo) ||
-                statement.PeriodTo.Length < 4 ||
-                !int.TryParse(statement.PeriodTo.Substring(0, 4), NumberStyles.None,
-                    CultureInfo.InvariantCulture, out int fiscalYear))
-            {
-                throw new InvalidOperationException("The selected financial statement has no valid fiscal year.");
-            }
-
-            return fiscalYear;
         }
 
         private static IEnumerable<LayoutRow> BuildLayoutRows(

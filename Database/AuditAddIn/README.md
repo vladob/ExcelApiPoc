@@ -87,10 +87,6 @@ configuration error.
 
 ## Future changes
 
-The first post-baseline migration is
-`Migrations/FrameworkAwareCalculationPackageV1`. Apply its scripts in filename
-order before deploying the framework-aware API and add-in.
-
 - Put schema and behavioural upgrades in `Migrations`.
 - Put reviewed additions such as a new calculation plan or template mapping in
   `DataUpdates`.
