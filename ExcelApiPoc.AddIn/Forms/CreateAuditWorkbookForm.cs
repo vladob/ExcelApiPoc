@@ -368,8 +368,40 @@ namespace ExcelApiPoc.AddIn.Forms
                 if (generalLedgerImport != null)
                     generalLedgerReconciliation = GeneralLedgerReconciliationService.Reconcile(
                         journalImport, generalLedgerImport, accountSummaries);
-                AccountFrameworkLoadResult frameworkLoad = AccountFrameworkService.Load("GOV_LOCAL", selectedFiscalYear);
+                AccountingEntityPackageEnvelope accountingEntityEnvelope =
+                    AccountingEntityPackageApiClient.GetEnvelope(
+                        journalImport.Ico);
+
+                AuditCalculationPackageResponse resolvedPackage =
+                    AuditCalculationPackageService.Load(journalImport.Ico, selectedFiscalYear);
+
+                FinancialReportEnvelope selectedReport;
+                if (!accountingEntityEnvelope.ReportsById.TryGetValue(
+                        resolvedPackage.FinancialReportId, out selectedReport) ||
+                    !selectedReport.BelongsToFinancialStatement ||
+                    selectedReport.FinancialStatement.Id != resolvedPackage.FinancialStatementId)
+                {
+                    throw new InvalidOperationException(
+                        "The API-selected RegisterUZ report is not present under the expected financial statement.");
+                }
+
+                var reportSelection = new RegisterUzFinancialReportSelection
+                {
+                    Statement = accountingEntityEnvelope.FinancialStatements.Single(
+                        item => item.Statement.Id == resolvedPackage.FinancialStatementId),
+                    Report = selectedReport,
+                    TemplateErpId = resolvedPackage.RegisterUzTemplateId,
+                    RegisterUzReportId = resolvedPackage.FinancialReportId
+                };
+
+                AuditTemplatePackageResponse templatePackage = resolvedPackage.CalculationPackage;
+                AccountFrameworkLoadResult frameworkLoad = AccountFrameworkService.Load(
+                    templatePackage.FrameworkCode, selectedFiscalYear);
                 ApplicableAccountFrameworkResponse framework = frameworkLoad.Framework;
+                if (framework.FrameworkVersionId != templatePackage.AccountFrameworkVersionId)
+                    throw new InvalidOperationException(
+                        "The resolved calculation package and account-framework package identify different framework versions.");
+
                 AccountFrameworkEnrichmentResult enrichmentResult = AccountFrameworkEnricher.Enrich(accountSummaries, framework);
                 if (accountingFrameworkImport != null)
                     accountingFrameworkEnrichment = AccountingFrameworkAccountEnricher.Enrich(
@@ -381,15 +413,6 @@ namespace ExcelApiPoc.AddIn.Forms
                 decimal totalCreditTurnover = accountSummaries.Sum(account => account.CreditTurnover);
                 decimal journalDifference = totalDebitTurnover - totalCreditTurnover;
                 bool fiscalYearMatches = dateFrom.Year == selectedFiscalYear && dateTo.Year == selectedFiscalYear;
-
-                AccountingEntityPackageEnvelope accountingEntityEnvelope =
-                    AccountingEntityPackageApiClient.GetEnvelope(
-                        journalImport.Ico);
-
-                RegisterUzFinancialReportSelection reportSelection =
-                    RegisterUzFinancialReportSelector.Select(
-                        accountingEntityEnvelope,
-                        selectedFiscalYear);
 
                 var reportContext =
                     new AuditReportContext
@@ -404,8 +427,11 @@ namespace ExcelApiPoc.AddIn.Forms
                                 CultureInfo.InvariantCulture)
                     };
 
-                AuditTemplatePackageLoadResult templatePackageLoad = AuditTemplatePackageService.Load(reportContext);
-                AuditTemplatePackageResponse templatePackage = templatePackageLoad.Package;
+                var templatePackageLoad = new AuditTemplatePackageLoadResult
+                {
+                    Package = templatePackage,
+                    Source = "API"
+                };
                 AuditReportCalculationResult calculationResult = AuditReportCalculationService.Calculate(accountSummaries, templatePackage);
                 AnalyticalMappingData analyticalMapping = AnalyticalMappingBuilder.Build(accountSummaries, templatePackage, calculationResult);
                 const int rejectedRecordCount = 0;
@@ -474,6 +500,9 @@ namespace ExcelApiPoc.AddIn.Forms
                 message.AppendLine($"Account framework: " + $"{framework.FrameworkCode} / " + $"{framework.VersionCode}");
                 message.AppendLine($"Report template: " + $"{templatePackage.Template.TemplateErpId} / " + $"{templatePackage.Template.Name}");
 
+                if (!string.IsNullOrWhiteSpace(resolvedPackage.LegalFormValidationWarning))
+                    message.AppendLine($"Legal-form validation: {resolvedPackage.LegalFormValidationWarning}");
+
                 if (frameworkFromCache || templateFromCache)
                 {
                     message.AppendLine();
@@ -488,6 +517,7 @@ namespace ExcelApiPoc.AddIn.Forms
 
                 bool hasWarning =
                     !fiscalYearMatches ||
+                    !string.IsNullOrWhiteSpace(resolvedPackage.LegalFormValidationWarning) ||
                     rejectedRecordCount > 0 ||
                     journalDifference != 0 ||
                     enrichmentResult.UnmatchedCount > 0 ||

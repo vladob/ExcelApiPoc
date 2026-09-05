@@ -51,8 +51,11 @@ namespace ExcelApiPoc.AddIn.Services
             RegisterUzReportsWorksheetWriter.AddWorksheet(
                 workbook, accountingEntityPackage);
 
-            MultiYearBalanceSheetWorksheetWriter.AddWorksheet(
-                workbook, accountingEntityPackage);
+            // The current comparison layout is explicitly configured only for
+            // template 690. Other calculation packages must still be usable.
+            if (registerUzReportSelection.TemplateErpId == 690)
+                MultiYearBalanceSheetWorksheetWriter.AddWorksheet(
+                    workbook, accountingEntityPackage, registerUzReportSelection);
 
             RegisterUzAttachmentsWorksheetWriter.AddWorksheet(
                 workbook, accountingEntityPackage);

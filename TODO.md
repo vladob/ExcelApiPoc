@@ -47,22 +47,22 @@ RegisterUZ.Templates.FinancialReportTemplate.RegisterUzTemplateId
     -> CalculationConfigurationVersion
 ```
 
-- [ ] Select the relevant financial statement and report for the requested IČO
+- [x] Select the relevant financial statement and report for the requested IČO
       and audited fiscal period.
-- [ ] Do not identify calculation-capable reports from names such as
+- [x] Do not identify calculation-capable reports from names such as
       `Oznámenie...`; determine support from AuditAddIn configuration.
-- [ ] Add an API database contract that accepts `RegisterUzTemplateId` and an
+- [x] Add an API database contract that accepts `RegisterUzTemplateId` and an
       applicable date or fiscal year.
-- [ ] Resolve exactly one applicable `TemplateFrameworkVersion`.
-- [ ] Return the framework code, framework-version identity and
+- [x] Resolve exactly one applicable `TemplateFrameworkVersion`.
+- [x] Return the framework code, framework-version identity and
       calculation-configuration identity with the calculation package.
-- [ ] Return a clear unsupported result when no applicable calculation
+- [x] Return a clear unsupported result when no applicable calculation
       configuration exists.
-- [ ] Treat multiple applicable configurations as a configuration error; never
+- [x] Treat multiple applicable configurations as a configuration error; never
       guess.
-- [ ] Remove the hardcoded `GOV_LOCAL` argument from
+- [x] Remove the hardcoded `GOV_LOCAL` argument from
       `CreateAuditWorkbookForm`.
-- [ ] Use `LegalFormCode` only as optional validation or a fallback hint.
+- [x] Use `LegalFormCode` only as optional validation or a fallback hint.
 - [ ] When no filed report exists, allow explicit selection of a supported
       report template or limited import-only operation; do not infer a template
       silently.
@@ -146,7 +146,7 @@ The audited fiscal year's report template is the reference template.
 - [ ] Add explicit report-template compatibility groups.
 - [ ] Add explicit comparable-row mappings when compatible templates do not
       share stable row identities.
-- [ ] Include only fiscal years whose templates are explicitly compatible with
+- [x] Include only fiscal years whose templates are explicitly compatible with
       the audited fiscal year's template.
 - [ ] Never infer compatibility from similar names, row numbers or table shape.
 - [ ] Allow missing years without treating them as errors.

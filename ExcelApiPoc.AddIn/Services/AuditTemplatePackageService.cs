@@ -12,7 +12,7 @@ namespace ExcelApiPoc.AddIn.Services
 {
     internal static class AuditTemplatePackageService
     {
-        private const int ContractVersion = 4;
+        private const int ContractVersion = 5;
         private const int MaximumErrorBodyBytes = 16 * 1024;
         private const int MaximumDisplayedMessageCharacters = 1000;
         private static readonly HttpClient HttpClient = new HttpClient {Timeout = TimeSpan.FromSeconds(10)};
@@ -27,11 +27,10 @@ namespace ExcelApiPoc.AddIn.Services
             string apiFailureMessage = null;
             bool downloadedFromApi = false;
 
-            string cachePath = TemplateMetadataCache.GetPackageV4Path(
+            string cachePath = TemplateMetadataCache.GetPackageV5Path(
                 reportContext.TemplateErpId, reportContext.FrameworkCode, reportContext.FiscalYear);
             string relativePath = $"api/v2/templates/{reportContext.TemplateErpId}/package" +
-                $"?frameworkCode={Uri.EscapeDataString(reportContext.FrameworkCode)}" +
-                $"&fiscalYear={reportContext.FiscalYear}";
+                $"?fiscalYear={reportContext.FiscalYear}";
 
             try
             {
@@ -86,7 +85,7 @@ namespace ExcelApiPoc.AddIn.Services
 
             if (downloadedFromApi)
             {
-                cachePath = TemplateMetadataCache.SavePackageV4(
+                cachePath = TemplateMetadataCache.SavePackageV5(
                     reportContext.TemplateErpId, reportContext.FrameworkCode, reportContext.FiscalYear, json);
             }
 
@@ -128,6 +127,10 @@ namespace ExcelApiPoc.AddIn.Services
             if (string.IsNullOrWhiteSpace(package.CalculationConfigurationCode))
                 throw new InvalidOperationException("The template package does not contain a calculation configuration code.");
 
+            if (package.TemplateFrameworkVersionId <= 0 || package.AccountFrameworkId <= 0 ||
+                package.AccountFrameworkVersionId <= 0 || package.CalculationConfigurationVersionId <= 0)
+                throw new InvalidOperationException("The template package does not contain complete configuration identities.");
+
             DateTime applicableDate = new DateTime(reportContext.FiscalYear, 12, 31);
             if (!package.ApplicableDate.HasValue ||
                 package.ApplicableDate.Value.Date != applicableDate ||
@@ -168,7 +171,7 @@ namespace ExcelApiPoc.AddIn.Services
         {
             try
             {
-                string json = TemplateMetadataCache.LoadPackageV4(
+                string json = TemplateMetadataCache.LoadPackageV5(
                     reportContext.TemplateErpId, reportContext.FrameworkCode, reportContext.FiscalYear);
                 AuditTemplatePackageResponse package =
                     JsonConvert.DeserializeObject<AuditTemplatePackageResponse>(json) ??

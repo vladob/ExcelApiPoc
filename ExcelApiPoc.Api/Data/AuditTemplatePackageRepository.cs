@@ -310,7 +310,6 @@ public sealed class AuditTemplatePackageRepository
 
     public async Task<AuditTemplatePackageV2> GetPackageV2Async(
         int templateErpId,
-        string frameworkCode,
         int fiscalYear,
         CancellationToken cancellationToken)
     {
@@ -321,37 +320,24 @@ public sealed class AuditTemplatePackageRepository
             FROM [Template].[Templates] AS [t]
             WHERE [t].[ErpId] = @TemplateErpId;
 
-            SELECT [af].[Id]
-            FROM [Accounts].[AccountFramework] AS [af]
-            WHERE [af].[Code] = @FrameworkCode;
-
-            SELECT [tfv].[Id] AS [TemplateFrameworkVersionId], [afv].[Id] AS [AccountFrameworkVersionId],
-                   [afv].[VersionCode] AS [FrameworkVersionCode], [ccv].[Id] AS [CalculationConfigurationVersionId],
-                   [ccv].[AccountFrameworkVersionId] AS [ConfigurationFrameworkVersionId],
-                   [ccv].[Code] AS [CalculationConfigurationCode], [ccv].[AccountingModelCode],
-                   [ccv].[ValidFrom] AS [ConfigurationValidFrom], [ccv].[ValidTo] AS [ConfigurationValidTo]
-            FROM [Template].[Templates] AS [t]
-            INNER JOIN [Accounts].[TemplateFrameworkVersion] AS [tfv] ON [tfv].[TemplateId] = [t].[Id]
-            INNER JOIN [Accounts].[AccountFrameworkVersion] AS [afv] ON [afv].[Id] = [tfv].[AccountFrameworkVersionId]
-            INNER JOIN [Accounts].[AccountFramework] AS [af] ON [af].[Id] = [afv].[AccountFrameworkId]
-            INNER JOIN [Accounts].[CalculationConfigurationVersion] AS [ccv] ON [ccv].[Id] = [tfv].[CalculationConfigurationVersionId]
-            WHERE [t].[ErpId] = @TemplateErpId
-              AND [af].[Code] = @FrameworkCode
-              AND [afv].[ValidFrom] <= @ApplicableDate
-              AND ([afv].[ValidTo] IS NULL OR [afv].[ValidTo] >= @ApplicableDate)
-            ORDER BY [tfv].[Id];
+            SELECT [TemplateFrameworkVersionId], [AccountFrameworkId], [FrameworkCode],
+                   [AccountFrameworkVersionId], [FrameworkVersionCode],
+                   [CalculationConfigurationVersionId], [CalculationConfigurationCode],
+                   [AccountingModelCode]
+            FROM [Accounts].[GetApplicableTemplateFrameworkVersions]
+                (@TemplateErpId, @ApplicableDate)
+            ORDER BY [TemplateFrameworkVersionId];
             """;
 
         await using var connection = new SqlConnection(_connectionString);
         await connection.OpenAsync(cancellationToken);
         await using var resolutionCommand = new SqlCommand(resolutionSql, connection);
         resolutionCommand.Parameters.Add("@TemplateErpId", System.Data.SqlDbType.Int).Value = templateErpId;
-        resolutionCommand.Parameters.Add("@FrameworkCode", System.Data.SqlDbType.NVarChar, 50).Value = frameworkCode;
         resolutionCommand.Parameters.Add("@ApplicableDate", System.Data.SqlDbType.Date).Value = applicableDate.ToDateTime(TimeOnly.MinValue);
 
-        (int TemplateFrameworkVersionId, int FrameworkVersionId, string FrameworkVersionCode,
-            int ConfigurationId, int ConfigurationFrameworkVersionId, string ConfigurationCode,
-            string AccountingModelCode, DateOnly ConfigurationValidFrom, DateOnly? ConfigurationValidTo) resolution;
+        (int TemplateFrameworkVersionId, int AccountFrameworkId, string FrameworkCode,
+            int FrameworkVersionId, string FrameworkVersionCode, int ConfigurationId,
+            string ConfigurationCode, string AccountingModelCode) resolution;
 
         await using (SqlDataReader reader = await resolutionCommand.ExecuteReaderAsync(cancellationToken))
         {
@@ -374,66 +360,44 @@ public sealed class AuditTemplatePackageRepository
             }
 
             await reader.NextResultAsync(cancellationToken);
-            if (!await reader.ReadAsync(cancellationToken))
-            {
-                throw new AuditTemplatePackageV2ResolutionException(
-                    AuditTemplatePackageV2ResolutionFailure.FrameworkNotFound,
-                    $"Framework '{frameworkCode}' was not found.");
-            }
-
-            await reader.NextResultAsync(cancellationToken);
-            var resolutions = new List<(int TemplateFrameworkVersionId, int FrameworkVersionId, string FrameworkVersionCode,
-                int ConfigurationId, int ConfigurationFrameworkVersionId, string ConfigurationCode,
-                string AccountingModelCode, DateOnly ConfigurationValidFrom, DateOnly? ConfigurationValidTo)>();
+            var resolutions = new List<(int TemplateFrameworkVersionId, int AccountFrameworkId, string FrameworkCode,
+                int FrameworkVersionId, string FrameworkVersionCode, int ConfigurationId,
+                string ConfigurationCode, string AccountingModelCode)>();
 
             while (await reader.ReadAsync(cancellationToken))
             {
                 resolutions.Add((reader.GetInt32(0), reader.GetInt32(1), reader.GetString(2), reader.GetInt32(3),
-                    reader.GetInt32(4), reader.GetString(5), reader.GetString(6), DateOnly.FromDateTime(reader.GetDateTime(7)),
-                    reader.IsDBNull(8) ? null : DateOnly.FromDateTime(reader.GetDateTime(8))));
+                    reader.GetString(4), reader.GetInt32(5), reader.GetString(6), reader.GetString(7)));
             }
 
-            if (resolutions.Any(candidate => candidate.FrameworkVersionId != candidate.ConfigurationFrameworkVersionId))
-            {
-                throw new AuditTemplatePackageV2ResolutionException(
-                    AuditTemplatePackageV2ResolutionFailure.InconsistentFrameworkVersionReferences,
-                    "A template association and its calculation configuration reference different framework versions.");
-            }
-
-            var applicableResolutions = resolutions
-                .Where(candidate => candidate.ConfigurationValidFrom <= applicableDate &&
-                    (!candidate.ConfigurationValidTo.HasValue || candidate.ConfigurationValidTo.Value >= applicableDate))
-                .ToList();
-
-            if (applicableResolutions.Count == 0)
+            if (resolutions.Count == 0)
             {
                 throw new AuditTemplatePackageV2ResolutionException(
                     AuditTemplatePackageV2ResolutionFailure.AssociationNotFound,
-                    $"No applicable association was found for template {templateErpId}, framework '{frameworkCode}', and date {applicableDate:yyyy-MM-dd}.");
+                    $"Template {templateErpId} has no applicable calculation configuration on {applicableDate:yyyy-MM-dd}.");
             }
 
-            if (applicableResolutions.Count > 1)
+            if (resolutions.Count > 1)
             {
                 throw new AuditTemplatePackageV2ResolutionException(
                     AuditTemplatePackageV2ResolutionFailure.MultipleAssociations,
-                    $"Multiple applicable associations were found for template {templateErpId}, framework '{frameworkCode}', and date {applicableDate:yyyy-MM-dd}.");
+                    $"Template {templateErpId} has multiple applicable calculation configurations on {applicableDate:yyyy-MM-dd}.");
             }
 
-            resolution = applicableResolutions[0];
+            resolution = resolutions[0];
         }
 
         return await LoadPackageV2Async(
-            connection, templateErpId, frameworkCode, applicableDate, resolution, cancellationToken);
+            connection, templateErpId, applicableDate, resolution, cancellationToken);
     }
 
     private static async Task<AuditTemplatePackageV2> LoadPackageV2Async(
         SqlConnection connection,
         int templateErpId,
-        string frameworkCode,
         DateOnly applicableDate,
-        (int TemplateFrameworkVersionId, int FrameworkVersionId, string FrameworkVersionCode,
-            int ConfigurationId, int ConfigurationFrameworkVersionId, string ConfigurationCode,
-            string AccountingModelCode, DateOnly ConfigurationValidFrom, DateOnly? ConfigurationValidTo) resolution,
+        (int TemplateFrameworkVersionId, int AccountFrameworkId, string FrameworkCode,
+            int FrameworkVersionId, string FrameworkVersionCode, int ConfigurationId,
+            string ConfigurationCode, string AccountingModelCode) resolution,
         CancellationToken cancellationToken)
     {
         const string sql = """
@@ -674,8 +638,12 @@ public sealed class AuditTemplatePackageRepository
         return new AuditTemplatePackageV2
         {
             GeneratedAtUtc = DateTime.UtcNow,
-            FrameworkCode = frameworkCode,
+            TemplateFrameworkVersionId = resolution.TemplateFrameworkVersionId,
+            AccountFrameworkId = resolution.AccountFrameworkId,
+            FrameworkCode = resolution.FrameworkCode,
+            AccountFrameworkVersionId = resolution.FrameworkVersionId,
             FrameworkVersionCode = resolution.FrameworkVersionCode,
+            CalculationConfigurationVersionId = resolution.ConfigurationId,
             CalculationConfigurationCode = resolution.ConfigurationCode,
             ApplicableDate = applicableDate,
             Template = new AuditTemplateDefinition

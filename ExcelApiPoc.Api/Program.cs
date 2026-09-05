@@ -175,7 +175,6 @@ app.MapGet(
     "/api/v2/templates/{templateErpId:int}/package",
     async (
         int templateErpId,
-        string? frameworkCode,
         int? fiscalYear,
         AuditTemplatePackageRepository repository,
         CancellationToken cancellationToken) =>
@@ -183,11 +182,6 @@ app.MapGet(
         if (templateErpId <= 0)
         {
             return Results.BadRequest(new { message = "Template ERP ID must be positive." });
-        }
-
-        if (string.IsNullOrWhiteSpace(frameworkCode))
-        {
-            return Results.BadRequest(new { message = "Framework code is required." });
         }
 
         if (!fiscalYear.HasValue)
@@ -204,7 +198,6 @@ app.MapGet(
         {
             AuditTemplatePackageV2 package = await repository.GetPackageV2Async(
                 templateErpId,
-                frameworkCode.Trim(),
                 fiscalYear.Value,
                 cancellationToken);
 
@@ -320,6 +313,43 @@ app.MapGet(
         }
     })
     .WithName("GetAccountingEntityPackageV1")
+    .WithOpenApi();
+
+app.MapGet(
+    "/api/v1/accounting-entities/{ico}/calculation-package",
+    async (
+        string ico,
+        int? fiscalYear,
+        AccountingEntityPackageService service,
+        CancellationToken cancellationToken) =>
+    {
+        if (string.IsNullOrWhiteSpace(ico))
+            return Results.BadRequest(new { message = "IČO is required." });
+        if (!fiscalYear.HasValue || fiscalYear.Value < 1900 || fiscalYear.Value > 9999)
+            return Results.BadRequest(new { message = "Fiscal year must be between 1900 and 9999." });
+
+        try
+        {
+            AuditCalculationPackageV1? package = await service.GetCalculationPackageAsync(
+                ico.Trim(), fiscalYear.Value, cancellationToken);
+            if (package is null)
+                return Results.NotFound(new { message = $"Accounting entity '{ico}' was not found in RegisterUZ." });
+            return Results.Ok(package);
+        }
+        catch (AuditCalculationPackageSelectionException exception)
+        {
+            return Results.NotFound(new { message = exception.Message });
+        }
+        catch (AuditCalculationPackageAmbiguousException exception)
+        {
+            return Results.Conflict(new { message = exception.Message });
+        }
+        catch (AuditTemplatePackageV2ResolutionException exception)
+        {
+            return Results.Conflict(new { message = exception.Message });
+        }
+    })
+    .WithName("GetAuditCalculationPackageV1")
     .WithOpenApi();
 
 app.MapGet(

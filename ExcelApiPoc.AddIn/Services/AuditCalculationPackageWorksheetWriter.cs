@@ -53,8 +53,9 @@ namespace ExcelApiPoc.AddIn.Services
                 "TemplateName", "MfSpecification", "ValidFrom", "ValidTo",
                 "AccountingModel", "Ico", "FiscalYear", "SelectionSource",
                 "RegisterUzReportId", "RetrievalSource", "CachePath",
-                "FrameworkCode", "FrameworkVersionCode",
-                "CalculationConfigurationCode", "ApplicableDate"
+                "TemplateFrameworkVersionId", "AccountFrameworkId",
+                "FrameworkCode", "AccountFrameworkVersionId", "FrameworkVersionCode",
+                "CalculationConfigurationVersionId", "CalculationConfigurationCode", "ApplicableDate"
             };
 
             var rows = new List<object[]>
@@ -75,13 +76,17 @@ namespace ExcelApiPoc.AddIn.Services
                     reportContext.RegisterUzReportId,
                     packageLoad.Source,
                     packageLoad.CachePath,
+                    package.TemplateFrameworkVersionId,
+                    package.AccountFrameworkId,
                     package.FrameworkCode,
+                    package.AccountFrameworkVersionId,
                     package.FrameworkVersionCode,
+                    package.CalculationConfigurationVersionId,
                     package.CalculationConfigurationCode,
                     package.ApplicableDate
                 }
             };
-            AddTable(worksheet, ref nextRow, "__TemplatePackage", headers, rows, new[] { 4, 5, 8, 9, 11, 12, 13, 14, 15, 16, 17 });
+            AddTable(worksheet, ref nextRow, "__TemplatePackage", headers, rows, new[] { 4, 5, 8, 9, 11, 12, 13, 14, 17, 19, 21, 22 });
         }
 
         private static void AddReportTablesTable(Excel.Worksheet worksheet, ref int nextRow, AuditTemplatePackageResponse package)
