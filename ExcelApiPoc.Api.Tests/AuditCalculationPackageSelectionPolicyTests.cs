@@ -1,6 +1,7 @@
 using ExcelApiPoc.Api.Data;
 using ExcelApiPoc.Api.Models;
 using ExcelApiPoc.Api.Models.AccountingEntities;
+using Xunit;
 
 namespace ExcelApiPoc.Api.Tests;
 
