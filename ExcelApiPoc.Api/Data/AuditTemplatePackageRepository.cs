@@ -325,8 +325,9 @@ public sealed class AuditTemplatePackageRepository
             FROM [Accounts].[AccountFramework] AS [af]
             WHERE [af].[Code] = @FrameworkCode;
 
-            SELECT [tfv].[Id] AS [TemplateFrameworkVersionId], [afv].[Id] AS [AccountFrameworkVersionId],
-                   [afv].[VersionCode] AS [FrameworkVersionCode], [ccv].[Id] AS [CalculationConfigurationVersionId],
+            SELECT [tfv].[Id] AS [TemplateFrameworkVersionId], [af].[Id] AS [AccountFrameworkId],
+                   [afv].[Id] AS [AccountFrameworkVersionId], [afv].[VersionCode] AS [FrameworkVersionCode],
+                   [ccv].[Id] AS [CalculationConfigurationVersionId],
                    [ccv].[AccountFrameworkVersionId] AS [ConfigurationFrameworkVersionId],
                    [ccv].[Code] AS [CalculationConfigurationCode], [ccv].[AccountingModelCode],
                    [ccv].[ValidFrom] AS [ConfigurationValidFrom], [ccv].[ValidTo] AS [ConfigurationValidTo]
@@ -349,7 +350,7 @@ public sealed class AuditTemplatePackageRepository
         resolutionCommand.Parameters.Add("@FrameworkCode", System.Data.SqlDbType.NVarChar, 50).Value = frameworkCode;
         resolutionCommand.Parameters.Add("@ApplicableDate", System.Data.SqlDbType.Date).Value = applicableDate.ToDateTime(TimeOnly.MinValue);
 
-        (int TemplateFrameworkVersionId, int FrameworkVersionId, string FrameworkVersionCode,
+        (int TemplateFrameworkVersionId, int AccountFrameworkId, int FrameworkVersionId, string FrameworkVersionCode,
             int ConfigurationId, int ConfigurationFrameworkVersionId, string ConfigurationCode,
             string AccountingModelCode, DateOnly ConfigurationValidFrom, DateOnly? ConfigurationValidTo) resolution;
 
@@ -382,15 +383,17 @@ public sealed class AuditTemplatePackageRepository
             }
 
             await reader.NextResultAsync(cancellationToken);
-            var resolutions = new List<(int TemplateFrameworkVersionId, int FrameworkVersionId, string FrameworkVersionCode,
-                int ConfigurationId, int ConfigurationFrameworkVersionId, string ConfigurationCode,
+            var resolutions = new List<(int TemplateFrameworkVersionId, int AccountFrameworkId,
+                int FrameworkVersionId, string FrameworkVersionCode, int ConfigurationId,
+                int ConfigurationFrameworkVersionId, string ConfigurationCode,
                 string AccountingModelCode, DateOnly ConfigurationValidFrom, DateOnly? ConfigurationValidTo)>();
 
             while (await reader.ReadAsync(cancellationToken))
             {
-                resolutions.Add((reader.GetInt32(0), reader.GetInt32(1), reader.GetString(2), reader.GetInt32(3),
-                    reader.GetInt32(4), reader.GetString(5), reader.GetString(6), DateOnly.FromDateTime(reader.GetDateTime(7)),
-                    reader.IsDBNull(8) ? null : DateOnly.FromDateTime(reader.GetDateTime(8))));
+                resolutions.Add((reader.GetInt32(0), reader.GetInt32(1), reader.GetInt32(2), reader.GetString(3),
+                    reader.GetInt32(4), reader.GetInt32(5), reader.GetString(6), reader.GetString(7),
+                    DateOnly.FromDateTime(reader.GetDateTime(8)),
+                    reader.IsDBNull(9) ? null : DateOnly.FromDateTime(reader.GetDateTime(9))));
             }
 
             if (resolutions.Any(candidate => candidate.FrameworkVersionId != candidate.ConfigurationFrameworkVersionId))
@@ -431,7 +434,7 @@ public sealed class AuditTemplatePackageRepository
         int templateErpId,
         string frameworkCode,
         DateOnly applicableDate,
-        (int TemplateFrameworkVersionId, int FrameworkVersionId, string FrameworkVersionCode,
+        (int TemplateFrameworkVersionId, int AccountFrameworkId, int FrameworkVersionId, string FrameworkVersionCode,
             int ConfigurationId, int ConfigurationFrameworkVersionId, string ConfigurationCode,
             string AccountingModelCode, DateOnly ConfigurationValidFrom, DateOnly? ConfigurationValidTo) resolution,
         CancellationToken cancellationToken)
@@ -674,6 +677,10 @@ public sealed class AuditTemplatePackageRepository
         return new AuditTemplatePackageV2
         {
             GeneratedAtUtc = DateTime.UtcNow,
+            TemplateFrameworkVersionId = resolution.TemplateFrameworkVersionId,
+            AccountFrameworkId = resolution.AccountFrameworkId,
+            AccountFrameworkVersionId = resolution.FrameworkVersionId,
+            CalculationConfigurationVersionId = resolution.ConfigurationId,
             FrameworkCode = frameworkCode,
             FrameworkVersionCode = resolution.FrameworkVersionCode,
             CalculationConfigurationCode = resolution.ConfigurationCode,

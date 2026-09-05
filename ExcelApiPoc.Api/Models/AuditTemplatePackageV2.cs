@@ -4,6 +4,10 @@ public sealed class AuditTemplatePackageV2
 {
     public int ContractVersion { get; init; } = 4;
     public DateTime GeneratedAtUtc { get; init; }
+    public int TemplateFrameworkVersionId { get; init; }
+    public int AccountFrameworkId { get; init; }
+    public int AccountFrameworkVersionId { get; init; }
+    public int CalculationConfigurationVersionId { get; init; }
     public string FrameworkCode { get; init; } = string.Empty;
     public string FrameworkVersionCode { get; init; } = string.Empty;
     public string CalculationConfigurationCode { get; init; } = string.Empty;

@@ -13,6 +13,8 @@ builder.Services.AddScoped<AuditTemplatePackageRepository>();
 builder.Services.AddScoped<AccountFrameworkRepository>();
 builder.Services.AddSingleton<RegisterUzAccountingEntityRepository>();
 builder.Services.AddScoped<AccountingEntityPackageService>();
+builder.Services.AddScoped<CalculationReportCandidateRepository>();
+builder.Services.AddScoped<AuditCalculationPackageService>();
 builder.Services.AddScoped<RegisterUzOnDemandLoadService>();
 
 var app = builder.Build();
@@ -272,6 +274,96 @@ app.MapGet(
         return Results.Ok(framework);
     })
     .WithName("GetApplicableAccountFrameworkV1")
+    .WithOpenApi();
+
+
+
+app.MapGet(
+    "/api/v1/accounting-entities/{ico}/calculation-package",
+    async (
+        string ico,
+        int fiscalYear,
+        AuditCalculationPackageService service,
+        CancellationToken cancellationToken) =>
+    {
+        if (string.IsNullOrWhiteSpace(ico))
+        {
+            return Results.BadRequest(new { message = "IČO is required." });
+        }
+
+        if (fiscalYear < 1900 || fiscalYear > 9999)
+        {
+            return Results.BadRequest(new
+            {
+                message = "Fiscal year must be between 1900 and 9999."
+            });
+        }
+
+        string normalizedIco = ico.Trim();
+
+        try
+        {
+            AuditCalculationPackageV1? package =
+                await service.GetAsync(
+                    normalizedIco,
+                    fiscalYear,
+                    cancellationToken);
+
+            if (package is null)
+            {
+                return Results.NotFound(new
+                {
+                    message =
+                        $"Accounting entity '{normalizedIco}' was not found in RegisterUZ."
+                });
+            }
+
+            return Results.Ok(package);
+        }
+        catch (CalculationPackageSelectionException exception)
+        {
+            return exception.Failure switch
+            {
+                CalculationPackageSelectionFailure.NoCalculationReport =>
+                    Results.NotFound(new { message = exception.Message }),
+                CalculationPackageSelectionFailure.CalculationNotImplemented =>
+                    Results.Json(
+                        new { message = exception.Message },
+                        statusCode: StatusCodes.Status422UnprocessableEntity),
+                CalculationPackageSelectionFailure.MultipleCalculationReports =>
+                    Results.Conflict(new { message = exception.Message }),
+                _ => throw new InvalidOperationException(
+                    "Unsupported calculation-package selection failure.")
+            };
+        }
+        catch (AuditTemplatePackageV2ResolutionException exception)
+        {
+            return exception.Failure switch
+            {
+                AuditTemplatePackageV2ResolutionFailure.TemplateNotFound =>
+                    Results.NotFound(new { message = exception.Message }),
+                AuditTemplatePackageV2ResolutionFailure.FrameworkNotFound =>
+                    Results.NotFound(new { message = exception.Message }),
+                AuditTemplatePackageV2ResolutionFailure.TemplateNotApplicable =>
+                    Results.NotFound(new { message = exception.Message }),
+                AuditTemplatePackageV2ResolutionFailure.AssociationNotFound =>
+                    Results.NotFound(new { message = exception.Message }),
+                AuditTemplatePackageV2ResolutionFailure.MultipleAssociations =>
+                    Results.Conflict(new { message = exception.Message }),
+                AuditTemplatePackageV2ResolutionFailure.InconsistentFrameworkVersionReferences =>
+                    Results.Conflict(new { message = exception.Message }),
+                AuditTemplatePackageV2ResolutionFailure.InconsistentConfiguration =>
+                    Results.Conflict(new { message = exception.Message }),
+                _ => throw new InvalidOperationException(
+                    "Unsupported template-package resolution failure.")
+            };
+        }
+        catch (RegisterUzMultipleAccountingEntitiesException exception)
+        {
+            return Results.Conflict(new { message = exception.Message });
+        }
+    })
+    .WithName("GetAuditCalculationPackageV1")
     .WithOpenApi();
 
 
