@@ -3,6 +3,7 @@ using ExcelDataReader;
 using System;
 using System.Globalization;
 using System.IO;
+using System.Reflection;
 using System.Security.Cryptography;
 
 namespace ExcelApiPoc.AccountingImport.Services
@@ -123,7 +124,7 @@ namespace ExcelApiPoc.AccountingImport.Services
             sourceRowNumber++;
             ValidateHeader(
                 reader,
-                sourceFile.FileName,
+                sourceFile,
                 worksheetName,
                 sourceRowNumber);
 
@@ -152,17 +153,20 @@ namespace ExcelApiPoc.AccountingImport.Services
                 }
 
                 string ordinalText =
-                    ExcelWorkbookReader.GetText(reader, 0);
+                    ExcelWorkbookReader.GetUrbisText(reader, 0, sourceFile.Extension);
                 object dateValue = reader.GetValue(1);
                 string description =
-                    ExcelWorkbookReader.GetText(reader, 2);
+                    ExcelWorkbookReader.GetUrbisText(reader, 2, sourceFile.Extension);
                 object amountValue = reader.GetValue(3);
                 string debitAccount =
-                    ExcelWorkbookReader.GetText(reader, 4);
+                    ExcelWorkbookReader.GetUrbisText(reader, 4, sourceFile.Extension);
+
                 string creditAccount =
-                    ExcelWorkbookReader.GetText(reader, 5);
+                    ExcelWorkbookReader.GetUrbisText(reader, 5, sourceFile.Extension);
+
                 string documentInformation =
-                    ExcelWorkbookReader.GetText(reader, 6);
+                    ExcelWorkbookReader.GetUrbisText(reader, 6, sourceFile.Extension);
+
 
                 if (IsEntireRowBlank(
                         ordinalText,
@@ -594,12 +598,12 @@ namespace ExcelApiPoc.AccountingImport.Services
 
         private static void ValidateHeader(
             IExcelDataReader reader,
-            string fileName,
+            UrbisSourceFile sourceFile,
             string worksheetName,
             int rowNumber)
         {
             string location = Location(
-                fileName,
+                sourceFile.FileName,
                 worksheetName,
                 rowNumber);
 
@@ -616,7 +620,7 @@ namespace ExcelApiPoc.AccountingImport.Services
                  index++)
             {
                 string actual =
-                    ExcelWorkbookReader.GetText(reader, index);
+                    ExcelWorkbookReader.GetUrbisText(reader, index, sourceFile.Extension);
 
                 if (!string.Equals(
                         (actual ?? string.Empty).Trim(),

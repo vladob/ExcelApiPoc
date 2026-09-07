@@ -9,9 +9,57 @@ namespace ExcelApiPoc.AccountingImport.Services
 {
     internal static class ExcelWorkbookReader
     {
+        private static readonly Encoding Windows1250;
+        private static readonly Encoding Windows1252;
+
         static ExcelWorkbookReader()
         {
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+
+            Windows1250 = Encoding.GetEncoding(
+                1250,
+                EncoderFallback.ExceptionFallback,
+                DecoderFallback.ExceptionFallback);
+
+            Windows1252 = Encoding.GetEncoding(
+                1252,
+                EncoderFallback.ExceptionFallback,
+                DecoderFallback.ExceptionFallback);
+        }
+
+        public static string GetUrbisText(
+    IExcelDataReader reader,
+    int columnIndex,
+    string sourceExtension)
+        {
+            string value = GetText(reader, columnIndex);
+
+            if (value == null ||
+                !string.Equals(
+                    sourceExtension,
+                    ".xls",
+                    StringComparison.OrdinalIgnoreCase))
+            {
+                return value;
+            }
+
+            try
+            {
+                byte[] originalBytes =
+                    Windows1252.GetBytes(value);
+
+                return Windows1250.GetString(originalBytes);
+            }
+            catch (EncoderFallbackException)
+            {
+                // BIFF8 may already contain correctly decoded Unicode.
+                // In that case, preserve it without conversion.
+                return value;
+            }
+            catch (DecoderFallbackException)
+            {
+                return value;
+            }
         }
 
         public static IExcelDataReader Open(string filePath)
