@@ -236,6 +236,12 @@
     <None Include="packages.config" />
     <None Include="Properties\ExcelDna.Build.props" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\ExcelApiPoc.AccountingImport\ExcelApiPoc.AccountingImport.csproj">
+      <Project>{e868b619-a425-48c7-b8af-a6d99315c25a}</Project>
+      <Name>ExcelApiPoc.AccountingImport</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
