@@ -23,6 +23,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RegisterUz.Client", "Regist
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExcelApiPoc.AccountingImport", "ExcelApiPoc.AccountingImport\ExcelApiPoc.AccountingImport.csproj", "{E868B619-A425-48C7-B8AF-A6D99315C25A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExcelApiPoc.AccountingImport.Tests", "ExcelApiPoc.AccountingImport.Tests\ExcelApiPoc.AccountingImport.Tests.csproj", "{6EEC5672-B5C1-449C-ADD4-A8614E1F8461}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -69,6 +71,10 @@ Global
 		{E868B619-A425-48C7-B8AF-A6D99315C25A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E868B619-A425-48C7-B8AF-A6D99315C25A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E868B619-A425-48C7-B8AF-A6D99315C25A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6EEC5672-B5C1-449C-ADD4-A8614E1F8461}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6EEC5672-B5C1-449C-ADD4-A8614E1F8461}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6EEC5672-B5C1-449C-ADD4-A8614E1F8461}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6EEC5672-B5C1-449C-ADD4-A8614E1F8461}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
