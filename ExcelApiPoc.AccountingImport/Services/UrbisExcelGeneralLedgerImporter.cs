@@ -10,7 +10,7 @@ using System.Text.RegularExpressions;
 
 namespace ExcelApiPoc.AccountingImport.Services
 {
-    public sealed class UrbisExcelGeneralLedgerImporter
+    public sealed class UrbisExcelGeneralLedgerImporter : IGeneralLedgerImporter
     {
         private const decimal AmountTolerance = 0.01m;
 

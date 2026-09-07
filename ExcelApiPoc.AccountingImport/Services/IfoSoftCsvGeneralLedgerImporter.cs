@@ -9,13 +9,32 @@ using System.Text.RegularExpressions;
 
 namespace ExcelApiPoc.AccountingImport.Services
 {
-    public sealed class IfoSoftCsvGeneralLedgerImporter
+    public sealed class IfoSoftCsvGeneralLedgerImporter : IGeneralLedgerImporter
     {
         private static readonly string[] FixedHeaders =
         {
             "Syn", "Ana", "Typ", "P", "Odd", "Polozka", "KZdroja", "Program",
             "Stred", "Zakaz", "Nazov uctu", "Poc_M", "Poc_D", "Roc_M", "Roc_D"
         };
+
+        public bool CanImport(
+    string filePath,
+    string accountingFormat)
+        {
+            return
+                string.Equals(
+                    accountingFormat,
+                    "IfoSoft",
+                    StringComparison.OrdinalIgnoreCase) &&
+                !string.IsNullOrWhiteSpace(filePath) &&
+                string.Equals(
+                    Path.GetExtension(filePath),
+                    ".csv",
+                    StringComparison.OrdinalIgnoreCase) &&
+                Path.GetFileName(filePath).StartsWith(
+                    "HL_KNIHA_",
+                    StringComparison.OrdinalIgnoreCase);
+        }
 
         public GeneralLedgerImport Import(string filePath)
         {
