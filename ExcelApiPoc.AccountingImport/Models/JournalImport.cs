@@ -16,5 +16,6 @@ namespace ExcelApiPoc.AccountingImport.Models
         public DateTime ImportedAtUtc { get; set; }
         public int NormalizedTextFieldCount { get; set; }
         public List<JournalRow> Rows { get; } = new List<JournalRow>();
+        public int? ExportStage { get; set; }
     }
 }
