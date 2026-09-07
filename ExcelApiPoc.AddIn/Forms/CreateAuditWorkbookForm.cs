@@ -46,8 +46,7 @@ namespace ExcelApiPoc.AddIn.Forms
 
             _journalPathTextBox = new TextBox();
             _journalPathTextBox.SetBounds(165, 19, 430, 23);
-            _journalPathTextBox.TextChanged +=
-                JournalPathTextBox_TextChanged;
+            _journalPathTextBox.TextChanged += JournalPathTextBox_TextChanged;
 
             var journalBrowseButton = new Button
             {
@@ -101,9 +100,7 @@ namespace ExcelApiPoc.AddIn.Forms
             };
 
             _technicalTypeComboBox.SetBounds(165,172,200,25);
-
             _technicalTypeComboBox.Items.AddRange(new object[] {"Unknown", "CSV", "XML", "JSON", "PDF", "Excel"});
-
             _technicalTypeComboBox.SelectedIndex = 0;
 
             // Accounting-system format
@@ -115,9 +112,7 @@ namespace ExcelApiPoc.AddIn.Forms
             };
 
             _accountingFormatComboBox.SetBounds(165,212,200,25);
-
-            _accountingFormatComboBox.Items.AddRange(new object[] {"Unknown", "IfoSoft", "MkSoft", "Pohoda"});
-
+            _accountingFormatComboBox.Items.AddRange(new object[] {"Unknown", "IfoSoft", "Urbis", "MkSoft","MkSoft", "Pohoda"});
             _accountingFormatComboBox.SelectedIndex = 0;
 
             // IČO
@@ -313,69 +308,90 @@ namespace ExcelApiPoc.AddIn.Forms
                 if (!string.IsNullOrWhiteSpace(generalLedgerPath) && !File.Exists(generalLedgerPath))
                     throw new InvalidOperationException("The selected general-ledger file does not exist.");
 
-                if (!string.Equals(_accountingFormatComboBox.Text, "IfoSoft", StringComparison.OrdinalIgnoreCase))
-                {
-                    throw new InvalidOperationException("Preflight validation is currently implemented " + "only for IfoSoft journals.");
-                }
 
                 if (!int.TryParse( _fiscalYearTextBox.Text.Trim(), out int selectedFiscalYear))
                 {
                     throw new InvalidOperationException("Enter a valid fiscal year.");
                 }
 
-                var importer = new IfoSoftCsvJournalImporter();
+                string selectedIco = _icoTextBox.Text.Trim();
 
-                if (!importer.CanImport(journalPath,_accountingFormatComboBox.Text))
+                AccountingImportPackage importPackage = AccountingImportCoordinator.CreateDefault().Import(
+                            new AccountingImportRequest
+                            {
+                                AccountingFormat = _accountingFormatComboBox.Text,
+                                JournalFilePath = journalPath,
+                                GeneralLedgerFilePath = string.IsNullOrWhiteSpace( generalLedgerPath) ? null : generalLedgerPath,
+                                ExpectedIco = selectedIco,
+                                ExpectedFiscalYear = selectedFiscalYear
+                            });
+
+                JournalImport journalImport = importPackage.Journal;
+                GeneralLedgerImport generalLedgerImport = importPackage.GeneralLedger;
+                JournalLedgerReconciliationResult canonicalReconciliation = importPackage.JournalLedgerReconciliation;
+
+                if (generalLedgerImport == null && !journalImport.Rows.Any(row => row.RecordKind == JournalRecordKind.Opening))
                 {
-                    throw new InvalidOperationException("No compatible journal importer was found.");
+                    throw new InvalidOperationException(
+                        "The accounting journal does not contain opening " +
+                        "balance records. Select the corresponding general " +
+                        "ledger so that opening balances can be supplied " +
+                        "and closing balances validated.");
                 }
-                JournalImport journalImport =importer.Import(journalPath);
+
                 AccountingFrameworkImport accountingFrameworkImport = null;
                 AccountingFrameworkAccountEnrichmentResult accountingFrameworkEnrichment = null;
-                GeneralLedgerImport generalLedgerImport = null;
                 GeneralLedgerReconciliationResult generalLedgerReconciliation = null;
-
-                if (!string.IsNullOrWhiteSpace(generalLedgerPath))
-                {
-                    generalLedgerImport = new IfoSoftCsvGeneralLedgerImporter().Import(generalLedgerPath);
-                    if (!string.Equals(generalLedgerImport.Ico, journalImport.Ico, StringComparison.Ordinal))
-                        throw new InvalidOperationException(
-                            "The general ledger belongs to IČO " + generalLedgerImport.Ico +
-                            ", but the journal belongs to IČO " + journalImport.Ico + ".");
-                    if (generalLedgerImport.FiscalYear != selectedFiscalYear)
-                        throw new InvalidOperationException(
-                            "The general ledger is for fiscal year " + generalLedgerImport.FiscalYear +
-                            ", but fiscal year " + selectedFiscalYear + " is selected.");
-                }
 
                 if (!string.IsNullOrWhiteSpace(accountsPath))
                 {
-                    accountingFrameworkImport =
-                        new IfoSoftCsvAccountingFrameworkImporter().Import(accountsPath);
+                    if (!string.Equals(importPackage.AccountingFormat, "IfoSoft", StringComparison.OrdinalIgnoreCase))
+                    {
+                        throw new InvalidOperationException(
+                            "An entity-specific accounting-framework export " +
+                            "is currently supported only for IfoSoft. " +
+                            "Leave the Accounting framework field empty " +
+                            "when importing Urbis.");
+                    }
+
+                    accountingFrameworkImport = new IfoSoftCsvAccountingFrameworkImporter() .Import(accountsPath);
 
                     if (!string.Equals(accountingFrameworkImport.Ico, journalImport.Ico, StringComparison.Ordinal))
+                    {
                         throw new InvalidOperationException(
-                            "The accounting framework belongs to IČO " + accountingFrameworkImport.Ico +
-                            ", but the journal belongs to IČO " + journalImport.Ico + ".");
+                            "The accounting framework belongs to IČO " +
+                            accountingFrameworkImport.Ico +
+                            ", but the journal belongs to IČO " +
+                            journalImport.Ico +
+                            ".");
+                    }
 
                     if (accountingFrameworkImport.FiscalYear != selectedFiscalYear)
+                    {
                         throw new InvalidOperationException(
-                            "The accounting framework is for fiscal year " + accountingFrameworkImport.FiscalYear +
-                            ", but fiscal year " + selectedFiscalYear + " is selected.");
+                            "The accounting framework is for fiscal year " +
+                            accountingFrameworkImport.FiscalYear +
+                            ", but fiscal year " +
+                            selectedFiscalYear +
+                            " is selected.");
+                    }
                 }
+
                 DateTime dateFrom = journalImport.Rows.Min(row => row.PostingDate);
                 DateTime dateTo = journalImport.Rows.Max(row => row.PostingDate);
                 List<AccountSummary> accountSummaries = JournalAccountSummaryBuilder.Build(journalImport);
                 int journalReportAccountCount = accountSummaries.Count;
-                if (generalLedgerImport != null)
-                    generalLedgerReconciliation = GeneralLedgerReconciliationService.Reconcile(
-                        journalImport, generalLedgerImport, accountSummaries);
+
+                if (canonicalReconciliation != null)
+                {
+                    generalLedgerReconciliation = CanonicalReconciliationAccountSummaryAdapter.Apply(canonicalReconciliation, accountSummaries);
+                }
+
                 AccountFrameworkLoadResult frameworkLoad = AccountFrameworkService.Load("GOV_LOCAL", selectedFiscalYear);
                 ApplicableAccountFrameworkResponse framework = frameworkLoad.Framework;
                 AccountFrameworkEnrichmentResult enrichmentResult = AccountFrameworkEnricher.Enrich(accountSummaries, framework);
                 if (accountingFrameworkImport != null)
-                    accountingFrameworkEnrichment = AccountingFrameworkAccountEnricher.Enrich(
-                        accountSummaries, accountingFrameworkImport);
+                    accountingFrameworkEnrichment = AccountingFrameworkAccountEnricher.Enrich( accountSummaries, accountingFrameworkImport);
                 if (generalLedgerImport != null)
                     GeneralLedgerReconciliationService.ResolveNames(accountSummaries, generalLedgerImport);
 
@@ -385,25 +401,19 @@ namespace ExcelApiPoc.AddIn.Forms
                 bool fiscalYearMatches = dateFrom.Year == selectedFiscalYear && dateTo.Year == selectedFiscalYear;
 
                 AccountingEntityPackageEnvelope accountingEntityEnvelope =
-                    AccountingEntityPackageApiClient.GetEnvelope(
-                        journalImport.Ico);
+                    AccountingEntityPackageApiClient.GetEnvelope( journalImport.Ico);
 
                 RegisterUzFinancialReportSelection reportSelection =
-                    RegisterUzFinancialReportSelector.Select(
-                        accountingEntityEnvelope,
-                        selectedFiscalYear);
+                    RegisterUzFinancialReportSelector.Select(accountingEntityEnvelope, selectedFiscalYear);
 
-                var reportContext =
-                    new AuditReportContext
+                var reportContext = new AuditReportContext
                     {
                         Ico = journalImport.Ico,
                         FiscalYear = selectedFiscalYear,
                         TemplateErpId = reportSelection.TemplateErpId,
                         FrameworkCode = framework.FrameworkCode,
                         SelectionSource = "RegisterUZ",
-                        RegisterUzReportId =
-                            reportSelection.RegisterUzReportId.ToString(
-                                CultureInfo.InvariantCulture)
+                        RegisterUzReportId = reportSelection.RegisterUzReportId.ToString(CultureInfo.InvariantCulture)
                     };
 
                 AuditTemplatePackageLoadResult templatePackageLoad = AuditTemplatePackageService.Load(reportContext);
@@ -411,14 +421,8 @@ namespace ExcelApiPoc.AddIn.Forms
                 AuditReportCalculationResult calculationResult = AuditReportCalculationService.Calculate(accountSummaries, templatePackage);
                 AnalyticalMappingData analyticalMapping = AnalyticalMappingBuilder.Build(accountSummaries, templatePackage, calculationResult);
                 const int rejectedRecordCount = 0;
-                bool frameworkFromCache = string.Equals(
-                    frameworkLoad.Source,
-                    "Local cache",
-                    StringComparison.OrdinalIgnoreCase);
-                bool templateFromCache = string.Equals(
-                    templatePackageLoad.Source,
-                    "Local cache",
-                    StringComparison.OrdinalIgnoreCase);
+                bool frameworkFromCache = string.Equals(frameworkLoad.Source, "Local cache", StringComparison.OrdinalIgnoreCase);
+                bool templateFromCache = string.Equals(templatePackageLoad.Source, "Local cache", StringComparison.OrdinalIgnoreCase);
 
                 var message = new System.Text.StringBuilder();
 
@@ -470,6 +474,10 @@ namespace ExcelApiPoc.AddIn.Forms
                     message.AppendLine($"Debit-turnover difference: {generalLedgerReconciliation.DebitTurnoverDifference:N2}");
                     message.AppendLine($"Credit-turnover difference: {generalLedgerReconciliation.CreditTurnoverDifference:N2}");
                     message.AppendLine($"Closing-balance difference: {generalLedgerReconciliation.ClosingBalanceDifference:N2}");
+
+                    message.AppendLine("Opening balance source: " + (canonicalReconciliation.OpeningBalanceSource == OpeningBalanceSource.Journal ? "Accounting journal" : "General ledger"));
+                    message.AppendLine("Journal contains opening records: " + (canonicalReconciliation.JournalContainsOpeningRecords ? "Yes" : "No"));
+                    message.AppendLine("Journal contains closing records: " + (canonicalReconciliation.JournalContainsClosingRecords ? "Yes" : "No"));
                 }
 
                 message.AppendLine();
@@ -528,7 +536,8 @@ namespace ExcelApiPoc.AddIn.Forms
             }
             catch (Exception exception)
             {
-                MessageBox.Show($"Accounting journal processing failed.\n\n" + exception.Message, "Create Audit Workbook", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                // MessageBox.Show($"Accounting journal processing failed.\n\n" + exception.Message, "Create Audit Workbook", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show($"Accounting journal processing failed.\n\n" + exception.ToString(), "Create Audit Workbook", MessageBoxButtons.OK, MessageBoxIcon.Error);
 
                 if (workbookPopulationStarted)
                 {
@@ -546,7 +555,7 @@ namespace ExcelApiPoc.AddIn.Forms
             _icoTextBox.Clear();
             _fiscalYearTextBox.Clear();
 
-            if (!IfoSoftCsvJournalDetector.TryDetect(filePath,out JournalDetectionResult detection))
+            if (!AccountingJournalDetectionService.TryDetect(filePath,out JournalDetectionResult detection))
             {
                 return;
             }

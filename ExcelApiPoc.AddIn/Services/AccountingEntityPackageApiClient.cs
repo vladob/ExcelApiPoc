@@ -11,7 +11,7 @@ namespace ExcelApiPoc.AddIn.Services
         private static readonly HttpClient HttpClient =
             new HttpClient
             {
-                Timeout = TimeSpan.FromSeconds(30)
+                Timeout = TimeSpan.FromSeconds(120)
             };
 
         public static AccountingEntityPackageDto GetPackage(string ico)

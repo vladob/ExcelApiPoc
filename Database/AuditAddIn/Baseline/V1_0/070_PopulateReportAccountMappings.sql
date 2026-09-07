@@ -98,7 +98,7 @@ BEGIN TRANSACTION;
     UNION ALL SELECT 690, 69001, 45, N'357', 0, 1, 0, 'Liabilities', N'ClosingNetto'
     UNION ALL SELECT 690, 69001, 46, N'358', 0, 1, 0, 'Assets', N'ClosingDebit'
     UNION ALL SELECT 690, 69001, 47, N'359', 0, 1, 0, 'Assets', N'ClosingCredit'
-    UNION ALL SELECT 690, 69001, 49, N'311', 0, 1, 0, 'Assets', N'ClosingDebit'
+    UNION ALL SELECT 690, 69001, 49, N'311', 1, 1, 0, 'Assets', N'ClosingDebit'
     UNION ALL SELECT 690, 69001, 49, N'391', 1, 0, 1, 'Liabilities', N'ClosingCredit'
     UNION ALL SELECT 690, 69001, 50, N'312', 1, 1, 0, 'Assets', N'ClosingDebit'
     UNION ALL SELECT 690, 69001, 50, N'313', 1, 1, 0, 'Assets', N'ClosingDebit'
