@@ -136,4 +136,60 @@ public sealed class AccountingImportCoordinatorTests
             "TestData",
             fileName);
     }
+
+    [Fact]
+    public void Import_DoesNotUseExportStageForCompatibility()
+    {
+        string directory = Path.Combine(
+            Path.GetTempPath(),
+            "ExcelApiPoc-" +
+            Guid.NewGuid().ToString("N"));
+
+        Directory.CreateDirectory(directory);
+
+        string copiedLedgerPath = Path.Combine(
+            directory,
+            "HL_KNIHA_00325791_202414.xls");
+
+        File.Copy(
+            GetFixturePath(
+                "HL_KNIHA_00325791_202412.xls"),
+            copiedLedgerPath);
+
+        try
+        {
+            AccountingImportPackage result =
+                AccountingImportCoordinator
+                    .CreateDefault()
+                    .Import(
+                        new AccountingImportRequest
+                        {
+                            AccountingFormat = "Urbis",
+                            JournalFilePath =
+                                GetFixturePath(
+                                    "U_DENNIK_00325791_202412.xlsx"),
+                            GeneralLedgerFilePath =
+                                copiedLedgerPath,
+                            ExpectedIco = "00325791",
+                            ExpectedFiscalYear = 2024
+                        });
+
+            Assert.Equal(12, result.Journal.ExportStage);
+            Assert.Equal(
+                14,
+                result.GeneralLedger.ExportStage);
+        }
+        finally
+        {
+            if (File.Exists(copiedLedgerPath))
+            {
+                File.Delete(copiedLedgerPath);
+            }
+
+            if (Directory.Exists(directory))
+            {
+                Directory.Delete(directory);
+            }
+        }
+    }
 }

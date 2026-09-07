@@ -54,17 +54,6 @@ namespace ExcelApiPoc.AccountingImport.Services
                 filePath,
                 UrbisDocumentKind.AccountingJournal);
 
-            if (sourceFile.ExportStage != 12)
-            {
-                throw new InvalidDataException(
-                    "Urbis accounting journal '" +
-                    sourceFile.FileName +
-                    "' has export stage " +
-                    sourceFile.ExportStage +
-                    ". The first Urbis importer version supports only " +
-                    "stage 12 journals without opening and closing movements.");
-            }
-
             var result = new JournalImport
             {
                 SourceFileName = sourceFile.FileName,

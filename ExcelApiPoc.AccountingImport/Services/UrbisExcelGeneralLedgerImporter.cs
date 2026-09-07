@@ -46,17 +46,6 @@ namespace ExcelApiPoc.AccountingImport.Services
                 filePath,
                 UrbisDocumentKind.GeneralLedger);
 
-            if (sourceFile.ExportStage != 12)
-            {
-                throw new InvalidDataException(
-                    "Urbis general ledger '" +
-                    sourceFile.FileName +
-                    "' has export stage " +
-                    sourceFile.ExportStage +
-                    ". The first Urbis importer version supports " +
-                    "only stage 12 general ledgers.");
-            }
-
             var result = new GeneralLedgerImport
             {
                 SourceFileName = sourceFile.FileName,

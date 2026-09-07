@@ -298,17 +298,6 @@ namespace ExcelApiPoc.AccountingImport.Services
                     ledger.FiscalYear +
                     ".");
             }
-
-            if (ledger.ExportStage != journal.ExportStage)
-            {
-                throw new InvalidDataException(
-                    "The accounting journal and general ledger " +
-                    "have different export stages: " +
-                    FormatStage(journal.ExportStage) +
-                    " and " +
-                    FormatStage(ledger.ExportStage) +
-                    ".");
-            }
         }
 
         private static void ValidateFormat(

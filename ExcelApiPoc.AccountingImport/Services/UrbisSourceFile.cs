@@ -12,15 +12,16 @@ namespace ExcelApiPoc.AccountingImport.Services
 
     internal sealed class UrbisSourceFile
     {
-        private static readonly Regex FileNamePattern = new Regex(
-            @"^(?<document>U_DENNIK|HL_KNIHA)_" +
-            @"(?<ico>\d{8})_" +
-            @"(?<year>\d{4})" +
-            @"(?<stage>\d{2})" +
-            @"(?<extension>\.xls|\.xlsx)$",
-            RegexOptions.Compiled |
-            RegexOptions.CultureInvariant |
-            RegexOptions.IgnoreCase);
+        private static readonly Regex FileNamePattern =
+            new Regex(
+                @"^(?<document>U_DENNIK|HL_KNIHA)_" +
+                @"(?<ico>\d{8})_" +
+                @"(?<year>\d{4})" +
+                @"(?<stage>\d{2})?" +
+                @"(?<extension>\.xls|\.xlsx)$",
+                RegexOptions.Compiled |
+                RegexOptions.CultureInvariant |
+                RegexOptions.IgnoreCase);
 
         public string FilePath { get; private set; }
 
@@ -32,7 +33,7 @@ namespace ExcelApiPoc.AccountingImport.Services
 
         public int FiscalYear { get; private set; }
 
-        public int ExportStage { get; private set; }
+        public int? ExportStage { get; private set; }
 
         public string Extension { get; private set; }
 
@@ -61,8 +62,8 @@ namespace ExcelApiPoc.AccountingImport.Services
             {
                 throw new InvalidDataException(
                     "The Urbis filename '" + fileName + "' is invalid. " +
-                    "Expected 'U_DENNIK_<IČO>_<YYYY><stage>.xls[x]' or " +
-                    "'HL_KNIHA_<IČO>_<YYYY><stage>.xls[x]'.");
+                    "Expected 'U_DENNIK_<IČO>_<YYYY>[<stage>].xls[x]' or " +
+                    "'HL_KNIHA_<IČO>_<YYYY>[<stage>].xls[x]'.");
             }
 
             UrbisDocumentKind detectedDocumentKind =
@@ -79,20 +80,14 @@ namespace ExcelApiPoc.AccountingImport.Services
             }
 
             int fiscalYear = int.Parse(match.Groups["year"].Value);
-            int exportStage = int.Parse(match.Groups["stage"].Value);
+            int? v = match.Groups["stage"].Success ? int.Parse(match.Groups["stage"].Value) : (int?)null;
+            int? exportStage = v;
 
             if (fiscalYear < 1900 || fiscalYear > 9999)
             {
                 throw new InvalidDataException(
                     "The Urbis filename '" + fileName +
                     "' contains invalid fiscal year " + fiscalYear + ".");
-            }
-
-            if (exportStage < 1 || exportStage > 99)
-            {
-                throw new InvalidDataException(
-                    "The Urbis filename '" + fileName +
-                    "' contains invalid export stage " + exportStage + ".");
             }
 
             return new UrbisSourceFile

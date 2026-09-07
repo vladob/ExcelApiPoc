@@ -72,42 +72,46 @@ public sealed class UrbisExcelJournalImporterTests
     }
 
     [Fact]
-    public void Import_RejectsUnsupportedExportStage()
+    public void Import_AllowsFilenameWithoutExportStage()
     {
-        string directory = Path.Combine(
-            Path.GetTempPath(),
-            "ExcelApiPoc-" + Guid.NewGuid().ToString("N"));
+        string copiedPath = CopyFixtureWithName(
+            "U_DENNIK_00325791_2024.xlsx");
 
-        Directory.CreateDirectory(directory);
+        try
+        {
+            JournalImport result =
+                new UrbisExcelJournalImporter()
+                    .Import(copiedPath);
 
-        string copiedPath = Path.Combine(
-            directory,
+            Assert.Null(result.ExportStage);
+            Assert.Equal("00325791", result.Ico);
+            Assert.Equal(2024, result.FiscalYear);
+            Assert.Equal(6, result.Rows.Count);
+        }
+        finally
+        {
+            DeleteCopiedFixture(copiedPath);
+        }
+    }
+
+    [Fact]
+    public void Import_PreservesOptionalExportStage()
+    {
+        string copiedPath = CopyFixtureWithName(
             "U_DENNIK_00325791_202414.xlsx");
 
         try
         {
-            File.Copy(GetFixturePath(), copiedPath);
+            JournalImport result =
+                new UrbisExcelJournalImporter()
+                    .Import(copiedPath);
 
-            InvalidDataException exception =
-                Assert.Throws<InvalidDataException>(
-                    () => new UrbisExcelJournalImporter()
-                        .Import(copiedPath));
-
-            Assert.Contains(
-                "supports only stage 12",
-                exception.Message);
+            Assert.Equal(14, result.ExportStage);
+            Assert.Equal(6, result.Rows.Count);
         }
         finally
         {
-            if (File.Exists(copiedPath))
-            {
-                File.Delete(copiedPath);
-            }
-
-            if (Directory.Exists(directory))
-            {
-                Directory.Delete(directory);
-            }
+            DeleteCopiedFixture(copiedPath);
         }
     }
 
@@ -117,5 +121,41 @@ public sealed class UrbisExcelJournalImporterTests
             AppContext.BaseDirectory,
             "TestData",
             "U_DENNIK_00325791_202412.xlsx");
+    }
+
+    private static string CopyFixtureWithName(
+    string fileName)
+    {
+        string directory = Path.Combine(
+            Path.GetTempPath(),
+            "ExcelApiPoc-" +
+            Guid.NewGuid().ToString("N"));
+
+        Directory.CreateDirectory(directory);
+
+        string copiedPath =
+            Path.Combine(directory, fileName);
+
+        File.Copy(GetFixturePath(), copiedPath);
+
+        return copiedPath;
+    }
+
+    private static void DeleteCopiedFixture(
+        string copiedPath)
+    {
+        string directory =
+            Path.GetDirectoryName(copiedPath);
+
+        if (File.Exists(copiedPath))
+        {
+            File.Delete(copiedPath);
+        }
+
+        if (!string.IsNullOrWhiteSpace(directory) &&
+            Directory.Exists(directory))
+        {
+            Directory.Delete(directory);
+        }
     }
 }
