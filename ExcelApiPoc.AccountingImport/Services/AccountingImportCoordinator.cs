@@ -8,16 +8,11 @@ namespace ExcelApiPoc.AccountingImport.Services
 {
     public sealed class AccountingImportCoordinator
     {
-        private readonly IReadOnlyList<IJournalImporter>
-            journalImporters;
+        private readonly IReadOnlyList<IJournalImporter> journalImporters;
 
-        private readonly IReadOnlyList<IGeneralLedgerImporter>
-            generalLedgerImporters;
+        private readonly IReadOnlyList<IGeneralLedgerImporter> generalLedgerImporters;
 
-        public AccountingImportCoordinator(
-            IEnumerable<IJournalImporter> journalImporters,
-            IEnumerable<IGeneralLedgerImporter>
-                generalLedgerImporters)
+        public AccountingImportCoordinator(IEnumerable<IJournalImporter> journalImporters, IEnumerable<IGeneralLedgerImporter> generalLedgerImporters)
         {
             if (journalImporters == null)
             {
@@ -45,8 +40,7 @@ namespace ExcelApiPoc.AccountingImport.Services
             }
         }
 
-        public static AccountingImportCoordinator
-            CreateDefault()
+        public static AccountingImportCoordinator CreateDefault()
         {
             return new AccountingImportCoordinator(
                 new IJournalImporter[]
@@ -61,28 +55,20 @@ namespace ExcelApiPoc.AccountingImport.Services
                 });
         }
 
-        public AccountingImportPackage Import(
-            AccountingImportRequest request)
+        public AccountingImportPackage Import(AccountingImportRequest request)
         {
             ValidateRequest(request);
 
-            IJournalImporter journalImporter =
-                SelectExactlyOne(
-                    journalImporters,
-                    importer => importer.CanImport(
-                        request.JournalFilePath,
-                        request.AccountingFormat),
-                    "accounting-journal",
-                    request.JournalFilePath,
-                    request.AccountingFormat);
+            IJournalImporter journalImporter = SelectExactlyOne(journalImporters, importer => importer.CanImport( request.JournalFilePath, request.AccountingFormat),
+                    "accounting-journal", request.JournalFilePath, request.AccountingFormat);
 
-            JournalImport journal =
-                journalImporter.Import(
-                    request.JournalFilePath);
+            JournalImport journal = journalImporter.Import(request.JournalFilePath);
 
             ValidateJournal(journal, request);
 
             GeneralLedgerImport generalLedger = null;
+
+            JournalLedgerReconciliationResult reconciliation = null;
 
             if (!string.IsNullOrWhiteSpace(
                     request.GeneralLedgerFilePath))
@@ -105,6 +91,11 @@ namespace ExcelApiPoc.AccountingImport.Services
                     generalLedger,
                     journal,
                     request);
+
+                reconciliation =
+                    JournalLedgerReconciliationService.Reconcile(
+                        journal,
+                        generalLedger);
             }
 
             return new AccountingImportPackage
@@ -115,16 +106,12 @@ namespace ExcelApiPoc.AccountingImport.Services
                 FiscalYear = journal.FiscalYear,
                 ExportStage = journal.ExportStage,
                 Journal = journal,
-                GeneralLedger = generalLedger
+                GeneralLedger = generalLedger,
+                JournalLedgerReconciliation = reconciliation
             };
         }
 
-        private static TImporter SelectExactlyOne<TImporter>(
-            IEnumerable<TImporter> importers,
-            Func<TImporter, bool> canImport,
-            string documentDescription,
-            string filePath,
-            string accountingFormat)
+        private static TImporter SelectExactlyOne<TImporter>(IEnumerable<TImporter> importers, Func<TImporter, bool> canImport, string documentDescription, string filePath,  string accountingFormat)
         {
             List<TImporter> matches =
                 importers.Where(canImport).ToList();
@@ -157,8 +144,7 @@ namespace ExcelApiPoc.AccountingImport.Services
             return matches[0];
         }
 
-        private static void ValidateRequest(
-            AccountingImportRequest request)
+        private static void ValidateRequest(AccountingImportRequest request)
         {
             if (request == null)
             {
@@ -199,9 +185,7 @@ namespace ExcelApiPoc.AccountingImport.Services
             }
         }
 
-        private static void ValidateJournal(
-            JournalImport journal,
-            AccountingImportRequest request)
+        private static void ValidateJournal(JournalImport journal, AccountingImportRequest request)
         {
             if (journal == null)
             {
@@ -246,10 +230,7 @@ namespace ExcelApiPoc.AccountingImport.Services
             }
         }
 
-        private static void ValidateGeneralLedger(
-            GeneralLedgerImport ledger,
-            JournalImport journal,
-            AccountingImportRequest request)
+        private static void ValidateGeneralLedger(GeneralLedgerImport ledger, JournalImport journal, AccountingImportRequest request)
         {
             if (ledger == null)
             {
@@ -300,10 +281,7 @@ namespace ExcelApiPoc.AccountingImport.Services
             }
         }
 
-        private static void ValidateFormat(
-            string documentDescription,
-            string actual,
-            string expected)
+        private static void ValidateFormat(string documentDescription, string actual, string expected)
         {
             if (!string.Equals(
                     actual,
@@ -321,11 +299,7 @@ namespace ExcelApiPoc.AccountingImport.Services
             }
         }
 
-        private static void ValidateIco(
-            string documentDescription,
-            string fileName,
-            string actual,
-            string expected)
+        private static void ValidateIco(string documentDescription, string fileName, string actual, string expected)
         {
             if (!string.Equals(
                     actual,
@@ -345,11 +319,7 @@ namespace ExcelApiPoc.AccountingImport.Services
             }
         }
 
-        private static void ValidateFiscalYear(
-            string documentDescription,
-            string fileName,
-            int actual,
-            int expected)
+        private static void ValidateFiscalYear(string documentDescription, string fileName, int actual, int expected)
         {
             if (actual != expected)
             {

@@ -33,6 +33,7 @@ public sealed class AccountingImportCoordinatorTests
         Assert.NotNull(result.Journal);
         Assert.NotNull(result.GeneralLedger);
         Assert.True(result.HasGeneralLedger);
+        Assert.NotNull(result.JournalLedgerReconciliation);
     }
 
     [Fact]
@@ -55,6 +56,7 @@ public sealed class AccountingImportCoordinatorTests
         Assert.NotNull(result.Journal);
         Assert.Null(result.GeneralLedger);
         Assert.False(result.HasGeneralLedger);
+        Assert.Null(result.JournalLedgerReconciliation);
     }
 
     [Fact]

@@ -10,7 +10,7 @@
         public JournalImport Journal { get; set; }
         public GeneralLedgerImport GeneralLedger { get; set; }
 
-        public bool HasGeneralLedger =>
-            GeneralLedger != null;
+        public bool HasGeneralLedger => GeneralLedger != null;
+        public JournalLedgerReconciliationResult JournalLedgerReconciliation { get; set; }
     }
 }
