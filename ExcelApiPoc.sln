@@ -24,6 +24,9 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExcelApiPoc.AccountingImport", "ExcelApiPoc.AccountingImport\ExcelApiPoc.AccountingImport.csproj", "{E868B619-A425-48C7-B8AF-A6D99315C25A}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExcelApiPoc.AccountingImport.Tests", "ExcelApiPoc.AccountingImport.Tests\ExcelApiPoc.AccountingImport.Tests.csproj", "{6EEC5672-B5C1-449C-ADD4-A8614E1F8461}"
+	ProjectSection(ProjectDependencies) = postProject
+		{E868B619-A425-48C7-B8AF-A6D99315C25A} = {E868B619-A425-48C7-B8AF-A6D99315C25A}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
