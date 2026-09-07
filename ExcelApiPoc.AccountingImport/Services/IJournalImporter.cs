@@ -1,8 +1,8 @@
 ﻿using ExcelApiPoc.AccountingImport.Models;
 
-namespace ExcelApiPoc.AddIn.Services
+namespace ExcelApiPoc.AccountingImport.Services
 {
-    internal interface IJournalImporter
+    public interface IJournalImporter
     {
         bool CanImport(string filePath,string accountingFormat);
 

@@ -5,9 +5,9 @@ using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
 
-namespace ExcelApiPoc.AddIn.Services
+namespace ExcelApiPoc.AccountingImport.Services
 {
-    internal static class IfoSoftCsvJournalDetector
+    public static class IfoSoftCsvJournalDetector
     {
         private const int MaximumDetectionRows = 100;
 

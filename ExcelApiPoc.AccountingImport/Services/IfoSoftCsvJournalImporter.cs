@@ -7,9 +7,9 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
 
-namespace ExcelApiPoc.AddIn.Services
+namespace ExcelApiPoc.AccountingImport.Services
 {
-    internal sealed class IfoSoftCsvJournalImporter : IJournalImporter
+    public sealed class IfoSoftCsvJournalImporter : IJournalImporter
     {
         public const int MaximumJournalRows = 500_000;
 

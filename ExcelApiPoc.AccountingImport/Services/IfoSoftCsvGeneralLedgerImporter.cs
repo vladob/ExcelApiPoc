@@ -7,9 +7,9 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
 
-namespace ExcelApiPoc.AddIn.Services
+namespace ExcelApiPoc.AccountingImport.Services
 {
-    internal sealed class IfoSoftCsvGeneralLedgerImporter
+    public sealed class IfoSoftCsvGeneralLedgerImporter
     {
         private static readonly string[] FixedHeaders =
         {

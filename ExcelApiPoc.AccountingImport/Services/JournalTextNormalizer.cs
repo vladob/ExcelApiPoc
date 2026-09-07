@@ -1,8 +1,8 @@
 ﻿using System;
 
-namespace ExcelApiPoc.AddIn.Services
+namespace ExcelApiPoc.AccountingImport.Services
 {
-    internal static class JournalTextNormalizer
+    public static class JournalTextNormalizer
     {
         public static string NormalizeText(string value, out bool changed)
         {

@@ -1,8 +1,8 @@
 ﻿using System.Text;
 
-namespace ExcelApiPoc.AddIn.Services
+namespace ExcelApiPoc.AccountingImport.Services
 {
-    internal static class AccountCodeNormalizer
+    public static class AccountCodeNormalizer
     {
         public static string Normalize(string value)
         {
