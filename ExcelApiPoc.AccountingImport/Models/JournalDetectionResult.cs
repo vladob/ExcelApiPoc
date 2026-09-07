@@ -1,6 +1,6 @@
-﻿namespace ExcelApiPoc.AddIn.Models
+﻿namespace ExcelApiPoc.AccountingImport.Models
 {
-    internal sealed class JournalDetectionResult
+    public sealed class JournalDetectionResult
     {
         public string TechnicalType { get; set; }
         public string AccountingFormat { get; set; }

@@ -1,3 +1,4 @@
+using ExcelApiPoc.AccountingImport.Models;
 using ExcelApiPoc.AddIn.Models;
 using System.Collections.Generic;
 using Excel = Microsoft.Office.Interop.Excel;

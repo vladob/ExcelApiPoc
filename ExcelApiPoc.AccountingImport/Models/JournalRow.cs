@@ -1,15 +1,15 @@
 ﻿using System;
 
-namespace ExcelApiPoc.AddIn.Models
+namespace ExcelApiPoc.AccountingImport.Models
 {
-    internal enum JournalRecordKind
+    public enum JournalRecordKind
     {
         Normal = 0,
         Opening = 1,
         Closing = 2
     }
 
-    internal sealed class JournalRow
+    public sealed class JournalRow
     {
         public int SequenceNumber { get; set; }
         public int SourceRecordNumber { get; set; }

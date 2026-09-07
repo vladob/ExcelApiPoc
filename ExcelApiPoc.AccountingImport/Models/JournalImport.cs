@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace ExcelApiPoc.AddIn.Models
+namespace ExcelApiPoc.AccountingImport.Models
 {
-    internal sealed class JournalImport
+    public sealed class JournalImport
     {
         public string SourceFileName { get; set; }
         public string SourceFilePath { get; set; }

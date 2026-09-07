@@ -1,4 +1,4 @@
-﻿using ExcelApiPoc.AddIn.Models;
+﻿using ExcelApiPoc.AccountingImport.Models;
 
 namespace ExcelApiPoc.AddIn.Services
 {

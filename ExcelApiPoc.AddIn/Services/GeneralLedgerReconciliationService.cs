@@ -1,4 +1,5 @@
-﻿using ExcelApiPoc.AddIn.Models;
+﻿using ExcelApiPoc.AccountingImport.Models;
+using ExcelApiPoc.AddIn.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;

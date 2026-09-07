@@ -1,4 +1,4 @@
-﻿using ExcelApiPoc.AddIn.Models;
+﻿using ExcelApiPoc.AccountingImport.Models;
 using ExcelDna.Integration;
 using System;
 using Excel = Microsoft.Office.Interop.Excel;

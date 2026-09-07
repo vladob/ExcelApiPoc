@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace ExcelApiPoc.AddIn.Models
+namespace ExcelApiPoc.AccountingImport.Models
 {
-    internal sealed class GeneralLedgerImport
+    public sealed class GeneralLedgerImport
     {
         public string SourceFileName { get; set; }
         public string SourceFilePath { get; set; }
@@ -20,7 +20,7 @@ namespace ExcelApiPoc.AddIn.Models
         public List<GeneralLedgerRow> Rows { get; } = new List<GeneralLedgerRow>();
     }
 
-    internal sealed class GeneralLedgerRow
+    public sealed class GeneralLedgerRow
     {
         public int SequenceNumber { get; set; }
         public int SourceRecordNumber { get; set; }
@@ -47,7 +47,7 @@ namespace ExcelApiPoc.AddIn.Models
         public decimal Plan { get; set; }
     }
 
-    internal sealed class GeneralLedgerReconciliationResult
+    public sealed class GeneralLedgerReconciliationResult
     {
         public int JournalAccountCount { get; set; }
         public int LedgerAccountCount { get; set; }

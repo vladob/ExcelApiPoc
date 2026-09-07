@@ -171,10 +171,6 @@
     <Compile Include="Models\AuditTemplateMetadataResponse.cs" />
     <Compile Include="Models\AuditTemplatePackageResponse.cs" />
     <Compile Include="Models\AuditWorkbookRecalculationResult.cs" />
-    <Compile Include="Models\GeneralLedgerImport.cs" />
-    <Compile Include="Models\JournalDetectionResult.cs" />
-    <Compile Include="Models\JournalImport.cs" />
-    <Compile Include="Models\JournalRow.cs" />
     <Compile Include="Models\MultiYearBalanceSheet.cs" />
     <Compile Include="Models\RegisterUzAttachmentListRow.cs" />
     <Compile Include="Models\RegisterUzReportListRow.cs" />

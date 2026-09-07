@@ -1,4 +1,4 @@
-﻿using ExcelApiPoc.AddIn.Models;
+﻿using ExcelApiPoc.AccountingImport.Models;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -137,16 +137,16 @@ namespace ExcelApiPoc.AddIn.Services
                 DebitFundingSource = Normalize(fields[6], journalImport, ref rowNormalized),
                 DebitCostCenter = Normalize(fields[7], journalImport, ref rowNormalized),
                 DebitOrder = Normalize(fields[8], journalImport, ref rowNormalized),
-                DebitAmount = ParseNullableDecimal( fields[9], source.Location, "debit amount"),
+                DebitAmount = ParseNullableDecimal(fields[9], source.Location, "debit amount"),
                 CreditAccount = Normalize(fields[10], journalImport, ref rowNormalized),
-                CreditSection =Normalize(fields[11], journalImport, ref rowNormalized),
+                CreditSection = Normalize(fields[11], journalImport, ref rowNormalized),
                 CreditItem = Normalize(fields[12], journalImport, ref rowNormalized),
                 CreditFundingSource = Normalize(fields[13], journalImport, ref rowNormalized),
                 CreditCostCenter = Normalize(fields[14], journalImport, ref rowNormalized),
                 CreditOrder = Normalize(fields[15], journalImport, ref rowNormalized),
-                CreditAmount = ParseNullableDecimal(fields[16], source.Location, "credit amount")
+                CreditAmount = ParseNullableDecimal(fields[16], source.Location, "credit amount"),
+                TextNormalizationApplied = rowNormalized
             };
-            row.TextNormalizationApplied = rowNormalized;
             row.RecordKind = ClassifyRecord(row);
             return row;
         }
