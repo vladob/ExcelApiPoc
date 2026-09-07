@@ -24,4 +24,10 @@
     <Using Include="Xunit" />
   </ItemGroup>
 
+	<ItemGroup>
+		<None Update="TestData\U_DENNIK_00325791_202412.xlsx">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+	</ItemGroup>
+
 </Project>
