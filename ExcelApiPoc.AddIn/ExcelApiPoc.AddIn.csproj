@@ -207,6 +207,7 @@
     <Compile Include="Services\AuditWorkbookRecalculationService.cs" />
     <Compile Include="Services\AuditWorkbookTableReader.cs" />
     <Compile Include="Services\AuditWorkbookWriter.cs" />
+    <Compile Include="Services\CanonicalReconciliationAccountSummaryAdapter.cs" />
     <Compile Include="Services\ExcelTableNameHelper.cs" />
     <Compile Include="Services\GeneralLedgerReconciliationService.cs" />
     <Compile Include="Services\GeneralLedgerWorksheetWriter.cs" />
