@@ -34,7 +34,9 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <None Update="TestData\Ives\HL_KNIHA_00322881_2024.xls">
+		<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </None>
 	  <Folder Include="TestData\IfoSoft\" />
-	  <Folder Include="TestData\Ives\" />
 	</ItemGroup>
 </Project>

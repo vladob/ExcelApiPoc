@@ -1,5 +1,6 @@
 ﻿using ExcelApiPoc.AccountingImport.Models;
 using ExcelApiPoc.AccountingImport.Services.IfoSoft;
+using ExcelApiPoc.AccountingImport.Services.Ives;
 using ExcelApiPoc.AccountingImport.Services.Urbis;
 using System;
 using System.Collections.Generic;
@@ -53,6 +54,7 @@ namespace ExcelApiPoc.AccountingImport.Services
                 new IGeneralLedgerImporter[]
                 {
                     new IfoSoftCsvGeneralLedgerImporter(),
+                    new IvesExcelGeneralLedgerImporter(),
                     new UrbisExcelGeneralLedgerImporter()
                 });
         }

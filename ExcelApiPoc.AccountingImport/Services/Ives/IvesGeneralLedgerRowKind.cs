@@ -1,10 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace ExcelApiPoc.AccountingImport.Services.Ives
+﻿namespace ExcelApiPoc.AccountingImport.Services.Ives
 {
-    internal class IvesGeneralLedgerRowKind
+    internal enum IvesGeneralLedgerRowKind
     {
+        Blank, Header, Title, SectionTitle, Account, Document,
+        DocumentSummary, SyntheticAccount, SyntheticSubtotal,
+        ReportTotal, Unclassified
     }
 }

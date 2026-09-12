@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using ExcelApiPoc.AccountingImport.Models.Reporting;
 
 namespace ExcelApiPoc.AccountingImport.Models
 {
@@ -19,6 +20,7 @@ namespace ExcelApiPoc.AccountingImport.Models
         public int NormalizedTextFieldCount { get; set; }
         public List<GeneralLedgerRow> Rows { get; } = new List<GeneralLedgerRow>();
         public int? ExportStage { get; set; }
+        public ImportReport ImportReport { get; set; }
     }
 
     public sealed class GeneralLedgerRow

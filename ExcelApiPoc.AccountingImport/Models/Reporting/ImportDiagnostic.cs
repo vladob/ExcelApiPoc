@@ -1,10 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace ExcelApiPoc.AccountingImport.Models.Reporting
+﻿namespace ExcelApiPoc.AccountingImport.Models.Reporting
 {
-    internal class ImportDiagnostic
+    public enum ImportDiagnosticSeverity
     {
+        Information,
+        Warning,
+        Error
+    }
+
+    public sealed class ImportDiagnostic
+    {
+        public string Code { get; set; }
+        public ImportDiagnosticSeverity Severity { get; set; }
+        public string Message { get; set; }
+        public SourceProvenance Source { get; set; }
     }
 }
