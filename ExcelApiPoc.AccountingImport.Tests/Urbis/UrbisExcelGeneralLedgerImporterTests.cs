@@ -1,7 +1,8 @@
 ﻿using ExcelApiPoc.AccountingImport.Models;
 using ExcelApiPoc.AccountingImport.Services;
+using ExcelApiPoc.AccountingImport.Services.Urbis;
 
-namespace ExcelApiPoc.AccountingImport.Tests;
+namespace ExcelApiPoc.AccountingImport.Tests.Urbis;
 
 public sealed class UrbisExcelGeneralLedgerImporterTests
 {
@@ -10,7 +11,7 @@ public sealed class UrbisExcelGeneralLedgerImporterTests
     {
         GeneralLedgerImport result =
             new UrbisExcelGeneralLedgerImporter()
-                .Import(GetFixturePath());
+                .Import(GetFixturePath("HL_KNIHA_00325791_202412.xls"));
 
         Assert.Equal("Urbis", result.AccountingFormat);
         Assert.Equal("00325791", result.Ico);
@@ -78,20 +79,21 @@ public sealed class UrbisExcelGeneralLedgerImporterTests
 
         Assert.True(
             importer.CanImport(
-                GetFixturePath(),
+                GetFixturePath("HL_KNIHA_00325791_202412.xls"),
                 "Urbis"));
 
         Assert.False(
             importer.CanImport(
-                GetFixturePath(),
+                GetFixturePath("HL_KNIHA_00325791_202412.xls"),
                 "IfoSoft"));
     }
 
-    private static string GetFixturePath()
+    private static string GetFixturePath(string fileName)
     {
         return Path.Combine(
             AppContext.BaseDirectory,
             "TestData",
-            "HL_KNIHA_00325791_202412.xls");
+            "Urbis",
+            fileName);
     }
 }

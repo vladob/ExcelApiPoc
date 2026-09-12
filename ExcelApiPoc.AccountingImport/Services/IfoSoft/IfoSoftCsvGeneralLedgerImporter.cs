@@ -1,4 +1,5 @@
 ﻿using ExcelApiPoc.AccountingImport.Models;
+using ExcelApiPoc.AccountingImport.Services.Common;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -7,7 +8,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
 
-namespace ExcelApiPoc.AccountingImport.Services
+namespace ExcelApiPoc.AccountingImport.Services.IfoSoft
 {
     public sealed class IfoSoftCsvGeneralLedgerImporter : IGeneralLedgerImporter
     {

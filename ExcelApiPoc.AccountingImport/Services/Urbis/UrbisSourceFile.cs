@@ -2,7 +2,7 @@
 using System.IO;
 using System.Text.RegularExpressions;
 
-namespace ExcelApiPoc.AccountingImport.Services
+namespace ExcelApiPoc.AccountingImport.Services.Urbis
 {
     internal enum UrbisDocumentKind
     {

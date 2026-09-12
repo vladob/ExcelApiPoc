@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace ExcelApiPoc.AccountingImport.Services
+namespace ExcelApiPoc.AccountingImport.Services.Common
 {
     public static class JournalTextNormalizer
     {

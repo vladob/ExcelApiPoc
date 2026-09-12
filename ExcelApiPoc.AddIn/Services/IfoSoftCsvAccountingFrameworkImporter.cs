@@ -1,11 +1,11 @@
 ﻿using ExcelApiPoc.AddIn.Models;
-using ExcelApiPoc.AccountingImport.Services;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
+using ExcelApiPoc.AccountingImport.Services.Common;
 
 namespace ExcelApiPoc.AddIn.Services
 {

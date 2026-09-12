@@ -5,7 +5,7 @@ using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
 
-namespace ExcelApiPoc.AccountingImport.Services
+namespace ExcelApiPoc.AccountingImport.Services.IfoSoft
 {
     public static class IfoSoftCsvJournalDetector
     {

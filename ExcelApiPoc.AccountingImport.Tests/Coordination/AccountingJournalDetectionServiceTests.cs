@@ -1,18 +1,14 @@
 ﻿using ExcelApiPoc.AccountingImport.Models;
 using ExcelApiPoc.AccountingImport.Services;
 
-namespace ExcelApiPoc.AccountingImport.Tests;
+namespace ExcelApiPoc.AccountingImport.Tests.Coordination;
 
 public sealed class AccountingJournalDetectionServiceTests
 {
     [Fact]
     public void TryDetect_DetectsUrbisJournal()
     {
-        bool detected =
-            AccountingJournalDetectionService.TryDetect(
-                GetFixturePath(
-                    "U_DENNIK_00325791_202412.xlsx"),
-                out JournalDetectionResult result);
+        bool detected = AccountingJournalDetectionService.TryDetect(GetFixturePath("U_DENNIK_00325791_202412.xlsx"), out JournalDetectionResult result);
 
         Assert.True(detected);
         Assert.NotNull(result);
@@ -25,21 +21,13 @@ public sealed class AccountingJournalDetectionServiceTests
     [Fact]
     public void TryDetect_DoesNotTreatLedgerAsJournal()
     {
-        bool detected =
-            AccountingJournalDetectionService.TryDetect(
-                GetFixturePath(
-                    "HL_KNIHA_00325791_202412.xls"),
-                out JournalDetectionResult result);
-
+        bool detected = AccountingJournalDetectionService.TryDetect(GetFixturePath("HL_KNIHA_00325791_202412.xls"), out JournalDetectionResult result);
         Assert.False(detected);
         Assert.Null(result);
     }
 
     private static string GetFixturePath(string fileName)
     {
-        return Path.Combine(
-            AppContext.BaseDirectory,
-            "TestData",
-            fileName);
+        return Path.Combine(AppContext.BaseDirectory, "TestData", "Urbis", fileName);
     }
 }

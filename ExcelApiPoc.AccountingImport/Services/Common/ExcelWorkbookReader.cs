@@ -5,7 +5,7 @@ using System.Globalization;
 using System.IO;
 using System.Text;
 
-namespace ExcelApiPoc.AccountingImport.Services
+namespace ExcelApiPoc.AccountingImport.Services.Common
 {
     internal static class ExcelWorkbookReader
     {

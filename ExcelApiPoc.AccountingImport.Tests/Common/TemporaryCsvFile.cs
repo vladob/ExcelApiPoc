@@ -1,6 +1,6 @@
 using System.Text;
 
-namespace ExcelApiPoc.AccountingImport.Tests;
+namespace ExcelApiPoc.AccountingImport.Tests.Common;
 
 internal sealed class TemporaryCsvFile : IDisposable
 {

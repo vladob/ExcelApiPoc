@@ -1,8 +1,8 @@
 using ExcelApiPoc.AccountingImport.Models;
-using ExcelApiPoc.AccountingImport.Services;
-using System.IO;
+using ExcelApiPoc.AccountingImport.Services.IfoSoft;
+using ExcelApiPoc.AccountingImport.Tests.Common;
 
-namespace ExcelApiPoc.AccountingImport.Tests;
+namespace ExcelApiPoc.AccountingImport.Tests.IfoSoft;
 
 public sealed class IfoSoftCsvGeneralLedgerImporterTests
 {
@@ -61,13 +61,13 @@ public sealed class IfoSoftCsvGeneralLedgerImporterTests
             "Zakladný bežný účet", "100,25", "", "250,50", "75,25",
             "250,50", "75,25", "275,50", "", "0,00");
 
-        return new TemporaryCsvFile(new[]
-        {
+        return new TemporaryCsvFile(
+        [
             Quote("00325791 Mesto Sobrance"),
             Quote("Hlavná kniha k 12/2024"),
             header,
             row
-        });
+        ]);
     }
 
     private static string Csv(params string[] fields)

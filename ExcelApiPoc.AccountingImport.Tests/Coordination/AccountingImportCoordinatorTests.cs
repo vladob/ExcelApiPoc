@@ -2,7 +2,7 @@
 using ExcelApiPoc.AccountingImport.Services;
 using System.IO;
 
-namespace ExcelApiPoc.AccountingImport.Tests;
+namespace ExcelApiPoc.AccountingImport.Tests.Coordination;
 
 public sealed class AccountingImportCoordinatorTests
 {
@@ -136,6 +136,7 @@ public sealed class AccountingImportCoordinatorTests
         return Path.Combine(
             AppContext.BaseDirectory,
             "TestData",
+            "Urbis",
             fileName);
     }
 

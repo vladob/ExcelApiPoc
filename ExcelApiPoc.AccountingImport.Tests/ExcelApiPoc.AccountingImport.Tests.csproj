@@ -25,11 +25,16 @@
   </ItemGroup>
 
 	<ItemGroup>
-		<None Update="TestData\U_DENNIK_00325791_202412.xlsx">
+		<None Update="TestData\Urbis\U_DENNIK_00325791_202412.xlsx">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
-		<None Update="TestData\HL_KNIHA_00325791_202412.xls">
+		<None Update="TestData\Urbis\HL_KNIHA_00325791_202412.xls">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Folder Include="TestData\IfoSoft\" />
+	  <Folder Include="TestData\Ives\" />
 	</ItemGroup>
 </Project>

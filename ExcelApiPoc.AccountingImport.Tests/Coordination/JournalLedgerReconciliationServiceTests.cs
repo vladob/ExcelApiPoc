@@ -1,7 +1,7 @@
 ﻿using ExcelApiPoc.AccountingImport.Models;
 using ExcelApiPoc.AccountingImport.Services;
 
-namespace ExcelApiPoc.AccountingImport.Tests;
+namespace ExcelApiPoc.AccountingImport.Tests.Coordination;
 
 public sealed class JournalLedgerReconciliationServiceTests
 {

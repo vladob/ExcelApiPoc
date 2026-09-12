@@ -1,4 +1,5 @@
 ﻿using ExcelApiPoc.AccountingImport.Models;
+using ExcelApiPoc.AccountingImport.Services.Common;
 using ExcelDataReader;
 using System;
 using System.Globalization;
@@ -6,7 +7,7 @@ using System.IO;
 using System.Reflection;
 using System.Security.Cryptography;
 
-namespace ExcelApiPoc.AccountingImport.Services
+namespace ExcelApiPoc.AccountingImport.Services.Urbis
 {
     public sealed class UrbisExcelJournalImporter : IJournalImporter
     {

@@ -1,4 +1,5 @@
 ﻿using ExcelApiPoc.AccountingImport.Models;
+using ExcelApiPoc.AccountingImport.Services.Common;
 using ExcelDataReader;
 using System;
 using System.Collections.Generic;
@@ -8,7 +9,7 @@ using System.IO;
 using System.Security.Cryptography;
 using System.Text.RegularExpressions;
 
-namespace ExcelApiPoc.AccountingImport.Services
+namespace ExcelApiPoc.AccountingImport.Services.Urbis
 {
     public sealed class UrbisExcelGeneralLedgerImporter : IGeneralLedgerImporter
     {

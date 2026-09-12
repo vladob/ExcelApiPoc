@@ -1,14 +1,14 @@
 ﻿using ExcelApiPoc.AccountingImport.Models;
-using ExcelApiPoc.AccountingImport.Services;
+using ExcelApiPoc.AccountingImport.Services.Urbis;
 
-namespace ExcelApiPoc.AccountingImport.Tests;
+namespace ExcelApiPoc.AccountingImport.Tests.Urbis;
 
 public sealed class UrbisExcelJournalImporterTests
 {
     [Fact]
     public void Import_MapsTwoSegmentsAndOneSidedMovements()
     {
-        string path = GetFixturePath();
+        string path = GetFixturePath("U_DENNIK_00325791_202412.xlsx");
 
         JournalImport result =
             new UrbisExcelJournalImporter().Import(path);
@@ -20,13 +20,9 @@ public sealed class UrbisExcelJournalImporterTests
         Assert.Equal(12, result.ExportStage);
         Assert.Equal(6, result.Rows.Count);
 
-        Assert.Equal(
-            12m,
-            result.Rows.Sum(row => row.DebitAmount ?? 0m));
+        Assert.Equal(12m, result.Rows.Sum(row => row.DebitAmount ?? 0m));
 
-        Assert.Equal(
-            12m,
-            result.Rows.Sum(row => row.CreditAmount ?? 0m));
+        Assert.Equal(12m, result.Rows.Sum(row => row.CreditAmount ?? 0m));
 
         JournalRow standard = result.Rows[0];
 
@@ -54,9 +50,7 @@ public sealed class UrbisExcelJournalImporterTests
 
         Assert.All(
             result.Rows,
-            row => Assert.Equal(
-                JournalRecordKind.Normal,
-                row.RecordKind));
+            row => Assert.Equal(JournalRecordKind.Normal, row.RecordKind));
     }
 
     [Fact]
@@ -64,24 +58,18 @@ public sealed class UrbisExcelJournalImporterTests
     {
         var importer = new UrbisExcelJournalImporter();
 
-        Assert.True(
-            importer.CanImport(GetFixturePath(), "Urbis"));
-
-        Assert.False(
-            importer.CanImport(GetFixturePath(), "IfoSoft"));
+        Assert.True(importer.CanImport(GetFixturePath("U_DENNIK_00325791_202412.xlsx"), "Urbis"));
+        Assert.False(importer.CanImport(GetFixturePath("U_DENNIK_00325791_202412.xlsx"), "IfoSoft"));
     }
 
     [Fact]
     public void Import_AllowsFilenameWithoutExportStage()
     {
-        string copiedPath = CopyFixtureWithName(
-            "U_DENNIK_00325791_2024.xlsx");
+        string copiedPath = CopyFixtureWithName("U_DENNIK_00325791_2024.xlsx");
 
         try
         {
-            JournalImport result =
-                new UrbisExcelJournalImporter()
-                    .Import(copiedPath);
+            JournalImport result = new UrbisExcelJournalImporter() .Import(copiedPath);
 
             Assert.Null(result.ExportStage);
             Assert.Equal("00325791", result.Ico);
@@ -115,12 +103,13 @@ public sealed class UrbisExcelJournalImporterTests
         }
     }
 
-    private static string GetFixturePath()
+    private static string GetFixturePath(string fileName)
     {
         return Path.Combine(
             AppContext.BaseDirectory,
             "TestData",
-            "U_DENNIK_00325791_202412.xlsx");
+            "Urbis",
+            fileName);
     }
 
     private static string CopyFixtureWithName(
@@ -136,7 +125,7 @@ public sealed class UrbisExcelJournalImporterTests
         string copiedPath =
             Path.Combine(directory, fileName);
 
-        File.Copy(GetFixturePath(), copiedPath);
+        File.Copy(GetFixturePath("U_DENNIK_00325791_202412.xlsx"), copiedPath);
 
         return copiedPath;
     }
