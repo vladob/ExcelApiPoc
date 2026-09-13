@@ -13,6 +13,7 @@ public sealed class LayoutDefinition
     public MatchingDefaults Defaults { get; set; } = new MatchingDefaults();
     public List<SectionDefinition> Sections { get; set; } = new List<SectionDefinition>();
     public List<RecognitionRuleDefinition> Rules { get; set; } = new List<RecognitionRuleDefinition>();
+    public List<RecordContinuationDefinition> RecordContinuations { get; set; } = new List<RecordContinuationDefinition>();
 }
 
 public sealed class MatchingDefaults
@@ -40,6 +41,23 @@ public enum SectionScope
 {
     Document,
     PerPage
+}
+
+public sealed class RecordContinuationDefinition
+{
+    public string Id { get; set; } = string.Empty;
+    public string SectionId { get; set; } = string.Empty;
+    public bool AcrossPageBoundaryOnly { get; set; }
+    public BaselineGroupConditionDefinition Previous { get; set; } = new BaselineGroupConditionDefinition();
+    public BaselineGroupConditionDefinition Next { get; set; } = new BaselineGroupConditionDefinition();
+}
+
+public sealed class BaselineGroupConditionDefinition
+{
+    public double? LeftAtLeast { get; set; }
+    public double? LeftAtMost { get; set; }
+    public double? RightAtLeast { get; set; }
+    public double? RightAtMost { get; set; }
 }
 
 public sealed class RecognitionRuleDefinition

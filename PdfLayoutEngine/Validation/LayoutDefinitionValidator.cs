@@ -21,8 +21,10 @@ public sealed class LayoutDefinitionValidator
 
         var sections = definition.Sections ?? new List<SectionDefinition>();
         var rules = definition.Rules ?? new List<RecognitionRuleDefinition>();
+        var continuations = definition.RecordContinuations ?? new List<RecordContinuationDefinition>();
         DuplicateIds(sections.Select(section => section.Id), "$.sections", "section");
         DuplicateIds(rules.Select(rule => rule.Id), "$.rules", "rule");
+        DuplicateIds(continuations.Select(item => item.Id), "$.recordContinuations", "record continuation");
 
         var sectionIds = new HashSet<string>(sections.Select(section => section.Id), StringComparer.Ordinal);
         var ruleIds = new HashSet<string>(rules.Select(rule => rule.Id), StringComparer.Ordinal);
@@ -57,6 +59,19 @@ public sealed class LayoutDefinitionValidator
                 Error(path, "At least one matching criterion is required.");
         }
 
+        for (var index = 0; index < continuations.Count; index++)
+        {
+            var continuation = continuations[index];
+            var path = $"$.recordContinuations[{index}]";
+            Required(continuation.Id, path + ".id");
+            Required(continuation.SectionId, path + ".sectionId");
+            Reference(continuation.SectionId, sectionIds, path + ".sectionId", "section");
+            ValidateConditions(continuation.Previous, path + ".previous");
+            ValidateConditions(continuation.Next, path + ".next");
+            if (!HasCondition(continuation.Previous) && !HasCondition(continuation.Next))
+                Error(path, "At least one baseline-group condition is required.");
+        }
+
         return messages;
 
         void Error(string path, string message) => messages.Add(new ValidationMessage(ValidationSeverity.Error, path, message));
@@ -86,6 +101,28 @@ public sealed class LayoutDefinitionValidator
             foreach (var id in ids.Where(id => !string.IsNullOrWhiteSpace(id)).GroupBy(id => id, StringComparer.Ordinal).Where(group => group.Count() > 1).Select(group => group.Key))
                 Error(path, $"Duplicate {kind} id '{id}'.");
         }
+        void ValidateConditions(BaselineGroupConditionDefinition? conditions, string path)
+        {
+            if (conditions == null)
+            {
+                Error(path, "A value is required.");
+                return;
+            }
+            OptionalFinite(conditions.LeftAtLeast, path + ".leftAtLeast");
+            OptionalFinite(conditions.LeftAtMost, path + ".leftAtMost");
+            OptionalFinite(conditions.RightAtLeast, path + ".rightAtLeast");
+            OptionalFinite(conditions.RightAtMost, path + ".rightAtMost");
+            if (conditions.LeftAtLeast.HasValue && conditions.LeftAtMost.HasValue &&
+                conditions.LeftAtLeast.Value > conditions.LeftAtMost.Value)
+                Error(path, "leftAtLeast cannot exceed leftAtMost.");
+            if (conditions.RightAtLeast.HasValue && conditions.RightAtMost.HasValue &&
+                conditions.RightAtLeast.Value > conditions.RightAtMost.Value)
+                Error(path, "rightAtLeast cannot exceed rightAtMost.");
+        }
+        bool HasCondition(BaselineGroupConditionDefinition? conditions) =>
+            conditions != null &&
+            (conditions.LeftAtLeast.HasValue || conditions.LeftAtMost.HasValue ||
+             conditions.RightAtLeast.HasValue || conditions.RightAtMost.HasValue);
     }
 
     private static bool IsFinite(double value) => !double.IsNaN(value) && !double.IsInfinity(value);

@@ -4,5 +4,5 @@ namespace PdfLayoutEngine.Records;
 
 public interface IBaselineRecordContinuationPolicy
 {
-    bool ContinuesRecord(BaselineRecord currentRecord, BaselineGroup nextGroup);
+    RecordContinuationDecision Evaluate(BaselineRecord currentRecord, BaselineGroup nextGroup);
 }

@@ -119,4 +119,61 @@ public sealed class LayoutDefinitionLoaderTests
         Assert.True(result.IsValid);
         Assert.True(result.Definition!.Sections[0].MayContinueOnNextPage);
     }
+
+    [Fact]
+    public void Loads_record_continuation_geometry()
+    {
+        const string json = """
+        {
+          "schemaVersion": 1,
+          "id": "sample",
+          "sections": [{ "id": "body", "scope": "PerPage", "mayContinueOnNextPage": true }],
+          "recordContinuations": [
+            {
+              "id": "split-values",
+              "sectionId": "body",
+              "acrossPageBoundaryOnly": true,
+              "previous": { "rightAtMost": 340 },
+              "next": { "leftAtLeast": 340 }
+            }
+          ]
+        }
+        """;
+
+        var result = new LayoutDefinitionLoader().Load(json);
+
+        Assert.True(result.IsValid);
+        var continuation = Assert.Single(result.Definition!.RecordContinuations);
+        Assert.True(continuation.AcrossPageBoundaryOnly);
+        Assert.Equal(340d, continuation.Previous.RightAtMost);
+        Assert.Equal(340d, continuation.Next.LeftAtLeast);
+    }
+
+    [Fact]
+    public void Reports_invalid_record_continuation_definitions()
+    {
+        const string json = """
+        {
+          "schemaVersion": 1,
+          "id": "sample",
+          "sections": [{ "id": "body" }],
+          "recordContinuations": [
+            { "id": "same", "sectionId": "missing" },
+            {
+              "id": "same",
+              "sectionId": "body",
+              "previous": { "rightAtLeast": 400, "rightAtMost": 300 }
+            }
+          ]
+        }
+        """;
+
+        var result = new LayoutDefinitionLoader().Load(json);
+
+        Assert.False(result.IsValid);
+        Assert.Contains(result.Messages, message => message.Message.Contains("Duplicate record continuation id"));
+        Assert.Contains(result.Messages, message => message.Message.Contains("Unknown section id"));
+        Assert.Contains(result.Messages, message => message.Message.Contains("At least one baseline-group condition"));
+        Assert.Contains(result.Messages, message => message.Message.Contains("rightAtLeast cannot exceed rightAtMost"));
+    }
 }

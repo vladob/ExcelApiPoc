@@ -11,7 +11,8 @@ public enum RecognitionDiagnosticKind
     AmbiguousRule,
     UnmatchedSectionBoundary,
     AmbiguousSectionBoundary,
-    InvalidSectionBoundaryOrder
+    InvalidSectionBoundaryOrder,
+    AmbiguousRecordContinuation
 }
 
 public sealed class RecognitionDiagnostic

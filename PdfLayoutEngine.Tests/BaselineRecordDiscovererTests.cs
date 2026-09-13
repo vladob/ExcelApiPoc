@@ -63,6 +63,7 @@ public sealed class BaselineRecordDiscovererTests
         var record = Assert.Single(result.Records);
         Assert.Equal(2, record.Groups.Count);
         Assert.Equal("first continued", record.Text);
+        Assert.Single(record.Continuations);
     }
 
     [Fact]
@@ -78,6 +79,7 @@ public sealed class BaselineRecordDiscovererTests
         Assert.Equal(1, record.StartPageNumber);
         Assert.Equal(2, record.EndPageNumber);
         Assert.Equal(2, record.Groups.Count);
+        Assert.Single(record.Continuations);
     }
 
     [Fact]
@@ -109,6 +111,20 @@ public sealed class BaselineRecordDiscovererTests
 
         Assert.Empty(result.Records);
         Assert.Same(diagnostic, Assert.Single(result.Diagnostics));
+    }
+
+    [Fact]
+    public void Does_not_join_ambiguous_continuation_and_reports_diagnostic()
+    {
+        var firstPage = Section(1, new[] { Token(1, "first", 100, 10) }, mayContinue: true);
+        var secondPage = Section(2, new[] { Token(2, "next", 500, 10) }, mayContinue: true);
+
+        var result = Discover(new[] { firstPage, secondPage }, new AmbiguousPolicy());
+
+        Assert.Equal(2, result.Records.Count);
+        var diagnostic = Assert.Single(result.Diagnostics);
+        Assert.Equal(RecognitionDiagnosticKind.AmbiguousRecordContinuation, diagnostic.Kind);
+        Assert.Equal(2, diagnostic.CandidateTokens.Count);
     }
 
     private static BaselineRecordDiscoveryResult Discover(
@@ -144,6 +160,31 @@ public sealed class BaselineRecordDiscovererTests
 
     private sealed class AlwaysContinuePolicy : IBaselineRecordContinuationPolicy
     {
-        public bool ContinuesRecord(BaselineRecord currentRecord, BaselineGroup nextGroup) => true;
+        public RecordContinuationDecision Evaluate(BaselineRecord currentRecord, BaselineGroup nextGroup)
+        {
+            var evidence = new RecordContinuationEvidence(
+                "always",
+                currentRecord.Groups[currentRecord.Groups.Count - 1],
+                nextGroup,
+                Array.Empty<MatchCriterionEvidence>());
+            return new RecordContinuationDecision(
+                RecordContinuationDecisionStatus.Continued,
+                new[] { evidence });
+        }
+    }
+
+    private sealed class AmbiguousPolicy : IBaselineRecordContinuationPolicy
+    {
+        public RecordContinuationDecision Evaluate(BaselineRecord currentRecord, BaselineGroup nextGroup)
+        {
+            var previous = currentRecord.Groups[currentRecord.Groups.Count - 1];
+            var first = new RecordContinuationEvidence(
+                "first", previous, nextGroup, Array.Empty<MatchCriterionEvidence>());
+            var second = new RecordContinuationEvidence(
+                "second", previous, nextGroup, Array.Empty<MatchCriterionEvidence>());
+            return new RecordContinuationDecision(
+                RecordContinuationDecisionStatus.Ambiguous,
+                new[] { first, second });
+        }
     }
 }
