@@ -29,7 +29,17 @@ public sealed class SectionDefinition
     public string Id { get; set; } = string.Empty;
     public string? StartRuleId { get; set; }
     public string? EndRuleId { get; set; }
+
+    [JsonConverter(typeof(JsonStringEnumConverter))]
+    public SectionScope Scope { get; set; } = SectionScope.Document;
+
     public bool MayContinueOnNextPage { get; set; }
+}
+
+public enum SectionScope
+{
+    Document,
+    PerPage
 }
 
 public sealed class RecognitionRuleDefinition

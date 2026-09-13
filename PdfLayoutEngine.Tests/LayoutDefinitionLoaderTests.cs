@@ -84,4 +84,39 @@ public sealed class LayoutDefinitionLoaderTests
         Assert.False(result.IsValid);
         Assert.Contains(result.Messages, message => message.Message.Contains("Invalid regular expression"));
     }
+
+    [Fact]
+    public void Loads_per_page_section_scope()
+    {
+        const string json = """
+        {
+          "schemaVersion": 1,
+          "id": "sample",
+          "sections": [{ "id": "header", "scope": "PerPage", "startRuleId": "header" }],
+          "rules": [{ "id": "header", "text": "Header", "pageScope": "Repeated" }]
+        }
+        """;
+
+        var result = new LayoutDefinitionLoader().Load(json);
+
+        Assert.True(result.IsValid);
+        Assert.Equal(SectionScope.PerPage, result.Definition!.Sections[0].Scope);
+    }
+
+    [Fact]
+    public void Rejects_per_page_section_that_may_continue_on_next_page()
+    {
+        const string json = """
+        {
+          "schemaVersion": 1,
+          "id": "sample",
+          "sections": [{ "id": "header", "scope": "PerPage", "mayContinueOnNextPage": true }]
+        }
+        """;
+
+        var result = new LayoutDefinitionLoader().Load(json);
+
+        Assert.False(result.IsValid);
+        Assert.Contains(result.Messages, message => message.Path == "$.sections[0].mayContinueOnNextPage");
+    }
 }

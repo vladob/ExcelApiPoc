@@ -8,7 +8,10 @@ namespace PdfLayoutEngine.Diagnostics;
 public enum RecognitionDiagnosticKind
 {
     UnmatchedRule,
-    AmbiguousRule
+    AmbiguousRule,
+    UnmatchedSectionBoundary,
+    AmbiguousSectionBoundary,
+    InvalidSectionBoundaryOrder
 }
 
 public sealed class RecognitionDiagnostic
