@@ -6,6 +6,32 @@ namespace ExcelApiPoc.AccountingImport.Tests.Coordination;
 public sealed class AccountingJournalDetectionServiceTests
 {
     [Fact]
+    public void TryDetect_DetectsIvesJournalBeforeUrbisFilenameFallback()
+    {
+        bool detected = AccountingJournalDetectionService.TryDetect(
+            GetIvesFixturePath("U_DENNIK_00322881_2024.xls"),
+            out JournalDetectionResult result);
+
+        Assert.True(detected);
+        Assert.NotNull(result);
+        Assert.Equal("Excel", result.TechnicalType);
+        Assert.Equal("IVES", result.AccountingFormat);
+        Assert.Equal("00322881", result.Ico);
+        Assert.Equal(2024, result.FiscalYear);
+    }
+
+    [Fact]
+    public void TryDetect_DoesNotTreatIvesLedgerAsJournal()
+    {
+        bool detected = AccountingJournalDetectionService.TryDetect(
+            GetIvesFixturePath("HL_KNIHA_00322881_2024.xls"),
+            out JournalDetectionResult result);
+
+        Assert.False(detected);
+        Assert.Null(result);
+    }
+
+    [Fact]
     public void TryDetect_DetectsUrbisJournal()
     {
         bool detected = AccountingJournalDetectionService.TryDetect(GetFixturePath("U_DENNIK_00325791_202412.xlsx"), out JournalDetectionResult result);
@@ -29,5 +55,14 @@ public sealed class AccountingJournalDetectionServiceTests
     private static string GetFixturePath(string fileName)
     {
         return Path.Combine(AppContext.BaseDirectory, "TestData", "Urbis", fileName);
+    }
+
+    private static string GetIvesFixturePath(string fileName)
+    {
+        return Path.Combine(
+            AppContext.BaseDirectory,
+            "TestData",
+            "Ives",
+            fileName);
     }
 }

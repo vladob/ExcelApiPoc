@@ -112,7 +112,16 @@ namespace ExcelApiPoc.AddIn.Forms
             };
 
             _accountingFormatComboBox.SetBounds(165,212,200,25);
-            _accountingFormatComboBox.Items.AddRange(new object[] {"Unknown", "IfoSoft", "Urbis", "MkSoft","MkSoft", "Pohoda"});
+            _accountingFormatComboBox.Items.AddRange(
+                new object[]
+                {
+                    "Unknown",
+                    "IfoSoft",
+                    "IVES",
+                    "Urbis",
+                    "MkSoft",
+                    "Pohoda"
+                });
             _accountingFormatComboBox.SelectedIndex = 0;
 
             // IČO
@@ -350,8 +359,8 @@ namespace ExcelApiPoc.AddIn.Forms
                         throw new InvalidOperationException(
                             "An entity-specific accounting-framework export " +
                             "is currently supported only for IfoSoft. " +
-                            "Leave the Accounting framework field empty " +
-                            "when importing Urbis.");
+                            "Leave the Accounting framework field empty for " +
+                            "the current IVES and Urbis imports.");
                     }
 
                     accountingFrameworkImport = new IfoSoftCsvAccountingFrameworkImporter() .Import(accountsPath);
