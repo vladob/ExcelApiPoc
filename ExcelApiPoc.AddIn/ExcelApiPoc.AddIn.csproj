@@ -178,6 +178,7 @@
     <Compile Include="Models\AuditReportCalculationResult.cs" />
     <Compile Include="Models\AuditReportContext.cs" />
     <Compile Include="Models\AuditReportReconciliationResult.cs" />
+    <Compile Include="Models\AuditCalculationPackageSelectionResponse.cs" />
     <Compile Include="Models\AuditTemplateMetadataResponse.cs" />
     <Compile Include="Models\AuditTemplatePackageResponse.cs" />
     <Compile Include="Models\AuditWorkbookRecalculationResult.cs" />
@@ -199,6 +200,7 @@
     <Compile Include="Services\AnalyticalMappingValidationWorksheetWriter.cs" />
     <Compile Include="Services\AnalyticalMappingWorksheetReader.cs" />
     <Compile Include="Services\AnalyticalMappingWorksheetWriter.cs" />
+    <Compile Include="Services\AuditCalculationPackageSelectionService.cs" />
     <Compile Include="Services\AuditCalculationPackageWorksheetReader.cs" />
     <Compile Include="Services\AuditCalculationPackageWorksheetWriter.cs" />
     <Compile Include="Services\AuditReportCalculationService.cs" />
