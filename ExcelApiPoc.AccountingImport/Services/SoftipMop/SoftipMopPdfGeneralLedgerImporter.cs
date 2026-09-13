@@ -22,7 +22,7 @@ namespace ExcelApiPoc.AccountingImport.Services.SoftipMop
             "SoftipMop.general-ledger.v1.json";
 
         private static readonly Regex PeriodPattern = new Regex(
-            @"^Hlavná kniha k účtovnému mesiacu\s+(?<period>\d{6})\s*$",
+            @"\bmesiacu\s+(?<period>\d{6})\s*$",
             RegexOptions.Compiled |
             RegexOptions.CultureInvariant |
             RegexOptions.IgnoreCase);
