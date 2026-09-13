@@ -36,6 +36,14 @@
     <Reference Path="System.Threading.Channels.dll" Pack="true" />
     <Reference Path="System.Threading.Tasks.Extensions.dll" Pack="true" />
     <Reference Path="ExcelApiPoc.AccountingImport.dll" Pack="true" />
+    <Reference Path="PdfLayoutEngine.dll" Pack="true" />
+    <Reference Path="PdfLayoutEngine.IText.dll" Pack="true" />
+    <Reference Path="itext.commons.dll" Pack="true" />
+    <Reference Path="itext.io.dll" Pack="true" />
+    <Reference Path="itext.kernel.dll" Pack="true" />
+    <Reference Path="itext.bouncy-castle-connector.dll" Pack="true" />
+    <Reference Path="itext.bouncy-castle-adapter.dll" Pack="true" />
+    <Reference Path="BouncyCastle.Cryptography.dll" Pack="true" />
     <Reference Path="ExcelDataReader.dll" Pack="true" />
     <Reference Path="System.Text.Encoding.CodePages.dll" Pack="true" />	
 
