@@ -100,5 +100,36 @@
       "minimumTokenCount": 3,
       "maximumTokenCount": 3
     }
+  ],
+  "recordFields": [
+    {
+      "recordRuleId": "account-row",
+      "fields": [
+        {
+          "id": "value-1",
+          "horizontal": { "anchor": "Right", "position": 372 }
+        },
+        {
+          "id": "value-2",
+          "horizontal": { "anchor": "Right", "position": 452 }
+        },
+        {
+          "id": "value-3",
+          "horizontal": { "anchor": "Right", "position": 532 }
+        },
+        {
+          "id": "value-4",
+          "horizontal": { "anchor": "Right", "position": 611 }
+        },
+        {
+          "id": "value-5",
+          "horizontal": { "anchor": "Right", "position": 691 }
+        },
+        {
+          "id": "value-6",
+          "horizontal": { "anchor": "Right", "position": 770 }
+        }
+      ]
+    }
   ]
 }

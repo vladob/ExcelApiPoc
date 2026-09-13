@@ -15,6 +15,7 @@ public sealed class LayoutDefinition
     public List<RecognitionRuleDefinition> Rules { get; set; } = new List<RecognitionRuleDefinition>();
     public List<RecordContinuationDefinition> RecordContinuations { get; set; } = new List<RecordContinuationDefinition>();
     public List<RecordRecognitionRuleDefinition> RecordRules { get; set; } = new List<RecordRecognitionRuleDefinition>();
+    public List<RecordFieldSetDefinition> RecordFields { get; set; } = new List<RecordFieldSetDefinition>();
 }
 
 public sealed class MatchingDefaults
@@ -80,6 +81,26 @@ public sealed class RecordRecognitionRuleDefinition
     public double? RightAtLeast { get; set; }
     public double? RightAtMost { get; set; }
     public bool? CrossesPageBoundary { get; set; }
+}
+
+public sealed class RecordFieldSetDefinition
+{
+    public string RecordRuleId { get; set; } = string.Empty;
+    public List<RecordFieldDefinition> Fields { get; set; } = new List<RecordFieldDefinition>();
+}
+
+public sealed class RecordFieldDefinition
+{
+    public string Id { get; set; } = string.Empty;
+    public string? Text { get; set; }
+
+    [JsonConverter(typeof(JsonStringEnumConverter))]
+    public TextMatchMode TextMatch { get; set; } = TextMatchMode.Equals;
+
+    public bool IgnoreCase { get; set; }
+    public HorizontalMatchDefinition? Horizontal { get; set; }
+    public bool? IsBold { get; set; }
+    public bool? IsItalic { get; set; }
 }
 
 public sealed class RecognitionRuleDefinition

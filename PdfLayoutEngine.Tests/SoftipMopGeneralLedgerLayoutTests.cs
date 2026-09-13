@@ -28,6 +28,11 @@ public sealed class SoftipMopGeneralLedgerLayoutTests
             },
             definition.RecordRules.Select(rule => rule.Id));
         Assert.Single(definition.RecordContinuations);
+        var fieldSet = Assert.Single(definition.RecordFields);
+        Assert.Equal("account-row", fieldSet.RecordRuleId);
+        Assert.Equal(
+            new[] { "value-1", "value-2", "value-3", "value-4", "value-5", "value-6" },
+            fieldSet.Fields.Select(field => field.Id));
     }
 
     [Fact]
@@ -81,6 +86,13 @@ public sealed class SoftipMopGeneralLedgerLayoutTests
         Assert.Equal(
             RuleMatchStatus.Unmatched,
             matcher.Match(unsupportedSummary, definition.RecordRules).Status);
+
+        var fields = new BaselineRecordFieldMatcher().Match(
+            account,
+            Assert.Single(definition.RecordFields),
+            definition.Defaults);
+        Assert.All(fields, field => Assert.Equal(RuleMatchStatus.Matched, field.Status));
+        Assert.Equal(6, fields.Count);
     }
 
     private static void AssertMatch(string ruleId, BaselineRecordRuleMatchResult result)

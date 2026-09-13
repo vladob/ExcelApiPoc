@@ -23,13 +23,16 @@ public sealed class LayoutDefinitionValidator
         var rules = definition.Rules ?? new List<RecognitionRuleDefinition>();
         var continuations = definition.RecordContinuations ?? new List<RecordContinuationDefinition>();
         var recordRules = definition.RecordRules ?? new List<RecordRecognitionRuleDefinition>();
+        var recordFields = definition.RecordFields ?? new List<RecordFieldSetDefinition>();
         DuplicateIds(sections.Select(section => section.Id), "$.sections", "section");
         DuplicateIds(rules.Select(rule => rule.Id), "$.rules", "rule");
         DuplicateIds(continuations.Select(item => item.Id), "$.recordContinuations", "record continuation");
         DuplicateIds(recordRules.Select(rule => rule.Id), "$.recordRules", "record rule");
+        DuplicateIds(recordFields.Select(set => set.RecordRuleId), "$.recordFields", "record field set");
 
         var sectionIds = new HashSet<string>(sections.Select(section => section.Id), StringComparer.Ordinal);
         var ruleIds = new HashSet<string>(rules.Select(rule => rule.Id), StringComparer.Ordinal);
+        var recordRuleIds = new HashSet<string>(recordRules.Select(rule => rule.Id), StringComparer.Ordinal);
         for (var index = 0; index < sections.Count; index++)
         {
             var section = sections[index];
@@ -100,6 +103,35 @@ public sealed class LayoutDefinitionValidator
             CoordinateRange(rule.RightAtLeast, rule.RightAtMost, path, "right");
             if (!HasRecordCriterion(rule))
                 Error(path, "At least one record matching criterion is required.");
+        }
+
+        for (var setIndex = 0; setIndex < recordFields.Count; setIndex++)
+        {
+            var fieldSet = recordFields[setIndex];
+            var setPath = $"$.recordFields[{setIndex}]";
+            Required(fieldSet.RecordRuleId, setPath + ".recordRuleId");
+            Reference(fieldSet.RecordRuleId, recordRuleIds, setPath + ".recordRuleId", "record rule");
+            var fields = fieldSet.Fields ?? new List<RecordFieldDefinition>();
+            DuplicateIds(fields.Select(field => field.Id), setPath + ".fields", "field");
+            for (var fieldIndex = 0; fieldIndex < fields.Count; fieldIndex++)
+            {
+                var field = fields[fieldIndex];
+                var path = $"{setPath}.fields[{fieldIndex}]";
+                Required(field.Id, path + ".id");
+                if (field.Text == string.Empty) Error(path + ".text", "Text cannot be empty when specified.");
+                if (field.Text != null && field.TextMatch == TextMatchMode.RegularExpression)
+                {
+                    try { _ = new Regex(field.Text); }
+                    catch (ArgumentException exception) { Error(path + ".text", $"Invalid regular expression: {exception.Message}"); }
+                }
+                if (field.Horizontal != null)
+                {
+                    OptionalFinite(field.Horizontal.Position, path + ".horizontal.position");
+                    OptionalPositiveFinite(field.Horizontal.Tolerance, path + ".horizontal.tolerance");
+                }
+                if (field.Text == null && field.Horizontal == null && !field.IsBold.HasValue && !field.IsItalic.HasValue)
+                    Error(path, "At least one field matching criterion is required.");
+            }
         }
 
         return messages;

@@ -243,4 +243,61 @@ public sealed class LayoutDefinitionLoaderTests
         Assert.Contains(result.Messages, message => message.Message.Contains("Minimum token count"));
         Assert.Contains(result.Messages, message => message.Message.Contains("leftAtLeast cannot exceed leftAtMost"));
     }
+
+    [Fact]
+    public void Loads_record_field_definitions()
+    {
+        const string json = """
+        {
+          "schemaVersion": 1,
+          "id": "sample",
+          "recordRules": [{ "id": "row", "text": "row" }],
+          "recordFields": [
+            {
+              "recordRuleId": "row",
+              "fields": [
+                { "id": "value-1", "horizontal": { "anchor": "Right", "position": 770 } }
+              ]
+            }
+          ]
+        }
+        """;
+
+        var result = new LayoutDefinitionLoader().Load(json);
+
+        Assert.True(result.IsValid);
+        var field = Assert.Single(Assert.Single(result.Definition!.RecordFields).Fields);
+        Assert.Equal("value-1", field.Id);
+        Assert.Equal(HorizontalAnchor.Right, field.Horizontal!.Anchor);
+        Assert.Equal(770d, field.Horizontal.Position);
+    }
+
+    [Fact]
+    public void Reports_invalid_record_field_definitions()
+    {
+        const string json = """
+        {
+          "schemaVersion": 1,
+          "id": "sample",
+          "recordRules": [{ "id": "row", "text": "row" }],
+          "recordFields": [
+            {
+              "recordRuleId": "missing",
+              "fields": [
+                { "id": "same" },
+                { "id": "same", "text": "[", "textMatch": "RegularExpression" }
+              ]
+            }
+          ]
+        }
+        """;
+
+        var result = new LayoutDefinitionLoader().Load(json);
+
+        Assert.False(result.IsValid);
+        Assert.Contains(result.Messages, message => message.Message.Contains("Unknown record rule id"));
+        Assert.Contains(result.Messages, message => message.Message.Contains("Duplicate field id"));
+        Assert.Contains(result.Messages, message => message.Message.Contains("At least one field matching criterion"));
+        Assert.Contains(result.Messages, message => message.Message.Contains("Invalid regular expression"));
+    }
 }
