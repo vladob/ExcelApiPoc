@@ -1,4 +1,5 @@
 ﻿using ExcelApiPoc.AccountingImport.Models;
+using ExcelApiPoc.AccountingImport.Services.Common;
 using System;
 using Excel = Microsoft.Office.Interop.Excel;
 
@@ -8,42 +9,8 @@ namespace ExcelApiPoc.AddIn.Services
     {
         private const string WorksheetName = "Accounting Journal";
         private const string TableName = "JournalRows";
-        private const int HeaderRow = 4;
+        private const int HeaderRow = JournalImportCapacity.JournalHeaderRow;
         private const int FirstColumn = 1;
-
-        private static readonly string[] Headers =
-        {
-            "SequenceNumber",
-            "PostingDate",
-            "DocumentType",
-            "DocumentNumber",
-            "Description",
-
-            "DebitAccount",
-            "DebitAmount",
-            "DebitSection",
-            "DebitItem",
-            "DebitFundingSource",
-            "DebitCostCenter",
-            "DebitOrder",
-
-            "CreditAccount",
-            "CreditAmount",
-            "CreditSection",
-            "CreditItem",
-            "CreditFundingSource",
-            "CreditCostCenter",
-            "CreditOrder",
-
-            "RecordKind",
-            "UsedForReportCalculation",
-
-            "SourceRecordNumber",
-            "SourceStartLineNumber",
-            "SourceEndLineNumber",
-            "SourceLocation",
-            "TextNormalizationApplied"
-        };
 
         private static readonly int[] TextColumns =
         {
@@ -86,12 +53,16 @@ namespace ExcelApiPoc.AddIn.Services
                 throw new InvalidOperationException("The canonical journal does not contain any rows.");
             }
 
-            object[,] values = CreateValues(journalImport);
+            JournalImportCapacity.EnsureCanAppend(
+                0,
+                journalImport.Rows.Count,
+                journalImport.SourceFileName);
+
             Excel.Worksheet worksheet = (Excel.Worksheet)workbook.Worksheets[1];
             worksheet.Name = WorksheetName;
 
             int lastRow = HeaderRow + journalImport.Rows.Count;
-            int lastColumn = Headers.Length;
+            int lastColumn = JournalWorksheetDataProjector.ColumnCount;
             Excel.Range firstCell = (Excel.Range)worksheet.Cells[HeaderRow, FirstColumn];
             Excel.Range lastCell = (Excel.Range)worksheet.Cells[ lastRow, lastColumn];
             Excel.Range tableRange = worksheet.Range[firstCell, lastCell];
@@ -100,8 +71,8 @@ namespace ExcelApiPoc.AddIn.Services
             Excel.Range dataRange = worksheet.Range[firstDataCell, lastCell];
             ApplyDataFormats(dataRange);
 
-            // One COM assignment for the complete journal.
-            tableRange.Value2 = values;
+            WriteHeader(worksheet, lastColumn);
+            WriteDataChunks(worksheet, journalImport, lastColumn);
 
             Excel.ListObject table = worksheet.ListObjects.Add( Excel.XlListObjectSourceType.xlSrcRange,
                     tableRange, Type.Missing, Excel.XlYesNoGuess.xlYes, Type.Missing);
@@ -126,54 +97,49 @@ namespace ExcelApiPoc.AddIn.Services
 
         }
 
-        private static object[,] CreateValues(JournalImport journalImport)
+        private static void WriteHeader(
+            Excel.Worksheet worksheet,
+            int lastColumn)
         {
-            int rowCount = journalImport.Rows.Count + 1;
-            int columnCount = Headers.Length;
-            var values = new object[rowCount, columnCount];
-
-            for (int columnIndex = 0; columnIndex < columnCount; columnIndex++)
-            {
-                values[0, columnIndex] = Headers[columnIndex];
-            }
-
-            for (int rowIndex = 0; rowIndex < journalImport.Rows.Count; rowIndex++)
-            {
-                JournalRow row = journalImport.Rows[rowIndex];
-                int targetRow = rowIndex + 1;
-                values[targetRow, 0] = row.SequenceNumber;
-                values[targetRow, 1] = row.PostingDate;
-                values[targetRow, 2] = row.DocumentType;
-                values[targetRow, 3] = row.DocumentNumber;
-                values[targetRow, 4] = row.Description;
-                values[targetRow, 5] = row.DebitAccount;
-                values[targetRow, 6] = ToExcelNumber(row.DebitAmount);
-                values[targetRow, 7] = row.DebitSection;
-                values[targetRow, 8] = row.DebitItem;
-                values[targetRow, 9] = row.DebitFundingSource;
-                values[targetRow, 10] = row.DebitCostCenter;
-                values[targetRow, 11] = row.DebitOrder;
-                values[targetRow, 12] = row.CreditAccount;
-                values[targetRow, 13] = ToExcelNumber(row.CreditAmount);
-                values[targetRow, 14] = row.CreditSection;
-                values[targetRow, 15] = row.CreditItem;
-                values[targetRow, 16] = row.CreditFundingSource;
-                values[targetRow, 17] = row.CreditCostCenter;
-                values[targetRow, 18] = row.CreditOrder;
-                values[targetRow, 19] = row.RecordKind.ToString();
-                values[targetRow, 20] = row.UsedForReportCalculation;
-                values[targetRow, 21] = row.SourceRecordNumber;
-                values[targetRow, 22] = row.SourceStartLineNumber.HasValue ? (object)row.SourceStartLineNumber.Value : null;
-                values[targetRow, 23] = row.SourceEndLineNumber.HasValue ? (object)row.SourceEndLineNumber.Value : null;
-                values[targetRow, 24] = row.SourceLocation;
-                values[targetRow, 25] = row.TextNormalizationApplied;
-            }
-            return values;
+            Excel.Range firstCell =
+                (Excel.Range)worksheet.Cells[HeaderRow, FirstColumn];
+            Excel.Range lastCell =
+                (Excel.Range)worksheet.Cells[HeaderRow, lastColumn];
+            Excel.Range headerRange = worksheet.Range[firstCell, lastCell];
+            headerRange.Value2 =
+                JournalWorksheetDataProjector.CreateHeaderValues();
         }
 
-        private static object ToExcelNumber(decimal? value)
+        private static void WriteDataChunks(
+            Excel.Worksheet worksheet,
+            JournalImport journalImport,
+            int lastColumn)
         {
-            return value.HasValue ? (object)(double)value.Value : null;
+            foreach (JournalWorksheetChunk chunk in
+                JournalWorksheetDataProjector.PlanChunks(
+                    journalImport.Rows.Count))
+            {
+                int firstWorksheetRow =
+                    HeaderRow + 1 + chunk.StartIndex;
+                int lastWorksheetRow =
+                    firstWorksheetRow + chunk.RowCount - 1;
+                Excel.Range firstCell =
+                    (Excel.Range)worksheet.Cells[
+                        firstWorksheetRow,
+                        FirstColumn];
+                Excel.Range lastCell =
+                    (Excel.Range)worksheet.Cells[
+                        lastWorksheetRow,
+                        lastColumn];
+                Excel.Range targetRange =
+                    worksheet.Range[firstCell, lastCell];
+
+                targetRange.Value2 =
+                    JournalWorksheetDataProjector.CreateDataValues(
+                        journalImport.Rows,
+                        chunk.StartIndex,
+                        chunk.RowCount);
+            }
         }
 
         private static void ApplyDataFormats(Excel.Range dataRange)
