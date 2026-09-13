@@ -31,16 +31,9 @@
 		<None Update="TestData\Urbis\HL_KNIHA_00325791_202412.xls">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
-	</ItemGroup>
-
-	<ItemGroup>
-	  <None Update="TestData\Ives\HL_KNIHA_00322881_2024.xls">
-		<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-	  </None>
-	  <Folder Include="TestData\IfoSoft\" />
-	</ItemGroup>
-
-	<ItemGroup>
+		<None Update="TestData\Ives\HL_KNIHA_00322881_2024.xls">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
 		<None Update="TestData\Ives\U_DENNIK_00322881_2022.xls">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
@@ -50,5 +43,18 @@
 		<None Update="TestData\Ives\U_DENNIK_00322881_2024.xls">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
+		<None Update="TestData\SoftipMop\Omida dennik 01 2025.xlsx">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Update="TestData\SoftipMop\Omida dennik 02 2025.xlsx">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Update="TestData\SoftipMop\Omida dennik 12 2025.xlsx">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Folder Include="TestData\IfoSoft\" />
 	</ItemGroup>
 </Project>
