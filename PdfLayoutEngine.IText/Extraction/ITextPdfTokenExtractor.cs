@@ -17,8 +17,8 @@ public sealed class ITextPdfTokenExtractor
     public LayoutDocument Extract(string filePath, string? password = null)
     {
         if (filePath == null) throw new ArgumentNullException(nameof(filePath));
-        using (var stream = File.OpenRead(filePath))
-            return Extract(stream, password);
+        using var stream = File.OpenRead(filePath);
+        return Extract(stream, password);
     }
 
     public LayoutDocument Extract(Stream pdfStream, string? password = null)
@@ -28,34 +28,30 @@ public sealed class ITextPdfTokenExtractor
         var properties = new ReaderProperties();
         if (!string.IsNullOrEmpty(password)) properties.SetPassword(Encoding.UTF8.GetBytes(password));
 
-        using (var reader = new PdfReader(pdfStream, properties))
-        using (var pdf = new iText.Kernel.Pdf.PdfDocument(reader))
+        using var reader = new PdfReader(pdfStream, properties);
+        using var pdf = new iText.Kernel.Pdf.PdfDocument(reader);
+        var pages = new List<LayoutPage>(pdf.GetNumberOfPages());
+        for (var pageNumber = 1; pageNumber <= pdf.GetNumberOfPages(); pageNumber++)
         {
-            var pages = new List<LayoutPage>(pdf.GetNumberOfPages());
-            for (var pageNumber = 1; pageNumber <= pdf.GetNumberOfPages(); pageNumber++)
-            {
-                var listener = new TextTokenEventListener(pageNumber);
-                new PdfCanvasProcessor(listener).ProcessPageContent(pdf.GetPage(pageNumber));
-                pages.Add(new LayoutPage(pageNumber, listener.Tokens));
-            }
-
-            return new LayoutDocument(pages);
+            var listener = new TextTokenEventListener(pageNumber);
+            new PdfCanvasProcessor(listener).ProcessPageContent(pdf.GetPage(pageNumber));
+            pages.Add(new LayoutPage(pageNumber, listener.Tokens));
         }
+
+        return new LayoutDocument(pages);
     }
 
-    private sealed class TextTokenEventListener : IEventListener
+    private sealed class TextTokenEventListener(int pageNumber) : IEventListener
     {
-        private static readonly ICollection<EventType> SupportedEvents = new[] { EventType.RENDER_TEXT };
-        private readonly int _pageNumber;
-        private readonly List<PdfTextToken> _tokens = new List<PdfTextToken>();
-
-        public TextTokenEventListener(int pageNumber) => _pageNumber = pageNumber;
+        private static readonly ICollection<EventType> SupportedEvents = [EventType.RENDER_TEXT];
+        private readonly int _pageNumber = pageNumber;
+        private readonly List<PdfTextToken> _tokens = [];
 
         public IReadOnlyList<PdfTextToken> Tokens => _tokens;
 
         public void EventOccurred(IEventData data, EventType type)
         {
-            if (type != EventType.RENDER_TEXT || !(data is TextRenderInfo textRenderInfo)) return;
+            if (type != EventType.RENDER_TEXT || data is not TextRenderInfo textRenderInfo) return;
 
             var baseline = textRenderInfo.GetBaseline().GetBoundingRectangle();
             var fontName = textRenderInfo.GetFont()?.GetFontProgram()?.ToString() ?? string.Empty;

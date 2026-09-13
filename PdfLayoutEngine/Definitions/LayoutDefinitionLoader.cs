@@ -48,8 +48,8 @@ public sealed class LayoutDefinitionLoader
     public LayoutLoadResult Load(Stream jsonStream)
     {
         if (jsonStream == null) throw new ArgumentNullException(nameof(jsonStream));
-        using (var reader = new StreamReader(jsonStream, System.Text.Encoding.UTF8, true, 1024, true))
-            return Load(reader.ReadToEnd());
+        using var reader = new StreamReader(jsonStream, System.Text.Encoding.UTF8, true, 1024, true);
+        return Load(reader.ReadToEnd());
     }
 }
 
@@ -67,5 +67,5 @@ public sealed class LayoutLoadResult
     public IReadOnlyList<ValidationMessage> Messages => _messages;
     public bool IsValid => Definition != null && _messages.All(message => message.Severity != ValidationSeverity.Error);
 
-    internal static LayoutLoadResult Failure(ValidationMessage message) => new LayoutLoadResult(null, new[] { message });
+    internal static LayoutLoadResult Failure(ValidationMessage message) => new(null, [message]);
 }
