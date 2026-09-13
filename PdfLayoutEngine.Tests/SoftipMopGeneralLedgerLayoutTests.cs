@@ -31,7 +31,7 @@ public sealed class SoftipMopGeneralLedgerLayoutTests
         var fieldSet = Assert.Single(definition.RecordFields);
         Assert.Equal("account-row", fieldSet.RecordRuleId);
         Assert.Equal(
-            new[] { "value-1", "value-2", "value-3", "value-4", "value-5", "value-6" },
+            new[] { "key", "label", "value-1", "value-2", "value-3", "value-4", "value-5", "value-6" },
             fieldSet.Fields.Select(field => field.Id));
     }
 
@@ -42,7 +42,7 @@ public sealed class SoftipMopGeneralLedgerLayoutTests
         var matcher = new BaselineRecordRuleMatcher();
         var account = Record(Group(1, 100,
             Token(1, "01110", 22.5, 48),
-            Token(1, "ACCOUNT NAME", 52, 300),
+            Token(1, "ACCOUNT NAME", 81, 300),
             Token(1, "0,00", 350, 372),
             Token(1, "0,00", 420, 452),
             Token(1, "0,00", 509, 532),
@@ -92,7 +92,7 @@ public sealed class SoftipMopGeneralLedgerLayoutTests
             Assert.Single(definition.RecordFields),
             definition.Defaults);
         Assert.All(fields, field => Assert.Equal(RuleMatchStatus.Matched, field.Status));
-        Assert.Equal(6, fields.Count);
+        Assert.Equal(8, fields.Count);
     }
 
     private static void AssertMatch(string ruleId, BaselineRecordRuleMatchResult result)
