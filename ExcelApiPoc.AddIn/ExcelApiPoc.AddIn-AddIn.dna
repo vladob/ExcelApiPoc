@@ -12,7 +12,9 @@
     <Reference Path="Microsoft.Bcl.TimeProvider.dll" Pack="true" />
     <Reference Path="Microsoft.Extensions.Caching.Abstractions.dll" Pack="true" />
     <Reference Path="Microsoft.Extensions.Caching.Memory.dll" Pack="true" />
+    <Reference Path="Microsoft.Extensions.DependencyInjection.dll" Pack="true" />
     <Reference Path="Microsoft.Extensions.DependencyInjection.Abstractions.dll" Pack="true" />
+    <Reference Path="Microsoft.Extensions.Logging.dll" Pack="true" />
     <Reference Path="Microsoft.Extensions.Logging.Abstractions.dll" Pack="true" />
     <Reference Path="Microsoft.Extensions.Options.dll" Pack="true" />
     <Reference Path="Microsoft.Extensions.Primitives.dll" Pack="true" />
@@ -38,11 +40,19 @@
     <Reference Path="ExcelApiPoc.AccountingImport.dll" Pack="true" />
     <Reference Path="PdfLayoutEngine.dll" Pack="true" />
     <Reference Path="PdfLayoutEngine.IText.dll" Pack="true" />
+    <Reference Path="itext.barcodes.dll" Pack="true" />
+    <Reference Path="itext.bouncy-castle-adapter.dll" Pack="true" />
+    <Reference Path="itext.bouncy-castle-connector.dll" Pack="true" />
     <Reference Path="itext.commons.dll" Pack="true" />
+    <Reference Path="itext.forms.dll" Pack="true" />
     <Reference Path="itext.io.dll" Pack="true" />
     <Reference Path="itext.kernel.dll" Pack="true" />
-    <Reference Path="itext.bouncy-castle-connector.dll" Pack="true" />
-    <Reference Path="itext.bouncy-castle-adapter.dll" Pack="true" />
+    <Reference Path="itext.layout.dll" Pack="true" />
+    <Reference Path="itext.pdfa.dll" Pack="true" />
+    <Reference Path="itext.pdfua.dll" Pack="true" />
+    <Reference Path="itext.sign.dll" Pack="true" />
+    <Reference Path="itext.styledxmlparser.dll" Pack="true" />
+    <Reference Path="itext.svg.dll" Pack="true" />
     <Reference Path="BouncyCastle.Cryptography.dll" Pack="true" />
     <Reference Path="ExcelDataReader.dll" Pack="true" />
     <Reference Path="System.Text.Encoding.CodePages.dll" Pack="true" />	
