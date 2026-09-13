@@ -14,7 +14,7 @@ public sealed class SoftipMopMonthlyJournalImporterTests
         string december = GetFixturePath("Omida dennik 12 2025.xlsx");
 
         JournalImport result = new SoftipMopMonthlyJournalImporter().Import(
-            [december, january, february]);
+            new[] { december, january, february });
 
         Assert.Equal("3 Softip-MOP monthly journal files", result.SourceFileName);
         Assert.Null(result.SourceFilePath);
@@ -41,6 +41,13 @@ public sealed class SoftipMopMonthlyJournalImporterTests
         Assert.Equal(3_140, result.ImportReport.RecordCounts["PostingDatesOutsideFiscalYear"]);
         Assert.Equal(9, result.ImportReport.RecordCounts["MissingAccountingPeriods"]);
 
+        Assert.NotNull(result.ImportReport.Performance);
+        Assert.True(result.ImportReport.Performance.ElapsedMilliseconds >= 0);
+        Assert.True(result.ImportReport.Performance.ManagedMemoryBeforeBytes >= 0);
+        Assert.True(result.ImportReport.Performance.ManagedMemoryAfterBytes >= 0);
+        Assert.Equal(3, result.ImportReport.Performance.SourceFileCount);
+        Assert.Equal(174_883, result.ImportReport.Performance.CanonicalRowCount);
+
         ImportValidationResult combined = Assert.Single(
             result.ImportReport.ValidationResults.Where(validation =>
                 validation.Code == "SOFTIP_MOP_COMBINED_DEBIT_CREDIT_BALANCE"));
@@ -61,10 +68,11 @@ public sealed class SoftipMopMonthlyJournalImporterTests
     public void Import_TwoConsecutivePeriodsDoesNotReportMissingMonth()
     {
         JournalImport result = new SoftipMopMonthlyJournalImporter().Import(
-            [
+            new[]
+            {
                 GetFixturePath("Omida dennik 02 2025.xlsx"),
                 GetFixturePath("Omida dennik 01 2025.xlsx")
-            ]);
+            });
 
         Assert.Equal(0, result.ImportReport.RecordCounts["MissingAccountingPeriods"]);
         Assert.DoesNotContain(result.ImportReport.Diagnostics,
@@ -77,7 +85,7 @@ public sealed class SoftipMopMonthlyJournalImporterTests
         string january = GetFixturePath("Omida dennik 01 2025.xlsx");
 
         InvalidDataException exception = Assert.Throws<InvalidDataException>(() =>
-            new SoftipMopMonthlyJournalImporter().Import([january, january]));
+            new SoftipMopMonthlyJournalImporter().Import(new[] { january, january }));
 
         Assert.Contains("Accounting period 202501", exception.Message);
         Assert.Contains("more than one", exception.Message);
@@ -102,7 +110,7 @@ public sealed class SoftipMopMonthlyJournalImporterTests
     public void Import_RejectsEmptyFileCollection()
     {
         Assert.Throws<ArgumentException>(() =>
-            new SoftipMopMonthlyJournalImporter().Import([]));
+            new SoftipMopMonthlyJournalImporter().Import(Array.Empty<string>()));
     }
 
     private static string GetFixturePath(string fileName)

@@ -4,6 +4,7 @@ using ExcelApiPoc.AccountingImport.Services.Common;
 using ExcelDataReader;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -16,6 +17,9 @@ namespace ExcelApiPoc.AccountingImport.Services.SoftipMop
     {
         public JournalImport Import(IEnumerable<string> filePaths)
         {
+            long memoryBefore = GC.GetTotalMemory(false);
+            Stopwatch stopwatch = Stopwatch.StartNew();
+
             if (filePaths == null) throw new ArgumentNullException(nameof(filePaths));
 
             string[] paths = filePaths
@@ -66,11 +70,18 @@ namespace ExcelApiPoc.AccountingImport.Services.SoftipMop
                 sourceHashes.Add(monthly.SourceFileHash);
                 result.NormalizedTextFieldCount += monthly.NormalizedTextFieldCount;
 
+                JournalImportCapacity.EnsureCanAppend(
+                    result.Rows.Count,
+                    monthly.Rows.Count,
+                    file.FileName);
+
+                int sequenceNumber = result.Rows.Count;
                 foreach (JournalRow row in monthly.Rows)
                 {
-                    row.SequenceNumber = result.Rows.Count + 1;
-                    result.Rows.Add(row);
+                    sequenceNumber++;
+                    row.SequenceNumber = sequenceNumber;
                 }
+                result.Rows.AddRange(monthly.Rows);
 
                 MergeReport(report, monthly.ImportReport);
                 ImportValidationResult balance = monthly.ImportReport.ValidationResults
@@ -86,6 +97,16 @@ namespace ExcelApiPoc.AccountingImport.Services.SoftipMop
             report.RecordCounts["AccountingPeriods"] = files.Length;
             AddCombinedBalanceValidation(report, combinedDebit, combinedCredit, combinedName);
             AddMissingPeriodDiagnostic(report, files, combinedName);
+
+            stopwatch.Stop();
+            report.Performance = new ImportPerformanceMetrics
+            {
+                ElapsedMilliseconds = stopwatch.ElapsedMilliseconds,
+                ManagedMemoryBeforeBytes = memoryBefore,
+                ManagedMemoryAfterBytes = GC.GetTotalMemory(false),
+                SourceFileCount = files.Length,
+                CanonicalRowCount = result.Rows.Count
+            };
 
             return result;
         }

@@ -170,6 +170,10 @@ namespace ExcelApiPoc.AccountingImport.Services.SoftipMop
                         row.CreditCostCenter = costCenter;
                     }
 
+                    JournalImportCapacity.EnsureCanAppend(
+                        result.Rows.Count,
+                        1,
+                        result.SourceFileName);
                     result.Rows.Add(row);
                 }
             }

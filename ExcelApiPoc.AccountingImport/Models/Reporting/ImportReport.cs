@@ -17,6 +17,8 @@ namespace ExcelApiPoc.AccountingImport.Models.Reporting
         public List<ImportDiagnostic> Diagnostics { get; } =
             new List<ImportDiagnostic>();
 
+        public ImportPerformanceMetrics Performance { get; set; }
+
         public bool IsValid
         {
             get
