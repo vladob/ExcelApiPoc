@@ -21,4 +21,9 @@
   <ItemGroup>
     <Using Include="Xunit" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="..\PdfLayouts\SoftipMop\general-ledger.v1.json"
+          Link="TestData\SoftipMop\general-ledger.v1.json"
+          CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
 </Project>

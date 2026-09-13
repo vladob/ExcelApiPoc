@@ -1,0 +1,80 @@
+{
+  "schemaVersion": 1,
+  "id": "softip-mop-general-ledger",
+  "name": "Softip-MOP General Ledger",
+  "defaults": {
+    "horizontalTolerance": 5,
+    "baselineTolerance": 4
+  },
+  "sections": [
+    {
+      "id": "page-body",
+      "startRuleId": "header-end",
+      "endRuleId": "footer-start",
+      "scope": "PerPage",
+      "mayContinueOnNextPage": true
+    }
+  ],
+  "rules": [
+    {
+      "id": "header-end",
+      "text": "^\\s*Dal\\s*$",
+      "textMatch": "RegularExpression",
+      "horizontal": {
+        "anchor": "Right",
+        "position": 661.5,
+        "tolerance": 5
+      },
+      "pageScope": "Repeated"
+    },
+    {
+      "id": "footer-start",
+      "text": "© Softip a.s.",
+      "textMatch": "Contains",
+      "pageScope": "Repeated"
+    }
+  ],
+  "recordContinuations": [
+    {
+      "id": "values-continued-on-next-page",
+      "sectionId": "page-body",
+      "acrossPageBoundaryOnly": true,
+      "previous": {
+        "rightAtMost": 340
+      },
+      "next": {
+        "leftAtLeast": 340
+      }
+    }
+  ],
+  "recordRules": [
+    {
+      "id": "account-row",
+      "sectionId": "page-body",
+      "text": "^\\d{5}\\s",
+      "textMatch": "RegularExpression",
+      "minimumTokenCount": 8,
+      "maximumTokenCount": 8,
+      "rightAtLeast": 760
+    },
+    {
+      "id": "subtotal-row",
+      "sectionId": "page-body",
+      "text": "^Medzisúčet za\\s+:\\s+\\d+",
+      "textMatch": "RegularExpression",
+      "minimumTokenCount": 8,
+      "maximumTokenCount": 8,
+      "rightAtLeast": 760
+    },
+    {
+      "id": "signature-row",
+      "sectionId": "page-body",
+      "text": "^Vypracoval\\s+Schválil\\s+Dátum$",
+      "textMatch": "RegularExpression",
+      "minimumGroupCount": 1,
+      "maximumGroupCount": 1,
+      "minimumTokenCount": 3,
+      "maximumTokenCount": 3
+    }
+  ]
+}
