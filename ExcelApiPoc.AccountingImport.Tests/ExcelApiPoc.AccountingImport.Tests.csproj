@@ -39,4 +39,16 @@
 	  </None>
 	  <Folder Include="TestData\IfoSoft\" />
 	</ItemGroup>
+
+	<ItemGroup>
+		<None Update="TestData\Ives\U_DENNIK_00322881_2022.xls">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Update="TestData\Ives\U_DENNIK_00322881_2023.xls">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Update="TestData\Ives\U_DENNIK_00322881_2024.xls">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+	</ItemGroup>
 </Project>
