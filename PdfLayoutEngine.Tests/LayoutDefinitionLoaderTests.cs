@@ -104,7 +104,7 @@ public sealed class LayoutDefinitionLoaderTests
     }
 
     [Fact]
-    public void Rejects_per_page_section_that_may_continue_on_next_page()
+    public void Allows_records_in_per_page_section_to_continue_on_next_page()
     {
         const string json = """
         {
@@ -116,7 +116,7 @@ public sealed class LayoutDefinitionLoaderTests
 
         var result = new LayoutDefinitionLoader().Load(json);
 
-        Assert.False(result.IsValid);
-        Assert.Contains(result.Messages, message => message.Path == "$.sections[0].mayContinueOnNextPage");
+        Assert.True(result.IsValid);
+        Assert.True(result.Definition!.Sections[0].MayContinueOnNextPage);
     }
 }

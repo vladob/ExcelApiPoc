@@ -32,8 +32,6 @@ public sealed class LayoutDefinitionValidator
             Required(section.Id, $"$.sections[{index}].id");
             Reference(section.StartRuleId, ruleIds, $"$.sections[{index}].startRuleId", "rule");
             Reference(section.EndRuleId, ruleIds, $"$.sections[{index}].endRuleId", "rule");
-            if (section.Scope == SectionScope.PerPage && section.MayContinueOnNextPage)
-                Error($"$.sections[{index}].mayContinueOnNextPage", "A per-page section cannot continue on the next page.");
         }
 
         for (var index = 0; index < rules.Count; index++)

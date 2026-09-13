@@ -78,7 +78,8 @@ public sealed class SectionDiscoverer
             tokens[tokens.Length - 1].PageNumber,
             tokens,
             start,
-            end);
+            end,
+            definition.MayContinueOnNextPage);
         return new SectionDiscoveryResult(definition.Id, SectionDiscoveryStatus.Discovered, new[] { instance }, diagnostics);
     }
 
@@ -105,7 +106,14 @@ public sealed class SectionDiscoverer
                 continue;
             }
             if (tokens.Length > 0)
-                sections.Add(new DiscoveredSection(definition.Id, page.PageNumber, page.PageNumber, tokens, start, end));
+                sections.Add(new DiscoveredSection(
+                    definition.Id,
+                    page.PageNumber,
+                    page.PageNumber,
+                    tokens,
+                    start,
+                    end,
+                    definition.MayContinueOnNextPage));
         }
 
         return Result(definition.Id, sections, diagnostics);

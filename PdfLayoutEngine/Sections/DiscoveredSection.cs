@@ -16,7 +16,8 @@ public sealed class DiscoveredSection
         int endPageNumber,
         IEnumerable<PdfTextToken> tokens,
         RecognitionEvidence? startEvidence,
-        RecognitionEvidence? endEvidence)
+        RecognitionEvidence? endEvidence,
+        bool mayContinueOnNextPage = false)
     {
         if (startPageNumber < 1) throw new ArgumentOutOfRangeException(nameof(startPageNumber));
         if (endPageNumber < startPageNumber) throw new ArgumentOutOfRangeException(nameof(endPageNumber));
@@ -27,6 +28,7 @@ public sealed class DiscoveredSection
         _tokens = Array.AsReadOnly(tokens?.ToArray() ?? throw new ArgumentNullException(nameof(tokens)));
         StartEvidence = startEvidence;
         EndEvidence = endEvidence;
+        MayContinueOnNextPage = mayContinueOnNextPage;
     }
 
     public string SectionId { get; }
@@ -35,4 +37,5 @@ public sealed class DiscoveredSection
     public IReadOnlyList<PdfTextToken> Tokens => _tokens;
     public RecognitionEvidence? StartEvidence { get; }
     public RecognitionEvidence? EndEvidence { get; }
+    public bool MayContinueOnNextPage { get; }
 }
