@@ -18,13 +18,20 @@ public sealed class SoftipMopGeneralLedgerLayoutTests
         Assert.Equal("softip-mop-general-ledger", definition.Id);
         Assert.Equal(new[] { "page-body" }, definition.Sections.Select(section => section.Id));
         Assert.Equal(
-            new[] { "account-row", "subtotal-row", "signature-row" },
+            new[]
+            {
+                "account-row",
+                "subtotal-row",
+                "report-total-row",
+                "summary-row",
+                "signature-row"
+            },
             definition.RecordRules.Select(rule => rule.Id));
         Assert.Single(definition.RecordContinuations);
     }
 
     [Fact]
-    public void Initial_record_rules_classify_only_the_three_supported_shapes()
+    public void Record_rules_classify_supported_shapes_without_catching_unknown_summary()
     {
         var definition = Assert.IsType<LayoutDefinition>(Load().Definition);
         var matcher = new BaselineRecordRuleMatcher();
@@ -60,12 +67,16 @@ public sealed class SoftipMopGeneralLedgerLayoutTests
             Token(13, "Vypracoval", 132, 190),
             Token(13, "Schválil", 350, 400),
             Token(13, "Dátum", 650, 700)));
+        var reportTotal = SevenTokenRecord(12, "Spolu", 22.5);
+        var summary = SevenTokenRecord(13, "Hospodársky výsledok", 132.7);
         var unsupportedSummary = Record(Group(13, 450,
-            Token(13, "Summary", 132, 200),
+            Token(13, "Unknown summary", 132, 200),
             Token(13, "0,00", 735, 770)));
 
         AssertMatch("account-row", matcher.Match(account, definition.RecordRules));
         AssertMatch("subtotal-row", matcher.Match(subtotal, definition.RecordRules));
+        AssertMatch("report-total-row", matcher.Match(reportTotal, definition.RecordRules));
+        AssertMatch("summary-row", matcher.Match(summary, definition.RecordRules));
         AssertMatch("signature-row", matcher.Match(signature, definition.RecordRules));
         Assert.Equal(
             RuleMatchStatus.Unmatched,
@@ -91,6 +102,16 @@ public sealed class SoftipMopGeneralLedgerLayoutTests
 
     private static BaselineRecord Record(BaselineGroup group) =>
         new BaselineRecord("page-body", new[] { group });
+
+    private static BaselineRecord SevenTokenRecord(int page, string label, double left) =>
+        Record(Group(page, 450,
+            Token(page, label, left, 300),
+            Token(page, "0,00", 350, 372),
+            Token(page, "0,00", 420, 452),
+            Token(page, "0,00", 509, 532),
+            Token(page, "0,00", 576, 611),
+            Token(page, "0,00", 668, 691),
+            Token(page, "0,00", 735, 770)));
 
     private static BaselineGroup Group(
         int page,

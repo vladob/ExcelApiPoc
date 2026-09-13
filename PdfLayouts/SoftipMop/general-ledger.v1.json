@@ -67,6 +67,30 @@
       "rightAtLeast": 760
     },
     {
+      "id": "report-total-row",
+      "sectionId": "page-body",
+      "text": "^Spolu\\s",
+      "textMatch": "RegularExpression",
+      "minimumGroupCount": 1,
+      "maximumGroupCount": 1,
+      "minimumTokenCount": 7,
+      "maximumTokenCount": 7,
+      "leftAtMost": 30,
+      "rightAtLeast": 760
+    },
+    {
+      "id": "summary-row",
+      "sectionId": "page-body",
+      "text": "^(Aktíva|Pasíva|Náklady|Výnosy|Hospodársky výsledok)\\s",
+      "textMatch": "RegularExpression",
+      "minimumGroupCount": 1,
+      "maximumGroupCount": 1,
+      "minimumTokenCount": 7,
+      "maximumTokenCount": 7,
+      "leftAtLeast": 125,
+      "rightAtLeast": 760
+    },
+    {
       "id": "signature-row",
       "sectionId": "page-body",
       "text": "^Vypracoval\\s+Schválil\\s+Dátum$",
