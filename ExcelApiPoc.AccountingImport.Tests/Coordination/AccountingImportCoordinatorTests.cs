@@ -1,5 +1,6 @@
 ﻿using ExcelApiPoc.AccountingImport.Models;
 using ExcelApiPoc.AccountingImport.Services;
+using ExcelApiPoc.AccountingImport.Models.Reporting;
 using System.IO;
 
 namespace ExcelApiPoc.AccountingImport.Tests.Coordination;
@@ -145,6 +146,77 @@ public sealed class AccountingImportCoordinatorTests
     }
 
     [Fact]
+    public void Import_AggregatesSoftipMopMonthlyJournalsAndUsesAccountingPeriod()
+    {
+        var request = new AccountingImportRequest
+        {
+            AccountingFormat = "Softip-MOP",
+            ExpectedIco = "31715362",
+            ExpectedFiscalYear = 2025
+        };
+        request.JournalFilePaths.Add(
+            GetSoftipMopFixturePath("Omida dennik 01 2025.xlsx"));
+        request.JournalFilePaths.Add(
+            GetSoftipMopFixturePath("Omida dennik 12 2025.xlsx"));
+
+        AccountingImportPackage result =
+            AccountingImportCoordinator.CreateDefault().Import(request);
+
+        Assert.Equal("Softip-MOP", result.AccountingFormat);
+        Assert.Equal("31715362", result.Ico);
+        Assert.Equal(2025, result.FiscalYear);
+        Assert.Equal(118787, result.Journal.Rows.Count);
+        Assert.Contains(
+            result.Journal.Rows,
+            row => row.PostingDate.Year == 2026);
+        Assert.Contains(
+            result.Journal.ImportReport.Diagnostics,
+            diagnostic =>
+                diagnostic.Code == "SOFTIP_MOP_ICO_SUPPLIED_BY_REQUEST" &&
+                diagnostic.Severity == ImportDiagnosticSeverity.Warning);
+        Assert.Null(result.GeneralLedger);
+    }
+
+    [Fact]
+    public void Import_RejectsMultipleJournalFilesForExistingSingleFileFormat()
+    {
+        var request = new AccountingImportRequest
+        {
+            AccountingFormat = "IVES",
+            ExpectedIco = "00322881",
+            ExpectedFiscalYear = 2024
+        };
+        request.JournalFilePaths.Add(
+            GetIvesFixturePath("U_DENNIK_00322881_2024.xls"));
+        request.JournalFilePaths.Add(
+            GetIvesFixturePath("U_DENNIK_00322881_2024.xls"));
+
+        InvalidDataException exception = Assert.Throws<InvalidDataException>(
+            () => AccountingImportCoordinator.CreateDefault().Import(request));
+
+        Assert.Contains("supports exactly one", exception.Message);
+    }
+
+    [Fact]
+    public void Import_PrefersJournalFilePathsWhenBothRequestShapesArePresent()
+    {
+        var request = new AccountingImportRequest
+        {
+            AccountingFormat = "IVES",
+            JournalFilePath = "missing-file.xls",
+            ExpectedIco = "00322881",
+            ExpectedFiscalYear = 2024
+        };
+        request.JournalFilePaths.Add(
+            GetIvesFixturePath("U_DENNIK_00322881_2024.xls"));
+
+        AccountingImportPackage result =
+            AccountingImportCoordinator.CreateDefault().Import(request);
+
+        Assert.Equal(2125, result.Journal.Rows.Count);
+    }
+
+    [Fact]
     public void Import_RejectsUnexpectedIco()
     {
         InvalidDataException exception =
@@ -231,6 +303,15 @@ public sealed class AccountingImportCoordinatorTests
             AppContext.BaseDirectory,
             "TestData",
             "Ives",
+            fileName);
+    }
+
+    private static string GetSoftipMopFixturePath(string fileName)
+    {
+        return Path.Combine(
+            AppContext.BaseDirectory,
+            "TestData",
+            "SoftipMop",
             fileName);
     }
 

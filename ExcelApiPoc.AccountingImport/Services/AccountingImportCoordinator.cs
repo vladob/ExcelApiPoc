@@ -1,7 +1,9 @@
 ﻿using ExcelApiPoc.AccountingImport.Models;
 using ExcelApiPoc.AccountingImport.Services.IfoSoft;
 using ExcelApiPoc.AccountingImport.Services.Ives;
+using ExcelApiPoc.AccountingImport.Services.SoftipMop;
 using ExcelApiPoc.AccountingImport.Services.Urbis;
+using ExcelApiPoc.AccountingImport.Models.Reporting;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -50,6 +52,7 @@ namespace ExcelApiPoc.AccountingImport.Services
                 {
                     new IfoSoftCsvJournalImporter(),
                     new IvesExcelJournalImporter(),
+                    new SoftipMopExcelJournalImporter(),
                     new UrbisExcelJournalImporter()
                 },
                 new IGeneralLedgerImporter[]
@@ -64,10 +67,8 @@ namespace ExcelApiPoc.AccountingImport.Services
         {
             ValidateRequest(request);
 
-            IJournalImporter journalImporter = SelectExactlyOne(journalImporters, importer => importer.CanImport( request.JournalFilePath, request.AccountingFormat),
-                    "accounting-journal", request.JournalFilePath, request.AccountingFormat);
-
-            JournalImport journal = journalImporter.Import(request.JournalFilePath);
+            IReadOnlyList<string> journalFilePaths = ResolveJournalFilePaths(request);
+            JournalImport journal = ImportJournal(request, journalFilePaths);
 
             ValidateJournal(journal, request);
 
@@ -114,6 +115,36 @@ namespace ExcelApiPoc.AccountingImport.Services
                 GeneralLedger = generalLedger,
                 JournalLedgerReconciliation = reconciliation
             };
+        }
+
+        private JournalImport ImportJournal(
+            AccountingImportRequest request,
+            IReadOnlyList<string> journalFilePaths)
+        {
+            if (IsSoftipMop(request.AccountingFormat))
+            {
+                return new SoftipMopMonthlyJournalImporter()
+                    .Import(journalFilePaths);
+            }
+
+            if (journalFilePaths.Count != 1)
+            {
+                throw new InvalidDataException(
+                    "Accounting format '" + request.AccountingFormat +
+                    "' supports exactly one accounting-journal file per import request.");
+            }
+
+            string journalFilePath = journalFilePaths[0];
+            IJournalImporter journalImporter = SelectExactlyOne(
+                journalImporters,
+                importer => importer.CanImport(
+                    journalFilePath,
+                    request.AccountingFormat),
+                "accounting-journal",
+                journalFilePath,
+                request.AccountingFormat);
+
+            return journalImporter.Import(journalFilePath);
         }
 
         private static TImporter SelectExactlyOne<TImporter>(IEnumerable<TImporter> importers, Func<TImporter, bool> canImport, string documentDescription, string filePath,  string accountingFormat)
@@ -165,11 +196,20 @@ namespace ExcelApiPoc.AccountingImport.Services
                     nameof(request));
             }
 
-            if (string.IsNullOrWhiteSpace(
-                    request.JournalFilePath))
+            IReadOnlyList<string> journalFilePaths =
+                ResolveJournalFilePaths(request);
+
+            if (journalFilePaths.Count == 0)
             {
                 throw new ArgumentException(
                     "An accounting-journal file is required.",
+                    nameof(request));
+            }
+
+            if (journalFilePaths.Any(string.IsNullOrWhiteSpace))
+            {
+                throw new ArgumentException(
+                    "An accounting-journal file path is empty.",
                     nameof(request));
             }
 
@@ -203,6 +243,8 @@ namespace ExcelApiPoc.AccountingImport.Services
                 journal.AccountingFormat,
                 request.AccountingFormat);
 
+            AdmitMissingSoftipMopIco(journal, request);
+
             ValidateIco(
                 "accounting journal",
                 journal.SourceFileName,
@@ -215,11 +257,10 @@ namespace ExcelApiPoc.AccountingImport.Services
                 journal.FiscalYear,
                 request.ExpectedFiscalYear);
 
-            JournalRow wrongYearRow =
-                journal.Rows.FirstOrDefault(
-                    row =>
-                        row.PostingDate.Year !=
-                        request.ExpectedFiscalYear);
+            JournalRow wrongYearRow = IsSoftipMop(request.AccountingFormat)
+                ? null
+                : journal.Rows.FirstOrDefault(
+                    row => row.PostingDate.Year != request.ExpectedFiscalYear);
 
             if (wrongYearRow != null)
             {
@@ -233,6 +274,58 @@ namespace ExcelApiPoc.AccountingImport.Services
                     request.ExpectedFiscalYear +
                     ".");
             }
+        }
+
+        private static void AdmitMissingSoftipMopIco(
+            JournalImport journal,
+            AccountingImportRequest request)
+        {
+            if (!IsSoftipMop(request.AccountingFormat) ||
+                !string.IsNullOrWhiteSpace(journal.Ico))
+            {
+                return;
+            }
+
+            journal.Ico = request.ExpectedIco;
+            journal.ImportReport?.Diagnostics.Add(
+                new ImportDiagnostic
+                {
+                    Code = "SOFTIP_MOP_ICO_SUPPLIED_BY_REQUEST",
+                    Severity = ImportDiagnosticSeverity.Warning,
+                    Message = "The Softip-MOP accounting journal does not contain IČO. " +
+                        "IČO '" + request.ExpectedIco +
+                        "' was supplied by the import request and could not be verified from the source files.",
+                    Source = new SourceProvenance
+                    {
+                        SourceFileName = journal.SourceFileName,
+                        RecordSet = "ImportRequest"
+                    }
+                });
+        }
+
+        private static IReadOnlyList<string> ResolveJournalFilePaths(
+            AccountingImportRequest request)
+        {
+            if (request.JournalFilePaths != null &&
+                request.JournalFilePaths.Count > 0)
+            {
+                return request.JournalFilePaths;
+            }
+
+            if (string.IsNullOrWhiteSpace(request.JournalFilePath))
+            {
+                return Array.Empty<string>();
+            }
+
+            return new[] { request.JournalFilePath };
+        }
+
+        private static bool IsSoftipMop(string accountingFormat)
+        {
+            return string.Equals(
+                accountingFormat,
+                "Softip-MOP",
+                StringComparison.OrdinalIgnoreCase);
         }
 
         private static void ValidateGeneralLedger(GeneralLedgerImport ledger, JournalImport journal, AccountingImportRequest request)
