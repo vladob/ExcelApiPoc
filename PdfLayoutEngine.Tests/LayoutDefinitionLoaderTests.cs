@@ -67,4 +67,21 @@ public sealed class LayoutDefinitionLoaderTests
         Assert.Single(result.Messages);
         Assert.Equal(ValidationSeverity.Error, result.Messages[0].Severity);
     }
+
+    [Fact]
+    public void Reports_invalid_regular_expression()
+    {
+        const string json = """
+        {
+          "schemaVersion": 1,
+          "id": "sample",
+          "rules": [{ "id": "pattern", "text": "[", "textMatch": "RegularExpression" }]
+        }
+        """;
+
+        var result = new LayoutDefinitionLoader().Load(json);
+
+        Assert.False(result.IsValid);
+        Assert.Contains(result.Messages, message => message.Message.Contains("Invalid regular expression"));
+    }
 }

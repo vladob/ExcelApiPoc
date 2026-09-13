@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using PdfLayoutEngine.Definitions;
 
 namespace PdfLayoutEngine.Validation;
@@ -40,6 +41,11 @@ public sealed class LayoutDefinitionValidator
             Required(rule.Id, path + ".id");
             Reference(rule.SectionId, sectionIds, path + ".sectionId", "section");
             if (rule.Text == string.Empty) Error(path + ".text", "Text cannot be empty when specified.");
+            if (rule.Text != null && rule.TextMatch == TextMatchMode.RegularExpression)
+            {
+                try { _ = new Regex(rule.Text); }
+                catch (ArgumentException exception) { Error(path + ".text", $"Invalid regular expression: {exception.Message}"); }
+            }
             if (rule.Horizontal != null)
             {
                 OptionalFinite(rule.Horizontal.Position, path + ".horizontal.position");

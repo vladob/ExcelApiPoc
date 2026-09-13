@@ -41,6 +41,8 @@ public sealed class RecognitionRuleDefinition
     [JsonConverter(typeof(JsonStringEnumConverter))]
     public TextMatchMode TextMatch { get; set; } = TextMatchMode.Equals;
 
+    public bool IgnoreCase { get; set; }
+
     [JsonConverter(typeof(JsonStringEnumConverter))]
     public PageScope PageScope { get; set; } = PageScope.Any;
 
