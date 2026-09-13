@@ -2,7 +2,10 @@ using iText.IO.Font.Constants;
 using iText.Kernel.Font;
 using iText.Kernel.Pdf;
 using iText.Kernel.Pdf.Canvas;
+using PdfLayoutEngine.Definitions;
 using PdfLayoutEngine.IText.Extraction;
+using PdfLayoutEngine.IText.Recognition;
+using PdfLayoutEngine.Recognition;
 
 namespace PdfLayoutEngine.Tests;
 
@@ -41,6 +44,59 @@ public sealed class ITextPdfTokenExtractorTests
         Assert.Equal(2, first.Tokens.Count);
         Assert.Single(second.Tokens);
         Assert.Equal("Only", second.Tokens[0].Text);
+    }
+
+    [Fact]
+    public void IText_recognizer_extracts_and_delegates_to_generic_orchestration()
+    {
+        using var stream = CreateSinglePagePdf("Only");
+        var layout = new LayoutDefinition
+        {
+            Sections = new List<SectionDefinition>
+            {
+                new SectionDefinition { Id = "body" }
+            },
+            RecordRules = new List<RecordRecognitionRuleDefinition>
+            {
+                new RecordRecognitionRuleDefinition
+                {
+                    Id = "only-record",
+                    SectionId = "body",
+                    Text = "Only"
+                }
+            },
+            RecordFields = new List<RecordFieldSetDefinition>
+            {
+                new RecordFieldSetDefinition
+                {
+                    RecordRuleId = "only-record",
+                    Fields = new List<RecordFieldDefinition>
+                    {
+                        new RecordFieldDefinition
+                        {
+                            Id = "label",
+                            Horizontal = new HorizontalMatchDefinition
+                            {
+                                Anchor = HorizontalAnchor.Left,
+                                Position = 10.5
+                            }
+                        }
+                    }
+                }
+            }
+        };
+
+        var result = new ITextLayoutRecognizer().Recognize(stream, layout);
+
+        Assert.Single(result.Document.Pages);
+        var record = Assert.Single(result.Records);
+        Assert.Equal(RuleMatchStatus.Matched, record.Status);
+        Assert.Equal("only-record", record.RuleId);
+        var field = Assert.Single(record.Fields);
+        Assert.Equal("Only", field.Value!.Value);
+        Assert.Same(
+            Assert.Single(result.Document.Tokens),
+            Assert.Single(field.Value.Evidence.SourceTokens));
     }
 
     private static MemoryStream CreateTwoPagePdf()
