@@ -8,6 +8,7 @@ using iText.Kernel.Pdf.Canvas.Parser.Data;
 using iText.Kernel.Pdf.Canvas.Parser.Listener;
 using PdfLayoutEngine.Models;
 using LayoutDocument = PdfLayoutEngine.Models.PdfDocument;
+using LayoutPage = PdfLayoutEngine.Models.PdfPage;
 
 namespace PdfLayoutEngine.IText.Extraction;
 
@@ -30,12 +31,12 @@ public sealed class ITextPdfTokenExtractor
         using (var reader = new PdfReader(pdfStream, properties))
         using (var pdf = new iText.Kernel.Pdf.PdfDocument(reader))
         {
-            var pages = new List<PdfPage>(pdf.GetNumberOfPages());
+            var pages = new List<LayoutPage>(pdf.GetNumberOfPages());
             for (var pageNumber = 1; pageNumber <= pdf.GetNumberOfPages(); pageNumber++)
             {
                 var listener = new TextTokenEventListener(pageNumber);
                 new PdfCanvasProcessor(listener).ProcessPageContent(pdf.GetPage(pageNumber));
-                pages.Add(new PdfPage(pageNumber, listener.Tokens));
+                pages.Add(new LayoutPage(pageNumber, listener.Tokens));
             }
 
             return new LayoutDocument(pages);

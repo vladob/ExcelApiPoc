@@ -72,7 +72,8 @@ public sealed class LayoutDefinitionValidator
         }
         void Reference(string? value, HashSet<string> ids, string path, string kind)
         {
-            if (!string.IsNullOrWhiteSpace(value) && !ids.Contains(value)) Error(path, $"Unknown {kind} id '{value}'.");
+            if (value != null && !string.IsNullOrWhiteSpace(value) && !ids.Contains(value))
+                Error(path, $"Unknown {kind} id '{value}'.");
         }
         void DuplicateIds(IEnumerable<string> ids, string path, string kind)
         {
