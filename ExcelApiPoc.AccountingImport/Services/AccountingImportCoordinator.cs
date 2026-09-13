@@ -49,6 +49,7 @@ namespace ExcelApiPoc.AccountingImport.Services
                 new IJournalImporter[]
                 {
                     new IfoSoftCsvJournalImporter(),
+                    new IvesExcelJournalImporter(),
                     new UrbisExcelJournalImporter()
                 },
                 new IGeneralLedgerImporter[]
