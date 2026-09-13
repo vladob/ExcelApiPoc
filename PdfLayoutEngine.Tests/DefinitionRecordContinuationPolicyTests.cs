@@ -107,7 +107,7 @@ public sealed class DefinitionRecordContinuationPolicyTests
             Policy(340, 340));
 
         Assert.Equal(3, result.Records.Count);
-        var joined = Assert.Single(result.Records.Where(record => record.CrossesPageBoundary));
+        var joined = Assert.Single(result.Records, record => record.CrossesPageBoundary);
         Assert.Equal("label values", joined.Text);
         Assert.Equal(2, joined.StartPageNumber);
         Assert.Equal(3, joined.EndPageNumber);
