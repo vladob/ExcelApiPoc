@@ -7,11 +7,12 @@ namespace ExcelApiPoc.AddIn.Services
 {
     internal static class RegisterUzFinancialReportSelector
     {
-        private const long SupportedTemplateId = 690;
-
         public static RegisterUzFinancialReportSelection Select(
             AccountingEntityPackageEnvelope envelope,
-            int fiscalYear)
+            int fiscalYear,
+            long financialStatementId,
+            long financialReportId,
+            int templateErpId)
         {
             if (envelope == null)
             {
@@ -33,7 +34,8 @@ namespace ExcelApiPoc.AddIn.Services
                 FinancialStatementDto statement =
                     statementEnvelope.Statement;
 
-                if (!string.Equals(
+                if (statement.Id != financialStatementId ||
+                    !string.Equals(
                         statement.PeriodFrom,
                         expectedPeriodFrom,
                         StringComparison.Ordinal) ||
@@ -51,12 +53,9 @@ namespace ExcelApiPoc.AddIn.Services
                     FinancialReportDto report =
                         reportEnvelope.Report;
 
-                    if (report.TemplateId != SupportedTemplateId)
-                    {
-                        continue;
-                    }
-
-                    if (!reportEnvelope.HasTemplate)
+                    if (report.Id != financialReportId ||
+                        report.TemplateId != templateErpId ||
+                        !reportEnvelope.HasTemplate)
                     {
                         continue;
                     }
@@ -66,10 +65,8 @@ namespace ExcelApiPoc.AddIn.Services
                         {
                             Statement = statementEnvelope,
                             Report = reportEnvelope,
-                            TemplateErpId =
-                                checked((int)SupportedTemplateId),
-                            RegisterUzReportId =
-                                report.Id
+                            TemplateErpId = templateErpId,
+                            RegisterUzReportId = report.Id
                         });
                 }
             }
@@ -77,16 +74,17 @@ namespace ExcelApiPoc.AddIn.Services
             if (candidates.Count == 0)
             {
                 throw new InvalidOperationException(
-                    $"No RegisterUZ financial report with template {SupportedTemplateId} " +
-                    $"was found for fiscal year {fiscalYear}.");
+                    $"The calculation-package API selected RegisterUZ report " +
+                    $"{financialReportId} with template {templateErpId}, but " +
+                    $"that report was not found in the accounting-entity " +
+                    $"package for fiscal year {fiscalYear}.");
             }
 
             if (candidates.Count > 1)
             {
                 throw new InvalidOperationException(
-                    $"Multiple RegisterUZ financial reports with template {SupportedTemplateId} " +
-                    $"were found for fiscal year {fiscalYear}. " +
-                    "Automatic correction-report selection is not implemented yet.");
+                    $"RegisterUZ report {financialReportId} occurred more than " +
+                    "once in the accounting-entity package.");
             }
 
             return candidates[0];
