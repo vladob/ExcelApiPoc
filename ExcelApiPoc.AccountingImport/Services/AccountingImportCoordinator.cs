@@ -59,6 +59,7 @@ namespace ExcelApiPoc.AccountingImport.Services
                 {
                     new IfoSoftCsvGeneralLedgerImporter(),
                     new IvesExcelGeneralLedgerImporter(),
+                    new SoftipMopPdfGeneralLedgerImporter(),
                     new UrbisExcelGeneralLedgerImporter()
                 });
         }
