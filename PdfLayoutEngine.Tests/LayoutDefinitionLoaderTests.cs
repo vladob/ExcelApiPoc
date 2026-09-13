@@ -176,4 +176,71 @@ public sealed class LayoutDefinitionLoaderTests
         Assert.Contains(result.Messages, message => message.Message.Contains("At least one baseline-group condition"));
         Assert.Contains(result.Messages, message => message.Message.Contains("rightAtLeast cannot exceed rightAtMost"));
     }
+
+    [Fact]
+    public void Loads_record_recognition_rule()
+    {
+        const string json = """
+        {
+          "schemaVersion": 1,
+          "id": "sample",
+          "sections": [{ "id": "body" }],
+          "recordRules": [
+            {
+              "id": "candidate",
+              "sectionId": "body",
+              "text": "^value$",
+              "textMatch": "RegularExpression",
+              "minimumTokenCount": 2,
+              "rightAtLeast": 700,
+              "crossesPageBoundary": false
+            }
+          ]
+        }
+        """;
+
+        var result = new LayoutDefinitionLoader().Load(json);
+
+        Assert.True(result.IsValid);
+        var rule = Assert.Single(result.Definition!.RecordRules);
+        Assert.Equal(TextMatchMode.RegularExpression, rule.TextMatch);
+        Assert.Equal(2, rule.MinimumTokenCount);
+        Assert.Equal(700d, rule.RightAtLeast);
+        Assert.False(rule.CrossesPageBoundary!.Value);
+    }
+
+    [Fact]
+    public void Reports_invalid_record_recognition_rules()
+    {
+        const string json = """
+        {
+          "schemaVersion": 1,
+          "id": "sample",
+          "sections": [{ "id": "body" }],
+          "recordRules": [
+            { "id": "same", "sectionId": "missing" },
+            {
+              "id": "same",
+              "sectionId": "body",
+              "text": "[",
+              "textMatch": "RegularExpression",
+              "minimumTokenCount": 3,
+              "maximumTokenCount": 2,
+              "leftAtLeast": 20,
+              "leftAtMost": 10
+            }
+          ]
+        }
+        """;
+
+        var result = new LayoutDefinitionLoader().Load(json);
+
+        Assert.False(result.IsValid);
+        Assert.Contains(result.Messages, message => message.Message.Contains("Duplicate record rule id"));
+        Assert.Contains(result.Messages, message => message.Message.Contains("Unknown section id"));
+        Assert.Contains(result.Messages, message => message.Message.Contains("At least one record matching criterion"));
+        Assert.Contains(result.Messages, message => message.Message.Contains("Invalid regular expression"));
+        Assert.Contains(result.Messages, message => message.Message.Contains("Minimum token count"));
+        Assert.Contains(result.Messages, message => message.Message.Contains("leftAtLeast cannot exceed leftAtMost"));
+    }
 }

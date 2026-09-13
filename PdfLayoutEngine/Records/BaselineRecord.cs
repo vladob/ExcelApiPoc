@@ -30,12 +30,16 @@ public sealed class BaselineRecord
         _continuations = Array.AsReadOnly(continuationArray);
         StartPageNumber = groupArray[0].PageNumber;
         EndPageNumber = groupArray[groupArray.Length - 1].PageNumber;
+        Left = _sourceTokens.Min(token => token.Left);
+        Right = _sourceTokens.Max(token => token.Right);
     }
 
     public string SectionId { get; }
     public int StartPageNumber { get; }
     public int EndPageNumber { get; }
     public bool CrossesPageBoundary => StartPageNumber != EndPageNumber;
+    public double Left { get; }
+    public double Right { get; }
     public IReadOnlyList<BaselineGroup> Groups => _groups;
     public IReadOnlyList<PdfTextToken> SourceTokens => _sourceTokens;
     public IReadOnlyList<RecordContinuationEvidence> Continuations => _continuations;

@@ -14,6 +14,7 @@ public sealed class LayoutDefinition
     public List<SectionDefinition> Sections { get; set; } = new List<SectionDefinition>();
     public List<RecognitionRuleDefinition> Rules { get; set; } = new List<RecognitionRuleDefinition>();
     public List<RecordContinuationDefinition> RecordContinuations { get; set; } = new List<RecordContinuationDefinition>();
+    public List<RecordRecognitionRuleDefinition> RecordRules { get; set; } = new List<RecordRecognitionRuleDefinition>();
 }
 
 public sealed class MatchingDefaults
@@ -58,6 +59,27 @@ public sealed class BaselineGroupConditionDefinition
     public double? LeftAtMost { get; set; }
     public double? RightAtLeast { get; set; }
     public double? RightAtMost { get; set; }
+}
+
+public sealed class RecordRecognitionRuleDefinition
+{
+    public string Id { get; set; } = string.Empty;
+    public string? SectionId { get; set; }
+    public string? Text { get; set; }
+
+    [JsonConverter(typeof(JsonStringEnumConverter))]
+    public TextMatchMode TextMatch { get; set; } = TextMatchMode.Equals;
+
+    public bool IgnoreCase { get; set; }
+    public int? MinimumGroupCount { get; set; }
+    public int? MaximumGroupCount { get; set; }
+    public int? MinimumTokenCount { get; set; }
+    public int? MaximumTokenCount { get; set; }
+    public double? LeftAtLeast { get; set; }
+    public double? LeftAtMost { get; set; }
+    public double? RightAtLeast { get; set; }
+    public double? RightAtMost { get; set; }
+    public bool? CrossesPageBoundary { get; set; }
 }
 
 public sealed class RecognitionRuleDefinition
