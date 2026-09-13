@@ -140,6 +140,129 @@
           "horizontal": { "anchor": "Right", "position": 770 }
         }
       ]
+    },
+    {
+      "recordRuleId": "subtotal-row",
+      "fields": [
+        {
+          "id": "label",
+          "text": "Medzisúčet za  :",
+          "horizontal": { "anchor": "Left", "position": 42.75 }
+        },
+        {
+          "id": "key",
+          "text": "^\\d+$",
+          "textMatch": "RegularExpression",
+          "horizontal": { "anchor": "Left", "position": 112.5 }
+        },
+        {
+          "id": "value-1",
+          "horizontal": { "anchor": "Right", "position": 372 }
+        },
+        {
+          "id": "value-2",
+          "horizontal": { "anchor": "Right", "position": 452 }
+        },
+        {
+          "id": "value-3",
+          "horizontal": { "anchor": "Right", "position": 532 }
+        },
+        {
+          "id": "value-4",
+          "horizontal": { "anchor": "Right", "position": 611 }
+        },
+        {
+          "id": "value-5",
+          "horizontal": { "anchor": "Right", "position": 691 }
+        },
+        {
+          "id": "value-6",
+          "horizontal": { "anchor": "Right", "position": 770 }
+        }
+      ]
+    },
+    {
+      "recordRuleId": "report-total-row",
+      "fields": [
+        {
+          "id": "label",
+          "horizontal": { "anchor": "Left", "position": 22.5 }
+        },
+        {
+          "id": "value-1",
+          "horizontal": { "anchor": "Right", "position": 372 }
+        },
+        {
+          "id": "value-2",
+          "horizontal": { "anchor": "Right", "position": 452 }
+        },
+        {
+          "id": "value-3",
+          "horizontal": { "anchor": "Right", "position": 532 }
+        },
+        {
+          "id": "value-4",
+          "horizontal": { "anchor": "Right", "position": 611 }
+        },
+        {
+          "id": "value-5",
+          "horizontal": { "anchor": "Right", "position": 691 }
+        },
+        {
+          "id": "value-6",
+          "horizontal": { "anchor": "Right", "position": 770 }
+        }
+      ]
+    },
+    {
+      "recordRuleId": "summary-row",
+      "fields": [
+        {
+          "id": "label",
+          "horizontal": { "anchor": "Left", "position": 132.75 }
+        },
+        {
+          "id": "value-1",
+          "horizontal": { "anchor": "Right", "position": 372 }
+        },
+        {
+          "id": "value-2",
+          "horizontal": { "anchor": "Right", "position": 452 }
+        },
+        {
+          "id": "value-3",
+          "horizontal": { "anchor": "Right", "position": 532 }
+        },
+        {
+          "id": "value-4",
+          "horizontal": { "anchor": "Right", "position": 611 }
+        },
+        {
+          "id": "value-5",
+          "horizontal": { "anchor": "Right", "position": 691 }
+        },
+        {
+          "id": "value-6",
+          "horizontal": { "anchor": "Right", "position": 769 }
+        }
+      ]
+    },
+    {
+      "recordRuleId": "signature-row",
+      "fields": [
+        {
+          "id": "label-1",
+          "horizontal": { "anchor": "Left", "position": 30 }
+        },
+        {
+          "id": "label-2",
+          "horizontal": { "anchor": "Left", "position": 212.25 }
+        },
+        {
+          "id": "label-3",
+          "horizontal": { "anchor": "Left", "position": 383.25 }
+        }
+      ]
     }
   ]
 }
