@@ -409,18 +409,6 @@ namespace ExcelApiPoc.AddIn.Forms
 
                 if (generalLedgerImport == null && !journalImport.Rows.Any(row => row.RecordKind == JournalRecordKind.Opening))
                 {
-                    if (string.Equals(
-                            importPackage.AccountingFormat,
-                            "Softip-MOP",
-                            StringComparison.OrdinalIgnoreCase))
-                    {
-                        throw new InvalidOperationException(
-                            "The selected Softip-MOP journals were imported successfully, " +
-                            "but they do not contain opening balances. Creating the audit " +
-                            "workbook requires the corresponding general ledger. Softip-MOP " +
-                            "general-ledger PDF import is not implemented yet.");
-                    }
-
                     throw new InvalidOperationException(
                         "The accounting journal does not contain opening " +
                         "balance records. Select the corresponding general " +
@@ -476,8 +464,20 @@ namespace ExcelApiPoc.AddIn.Forms
                     generalLedgerReconciliation = CanonicalReconciliationAccountSummaryAdapter.Apply(canonicalReconciliation, accountSummaries);
                 }
 
-                AccountFrameworkLoadResult frameworkLoad = AccountFrameworkService.Load("GOV_LOCAL", selectedFiscalYear);
-                ApplicableAccountFrameworkResponse framework = frameworkLoad.Framework;
+                AuditCalculationPackageSelectionResponse calculationSelection =
+                    AuditCalculationPackageSelectionService.Load(
+                        journalImport.Ico,
+                        selectedFiscalYear);
+
+                string selectedFrameworkCode =
+                    calculationSelection.CalculationPackage.FrameworkCode;
+
+                AccountFrameworkLoadResult frameworkLoad =
+                    AccountFrameworkService.Load(
+                        selectedFrameworkCode,
+                        selectedFiscalYear);
+                ApplicableAccountFrameworkResponse framework =
+                    frameworkLoad.Framework;
                 AccountFrameworkEnrichmentResult enrichmentResult = AccountFrameworkEnricher.Enrich(accountSummaries, framework);
                 if (accountingFrameworkImport != null)
                     accountingFrameworkEnrichment = AccountingFrameworkAccountEnricher.Enrich( accountSummaries, accountingFrameworkImport);
@@ -494,7 +494,12 @@ namespace ExcelApiPoc.AddIn.Forms
                     AccountingEntityPackageApiClient.GetEnvelope( journalImport.Ico);
 
                 RegisterUzFinancialReportSelection reportSelection =
-                    RegisterUzFinancialReportSelector.Select(accountingEntityEnvelope, selectedFiscalYear);
+                    RegisterUzFinancialReportSelector.Select(
+                        accountingEntityEnvelope,
+                        selectedFiscalYear,
+                        calculationSelection.FinancialStatementId,
+                        calculationSelection.FinancialReportId,
+                        calculationSelection.RegisterUzTemplateId);
 
                 var reportContext = new AuditReportContext
                     {
