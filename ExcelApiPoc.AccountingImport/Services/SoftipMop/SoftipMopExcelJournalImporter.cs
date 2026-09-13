@@ -15,7 +15,19 @@ namespace ExcelApiPoc.AccountingImport.Services.SoftipMop
         public bool CanImport(string filePath, string accountingFormat)
         {
             if (!string.Equals(accountingFormat, "Softip-MOP", StringComparison.OrdinalIgnoreCase) ||
-                string.IsNullOrWhiteSpace(filePath) ||
+                !TryDetect(filePath, out int _))
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        public static bool TryDetect(string filePath, out int fiscalYear)
+        {
+            fiscalYear = 0;
+
+            if (string.IsNullOrWhiteSpace(filePath) ||
                 !File.Exists(filePath) ||
                 !string.Equals(Path.GetExtension(filePath), ".xlsx", StringComparison.OrdinalIgnoreCase))
             {
@@ -27,12 +39,51 @@ namespace ExcelApiPoc.AccountingImport.Services.SoftipMop
                 using (IExcelDataReader reader = ExcelWorkbookReader.Open(filePath))
                 {
                     if (reader.ResultsCount != 1 || !reader.Read()) return false;
-                    return SoftipMopJournalColumnLayout.TryDiscover(
-                        ReadHeaders(reader), out SoftipMopJournalColumnLayout _, out string _);
+                    if (!SoftipMopJournalColumnLayout.TryDiscover(
+                            ReadHeaders(reader),
+                            out SoftipMopJournalColumnLayout layout,
+                            out string _))
+                    {
+                        return false;
+                    }
+
+                    while (reader.Read())
+                    {
+                        string period = (ExcelWorkbookReader.GetText(
+                            reader,
+                            layout.AccountingPeriod) ?? string.Empty).Trim();
+
+                        if (period.Length == 0)
+                        {
+                            continue;
+                        }
+
+                        if (period.Length != 6 ||
+                            !int.TryParse(
+                                period.Substring(0, 4),
+                                NumberStyles.None,
+                                CultureInfo.InvariantCulture,
+                                out fiscalYear) ||
+                            !int.TryParse(
+                                period.Substring(4, 2),
+                                NumberStyles.None,
+                                CultureInfo.InvariantCulture,
+                                out int month) ||
+                            month < 1 || month > 12)
+                        {
+                            fiscalYear = 0;
+                            return false;
+                        }
+
+                        return true;
+                    }
+
+                    return false;
                 }
             }
             catch
             {
+                fiscalYear = 0;
                 return false;
             }
         }

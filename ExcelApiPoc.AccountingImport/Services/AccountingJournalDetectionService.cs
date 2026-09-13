@@ -1,6 +1,7 @@
 ﻿using ExcelApiPoc.AccountingImport.Models;
 using ExcelApiPoc.AccountingImport.Services.IfoSoft;
 using ExcelApiPoc.AccountingImport.Services.Ives;
+using ExcelApiPoc.AccountingImport.Services.SoftipMop;
 using ExcelApiPoc.AccountingImport.Services.Urbis;
 using System;
 using System.IO;
@@ -25,6 +26,20 @@ namespace ExcelApiPoc.AccountingImport.Services
 
             if (TryDetectIves(filePath, out result))
             {
+                return true;
+            }
+
+            if (SoftipMopExcelJournalImporter.TryDetect(
+                    filePath,
+                    out int softipMopFiscalYear))
+            {
+                result = new JournalDetectionResult
+                {
+                    TechnicalType = "Excel",
+                    AccountingFormat = "Softip-MOP",
+                    FiscalYear = softipMopFiscalYear
+                };
+
                 return true;
             }
 

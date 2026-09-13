@@ -45,6 +45,21 @@ public sealed class AccountingJournalDetectionServiceTests
     }
 
     [Fact]
+    public void TryDetect_DetectsSoftipMopJournalWithoutClaimingSourceIco()
+    {
+        bool detected = AccountingJournalDetectionService.TryDetect(
+            GetSoftipMopFixturePath("Omida dennik 12 2025.xlsx"),
+            out JournalDetectionResult result);
+
+        Assert.True(detected);
+        Assert.NotNull(result);
+        Assert.Equal("Excel", result.TechnicalType);
+        Assert.Equal("Softip-MOP", result.AccountingFormat);
+        Assert.Null(result.Ico);
+        Assert.Equal(2025, result.FiscalYear);
+    }
+
+    [Fact]
     public void TryDetect_DoesNotTreatLedgerAsJournal()
     {
         bool detected = AccountingJournalDetectionService.TryDetect(GetFixturePath("HL_KNIHA_00325791_202412.xls"), out JournalDetectionResult result);
@@ -63,6 +78,16 @@ public sealed class AccountingJournalDetectionServiceTests
             AppContext.BaseDirectory,
             "TestData",
             "Ives",
+            fileName);
+    }
+
+
+    private static string GetSoftipMopFixturePath(string fileName)
+    {
+        return Path.Combine(
+            AppContext.BaseDirectory,
+            "TestData",
+            "SoftipMop",
             fileName);
     }
 }

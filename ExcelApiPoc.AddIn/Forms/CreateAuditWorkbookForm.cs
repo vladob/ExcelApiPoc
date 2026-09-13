@@ -26,6 +26,8 @@ namespace ExcelApiPoc.AddIn.Forms
         private readonly TextBox _fiscalYearTextBox;
         private readonly Button _continueButton;
         private readonly Workbook _auditWorkbook;
+        private readonly List<string> _journalFilePaths = new List<string>();
+        private bool _updatingJournalPathDisplay;
 
         public CreateAuditWorkbookForm(Workbook auditWorkbook)
         {
@@ -118,6 +120,7 @@ namespace ExcelApiPoc.AddIn.Forms
                     "Unknown",
                     "IfoSoft",
                     "IVES",
+                    "Softip-MOP",
                     "Urbis",
                     "MkSoft",
                     "Pohoda"
@@ -202,12 +205,66 @@ namespace ExcelApiPoc.AddIn.Forms
             using (var dialog = CreateOpenFileDialog())
             {
                 dialog.Title = "Select Accounting Journal";
+                dialog.Multiselect = true;
                 if (dialog.ShowDialog() != DialogResult.OK)
                 {
                     return;
                 }
-                _journalPathTextBox.Text = dialog.FileName;
-                ProcessJournalFile(dialog.FileName);
+
+                string[] selectedPaths = dialog.FileNames;
+                if (selectedPaths.Length > 1 &&
+                    !AreSoftipMopJournalFiles(selectedPaths))
+                {
+                    MessageBox.Show(
+                        "Multiple accounting-journal files can currently be selected only for Softip-MOP monthly journals.",
+                        "Select Accounting Journal",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Warning);
+                    return;
+                }
+
+                _journalFilePaths.Clear();
+                _journalFilePaths.AddRange(selectedPaths);
+                UpdateJournalPathDisplay();
+                ProcessJournalFiles(_journalFilePaths);
+            }
+        }
+
+        private static bool AreSoftipMopJournalFiles(
+            IEnumerable<string> filePaths)
+        {
+            foreach (string filePath in filePaths)
+            {
+                if (!AccountingJournalDetectionService.TryDetect(
+                        filePath,
+                        out JournalDetectionResult detection) ||
+                    !string.Equals(
+                        detection.AccountingFormat,
+                        "Softip-MOP",
+                        StringComparison.OrdinalIgnoreCase))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        private void UpdateJournalPathDisplay()
+        {
+            _updatingJournalPathDisplay = true;
+            try
+            {
+                _journalPathTextBox.Text = _journalFilePaths.Count == 1
+                    ? _journalFilePaths[0]
+                    : _journalFilePaths.Count + " files selected: " +
+                        string.Join(
+                            "; ",
+                            _journalFilePaths.Select(Path.GetFileName));
+            }
+            finally
+            {
+                _updatingJournalPathDisplay = false;
             }
         }
 
@@ -254,6 +311,12 @@ namespace ExcelApiPoc.AddIn.Forms
 
         private void JournalPathTextBox_TextChanged(object sender,EventArgs e)
         {
+            if (_updatingJournalPathDisplay)
+            {
+                return;
+            }
+
+            _journalFilePaths.Clear();
             ProcessJournalFile(_journalPathTextBox.Text);
         }
 
@@ -300,11 +363,12 @@ namespace ExcelApiPoc.AddIn.Forms
 
             try
             {
-                string journalPath = _journalPathTextBox.Text.Trim();
+                List<string> journalFilePaths = GetJournalFilePaths();
 
-                if (!File.Exists(journalPath))
+                if (journalFilePaths.Count == 0 ||
+                    journalFilePaths.Any(path => !File.Exists(path)))
                 {
-                    throw new InvalidOperationException("Select a valid accounting journal file.");
+                    throw new InvalidOperationException("Select valid accounting journal files.");
                 }
 
                 string accountsPath = _accountsPathTextBox.Text.Trim();
@@ -325,15 +389,19 @@ namespace ExcelApiPoc.AddIn.Forms
 
                 string selectedIco = _icoTextBox.Text.Trim();
 
-                AccountingImportPackage importPackage = AccountingImportCoordinator.CreateDefault().Import(
-                            new AccountingImportRequest
-                            {
-                                AccountingFormat = _accountingFormatComboBox.Text,
-                                JournalFilePath = journalPath,
-                                GeneralLedgerFilePath = string.IsNullOrWhiteSpace( generalLedgerPath) ? null : generalLedgerPath,
-                                ExpectedIco = selectedIco,
-                                ExpectedFiscalYear = selectedFiscalYear
-                            });
+                var importRequest = new AccountingImportRequest
+                {
+                    AccountingFormat = _accountingFormatComboBox.Text,
+                    JournalFilePath = journalFilePaths[0],
+                    GeneralLedgerFilePath = string.IsNullOrWhiteSpace(
+                        generalLedgerPath) ? null : generalLedgerPath,
+                    ExpectedIco = selectedIco,
+                    ExpectedFiscalYear = selectedFiscalYear
+                };
+                importRequest.JournalFilePaths.AddRange(journalFilePaths);
+
+                AccountingImportPackage importPackage =
+                    AccountingImportCoordinator.CreateDefault().Import(importRequest);
 
                 JournalImport journalImport = importPackage.Journal;
                 GeneralLedgerImport generalLedgerImport = importPackage.GeneralLedger;
@@ -341,6 +409,18 @@ namespace ExcelApiPoc.AddIn.Forms
 
                 if (generalLedgerImport == null && !journalImport.Rows.Any(row => row.RecordKind == JournalRecordKind.Opening))
                 {
+                    if (string.Equals(
+                            importPackage.AccountingFormat,
+                            "Softip-MOP",
+                            StringComparison.OrdinalIgnoreCase))
+                    {
+                        throw new InvalidOperationException(
+                            "The selected Softip-MOP journals were imported successfully, " +
+                            "but they do not contain opening balances. Creating the audit " +
+                            "workbook requires the corresponding general ledger. Softip-MOP " +
+                            "general-ledger PDF import is not implemented yet.");
+                    }
+
                     throw new InvalidOperationException(
                         "The accounting journal does not contain opening " +
                         "balance records. Select the corresponding general " +
@@ -360,7 +440,7 @@ namespace ExcelApiPoc.AddIn.Forms
                             "An entity-specific accounting-framework export " +
                             "is currently supported only for IfoSoft. " +
                             "Leave the Accounting framework field empty for " +
-                            "the current IVES and Urbis imports.");
+                            "the current IVES, Urbis, and Softip-MOP imports.");
                     }
 
                     accountingFrameworkImport = new IfoSoftCsvAccountingFrameworkImporter() .Import(accountsPath);
@@ -407,7 +487,8 @@ namespace ExcelApiPoc.AddIn.Forms
                 decimal totalDebitTurnover = accountSummaries.Sum(account => account.DebitTurnover);
                 decimal totalCreditTurnover = accountSummaries.Sum(account => account.CreditTurnover);
                 decimal journalDifference = totalDebitTurnover - totalCreditTurnover;
-                bool fiscalYearMatches = dateFrom.Year == selectedFiscalYear && dateTo.Year == selectedFiscalYear;
+                bool fiscalYearMatches =
+                    journalImport.FiscalYear == selectedFiscalYear;
 
                 AccountingEntityPackageEnvelope accountingEntityEnvelope =
                     AccountingEntityPackageApiClient.GetEnvelope( journalImport.Ico);
@@ -439,7 +520,7 @@ namespace ExcelApiPoc.AddIn.Forms
                 message.AppendLine($"IČO: {journalImport.Ico}");
 
                 message.AppendLine();
-                message.AppendLine($"Journal period: {dateFrom:yyyy-MM-dd} – {dateTo:yyyy-MM-dd}");
+                message.AppendLine($"Posting-date range: {dateFrom:yyyy-MM-dd} – {dateTo:yyyy-MM-dd}");
                 message.AppendLine($"Selected fiscal year: {selectedFiscalYear}");
                 message.AppendLine($"Fiscal year matches: " + $"{(fiscalYearMatches ? "Yes" : "No")}");
 
@@ -602,6 +683,34 @@ namespace ExcelApiPoc.AddIn.Forms
 
             SelectTechnicalType(path);
             DetectJournalInformation(path);
+        }
+
+        private void ProcessJournalFiles(IReadOnlyList<string> filePaths)
+        {
+            bool filesExist = filePaths != null &&
+                filePaths.Count > 0 &&
+                filePaths.All(File.Exists);
+
+            _continueButton.Enabled = filesExist;
+            if (!filesExist)
+            {
+                return;
+            }
+
+            ProcessJournalFile(filePaths[0]);
+        }
+
+        private List<string> GetJournalFilePaths()
+        {
+            if (_journalFilePaths.Count > 0)
+            {
+                return new List<string>(_journalFilePaths);
+            }
+
+            string path = _journalPathTextBox.Text.Trim();
+            return path.Length == 0
+                ? new List<string>()
+                : new List<string> { path };
         }
     }
 }
