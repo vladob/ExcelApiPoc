@@ -106,6 +106,16 @@
       "recordRuleId": "account-row",
       "fields": [
         {
+          "id": "key",
+          "text": "^\\d{5}$",
+          "textMatch": "RegularExpression",
+          "horizontal": { "anchor": "Left", "position": 22.5 }
+        },
+        {
+          "id": "label",
+          "horizontal": { "anchor": "Left", "position": 81 }
+        },
+        {
           "id": "value-1",
           "horizontal": { "anchor": "Right", "position": 372 }
         },
