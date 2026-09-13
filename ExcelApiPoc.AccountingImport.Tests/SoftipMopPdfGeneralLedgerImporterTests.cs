@@ -1,3 +1,5 @@
+using ExcelApiPoc.AccountingImport.Models;
+using ExcelApiPoc.AccountingImport.Services;
 using ExcelApiPoc.AccountingImport.Services.SoftipMop;
 using iText.IO.Font.Constants;
 using iText.Kernel.Font;
@@ -68,6 +70,62 @@ public sealed class SoftipMopPdfGeneralLedgerImporterTests
             if (Directory.Exists(directory))
                 Directory.Delete(directory, true);
         }
+    }
+
+    [Fact]
+    public void Default_coordinator_routes_softip_pdf_general_ledger()
+    {
+        string directory = Path.Combine(
+            Path.GetTempPath(),
+            "SoftipMopPdfCoordinatorTests",
+            Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(directory);
+        string ledgerPath = Path.Combine(
+            directory,
+            "HL_KNIHA_31715362_2025.pdf");
+
+        try
+        {
+            CreatePdf(ledgerPath);
+
+            AccountingImportPackage result =
+                AccountingImportCoordinator
+                    .CreateDefault()
+                    .Import(
+                        new AccountingImportRequest
+                        {
+                            AccountingFormat = "Softip-MOP",
+                            JournalFilePaths = new[]
+                            {
+                                GetFixturePath(
+                                    "Omida dennik 01 2025.xlsx")
+                            },
+                            GeneralLedgerFilePath = ledgerPath,
+                            ExpectedIco = "31715362",
+                            ExpectedFiscalYear = 2025
+                        });
+
+            Assert.Equal("Softip-MOP", result.AccountingFormat);
+            Assert.NotNull(result.Journal);
+            Assert.NotNull(result.GeneralLedger);
+            Assert.Single(result.GeneralLedger.Rows);
+            Assert.True(result.HasGeneralLedger);
+            Assert.NotNull(result.JournalLedgerReconciliation);
+        }
+        finally
+        {
+            if (Directory.Exists(directory))
+                Directory.Delete(directory, true);
+        }
+    }
+
+    private static string GetFixturePath(string fileName)
+    {
+        return Path.Combine(
+            AppContext.BaseDirectory,
+            "TestData",
+            "SoftipMop",
+            fileName);
     }
 
     private static void CreatePdf(string path)
