@@ -95,7 +95,7 @@ public sealed class SoftipMopPdfGeneralLedgerImporterTests
                         new AccountingImportRequest
                         {
                             AccountingFormat = "Softip-MOP",
-                            JournalFilePaths = new[]
+                            JournalFilePaths =
                             {
                                 GetFixturePath(
                                     "Omida dennik 01 2025.xlsx")
