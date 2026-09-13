@@ -28,11 +28,26 @@ public sealed class SoftipMopGeneralLedgerLayoutTests
             },
             definition.RecordRules.Select(rule => rule.Id));
         Assert.Single(definition.RecordContinuations);
-        var fieldSet = Assert.Single(definition.RecordFields);
-        Assert.Equal("account-row", fieldSet.RecordRuleId);
         Assert.Equal(
-            new[] { "key", "label", "value-1", "value-2", "value-3", "value-4", "value-5", "value-6" },
-            fieldSet.Fields.Select(field => field.Id));
+            new[]
+            {
+                "account-row",
+                "subtotal-row",
+                "report-total-row",
+                "summary-row",
+                "signature-row"
+            },
+            definition.RecordFields.Select(fieldSet => fieldSet.RecordRuleId));
+        AssertFieldIds(definition, "account-row",
+            "key", "label", "value-1", "value-2", "value-3", "value-4", "value-5", "value-6");
+        AssertFieldIds(definition, "subtotal-row",
+            "label", "key", "value-1", "value-2", "value-3", "value-4", "value-5", "value-6");
+        AssertFieldIds(definition, "report-total-row",
+            "label", "value-1", "value-2", "value-3", "value-4", "value-5", "value-6");
+        AssertFieldIds(definition, "summary-row",
+            "label", "value-1", "value-2", "value-3", "value-4", "value-5", "value-6");
+        AssertFieldIds(definition, "signature-row",
+            "label-1", "label-2", "label-3");
     }
 
     [Fact]
@@ -69,9 +84,9 @@ public sealed class SoftipMopGeneralLedgerLayoutTests
             new[] { subtotalLabel, subtotalValues },
             new[] { continuation });
         var signature = Record(Group(13, 400,
-            Token(13, "Vypracoval", 132, 190),
-            Token(13, "Schválil", 350, 400),
-            Token(13, "Dátum", 650, 700)));
+            Token(13, "Vypracoval", 30, 69.6),
+            Token(13, "Schválil", 212.25, 239.8),
+            Token(13, "Dátum", 383.25, 406.8)));
         var reportTotal = SevenTokenRecord(12, "Spolu", 22.5);
         var summary = SevenTokenRecord(13, "Hospodársky výsledok", 132.7);
         var unsupportedSummary = Record(Group(13, 450,
@@ -87,12 +102,40 @@ public sealed class SoftipMopGeneralLedgerLayoutTests
             RuleMatchStatus.Unmatched,
             matcher.Match(unsupportedSummary, definition.RecordRules).Status);
 
+        AssertFields(definition, "account-row", account, 8);
+        AssertFields(definition, "subtotal-row", subtotal, 8);
+        AssertFields(definition, "report-total-row", reportTotal, 7);
+        AssertFields(definition, "summary-row", summary, 7);
+        AssertFields(definition, "signature-row", signature, 3);
+    }
+
+    private static void AssertFieldIds(
+        LayoutDefinition definition,
+        string recordRuleId,
+        params string[] expectedIds)
+    {
+        var fieldSet = Assert.Single(
+            definition.RecordFields,
+            item => item.RecordRuleId == recordRuleId);
+        Assert.Equal(expectedIds, fieldSet.Fields.Select(field => field.Id));
+    }
+
+    private static void AssertFields(
+        LayoutDefinition definition,
+        string recordRuleId,
+        BaselineRecord record,
+        int expectedCount)
+    {
+        var fieldSet = Assert.Single(
+            definition.RecordFields,
+            item => item.RecordRuleId == recordRuleId);
         var fields = new BaselineRecordFieldMatcher().Match(
-            account,
-            Assert.Single(definition.RecordFields),
+            record,
+            fieldSet,
             definition.Defaults);
+        Assert.Equal(expectedCount, fields.Count);
         Assert.All(fields, field => Assert.Equal(RuleMatchStatus.Matched, field.Status));
-        Assert.Equal(8, fields.Count);
+        Assert.All(fields, field => Assert.Single(field.Value!.Evidence.SourceTokens));
     }
 
     private static void AssertMatch(string ruleId, BaselineRecordRuleMatchResult result)
