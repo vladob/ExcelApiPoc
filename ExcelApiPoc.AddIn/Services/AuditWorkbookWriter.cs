@@ -74,6 +74,7 @@ namespace ExcelApiPoc.AddIn.Services
             IReadOnlyList<AccountSummary> accountSummaries,
             AccountingFrameworkImport accountingFrameworkImport,
             GeneralLedgerImport generalLedgerImport,
+            AccountingEntityPackageEnvelope accountingEntityPackage,
             Exception calculationFailure)
         {
             AddSourceDataWorksheets(
@@ -83,11 +84,21 @@ namespace ExcelApiPoc.AddIn.Services
                 accountingFrameworkImport,
                 generalLedgerImport);
 
+            if (accountingEntityPackage != null)
+            {
+                RegisterUzReportsWorksheetWriter.AddWorksheet(
+                    workbook, accountingEntityPackage);
+
+                RegisterUzAttachmentsWorksheetWriter.AddWorksheet(
+                    workbook, accountingEntityPackage);
+            }
+
             NoCalculationReportWorksheetWriter.AddWorksheet(
                 workbook,
                 journalImport,
                 accountingFrameworkImport,
                 generalLedgerImport,
+                accountingEntityPackage,
                 calculationFailure);
 
             return workbook;
