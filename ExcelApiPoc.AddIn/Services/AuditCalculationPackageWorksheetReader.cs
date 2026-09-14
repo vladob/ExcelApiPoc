@@ -25,8 +25,17 @@ namespace ExcelApiPoc.AddIn.Services
                     MfSpecification = AuditWorkbookTableReader.GetString(metadata, "MfSpecification"),
                     ValidFrom = AuditWorkbookTableReader.GetNullableDateTime(metadata, "ValidFrom"),
                     ValidTo = AuditWorkbookTableReader.GetNullableDateTime(metadata, "ValidTo"),
-                    CreateMultiYear = AuditWorkbookTableReader.GetBoolean(metadata, "CreateMultiYear"),
-                    MultiYearWorksheetName = AuditWorkbookTableReader.GetString(metadata, "MultiYearWorksheetName"),
+                    CreateMultiYear =
+                        metadata.ContainsKey("CreateMultiYear") &&
+                        AuditWorkbookTableReader.GetBoolean(
+                            metadata,
+                            "CreateMultiYear"),
+                    MultiYearWorksheetName =
+                        metadata.ContainsKey("MultiYearWorksheetName")
+                            ? AuditWorkbookTableReader.GetString(
+                                metadata,
+                                "MultiYearWorksheetName")
+                            : null,
                     AccountingModel = AuditWorkbookTableReader.GetString(metadata, "AccountingModel"),
                     Tables = tables
                 },
