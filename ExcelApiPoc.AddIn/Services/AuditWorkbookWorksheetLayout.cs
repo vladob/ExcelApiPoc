@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Excel = Microsoft.Office.Interop.Excel;
 
 namespace ExcelApiPoc.AddIn.Services
@@ -98,6 +99,35 @@ namespace ExcelApiPoc.AddIn.Services
                 }
 
                 previous = worksheet;
+            }
+
+            PlaceMultiYearWorksheets(workbook);
+        }
+
+        private static void PlaceMultiYearWorksheets(
+            Excel.Workbook workbook)
+        {
+            Excel.Worksheet anchor =
+                FindWorksheet(workbook, "RegisterUZ Attachments") ??
+                FindWorksheet(workbook, "RegisterUZ Reports") ??
+                FindWorksheet(workbook, "No Calculation Report");
+
+            if (anchor == null)
+                return;
+
+            Excel.Worksheet[] multiYearWorksheets =
+                workbook.Worksheets
+                    .Cast<Excel.Worksheet>()
+                    .Where(worksheet => worksheet.Name.StartsWith(
+                        "Multi-year ",
+                        StringComparison.OrdinalIgnoreCase))
+                    .OrderBy(worksheet => worksheet.Name)
+                    .ToArray();
+
+            foreach (Excel.Worksheet worksheet in multiYearWorksheets)
+            {
+                worksheet.Tab.Color = AuditWorkColor;
+                worksheet.Move(Before: anchor);
             }
         }
 
