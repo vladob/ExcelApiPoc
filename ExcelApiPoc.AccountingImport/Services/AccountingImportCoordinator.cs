@@ -73,6 +73,9 @@ namespace ExcelApiPoc.AccountingImport.Services
 
             ValidateJournal(journal, request);
 
+            CalculatedGeneralLedger calculatedGeneralLedger =
+                CalculatedGeneralLedgerBuilder.Build(journal);
+
             GeneralLedgerImport generalLedger = null;
 
             JournalLedgerReconciliationResult reconciliation = null;
@@ -114,6 +117,7 @@ namespace ExcelApiPoc.AccountingImport.Services
                 ExportStage = journal.ExportStage,
                 Journal = journal,
                 GeneralLedger = generalLedger,
+                CalculatedGeneralLedger = calculatedGeneralLedger,
                 JournalLedgerReconciliation = reconciliation
             };
         }
