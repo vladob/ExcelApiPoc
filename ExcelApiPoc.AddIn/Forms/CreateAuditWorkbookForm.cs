@@ -405,7 +405,10 @@ namespace ExcelApiPoc.AddIn.Forms
 
                 JournalImport journalImport = importPackage.Journal;
                 GeneralLedgerImport generalLedgerImport = importPackage.GeneralLedger;
-                JournalLedgerReconciliationResult canonicalReconciliation = importPackage.JournalLedgerReconciliation;
+                CalculatedGeneralLedger calculatedGeneralLedger =
+                    importPackage.CalculatedGeneralLedger;
+                JournalLedgerReconciliationResult canonicalReconciliation =
+                    importPackage.JournalLedgerReconciliation;
 
                 if (generalLedgerImport == null && !journalImport.Rows.Any(row => row.RecordKind == JournalRecordKind.Opening))
                 {
@@ -499,6 +502,8 @@ namespace ExcelApiPoc.AddIn.Forms
                         _auditWorkbook,
                         journalImport,
                         accountSummaries,
+                        calculatedGeneralLedger,
+                        canonicalReconciliation,
                         accountingFrameworkImport,
                         generalLedgerImport,
                         accountingEntityEnvelope,
@@ -662,6 +667,8 @@ namespace ExcelApiPoc.AddIn.Forms
                     _auditWorkbook,
                     journalImport,
                     accountSummaries,
+                    calculatedGeneralLedger,
+                    canonicalReconciliation,
                     frameworkLoad,
                     analyticalMapping,
                     templatePackage,
