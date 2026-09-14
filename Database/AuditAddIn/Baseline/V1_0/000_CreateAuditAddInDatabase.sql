@@ -140,9 +140,12 @@ CREATE TABLE [Template].[Templates]
     [MfSpecification] nvarchar(500) NULL,
     [ValidFrom] date NULL,
     [ValidTo] date NULL,
+    [CreateMultiYear] bit NOT NULL CONSTRAINT [DF_Template_Templates_CreateMultiYear] DEFAULT (0),
+    [MultiYearWorksheetName] nvarchar(31) NULL,
     CONSTRAINT [PK_Template_Templates] PRIMARY KEY CLUSTERED ([Id]),
     CONSTRAINT [UQ_Template_Templates_ErpId] UNIQUE ([ErpId]),
-    CONSTRAINT [CK_Template_Templates_Dates] CHECK ([ValidFrom] IS NULL OR [ValidTo] IS NULL OR [ValidTo] >= [ValidFrom])
+    CONSTRAINT [CK_Template_Templates_Dates] CHECK ([ValidFrom] IS NULL OR [ValidTo] IS NULL OR [ValidTo] >= [ValidFrom]),
+    CONSTRAINT [CK_Template_Templates_MultiYear] CHECK ([CreateMultiYear] = 0 OR NULLIF(LTRIM(RTRIM([MultiYearWorksheetName])), N'') IS NOT NULL)
 );
 GO
 

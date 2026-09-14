@@ -18,6 +18,8 @@ public sealed class AuditTemplateDefinition
     public string? MfSpecification { get; init; }
     public DateOnly? ValidFrom { get; init; }
     public DateOnly? ValidTo { get; init; }
+    public bool CreateMultiYear { get; init; }
+    public string? MultiYearWorksheetName { get; init; }
     public string? AccountingModel { get; init; }
     public IReadOnlyList<AuditReportTableDefinition> Tables { get; init; } = Array.Empty<AuditReportTableDefinition>();
 }

@@ -21,6 +21,8 @@ public sealed class AuditTemplatePackageRepository
                 t.[MfSpecification],
                 t.[ValidFrom],
                 t.[ValidTo],
+                t.[CreateMultiYear],
+                t.[MultiYearWorksheetName],
                 (
                     SELECT
                         CASE WHEN COUNT(DISTINCT ccv.[AccountingModelCode]) = 1
@@ -156,7 +158,9 @@ public sealed class AuditTemplatePackageRepository
         string? mfSpecification = reader.IsDBNull(2) ? null : reader.GetString(2);
         DateOnly? validFrom = reader.IsDBNull(3) ? null : DateOnly.FromDateTime(reader.GetDateTime(3));
         DateOnly? validTo = reader.IsDBNull(4) ? null : DateOnly.FromDateTime(reader.GetDateTime(4));
-        string? accountingModel = reader.IsDBNull(5) ? null : reader.GetString(5);
+        bool createMultiYear = !reader.IsDBNull(5) && reader.GetBoolean(5);
+        string? multiYearWorksheetName = reader.IsDBNull(6) ? null : reader.GetString(6);
+        string? accountingModel = reader.IsDBNull(7) ? null : reader.GetString(7);
         var tables = new List<AuditReportTableDefinition>();
         var headersByTable = new Dictionary<int, List<AuditReportHeaderDefinition>>();
         var rowsByTable = new Dictionary<int, List<AuditReportRowDefinition>>();
@@ -299,6 +303,8 @@ public sealed class AuditTemplatePackageRepository
                 MfSpecification = mfSpecification,
                 ValidFrom = validFrom,
                 ValidTo = validTo,
+                CreateMultiYear = createMultiYear,
+                MultiYearWorksheetName = multiYearWorksheetName,
                 AccountingModel = accountingModel,
                 Tables = tables
             },
@@ -465,7 +471,8 @@ public sealed class AuditTemplatePackageRepository
             WHERE [m].[TemplateFrameworkVersionId] = @TemplateFrameworkVersionId
               AND [tr].[RowNumber] IS NULL;
 
-            SELECT [t].[ErpId], [t].[Name_sk] AS [Name], [t].[MfSpecification], [t].[ValidFrom], [t].[ValidTo]
+            SELECT [t].[ErpId], [t].[Name_sk] AS [Name], [t].[MfSpecification], [t].[ValidFrom], [t].[ValidTo],
+                   [t].[CreateMultiYear], [t].[MultiYearWorksheetName]
             FROM [Template].[Templates] AS [t]
             WHERE [t].[ErpId] = @TemplateErpId;
 
@@ -561,6 +568,8 @@ public sealed class AuditTemplatePackageRepository
         string? mfSpecification = reader.IsDBNull(2) ? null : reader.GetString(2);
         DateOnly? validFrom = reader.IsDBNull(3) ? null : DateOnly.FromDateTime(reader.GetDateTime(3));
         DateOnly? validTo = reader.IsDBNull(4) ? null : DateOnly.FromDateTime(reader.GetDateTime(4));
+        bool createMultiYear = !reader.IsDBNull(5) && reader.GetBoolean(5);
+        string? multiYearWorksheetName = reader.IsDBNull(6) ? null : reader.GetString(6);
         var tables = new List<AuditReportTableDefinition>();
         var headersByTable = new Dictionary<int, List<AuditReportHeaderDefinition>>();
         var rowsByTable = new Dictionary<int, List<AuditReportRowDefinition>>();
@@ -692,6 +701,8 @@ public sealed class AuditTemplatePackageRepository
                 MfSpecification = mfSpecification,
                 ValidFrom = validFrom,
                 ValidTo = validTo,
+                CreateMultiYear = createMultiYear,
+                MultiYearWorksheetName = multiYearWorksheetName,
                 AccountingModel = resolution.AccountingModelCode,
                 Tables = tables
             },
