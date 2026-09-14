@@ -93,6 +93,12 @@ namespace ExcelApiPoc.AddIn.Services
                     workbook, accountingEntityPackage);
             }
 
+            ImportMetadataWorksheetWriter.AddWithoutCalculation(
+                workbook,
+                journalImport,
+                accountingFrameworkImport,
+                generalLedgerImport);
+
             NoCalculationReportWorksheetWriter.AddWorksheet(
                 workbook,
                 journalImport,
