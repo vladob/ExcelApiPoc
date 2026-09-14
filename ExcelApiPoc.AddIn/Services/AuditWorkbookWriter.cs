@@ -56,7 +56,7 @@ namespace ExcelApiPoc.AddIn.Services
             RegisterUzReportsWorksheetWriter.AddWorksheet(
                 workbook, accountingEntityPackage);
 
-            MultiYearBalanceSheetWorksheetWriter.AddWorksheet(
+            MultiYearBalanceSheetWorksheetWriter.AddWorksheets(
                 workbook, accountingEntityPackage);
 
             RegisterUzAttachmentsWorksheetWriter.AddWorksheet(
@@ -105,6 +105,9 @@ namespace ExcelApiPoc.AddIn.Services
             if (accountingEntityPackage != null)
             {
                 RegisterUzReportsWorksheetWriter.AddWorksheet(
+                    workbook, accountingEntityPackage);
+
+                MultiYearBalanceSheetWorksheetWriter.AddWorksheets(
                     workbook, accountingEntityPackage);
 
                 RegisterUzAttachmentsWorksheetWriter.AddWorksheet(
