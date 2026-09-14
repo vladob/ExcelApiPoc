@@ -15,10 +15,21 @@ namespace ExcelApiPoc.AddIn
     [ComVisible(true)]
     public class PocRibbon : ExcelRibbon
     {
+        private const string RegisterUzReportsWorksheetName =
+            "RegisterUZ Reports";
+        private const string RegisterUzReportsTableName =
+            "RegisterUzReports";
+        private const string OpenRegisterUzReportControlId =
+            "buttonOpenRegisterUzReport";
+
+        private IRibbonUI _ribbon;
+        private bool _applicationEventsSubscribed;
+
         public override string GetCustomUI(string ribbonId)
         {
             return @"
-<customUI xmlns='http://schemas.microsoft.com/office/2009/07/customui'>
+<customUI xmlns='http://schemas.microsoft.com/office/2009/07/customui'
+          onLoad='OnRibbonLoad'>
   <ribbon>
     <tabs>
       <tab id='tabExcelApiPoc' label='API PoC'>
@@ -30,30 +41,120 @@ namespace ExcelApiPoc.AddIn
                 imageMso='FileNew'
                 onAction='OnCreateAuditWorkbook'/>
             <button
+                id='buttonSettings'
+                label='Settings'
+                size='large'
+                imageMso='ApplicationOptionsDialog'
+                onAction='OnSettings'/>
+        </group>
+        <group id='groupAnalysis' label='Analysis'>
+            <button
                 id='buttonRecalculateAuditReport'
                 label='Recalculate Report'
                 size='large'
-                imageMso='RefreshAll'
+                imageMso='CalculateSheet'
                 onAction='OnRecalculateAuditReport'/>
+        </group>
+        <group id='groupRegisterUz' label='RegisterUZ'>
             <button
                 id='buttonOpenRegisterUzReport'
                 label='Open RegisterUZ Report'
                 size='large'
-                imageMso='FileOpen'
-                onAction='OnOpenRegisterUzReport'/>
-        </group>
-        <group id='groupTools' label='Tools'>
-            <button
-                id='buttonSettings'
-                label='Settings'
-                size='large'
-                imageMso='FileProperties'
-                onAction='OnSettings'/>
+                imageMso='FieldChooser'
+                onAction='OnOpenRegisterUzReport'
+                getEnabled='GetOpenRegisterUzReportEnabled'/>
         </group>
       </tab>
     </tabs>
   </ribbon>
 </customUI>";
+        }
+
+        public void OnRibbonLoad(IRibbonUI ribbon)
+        {
+            _ribbon = ribbon;
+
+            if (_applicationEventsSubscribed)
+                return;
+
+            Excel.Application application =
+                (Excel.Application)ExcelDnaUtil.Application;
+            application.SheetSelectionChange += OnSheetSelectionChange;
+            application.SheetActivate += OnSheetActivate;
+            application.WorkbookActivate += OnWorkbookActivate;
+            _applicationEventsSubscribed = true;
+        }
+
+        public bool GetOpenRegisterUzReportEnabled(IRibbonControl control)
+        {
+            _ = control;
+
+            try
+            {
+                Excel.Application application =
+                    (Excel.Application)ExcelDnaUtil.Application;
+                Excel.Worksheet worksheet =
+                    application.ActiveSheet as Excel.Worksheet;
+
+                if (worksheet == null ||
+                    !string.Equals(
+                        worksheet.Name,
+                        RegisterUzReportsWorksheetName,
+                        StringComparison.Ordinal))
+                    return false;
+
+                Excel.ListObject table = null;
+                foreach (Excel.ListObject candidate in worksheet.ListObjects)
+                {
+                    if (string.Equals(
+                            candidate.Name,
+                            RegisterUzReportsTableName,
+                            StringComparison.OrdinalIgnoreCase))
+                    {
+                        table = candidate;
+                        break;
+                    }
+                }
+
+                Excel.Range data = table?.DataBodyRange;
+                Excel.Range activeCell =
+                    application.ActiveCell as Excel.Range;
+
+                return data != null &&
+                    activeCell != null &&
+                    activeCell.Row >= data.Row &&
+                    activeCell.Row < data.Row + data.Rows.Count &&
+                    activeCell.Column >= data.Column &&
+                    activeCell.Column < data.Column + data.Columns.Count;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        private void OnSheetSelectionChange(object sheet, Excel.Range target)
+        {
+            _ = sheet;
+            _ = target;
+            InvalidateOpenRegisterUzReport();
+        }
+
+        private void OnSheetActivate(object sheet)
+        {
+            _ = sheet;
+            InvalidateOpenRegisterUzReport();
+        }
+
+        private void OnWorkbookActivate(Excel.Workbook workbook)
+        {
+            _ = workbook;
+            InvalidateOpenRegisterUzReport();
+        }
+
+        private void InvalidateOpenRegisterUzReport()
+        {
+            _ribbon?.InvalidateControl(OpenRegisterUzReportControlId);
         }
 
         public void OnSettings(IRibbonControl control)

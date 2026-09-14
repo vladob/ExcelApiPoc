@@ -119,7 +119,7 @@ namespace ExcelApiPoc.AddIn.Services
             values[HeaderRow - 1, 1] = "Designation";
             values[HeaderRow - 1, 2] = "Description";
             values[HeaderRow - 1, 3] = "Row number";
-            values[HeaderRow - 1, HasDataColumn - 1] = "Has data";
+            values[HeaderRow - 1, HasDataColumn - 1] = "data";
 
             for (int yearIndex = 0;
                  yearIndex < balanceSheet.FiscalYears.Count;
@@ -236,7 +236,7 @@ namespace ExcelApiPoc.AddIn.Services
                 sumRow.Font.Bold = true;
             }
 
-            data.Rows.RowHeight = 15;
+            data.Rows.RowHeight = 30;
             header.Rows.AutoFit();
         }
 
