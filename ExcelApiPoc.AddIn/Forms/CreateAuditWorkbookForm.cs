@@ -464,6 +464,10 @@ namespace ExcelApiPoc.AddIn.Forms
                     generalLedgerReconciliation = CanonicalReconciliationAccountSummaryAdapter.Apply(canonicalReconciliation, accountSummaries);
                 }
 
+                AccountingEntityPackageEnvelope accountingEntityEnvelope =
+                    AccountingEntityPackageApiClient.GetEnvelope(
+                        journalImport.Ico);
+
                 AuditCalculationPackageSelectionResponse calculationSelection;
 
                 try
@@ -497,14 +501,16 @@ namespace ExcelApiPoc.AddIn.Forms
                         accountSummaries,
                         accountingFrameworkImport,
                         generalLedgerImport,
+                        accountingEntityEnvelope,
                         calculationFailure);
 
                     MessageBox.Show(
                         "The accounting data was imported successfully, but " +
                         "a calculation report could not be created.\r\n\r\n" +
                         "The Accounting Journal, Account Summary, General " +
-                        "Ledger, and provided Accounting Framework are " +
-                        "available in the workbook.\r\n\r\n" +
+                        "Ledger, provided Accounting Framework, RegisterUZ " +
+                        "reports, and attachments are available in the " +
+                        "workbook.\r\n\r\n" +
                         calculationFailure.Message,
                         "Calculation Report Unavailable",
                         MessageBoxButtons.OK,
@@ -535,9 +541,6 @@ namespace ExcelApiPoc.AddIn.Forms
                 decimal journalDifference = totalDebitTurnover - totalCreditTurnover;
                 bool fiscalYearMatches =
                     journalImport.FiscalYear == selectedFiscalYear;
-
-                AccountingEntityPackageEnvelope accountingEntityEnvelope =
-                    AccountingEntityPackageApiClient.GetEnvelope( journalImport.Ico);
 
                 RegisterUzFinancialReportSelection reportSelection =
                     RegisterUzFinancialReportSelector.Select(
