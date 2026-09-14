@@ -28,7 +28,9 @@ namespace ExcelApiPoc.AddIn.Services
                     After: workbook.Worksheets[workbook.Worksheets.Count]);
             worksheet.Name = WorksheetName;
 
-            worksheet.Cells[1, 1] = "Calculation report unavailable";
+            Excel.Range titleCell =
+                (Excel.Range)worksheet.Cells[1, 1];
+            titleCell.Value2 = "Calculation report unavailable";
             Excel.Range title = worksheet.Range["A1:B1"];
             title.Merge();
             title.Font.Bold = true;
@@ -89,10 +91,16 @@ namespace ExcelApiPoc.AddIn.Services
                     ? 0
                     : accountingFrameworkImport.Rows.Count);
 
-            worksheet.Columns[1].ColumnWidth = 28;
-            worksheet.Columns[2].ColumnWidth = 100;
-            worksheet.Columns[2].WrapText = true;
-            worksheet.Rows.AutoFit();
+            Excel.Range labelColumn =
+                (Excel.Range)worksheet.Columns[1];
+            Excel.Range valueColumn =
+                (Excel.Range)worksheet.Columns[2];
+            Excel.Range rows = (Excel.Range)worksheet.Rows;
+
+            labelColumn.ColumnWidth = 28;
+            valueColumn.ColumnWidth = 100;
+            valueColumn.WrapText = true;
+            rows.AutoFit();
             worksheet.Activate();
 
             return worksheet;
