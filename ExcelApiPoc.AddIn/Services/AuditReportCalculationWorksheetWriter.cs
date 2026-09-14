@@ -61,13 +61,24 @@ namespace ExcelApiPoc.AddIn.Services
 
             Excel.ListObject table = FindTable(workbook);
 
+            Excel.Worksheet result;
+
             if (table != null)
             {
                 Refresh(table, calculation, reconciliation);
-                return (Excel.Worksheet)table.Parent;
+                result = (Excel.Worksheet)table.Parent;
+            }
+            else
+            {
+                result = Create(
+                    workbook,
+                    package,
+                    calculation,
+                    reconciliation);
             }
 
-            return Create(workbook, package, calculation, reconciliation);
+            AuditWorkbookWorksheetLayout.Apply(workbook);
+            return result;
         }
 
         private static void Refresh(
