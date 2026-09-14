@@ -14,6 +14,7 @@ namespace ExcelApiPoc.AddIn.Services
             JournalImport journalImport,
             AccountingFrameworkImport accountingFrameworkImport,
             GeneralLedgerImport generalLedgerImport,
+            AccountingEntityPackageEnvelope accountingEntityPackage,
             Exception calculationFailure)
         {
             if (workbook == null)
@@ -90,6 +91,28 @@ namespace ExcelApiPoc.AddIn.Services
                 accountingFrameworkImport == null
                     ? 0
                     : accountingFrameworkImport.Rows.Count);
+
+            WriteValue(
+                worksheet,
+                21,
+                "RegisterUZ financial reports",
+                accountingEntityPackage == null
+                    ? 0
+                    : accountingEntityPackage.FinancialReportCount);
+            WriteValue(
+                worksheet,
+                22,
+                "RegisterUZ annual-report attachments",
+                accountingEntityPackage == null
+                    ? 0
+                    : accountingEntityPackage.AnnualReportAttachmentCount);
+            WriteValue(
+                worksheet,
+                23,
+                "RegisterUZ financial-report attachments",
+                accountingEntityPackage == null
+                    ? 0
+                    : accountingEntityPackage.FinancialReportAttachmentCount);
 
             Excel.Range labelColumn =
                 (Excel.Range)worksheet.Columns[1];
