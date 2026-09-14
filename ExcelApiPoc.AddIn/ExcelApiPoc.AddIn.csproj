@@ -270,6 +270,7 @@
     <Compile Include="Services\JournalWorksheetWriter.cs" />
     <Compile Include="Services\MultiYearBalanceSheetBuilder.cs" />
     <Compile Include="Services\MultiYearBalanceSheetWorksheetWriter.cs" />
+    <Compile Include="Services\NoCalculationReportWorksheetWriter.cs" />
     <Compile Include="Services\RegisterUzAttachmentsWorksheetBuilder.cs" />
     <Compile Include="Services\RegisterUzAttachmentsWorksheetWriter.cs" />
     <Compile Include="Services\RegisterUzFinancialReportSelector.cs" />
