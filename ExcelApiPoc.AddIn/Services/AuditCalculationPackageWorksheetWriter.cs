@@ -51,6 +51,7 @@ namespace ExcelApiPoc.AddIn.Services
             {
                 "ContractVersion", "GeneratedAtUtc", "TemplateErpId",
                 "TemplateName", "MfSpecification", "ValidFrom", "ValidTo",
+                "CreateMultiYear", "MultiYearWorksheetName",
                 "AccountingModel", "Ico", "FiscalYear", "SelectionSource",
                 "RegisterUzReportId", "RetrievalSource", "CachePath",
                 "FrameworkCode", "FrameworkVersionCode",
@@ -68,6 +69,8 @@ namespace ExcelApiPoc.AddIn.Services
                     package.Template.MfSpecification,
                     package.Template.ValidFrom,
                     package.Template.ValidTo,
+                    package.Template.CreateMultiYear,
+                    package.Template.MultiYearWorksheetName,
                     package.Template.AccountingModel,
                     reportContext.Ico,
                     reportContext.FiscalYear,
@@ -81,7 +84,13 @@ namespace ExcelApiPoc.AddIn.Services
                     package.ApplicableDate
                 }
             };
-            AddTable(worksheet, ref nextRow, "__TemplatePackage", headers, rows, new[] { 4, 5, 8, 9, 11, 12, 13, 14, 15, 16, 17 });
+            AddTable(
+                worksheet,
+                ref nextRow,
+                "__TemplatePackage",
+                headers,
+                rows,
+                new[] { 4, 5, 9, 10, 11, 13, 14, 15, 16, 17, 18, 19 });
         }
 
         private static void AddReportTablesTable(Excel.Worksheet worksheet, ref int nextRow, AuditTemplatePackageResponse package)
