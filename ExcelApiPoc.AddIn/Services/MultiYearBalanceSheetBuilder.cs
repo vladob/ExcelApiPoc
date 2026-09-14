@@ -174,7 +174,8 @@ namespace ExcelApiPoc.AddIn.Services
 
             int descriptiveCount =
                 table.NumberOfColumns.Value - dataCount;
-            var candidates = new List<int>();
+            var currentCandidates = new List<int>();
+            var previousCandidates = new List<int>();
 
             foreach (AuditReportHeaderDefinitionResponse header in
                 table.Headers ??
@@ -182,8 +183,10 @@ namespace ExcelApiPoc.AddIn.Services
             {
                 string text = NormalizeHeaderText(
                     FirstNonEmpty(header.TextSk, header.TextEn));
+                bool isCurrent = IsCurrentPeriodHeader(text);
+                bool isPrevious = IsPreviousPeriodHeader(text);
 
-                if (!IsCurrentPeriodHeader(text))
+                if (!isCurrent && !isPrevious)
                     continue;
 
                 int first = header.ColumnPosition - 1;
@@ -192,29 +195,51 @@ namespace ExcelApiPoc.AddIn.Services
                 for (int column = first; column <= last; column++)
                 {
                     int ordinal = column - descriptiveCount;
-                    if (ordinal >= 0 && ordinal < dataCount)
-                        candidates.Add(ordinal);
+                    if (ordinal < 0 || ordinal >= dataCount)
+                        continue;
+
+                    if (isCurrent)
+                        currentCandidates.Add(ordinal);
+                    if (isPrevious)
+                        previousCandidates.Add(ordinal);
                 }
             }
 
-            if (candidates.Count == 0)
-                throw new InvalidOperationException(
-                    $"Template table {table.TableErpId} has {dataCount} " +
-                    "data columns, but its current-period value column " +
-                    "could not be identified from the headers.");
+            if (previousCandidates.Count > 0)
+            {
+                int firstPreviousColumn = previousCandidates.Min();
+                if (firstPreviousColumn > 0)
+                    return firstPreviousColumn - 1;
+            }
 
-            return candidates.Max();
+            if (currentCandidates.Count > 0)
+                return currentCandidates.Max();
+
+            throw new InvalidOperationException(
+                $"Template table {table.TableErpId} has {dataCount} " +
+                "data columns, but its current-period value column " +
+                "could not be identified from the headers.");
         }
 
         private static bool IsCurrentPeriodHeader(string text)
         {
-            if (text.Contains("PREDCHADZAJUCE"))
+            if (IsPreviousPeriodHeader(text))
                 return false;
 
             return text.Contains("BEZNE UCTOVNE OBDOBIE") ||
                    text.Contains("BEZNE OBDOBIE") ||
                    text.Contains("CURRENT ACCOUNTING PERIOD") ||
-                   text.Contains("CURRENT PERIOD");
+                   text.Contains("CURRENT PERIOD") ||
+                   text.Contains("20XX");
+        }
+
+        private static bool IsPreviousPeriodHeader(string text)
+        {
+            return text.Contains("PREDCHADZAJUCE") ||
+                   text.Contains("PREVIOUS ACCOUNTING PERIOD") ||
+                   text.Contains("PREVIOUS PERIOD") ||
+                   text.Contains("20XX-1") ||
+                   text.Contains("20XX - 1");
         }
 
         private static string NormalizeHeaderText(string value)
