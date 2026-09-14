@@ -12,6 +12,8 @@ namespace ExcelApiPoc.AddIn.Services
             Excel.Workbook workbook,
             JournalImport journalImport,
             IReadOnlyList<AccountSummary> accountSummaries,
+            CalculatedGeneralLedger calculatedGeneralLedger,
+            JournalLedgerReconciliationResult journalLedgerReconciliation,
             AccountFrameworkLoadResult frameworkLoad,
             AnalyticalMappingData analyticalMapping,
             AuditTemplatePackageResponse templatePackage,
@@ -29,6 +31,11 @@ namespace ExcelApiPoc.AddIn.Services
                     accountSummaries,
                     accountingFrameworkImport,
                     generalLedgerImport);
+
+            CalculatedGeneralLedgerComparisonWorksheetWriter.AddWorksheet(
+                workbook,
+                calculatedGeneralLedger,
+                journalLedgerReconciliation);
 
             if (analyticalMapping != null && analyticalMapping.Rows.Count > 0)
             {
@@ -72,6 +79,8 @@ namespace ExcelApiPoc.AddIn.Services
             Excel.Workbook workbook,
             JournalImport journalImport,
             IReadOnlyList<AccountSummary> accountSummaries,
+            CalculatedGeneralLedger calculatedGeneralLedger,
+            JournalLedgerReconciliationResult journalLedgerReconciliation,
             AccountingFrameworkImport accountingFrameworkImport,
             GeneralLedgerImport generalLedgerImport,
             AccountingEntityPackageEnvelope accountingEntityPackage,
@@ -83,6 +92,11 @@ namespace ExcelApiPoc.AddIn.Services
                 accountSummaries,
                 accountingFrameworkImport,
                 generalLedgerImport);
+
+            CalculatedGeneralLedgerComparisonWorksheetWriter.AddWorksheet(
+                workbook,
+                calculatedGeneralLedger,
+                journalLedgerReconciliation);
 
             if (accountingEntityPackage != null)
             {
