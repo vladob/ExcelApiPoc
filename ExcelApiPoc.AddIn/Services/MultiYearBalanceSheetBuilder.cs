@@ -3,277 +3,267 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Text;
 
 namespace ExcelApiPoc.AddIn.Services
 {
     internal static class MultiYearBalanceSheetBuilder
     {
-        private const long SupportedTemplateId = 690;
-        private const int FirstSupportedFiscalYear = 2014;
-        private const int AssetsTableOrdinal = 0;
-        private const int LiabilitiesTableOrdinal = 1;
-        private const int AssetsFirstRowNumber = 1;
-        private const int AssetsLastRowNumber = 114;
-        private const int LiabilitiesFirstRowNumber = 115;
-        private const int LiabilitiesLastRowNumber = 183;
-
-        // RegisterUZ data-column ordinals are zero-based. These correspond to
-        // official balance-sheet columns 3 (assets Netto) and 5 (liabilities).
-        private const int AssetsNetDataColumnOrdinal = 2;
-        private const int LiabilitiesNetDataColumnOrdinal = 0;
-
-        public static MultiYearBalanceSheet Build(
+        public static IReadOnlyList<MultiYearBalanceSheet> BuildAll(
             AccountingEntityPackageEnvelope package)
         {
             if (package == null)
                 throw new ArgumentNullException(nameof(package));
 
-            List<YearlyReport> reports = SelectYearlyReports(package);
+            var candidates = new List<YearlyReport>();
 
-            if (reports.Count == 0)
+            foreach (FinancialReportEnvelope report in package.ReportsById.Values)
             {
-                throw new InvalidOperationException(
-                    "No RegisterUZ financial report with template 690 was found.");
+                if (!report.Report.TemplateId.HasValue ||
+                    !report.HasTemplate ||
+                    report.Template.Template == null ||
+                    !report.Template.Template.CreateMultiYear)
+                    continue;
+
+                if (!TryGetFiscalYear(report, out int fiscalYear))
+                    continue;
+
+                candidates.Add(new YearlyReport
+                {
+                    TemplateErpId = report.Template.Template.TemplateErpId,
+                    FiscalYear = fiscalYear,
+                    Report = report,
+                    SortDate = GetReportSortDate(report)
+                });
             }
 
-            YearlyReport newest = reports[0];
-            AuditTemplatePackageResponse template = newest.Report.Template;
+            var result = new List<MultiYearBalanceSheet>();
 
-            AuditReportTableDefinitionResponse assetsTemplate =
-                GetTemplateTable(template, AssetsTableOrdinal);
-            AuditReportTableDefinitionResponse liabilitiesTemplate =
-                GetTemplateTable(template, LiabilitiesTableOrdinal);
+            foreach (IGrouping<int, YearlyReport> group in candidates
+                .GroupBy(x => x.TemplateErpId)
+                .OrderBy(x => x.Key))
+            {
+                List<YearlyReport> reports = group
+                    .GroupBy(x => x.FiscalYear)
+                    .Select(year => year
+                        .OrderByDescending(x => x.SortDate)
+                        .ThenByDescending(x => x.Report.Report.Id)
+                        .First())
+                    .OrderByDescending(x => x.FiscalYear)
+                    .ToList();
 
-            List<LayoutRow> layout = new List<LayoutRow>();
-            layout.AddRange(BuildLayoutRows(
-                assetsTemplate,
-                AssetsTableOrdinal,
-                AssetsFirstRowNumber,
-                AssetsLastRowNumber,
-                AssetsNetDataColumnOrdinal));
-            layout.AddRange(BuildLayoutRows(
-                liabilitiesTemplate,
-                LiabilitiesTableOrdinal,
-                LiabilitiesFirstRowNumber,
-                LiabilitiesLastRowNumber,
-                LiabilitiesNetDataColumnOrdinal));
+                if (reports.Count >= 2)
+                    result.Add(Build(package, reports));
+            }
 
-            ValidateContinuousRowNumbers(layout);
+            return result;
+        }
 
-            var valuesByReport = new Dictionary<int, IReadOnlyDictionary<string, decimal>>();
+        private static MultiYearBalanceSheet Build(
+            AccountingEntityPackageEnvelope package,
+            IReadOnlyList<YearlyReport> reports)
+        {
+            AuditTemplateDefinitionResponse template =
+                reports[0].Report.Template.Template;
+
+            if (string.IsNullOrWhiteSpace(template.MultiYearWorksheetName))
+                throw new InvalidOperationException(
+                    $"Template {template.TemplateErpId} enables multi-year " +
+                    "reporting but does not define a worksheet name.");
+
+            var layout = new List<LayoutRow>();
+
+            foreach (AuditReportTableDefinitionResponse table in
+                (template.Tables ??
+                    Array.Empty<AuditReportTableDefinitionResponse>())
+                .OrderBy(x => x.TableOrdinal))
+            {
+                int valueColumn =
+                    ResolveCurrentPeriodDataColumnOrdinal(table);
+
+                foreach (AuditReportRowDefinitionResponse row in
+                    (table.Rows ??
+                        Array.Empty<AuditReportRowDefinitionResponse>())
+                    .Where(x => x.RowNumber.HasValue)
+                    .OrderBy(x => x.RowOrdinal))
+                {
+                    layout.Add(new LayoutRow
+                    {
+                        TableOrdinal = table.TableOrdinal,
+                        RowOrdinal = row.RowOrdinal,
+                        DataColumnOrdinal = valueColumn,
+                        TableName = FirstNonEmpty(
+                            table.NameSk,
+                            table.NameEn,
+                            "Table " + table.TableErpId),
+                        TemplateRow = row
+                    });
+                }
+            }
+
+            if (layout.Count == 0)
+                throw new InvalidOperationException(
+                    $"Template {template.TemplateErpId} does not contain " +
+                    "numbered report rows.");
+
+            var reportValues =
+                new Dictionary<int, IReadOnlyDictionary<string, decimal>>();
 
             foreach (YearlyReport report in reports)
-            {
-                valuesByReport.Add(
+                reportValues.Add(
                     report.FiscalYear,
                     BuildValueIndex(report.Report));
-            }
 
-            List<MultiYearBalanceSheetRow> rows =
-                new List<MultiYearBalanceSheetRow>(layout.Count);
+            var rows = new List<MultiYearBalanceSheetRow>(layout.Count);
 
             foreach (LayoutRow layoutRow in layout)
             {
-                var valuesByYear = new Dictionary<int, decimal>();
+                var values = new Dictionary<int, decimal>();
 
                 foreach (YearlyReport report in reports)
-                {
-                    decimal value;
-                    if (valuesByReport[report.FiscalYear].TryGetValue(
-                            ValueKey(
-                                layoutRow.TableOrdinal,
-                                layoutRow.RowOrdinal,
-                                layoutRow.DataColumnOrdinal),
-                            out value))
-                    {
-                        valuesByYear.Add(report.FiscalYear, value);
-                    }
-                }
+                    if (reportValues[report.FiscalYear].TryGetValue(
+                        ValueKey(
+                            layoutRow.TableOrdinal,
+                            layoutRow.RowOrdinal,
+                            layoutRow.DataColumnOrdinal),
+                        out decimal value))
+                        values.Add(report.FiscalYear, value);
 
-                rows.Add(
-                    new MultiYearBalanceSheetRow
-                    {
-                        Designation = layoutRow.TemplateRow.Designation,
-                        Description = layoutRow.TemplateRow.TextSk,
-                        RowNumber = layoutRow.TemplateRow.RowNumber.Value,
-                        IsSumRow = layoutRow.TemplateRow.IsSumRow,
-                        HasData = GetHasDataValue(valuesByYear.Values),
-                        ValuesByFiscalYear = valuesByYear
-                    });
+                rows.Add(new MultiYearBalanceSheetRow
+                {
+                    ReportTable = layoutRow.TableName,
+                    Designation = layoutRow.TemplateRow.Designation,
+                    Description = layoutRow.TemplateRow.TextSk,
+                    RowNumber = layoutRow.TemplateRow.RowNumber.Value,
+                    IsSumRow = layoutRow.TemplateRow.IsSumRow,
+                    HasData = GetHasDataValue(values.Values),
+                    ValuesByFiscalYear = values
+                });
             }
 
             return new MultiYearBalanceSheet
             {
                 Entity = package.Entity,
-                TemplateName = template.Template?.Name ?? string.Empty,
+                TemplateErpId = template.TemplateErpId,
+                TemplateName = template.Name ?? string.Empty,
+                WorksheetName = template.MultiYearWorksheetName.Trim(),
                 FiscalYears = reports.Select(x => x.FiscalYear).ToArray(),
                 Rows = rows
             };
         }
 
-        private static int? GetHasDataValue(
-            IEnumerable<decimal> values)
+        private static int ResolveCurrentPeriodDataColumnOrdinal(
+            AuditReportTableDefinitionResponse table)
         {
-            bool hasValue = false;
-
-            foreach (decimal value in values)
-            {
-                hasValue = true;
-
-                if (value != 0m)
-                    return 1;
-            }
-
-            return hasValue ? (int?)0 : null;
-        }
-
-        private static List<YearlyReport> SelectYearlyReports(
-            AccountingEntityPackageEnvelope package)
-        {
-            var candidates = new List<YearlyReport>();
-
-            foreach (FinancialReportEnvelope report in package.ReportsById.Values)
-            {
-                if (report.Report.TemplateId != SupportedTemplateId ||
-                    !report.HasTemplate)
-                {
-                    continue;
-                }
-
-                int fiscalYear;
-                if (!TryGetFiscalYear(report, out fiscalYear))
-                    continue;
-
-                if (fiscalYear < FirstSupportedFiscalYear)
-                    continue;
-
-                candidates.Add(
-                    new YearlyReport
-                    {
-                        FiscalYear = fiscalYear,
-                        Report = report,
-                        SortDate = GetReportSortDate(report)
-                    });
-            }
-
-            return candidates
-                .GroupBy(x => x.FiscalYear)
-                .Select(group => group
-                    .OrderByDescending(x => x.SortDate)
-                    .ThenByDescending(x => x.Report.Report.Id)
-                    .First())
-                .OrderByDescending(x => x.FiscalYear)
-                .ToList();
-        }
-
-        private static IEnumerable<LayoutRow> BuildLayoutRows(
-            AuditReportTableDefinitionResponse table,
-            int tableOrdinal,
-            int firstRowNumber,
-            int lastRowNumber,
-            int dataColumnOrdinal)
-        {
-            AuditReportRowDefinitionResponse[] rows = table.Rows ??
-                Array.Empty<AuditReportRowDefinitionResponse>();
-
-            foreach (AuditReportRowDefinitionResponse row
-                     in rows.OrderBy(x => x.RowOrdinal))
-            {
-                if (!row.RowNumber.HasValue ||
-                    row.RowNumber.Value < firstRowNumber ||
-                    row.RowNumber.Value > lastRowNumber)
-                {
-                    continue;
-                }
-
-                yield return new LayoutRow
-                {
-                    TableOrdinal = tableOrdinal,
-                    RowOrdinal = row.RowOrdinal,
-                    DataColumnOrdinal = dataColumnOrdinal,
-                    TemplateRow = row
-                };
-            }
-        }
-
-        private static void ValidateContinuousRowNumbers(
-            IReadOnlyList<LayoutRow> rows)
-        {
-            int expectedCount = LiabilitiesLastRowNumber;
-
-            if (rows.Count != expectedCount)
-            {
+            if (!table.NumberOfColumns.HasValue ||
+                !table.NumberOfDataColumns.HasValue ||
+                table.NumberOfDataColumns.Value <= 0)
                 throw new InvalidOperationException(
-                    $"Template 690 balance-sheet layout contains {rows.Count} rows; " +
-                    $"{expectedCount} rows were expected.");
-            }
+                    $"Template table {table.TableErpId} does not define " +
+                    "a valid data-column layout.");
 
-            for (int index = 0; index < rows.Count; index++)
+            int dataCount = table.NumberOfDataColumns.Value;
+            if (dataCount == 1)
+                return 0;
+
+            int descriptiveCount =
+                table.NumberOfColumns.Value - dataCount;
+            var candidates = new List<int>();
+
+            foreach (AuditReportHeaderDefinitionResponse header in
+                table.Headers ??
+                    Array.Empty<AuditReportHeaderDefinitionResponse>())
             {
-                int expectedRowNumber = index + 1;
-                if (rows[index].TemplateRow.RowNumber != expectedRowNumber)
+                string text = NormalizeHeaderText(
+                    FirstNonEmpty(header.TextSk, header.TextEn));
+
+                if (!IsCurrentPeriodHeader(text))
+                    continue;
+
+                int first = header.ColumnPosition - 1;
+                int last = first + Math.Max(header.ColumnSpan, 1) - 1;
+
+                for (int column = first; column <= last; column++)
                 {
-                    throw new InvalidOperationException(
-                        "Template 690 balance-sheet row order is not continuous at " +
-                        $"row number {expectedRowNumber}.");
+                    int ordinal = column - descriptiveCount;
+                    if (ordinal >= 0 && ordinal < dataCount)
+                        candidates.Add(ordinal);
                 }
             }
+
+            if (candidates.Count == 0)
+                throw new InvalidOperationException(
+                    $"Template table {table.TableErpId} has {dataCount} " +
+                    "data columns, but its current-period value column " +
+                    "could not be identified from the headers.");
+
+            return candidates.Max();
         }
 
-        private static AuditReportTableDefinitionResponse GetTemplateTable(
-            AuditTemplatePackageResponse template,
-            int tableOrdinal)
+        private static bool IsCurrentPeriodHeader(string text)
         {
-            AuditReportTableDefinitionResponse[] matches =
-                (template.Template?.Tables ??
-                    Array.Empty<AuditReportTableDefinitionResponse>())
-                .Where(x => x.TableOrdinal == tableOrdinal)
-                .ToArray();
+            if (text.Contains("PREDCHADZAJUCE"))
+                return false;
 
-            if (matches.Length != 1)
-            {
-                throw new InvalidOperationException(
-                    $"Template 690 must contain exactly one table with ordinal " +
-                    $"{tableOrdinal}; found {matches.Length}.");
-            }
+            return text.Contains("BEZNE UCTOVNE OBDOBIE") ||
+                   text.Contains("BEZNE OBDOBIE") ||
+                   text.Contains("CURRENT ACCOUNTING PERIOD") ||
+                   text.Contains("CURRENT PERIOD");
+        }
 
-            return matches[0];
+        private static string NormalizeHeaderText(string value)
+        {
+            string decomposed =
+                (value ?? string.Empty).Normalize(NormalizationForm.FormD);
+            var result = new StringBuilder(decomposed.Length);
+
+            foreach (char character in decomposed)
+                if (CharUnicodeInfo.GetUnicodeCategory(character) !=
+                    UnicodeCategory.NonSpacingMark)
+                    result.Append(char.ToUpperInvariant(character));
+
+            return result.ToString().Normalize(NormalizationForm.FormC);
         }
 
         private static IReadOnlyDictionary<string, decimal> BuildValueIndex(
             FinancialReportEnvelope report)
         {
-            var result = new Dictionary<string, decimal>(StringComparer.Ordinal);
+            var result =
+                new Dictionary<string, decimal>(StringComparer.Ordinal);
 
             foreach (FinancialReportTableEnvelope table in report.Tables)
-            {
-                int tableOrdinal = table.Table.TableOrdinal;
-                if (tableOrdinal != AssetsTableOrdinal &&
-                    tableOrdinal != LiabilitiesTableOrdinal)
-                {
-                    continue;
-                }
-
                 foreach (FinancialReportValueDto value in table.Values)
                 {
                     string key = ValueKey(
-                        tableOrdinal,
+                        table.Table.TableOrdinal,
                         value.RowOrdinal,
                         value.DataColumnOrdinal);
 
                     if (result.ContainsKey(key))
-                    {
                         throw new InvalidOperationException(
-                            $"RegisterUZ report {report.Report.Id} contains duplicate " +
-                            $"value for table {tableOrdinal}, row {value.RowOrdinal}, " +
-                            $"data column {value.DataColumnOrdinal}.");
-                    }
+                            $"RegisterUZ report {report.Report.Id} contains " +
+                            $"duplicate value for table " +
+                            $"{table.Table.TableOrdinal}, row " +
+                            $"{value.RowOrdinal}, data column " +
+                            $"{value.DataColumnOrdinal}.");
 
                     result.Add(key, value.NumericValue);
                 }
-            }
 
             return result;
+        }
+
+        private static int? GetHasDataValue(IEnumerable<decimal> values)
+        {
+            bool hasValue = false;
+            foreach (decimal value in values)
+            {
+                hasValue = true;
+                if (value != 0m)
+                    return 1;
+            }
+
+            return hasValue ? (int?)0 : null;
         }
 
         private static bool TryGetFiscalYear(
@@ -308,10 +298,8 @@ namespace ExcelApiPoc.AddIn.Services
             };
 
             foreach (DateTime? date in dates)
-            {
                 if (date.HasValue && date.Value > result)
                     result = date.Value;
-            }
 
             return result;
         }
@@ -329,31 +317,26 @@ namespace ExcelApiPoc.AddIn.Services
         private static string FirstNonEmpty(params string[] values)
         {
             foreach (string value in values)
-            {
                 if (!string.IsNullOrWhiteSpace(value))
                     return value.Trim();
-            }
 
             return string.Empty;
         }
 
         private sealed class YearlyReport
         {
+            public int TemplateErpId { get; set; }
             public int FiscalYear { get; set; }
-
             public FinancialReportEnvelope Report { get; set; }
-
             public DateTime SortDate { get; set; }
         }
 
         private sealed class LayoutRow
         {
             public int TableOrdinal { get; set; }
-
             public int RowOrdinal { get; set; }
-
             public int DataColumnOrdinal { get; set; }
-
+            public string TableName { get; set; }
             public AuditReportRowDefinitionResponse TemplateRow { get; set; }
         }
     }
