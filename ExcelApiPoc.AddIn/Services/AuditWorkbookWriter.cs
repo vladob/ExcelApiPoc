@@ -1,5 +1,6 @@
 using ExcelApiPoc.AccountingImport.Models;
 using ExcelApiPoc.AddIn.Models;
+using System;
 using System.Collections.Generic;
 using Excel = Microsoft.Office.Interop.Excel;
 
@@ -22,17 +23,12 @@ namespace ExcelApiPoc.AddIn.Services
             GeneralLedgerImport generalLedgerImport)
         {
             Excel.Worksheet journalWorksheet =
-                JournalWorksheetWriter.AddWorksheet(workbook, journalImport);
-
-            AccountWorksheetWriter.AddWorksheet(workbook, accountSummaries);
-
-            if (accountingFrameworkImport != null)
-                AccountingFrameworkWorksheetWriter.AddWorksheet(
-                    workbook, accountingFrameworkImport);
-
-            if (generalLedgerImport != null)
-                GeneralLedgerWorksheetWriter.AddWorksheet(
-                    workbook, generalLedgerImport);
+                AddSourceDataWorksheets(
+                    workbook,
+                    journalImport,
+                    accountSummaries,
+                    accountingFrameworkImport,
+                    generalLedgerImport);
 
             if (analyticalMapping != null && analyticalMapping.Rows.Count > 0)
             {
@@ -70,6 +66,58 @@ namespace ExcelApiPoc.AddIn.Services
 
             journalWorksheet.Activate();
             return workbook;
+        }
+
+        public static Excel.Workbook CreateWithoutCalculation(
+            Excel.Workbook workbook,
+            JournalImport journalImport,
+            IReadOnlyList<AccountSummary> accountSummaries,
+            AccountingFrameworkImport accountingFrameworkImport,
+            GeneralLedgerImport generalLedgerImport,
+            Exception calculationFailure)
+        {
+            AddSourceDataWorksheets(
+                workbook,
+                journalImport,
+                accountSummaries,
+                accountingFrameworkImport,
+                generalLedgerImport);
+
+            NoCalculationReportWorksheetWriter.AddWorksheet(
+                workbook,
+                journalImport,
+                accountingFrameworkImport,
+                generalLedgerImport,
+                calculationFailure);
+
+            return workbook;
+        }
+
+        private static Excel.Worksheet AddSourceDataWorksheets(
+            Excel.Workbook workbook,
+            JournalImport journalImport,
+            IReadOnlyList<AccountSummary> accountSummaries,
+            AccountingFrameworkImport accountingFrameworkImport,
+            GeneralLedgerImport generalLedgerImport)
+        {
+            Excel.Worksheet journalWorksheet =
+                JournalWorksheetWriter.AddWorksheet(workbook, journalImport);
+
+            AccountWorksheetWriter.AddWorksheet(workbook, accountSummaries);
+
+            if (accountingFrameworkImport != null)
+            {
+                AccountingFrameworkWorksheetWriter.AddWorksheet(
+                    workbook, accountingFrameworkImport);
+            }
+
+            if (generalLedgerImport != null)
+            {
+                GeneralLedgerWorksheetWriter.AddWorksheet(
+                    workbook, generalLedgerImport);
+            }
+
+            return journalWorksheet;
         }
     }
 }
