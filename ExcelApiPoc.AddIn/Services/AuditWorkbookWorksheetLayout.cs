@@ -18,7 +18,9 @@ namespace ExcelApiPoc.AddIn.Services
             "GL Comparison",
             "Analytical Mapping",
             "Calculation Results",
+            "Multi-year Income Statement",
             "Multi-year Balance Sheet",
+            "Multi-year Balance & Income",
             "RegisterUZ Attachments",
             "RegisterUZ Reports",
             "No Calculation Report"
@@ -42,7 +44,9 @@ namespace ExcelApiPoc.AddIn.Services
                 {
                     "Analytical Mapping",
                     "Calculation Results",
-                    "Multi-year Balance Sheet"
+                    "Multi-year Income Statement",
+                    "Multi-year Balance Sheet",
+                    "Multi-year Balance & Income"
                 },
                 StringComparer.OrdinalIgnoreCase);
 
@@ -95,6 +99,15 @@ namespace ExcelApiPoc.AddIn.Services
 
                 previous = worksheet;
             }
+        }
+
+        public static void ApplyAuditWorkColor(
+            Excel.Worksheet worksheet)
+        {
+            if (worksheet == null)
+                throw new ArgumentNullException(nameof(worksheet));
+
+            worksheet.Tab.Color = AuditWorkColor;
         }
 
         public static void ApplyRegisterUzEvidenceColor(
