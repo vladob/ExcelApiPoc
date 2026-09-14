@@ -179,12 +179,16 @@ namespace ExcelApiPoc.AddIn.Services
 
             if (journal != null)
             {
-                row.CalculatedOpeningDebit = journal.OpeningDebit;
-                row.CalculatedOpeningCredit = journal.OpeningCredit;
                 row.CalculatedDebitTurnover = journal.DebitTurnover;
                 row.CalculatedCreditTurnover = journal.CreditTurnover;
-                row.CalculatedClosingDebit = journal.ClosingDebit;
-                row.CalculatedClosingCredit = journal.ClosingCredit;
+
+                if (openingAvailable)
+                {
+                    row.CalculatedOpeningDebit = journal.OpeningDebit;
+                    row.CalculatedOpeningCredit = journal.OpeningCredit;
+                    row.CalculatedClosingDebit = journal.ClosingDebit;
+                    row.CalculatedClosingCredit = journal.ClosingCredit;
+                }
             }
 
             if (ledger != null && ledger.HasGeneralLedgerAccount)
