@@ -1,4 +1,5 @@
 using ExcelApiPoc.AccountingImport.Models;
+using ExcelApiPoc.AddIn.Models;
 using ExcelDna.Integration;
 using System;
 using System.Collections.Generic;
@@ -17,6 +18,10 @@ namespace ExcelApiPoc.AddIn.Services
         private static readonly string[] Headers =
         {
             "AccountCode",
+            "AccountName",
+            "AccountNameSource",
+            "SyntheticAccountCode",
+            "SyntheticAccountName",
             "OpeningAvailableFromJournal",
             "CalculatedOpeningDebit",
             "CalculatedOpeningCredit",
@@ -24,7 +29,6 @@ namespace ExcelApiPoc.AddIn.Services
             "CalculatedCreditTurnover",
             "CalculatedClosingDebit",
             "CalculatedClosingCredit",
-            "GeneralLedgerAccountName",
             "GeneralLedgerOpeningDebit",
             "GeneralLedgerOpeningCredit",
             "GeneralLedgerDebitTurnover",
@@ -35,15 +39,17 @@ namespace ExcelApiPoc.AddIn.Services
             "OpeningCreditDifference",
             "DebitTurnoverDifference",
             "CreditTurnoverDifference",
-            "ClosingDebitDifference",
-            "ClosingCreditDifference",
+            "CalculatedNetClosingBalance",
+            "GeneralLedgerNetClosingBalance",
+            "ClosingBalanceDifference",
             "Status"
         };
 
         public static Excel.Worksheet AddWorksheet(
             Excel.Workbook workbook,
             CalculatedGeneralLedger calculated,
-            JournalLedgerReconciliationResult reconciliation)
+            JournalLedgerReconciliationResult reconciliation,
+            IReadOnlyList<AccountSummary> accountSummaries)
         {
             if (workbook == null)
                 throw new ArgumentNullException(nameof(workbook));
@@ -61,7 +67,10 @@ namespace ExcelApiPoc.AddIn.Services
 
             sheet.Name = WorksheetName;
 
-            List<Row> rows = BuildRows(calculated, reconciliation);
+            List<Row> rows = BuildRows(
+                calculated,
+                reconciliation,
+                accountSummaries);
             int lastRow = HeaderRow + rows.Count;
 
             Excel.Range first = (Excel.Range)sheet.Cells[HeaderRow, 1];
@@ -77,7 +86,7 @@ namespace ExcelApiPoc.AddIn.Services
 
                 ((Excel.Range)data.Columns[1]).NumberFormat = "@";
 
-                for (int column = 3; column <= 21; column++)
+                for (int column = 7; column <= 25; column++)
                 {
                     ((Excel.Range)data.Columns[column]).NumberFormat =
                         "#,##0.00;[Red]-#,##0.00";
@@ -105,12 +114,12 @@ namespace ExcelApiPoc.AddIn.Services
                 Excel.Range target = (Excel.Range)sheet.Columns[column];
                 target.ColumnWidth = Math.Min(
                     Convert.ToDouble(target.ColumnWidth) + 2,
-                    column == 9 ? 40 : 24);
+                    column == 2 || column == 5 ? 40 : 24);
             }
 
             sheet.Activate();
             application.ActiveWindow.SplitRow = HeaderRow;
-            application.ActiveWindow.SplitColumn = 2;
+            application.ActiveWindow.SplitColumn = 5;
             application.ActiveWindow.FreezePanes = true;
 
             if (previous is Excel.Worksheet previousSheet)
@@ -121,11 +130,21 @@ namespace ExcelApiPoc.AddIn.Services
 
         private static List<Row> BuildRows(
             CalculatedGeneralLedger calculated,
-            JournalLedgerReconciliationResult reconciliation)
+            JournalLedgerReconciliationResult reconciliation,
+            IReadOnlyList<AccountSummary> accountSummaries)
         {
             var calculatedByCode = calculated.Rows.ToDictionary(
                 row => row.AccountCode,
                 StringComparer.Ordinal);
+
+            var summariesByCode =
+                (accountSummaries ?? Array.Empty<AccountSummary>())
+                    .Where(summary => summary != null)
+                    .GroupBy(summary => summary.AccountCode, StringComparer.Ordinal)
+                    .ToDictionary(
+                        group => group.Key,
+                        group => group.First(),
+                        StringComparer.Ordinal);
 
             var reconciledByCode =
                 reconciliation == null
@@ -151,6 +170,9 @@ namespace ExcelApiPoc.AddIn.Services
                 reconciledByCode.TryGetValue(
                     accountCode,
                     out JournalLedgerAccountReconciliation ledger);
+                summariesByCode.TryGetValue(
+                    accountCode,
+                    out AccountSummary summary);
 
                 result.Add(
                     CreateRow(
@@ -158,6 +180,7 @@ namespace ExcelApiPoc.AddIn.Services
                         calculated.JournalContainsOpeningRecords,
                         journal,
                         ledger,
+                        summary,
                         reconciliation != null));
             }
 
@@ -169,13 +192,18 @@ namespace ExcelApiPoc.AddIn.Services
             bool openingAvailable,
             CalculatedGeneralLedgerRow journal,
             JournalLedgerAccountReconciliation ledger,
+            AccountSummary summary,
             bool hasImportedLedger)
         {
             var row = new Row
             {
                 AccountCode = accountCode,
+                SyntheticAccountCode = summary?.SyntheticAccountCode,
+                SyntheticAccountName = summary?.FrameworkAccountName,
                 OpeningAvailable = openingAvailable && journal != null
             };
+
+            ResolveAccountName(row, summary, ledger);
 
             if (journal != null)
             {
@@ -194,8 +222,6 @@ namespace ExcelApiPoc.AddIn.Services
             if (ledger != null && ledger.HasGeneralLedgerAccount)
             {
                 row.HasImportedLedgerAccount = true;
-                row.GeneralLedgerAccountName =
-                    ledger.GeneralLedgerAccountName;
                 row.GeneralLedgerOpeningDebit =
                     ledger.LedgerOpeningDebit;
                 row.GeneralLedgerOpeningCredit =
@@ -251,24 +277,57 @@ namespace ExcelApiPoc.AddIn.Services
             row.OpeningCreditDifference =
                 row.CalculatedOpeningCredit -
                 row.GeneralLedgerOpeningCredit;
-            row.ClosingDebitDifference =
-                row.CalculatedClosingDebit -
-                row.GeneralLedgerClosingDebit;
-            row.ClosingCreditDifference =
-                row.CalculatedClosingCredit -
-                row.GeneralLedgerClosingCredit;
+            row.CalculatedNetClosingBalance =
+                row.CalculatedClosingDebit - row.CalculatedClosingCredit;
+            row.GeneralLedgerNetClosingBalance =
+                row.GeneralLedgerClosingDebit - row.GeneralLedgerClosingCredit;
+            row.ClosingBalanceDifference =
+                row.CalculatedNetClosingBalance -
+                row.GeneralLedgerNetClosingBalance;
 
             row.Status =
                 IsZero(row.OpeningDebitDifference.Value) &&
                 IsZero(row.OpeningCreditDifference.Value) &&
                 IsZero(row.DebitTurnoverDifference.Value) &&
                 IsZero(row.CreditTurnoverDifference.Value) &&
-                IsZero(row.ClosingDebitDifference.Value) &&
-                IsZero(row.ClosingCreditDifference.Value)
+                IsZero(row.ClosingBalanceDifference.Value)
                     ? "Reconciled"
                     : "Different";
 
             return row;
+        }
+
+        private static void ResolveAccountName(
+            Row row,
+            AccountSummary summary,
+            JournalLedgerAccountReconciliation ledger)
+        {
+            if (!string.IsNullOrWhiteSpace(summary?.EntityAccountName))
+            {
+                row.AccountName = summary.EntityAccountName;
+                row.AccountNameSource = "Accounting framework";
+                return;
+            }
+
+            if (!string.IsNullOrWhiteSpace(ledger?.GeneralLedgerAccountName))
+            {
+                row.AccountName = ledger.GeneralLedgerAccountName;
+                row.AccountNameSource = "General ledger";
+                return;
+            }
+
+            if (!string.IsNullOrWhiteSpace(summary?.FrameworkAccountName))
+            {
+                row.AccountName = summary.FrameworkAccountName;
+                row.AccountNameSource = "Statutory framework";
+                return;
+            }
+
+            row.AccountName = summary?.AccountName ?? string.Empty;
+            row.AccountNameSource =
+                string.IsNullOrWhiteSpace(row.AccountName)
+                    ? string.Empty
+                    : summary?.AccountNameSource;
         }
 
         private static object[,] CreateValues(IReadOnlyList<Row> rows)
@@ -284,27 +343,31 @@ namespace ExcelApiPoc.AddIn.Services
                 int target = index + 1;
 
                 values[target, 0] = row.AccountCode;
-                values[target, 1] = row.OpeningAvailable;
-                values[target, 2] = Number(row.CalculatedOpeningDebit);
-                values[target, 3] = Number(row.CalculatedOpeningCredit);
-                values[target, 4] = Number(row.CalculatedDebitTurnover);
-                values[target, 5] = Number(row.CalculatedCreditTurnover);
-                values[target, 6] = Number(row.CalculatedClosingDebit);
-                values[target, 7] = Number(row.CalculatedClosingCredit);
-                values[target, 8] = row.GeneralLedgerAccountName;
-                values[target, 9] = Number(row.GeneralLedgerOpeningDebit);
-                values[target, 10] = Number(row.GeneralLedgerOpeningCredit);
-                values[target, 11] = Number(row.GeneralLedgerDebitTurnover);
-                values[target, 12] = Number(row.GeneralLedgerCreditTurnover);
-                values[target, 13] = Number(row.GeneralLedgerClosingDebit);
-                values[target, 14] = Number(row.GeneralLedgerClosingCredit);
-                values[target, 15] = Number(row.OpeningDebitDifference);
-                values[target, 16] = Number(row.OpeningCreditDifference);
-                values[target, 17] = Number(row.DebitTurnoverDifference);
-                values[target, 18] = Number(row.CreditTurnoverDifference);
-                values[target, 19] = Number(row.ClosingDebitDifference);
-                values[target, 20] = Number(row.ClosingCreditDifference);
-                values[target, 21] = row.Status;
+                values[target, 1] = row.AccountName;
+                values[target, 2] = row.AccountNameSource;
+                values[target, 3] = row.SyntheticAccountCode;
+                values[target, 4] = row.SyntheticAccountName;
+                values[target, 5] = row.OpeningAvailable;
+                values[target, 6] = Number(row.CalculatedOpeningDebit);
+                values[target, 7] = Number(row.CalculatedOpeningCredit);
+                values[target, 8] = Number(row.CalculatedDebitTurnover);
+                values[target, 9] = Number(row.CalculatedCreditTurnover);
+                values[target, 10] = Number(row.CalculatedClosingDebit);
+                values[target, 11] = Number(row.CalculatedClosingCredit);
+                values[target, 12] = Number(row.GeneralLedgerOpeningDebit);
+                values[target, 13] = Number(row.GeneralLedgerOpeningCredit);
+                values[target, 14] = Number(row.GeneralLedgerDebitTurnover);
+                values[target, 15] = Number(row.GeneralLedgerCreditTurnover);
+                values[target, 16] = Number(row.GeneralLedgerClosingDebit);
+                values[target, 17] = Number(row.GeneralLedgerClosingCredit);
+                values[target, 18] = Number(row.OpeningDebitDifference);
+                values[target, 19] = Number(row.OpeningCreditDifference);
+                values[target, 20] = Number(row.DebitTurnoverDifference);
+                values[target, 21] = Number(row.CreditTurnoverDifference);
+                values[target, 22] = Number(row.CalculatedNetClosingBalance);
+                values[target, 23] = Number(row.GeneralLedgerNetClosingBalance);
+                values[target, 24] = Number(row.ClosingBalanceDifference);
+                values[target, 25] = row.Status;
             }
 
             return values;
@@ -328,7 +391,7 @@ namespace ExcelApiPoc.AddIn.Services
                 "=SUBTOTAL(3,GeneralLedgerComparisonRows[AccountCode])",
                 "0");
 
-            for (int column = 3; column <= 21; column++)
+            for (int column = 7; column <= 25; column++)
             {
                 SetSubtotal(
                     sheet,
@@ -354,6 +417,10 @@ namespace ExcelApiPoc.AddIn.Services
         private sealed class Row
         {
             public string AccountCode;
+            public string AccountName;
+            public string AccountNameSource;
+            public string SyntheticAccountCode;
+            public string SyntheticAccountName;
             public bool OpeningAvailable;
             public bool HasImportedLedgerAccount;
             public decimal? CalculatedOpeningDebit;
@@ -362,7 +429,6 @@ namespace ExcelApiPoc.AddIn.Services
             public decimal? CalculatedCreditTurnover;
             public decimal? CalculatedClosingDebit;
             public decimal? CalculatedClosingCredit;
-            public string GeneralLedgerAccountName;
             public decimal? GeneralLedgerOpeningDebit;
             public decimal? GeneralLedgerOpeningCredit;
             public decimal? GeneralLedgerDebitTurnover;
@@ -373,8 +439,9 @@ namespace ExcelApiPoc.AddIn.Services
             public decimal? OpeningCreditDifference;
             public decimal? DebitTurnoverDifference;
             public decimal? CreditTurnoverDifference;
-            public decimal? ClosingDebitDifference;
-            public decimal? ClosingCreditDifference;
+            public decimal? CalculatedNetClosingBalance;
+            public decimal? GeneralLedgerNetClosingBalance;
+            public decimal? ClosingBalanceDifference;
             public string Status;
         }
     }
