@@ -72,6 +72,8 @@ namespace ExcelApiPoc.AddIn.Services
                 accountingFrameworkImport,
                 generalLedgerImport);
 
+            AuditWorkbookWorksheetLayout.Apply(workbook);
+
             journalWorksheet.Activate();
             return workbook;
         }
@@ -122,6 +124,8 @@ namespace ExcelApiPoc.AddIn.Services
                 generalLedgerImport,
                 accountingEntityPackage,
                 calculationFailure);
+
+            AuditWorkbookWorksheetLayout.Apply(workbook);
 
             return workbook;
         }
