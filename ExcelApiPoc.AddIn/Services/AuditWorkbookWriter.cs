@@ -35,7 +35,8 @@ namespace ExcelApiPoc.AddIn.Services
             CalculatedGeneralLedgerComparisonWorksheetWriter.AddWorksheet(
                 workbook,
                 calculatedGeneralLedger,
-                journalLedgerReconciliation);
+                journalLedgerReconciliation,
+                accountSummaries);
 
             if (analyticalMapping != null && analyticalMapping.Rows.Count > 0)
             {
@@ -96,7 +97,8 @@ namespace ExcelApiPoc.AddIn.Services
             CalculatedGeneralLedgerComparisonWorksheetWriter.AddWorksheet(
                 workbook,
                 calculatedGeneralLedger,
-                journalLedgerReconciliation);
+                journalLedgerReconciliation,
+                accountSummaries);
 
             if (accountingEntityPackage != null)
             {
