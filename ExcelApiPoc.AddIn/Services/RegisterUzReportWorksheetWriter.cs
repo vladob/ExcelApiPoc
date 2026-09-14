@@ -166,6 +166,9 @@ namespace ExcelApiPoc.AddIn.Services
             window.SplitColumn = descriptiveColumnCount;
             window.FreezePanes = true;
 
+            AuditWorkbookWorksheetLayout.ApplyRegisterUzEvidenceColor(
+                worksheet);
+
             return worksheet;
         }
 
