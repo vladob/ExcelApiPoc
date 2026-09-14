@@ -78,14 +78,20 @@ namespace ExcelApiPoc.AddIn.Services
                     Array.Empty<AuditReportTableDefinitionResponse>())
                 .OrderBy(x => x.TableOrdinal))
             {
-                int valueColumn =
-                    ResolveCurrentPeriodDataColumnOrdinal(table);
-
-                foreach (AuditReportRowDefinitionResponse row in
+                AuditReportRowDefinitionResponse[] numberedRows =
                     (table.Rows ??
                         Array.Empty<AuditReportRowDefinitionResponse>())
                     .Where(x => x.RowNumber.HasValue)
-                    .OrderBy(x => x.RowOrdinal))
+                    .OrderBy(x => x.RowOrdinal)
+                    .ToArray();
+
+                if (numberedRows.Length == 0)
+                    continue;
+
+                int valueColumn =
+                    ResolveCurrentPeriodDataColumnOrdinal(table);
+
+                foreach (AuditReportRowDefinitionResponse row in numberedRows)
                 {
                     layout.Add(new LayoutRow
                     {
