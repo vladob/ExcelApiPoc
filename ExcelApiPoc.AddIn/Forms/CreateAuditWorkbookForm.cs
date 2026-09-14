@@ -464,10 +464,56 @@ namespace ExcelApiPoc.AddIn.Forms
                     generalLedgerReconciliation = CanonicalReconciliationAccountSummaryAdapter.Apply(canonicalReconciliation, accountSummaries);
                 }
 
-                AuditCalculationPackageSelectionResponse calculationSelection =
-                    AuditCalculationPackageSelectionService.Load(
-                        journalImport.Ico,
-                        selectedFiscalYear);
+                AuditCalculationPackageSelectionResponse calculationSelection;
+
+                try
+                {
+                    calculationSelection =
+                        AuditCalculationPackageSelectionService.Load(
+                            journalImport.Ico,
+                            selectedFiscalYear);
+                }
+                catch (Exception calculationFailure)
+                {
+                    if (accountingFrameworkImport != null)
+                    {
+                        accountingFrameworkEnrichment =
+                            AccountingFrameworkAccountEnricher.Enrich(
+                                accountSummaries,
+                                accountingFrameworkImport);
+                    }
+
+                    if (generalLedgerImport != null)
+                    {
+                        GeneralLedgerReconciliationService.ResolveNames(
+                            accountSummaries,
+                            generalLedgerImport);
+                    }
+
+                    workbookPopulationStarted = true;
+                    AuditWorkbookWriter.CreateWithoutCalculation(
+                        _auditWorkbook,
+                        journalImport,
+                        accountSummaries,
+                        accountingFrameworkImport,
+                        generalLedgerImport,
+                        calculationFailure);
+
+                    MessageBox.Show(
+                        "The accounting data was imported successfully, but " +
+                        "a calculation report could not be created.\r\n\r\n" +
+                        "The Accounting Journal, Account Summary, General " +
+                        "Ledger, and provided Accounting Framework are " +
+                        "available in the workbook.\r\n\r\n" +
+                        calculationFailure.Message,
+                        "Calculation Report Unavailable",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Warning);
+
+                    DialogResult = DialogResult.OK;
+                    Close();
+                    return;
+                }
 
                 string selectedFrameworkCode =
                     calculationSelection.CalculationPackage.FrameworkCode;
