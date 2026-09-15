@@ -4,6 +4,6 @@
     {
         Blank, Header, Title, SectionTitle, Account, Document,
         DocumentSummary, SyntheticAccount, SyntheticSubtotal,
-        ReportTotal, Unclassified
+        ReportTotal, AmountContinuation, Unclassified
     }
 }

@@ -98,17 +98,70 @@ public sealed class IvesExcelGeneralLedgerImporterTests
         Assert.Equal(34765.97m, account.ClosingCredit);
     }
 
+    [Fact]
+    public void Import_WideSplitRowLayout_ReconcilesAllRecordSets()
+    {
+        GeneralLedgerImport result = ImportWideFixture();
+
+        Assert.Equal("00999999", result.Ico);
+        Assert.Equal(2025, result.FiscalYear);
+        Assert.Equal(12, result.ThroughMonth);
+        Assert.Single(result.Rows);
+
+        Assert.NotNull(result.ImportReport);
+        Assert.True(result.ImportReport.IsValid);
+        Assert.Empty(result.ImportReport.Diagnostics);
+        Assert.Equal(11, result.ImportReport.ValidationResults.Count);
+        Assert.Equal(1, result.ImportReport.RecordCounts["Accounts"]);
+        Assert.Equal(1, result.ImportReport.RecordCounts["Documents"]);
+        Assert.Equal(1, result.ImportReport.RecordCounts["SyntheticAccounts"]);
+        Assert.Equal(1, result.ImportReport.RecordCounts["SyntheticSubtotals"]);
+        Assert.Equal(1, result.ImportReport.RecordCounts["ReportTotals"]);
+        Assert.Equal(0, result.ImportReport.RecordCounts["Unclassified"]);
+    }
+
+    [Fact]
+    public void Import_WideSplitRowLayout_CombinesAccountAndAmountRows()
+    {
+        GeneralLedgerImport result = ImportWideFixture();
+
+        GeneralLedgerRow first = result.Rows[0];
+        Assert.Equal(1, first.SequenceNumber);
+        Assert.Equal(18, first.SourceRecordNumber);
+        Assert.Equal("019", first.SyntheticCode);
+        Assert.Equal(".1......", first.AnalyticalCode);
+        Assert.Equal("019.1......", first.AccountCode);
+        Assert.Equal("Synthetic account", first.AccountName);
+        Assert.Equal(100m, first.OpeningDebit);
+        Assert.Equal(0m, first.OpeningCredit);
+        Assert.Equal(20m, first.AnnualDebitTurnover);
+        Assert.Equal(5m, first.AnnualCreditTurnover);
+        Assert.Equal(115m, first.ClosingDebit);
+        Assert.Equal(0m, first.ClosingCredit);
+    }
+
     private static GeneralLedgerImport ImportFixture()
     {
         return new IvesExcelGeneralLedgerImporter().Import(GetFixturePath());
     }
 
+    private static GeneralLedgerImport ImportWideFixture()
+    {
+        return new IvesExcelGeneralLedgerImporter().Import(
+            GetFixturePath("HL_KNIHA_00999999_2025.xls"));
+    }
+
     private static string GetFixturePath()
+    {
+        return GetFixturePath("HL_KNIHA_00322881_2024.xls");
+    }
+
+    private static string GetFixturePath(string fileName)
     {
         return Path.Combine(
             AppContext.BaseDirectory,
             "TestData",
             "Ives",
-            "HL_KNIHA_00322881_2024.xls");
+            fileName);
     }
 }

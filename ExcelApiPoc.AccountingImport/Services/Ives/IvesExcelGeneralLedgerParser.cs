@@ -11,17 +11,6 @@ namespace ExcelApiPoc.AccountingImport.Services.Ives
 {
     internal sealed class IvesExcelGeneralLedgerParser
     {
-        private const int DateColumn = 1;
-        private const int DocumentColumn = 3;
-        private const int AccountColumn = 8;
-        private const int TextColumn = 12;
-        private const int ReportOpeningColumn = 13;
-        private const int AccountOpeningColumn = 15;
-        private const int DocumentDebitColumn = 18;
-        private const int AccountDebitColumn = 19;
-        private const int CreditColumn = 23;
-        private const int ClosingColumn = 26;
-
         private static readonly Regex IcoPattern = new Regex(
             @"I\s*[ČC]\s*O\s*:\s*(?<ico>\d{8})",
             RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
@@ -54,6 +43,8 @@ namespace ExcelApiPoc.AccountingImport.Services.Ives
         private static void ParseWorksheet(IExcelDataReader reader, IvesGeneralLedgerParseResult result)
         {
             string currentSyntheticAccount = null;
+            IvesGeneralLedgerSourceRow pendingAccount = null;
+            ColumnLayout layout = null;
             int sourceRowNumber = 0;
             int lastMeaningfulSourceRowNumber = 0;
             var sequences = new Dictionary<IvesGeneralLedgerRowKind, int>();
@@ -61,6 +52,10 @@ namespace ExcelApiPoc.AccountingImport.Services.Ives
             while (reader.Read())
             {
                 sourceRowNumber++;
+                if (layout == null)
+                {
+                    layout = DiscoverLayout(reader, result.SourceFileName);
+                }
 
                 if (!IsEntireRowBlank(reader))
                 {
@@ -68,8 +63,27 @@ namespace ExcelApiPoc.AccountingImport.Services.Ives
                 }
 
                 ReadMetadata(reader, result);
-                IvesGeneralLedgerRowKind kind = Classify(reader, sourceRowNumber, currentSyntheticAccount);
-                IvesGeneralLedgerSourceRow row = CreateRow(reader, sourceRowNumber, kind);
+                IvesGeneralLedgerRowKind kind = Classify(
+                    reader,
+                    sourceRowNumber,
+                    currentSyntheticAccount,
+                    pendingAccount,
+                    layout);
+                IvesGeneralLedgerSourceRow row = CreateRow(
+                    reader,
+                    sourceRowNumber,
+                    kind,
+                    layout);
+
+                if (kind == IvesGeneralLedgerRowKind.AmountContinuation)
+                {
+                    PopulateAccountAmounts(
+                        pendingAccount,
+                        reader,
+                        sourceRowNumber,
+                        layout);
+                    pendingAccount = null;
+                }
 
                 if (IsSequencedRecord(kind))
                 {
@@ -90,6 +104,17 @@ namespace ExcelApiPoc.AccountingImport.Services.Ives
                     currentSyntheticAccount = null;
                 }
 
+                if (kind == IvesGeneralLedgerRowKind.Account &&
+                    layout.UsesAmountContinuation)
+                {
+                    pendingAccount = row;
+                }
+                else if (kind != IvesGeneralLedgerRowKind.Blank &&
+                         kind != IvesGeneralLedgerRowKind.AmountContinuation)
+                {
+                    pendingAccount = null;
+                }
+
                 AddRow(result, row);
             }
 
@@ -102,17 +127,21 @@ namespace ExcelApiPoc.AccountingImport.Services.Ives
         }
 
         private static IvesGeneralLedgerRowKind Classify(
-            IExcelDataReader reader, int sourceRowNumber, string currentSyntheticAccount)
+            IExcelDataReader reader,
+            int sourceRowNumber,
+            string currentSyntheticAccount,
+            IvesGeneralLedgerSourceRow pendingAccount,
+            ColumnLayout layout)
         {
             if (sourceRowNumber <= 11) return IvesGeneralLedgerRowKind.Header;
             if (IsEntireRowBlank(reader)) return IvesGeneralLedgerRowKind.Blank;
 
-            string dateText = Text(reader, DateColumn);
-            string document = Text(reader, DocumentColumn);
-            string account = Text(reader, AccountColumn);
-            string description = Text(reader, TextColumn);
+            string dateText = Text(reader, layout.DateColumn);
+            string document = Text(reader, layout.DocumentColumn);
+            string account = Text(reader, layout.AccountColumn);
+            string description = Text(reader, layout.TextColumn);
 
-            if (sourceRowNumber == 12 && Contains(dateText, "Dátum") && Contains(document, "Doklad"))
+            if (Contains(dateText, "Dátum") && Contains(document, "Doklad"))
                 return IvesGeneralLedgerRowKind.Title;
             if (IsReportTotalLabel(dateText))
                 return IvesGeneralLedgerRowKind.ReportTotal;
@@ -121,12 +150,16 @@ namespace ExcelApiPoc.AccountingImport.Services.Ives
             if (IsSyntheticAccount(account, description))
                 return IvesGeneralLedgerRowKind.SyntheticAccount;
             if (!string.IsNullOrWhiteSpace(currentSyntheticAccount) &&
-                string.IsNullOrWhiteSpace(account) && HasAnyAmount(reader))
+                string.IsNullOrWhiteSpace(account) && HasAnyAmount(reader, layout))
                 return IvesGeneralLedgerRowKind.SyntheticSubtotal;
-            if (dateText == "-" && document == "-" &&
-                !string.IsNullOrWhiteSpace(account) && account.IndexOf('=') < 0)
+            if (pendingAccount != null &&
+                string.IsNullOrWhiteSpace(account) &&
+                HasAnyAmount(reader, layout))
+                return IvesGeneralLedgerRowKind.AmountContinuation;
+            if (dateText == "-" && !string.IsNullOrWhiteSpace(account) &&
+                account.IndexOf('=') < 0)
                 return IvesGeneralLedgerRowKind.Account;
-            if (TryGetDocumentDate(Value(reader, DateColumn), out _) &&
+            if (TryGetDocumentDate(Value(reader, layout.DateColumn), out _) &&
                 !string.IsNullOrWhiteSpace(document) && document != "-" &&
                 !string.IsNullOrWhiteSpace(account))
                 return IvesGeneralLedgerRowKind.Document;
@@ -137,44 +170,74 @@ namespace ExcelApiPoc.AccountingImport.Services.Ives
         }
 
         private static IvesGeneralLedgerSourceRow CreateRow(
-            IExcelDataReader reader, int sourceRowNumber, IvesGeneralLedgerRowKind kind)
+            IExcelDataReader reader,
+            int sourceRowNumber,
+            IvesGeneralLedgerRowKind kind,
+            ColumnLayout layout)
         {
             var row = new IvesGeneralLedgerSourceRow
             {
                 SourceRowNumber = sourceRowNumber,
                 Kind = kind,
-                DocumentNumber = Text(reader, DocumentColumn),
-                AccountCode = Text(reader, AccountColumn),
-                Text = Text(reader, TextColumn)
+                DocumentNumber = Text(reader, layout.DocumentColumn),
+                AccountCode = Text(reader, layout.AccountColumn),
+                Text = Text(reader, layout.TextColumn)
             };
 
             if (kind == IvesGeneralLedgerRowKind.Document)
             {
-                if (TryGetDocumentDate(Value(reader, DateColumn), out DateTime date)) row.DocumentDate = date;
-                row.DebitTurnover = Amount(reader, DocumentDebitColumn, sourceRowNumber);
-                row.CreditTurnover = Amount(reader, CreditColumn, sourceRowNumber);
+                if (TryGetDocumentDate(
+                    Value(reader, layout.DateColumn),
+                    out DateTime date))
+                {
+                    row.DocumentDate = date;
+                }
+                row.DebitTurnover = Amount(
+                    reader,
+                    layout.DocumentDebitColumn,
+                    sourceRowNumber);
+                row.CreditTurnover = Amount(
+                    reader,
+                    layout.CreditColumn,
+                    sourceRowNumber);
             }
             else if (kind == IvesGeneralLedgerRowKind.Account || kind == IvesGeneralLedgerRowKind.SyntheticSubtotal)
             {
-                row.OpeningBalance = Amount(reader, AccountOpeningColumn, sourceRowNumber);
-                row.DebitTurnover = Amount(reader,
-                    kind == IvesGeneralLedgerRowKind.Account ? AccountDebitColumn : DocumentDebitColumn,
-                    sourceRowNumber);
-                row.CreditTurnover = Amount(reader, CreditColumn, sourceRowNumber);
-                row.ClosingBalance = Amount(reader, ClosingColumn, sourceRowNumber);
+                PopulateAccountAmounts(
+                    row,
+                    reader,
+                    sourceRowNumber,
+                    layout);
             }
             else if (kind == IvesGeneralLedgerRowKind.ReportTotal)
             {
-                row.OpeningBalance = Amount(reader, ReportOpeningColumn, sourceRowNumber);
-                row.DebitTurnover = Amount(reader, AccountDebitColumn, sourceRowNumber);
-                row.CreditTurnover = Amount(reader, CreditColumn, sourceRowNumber);
-                row.ClosingBalance = Amount(reader, ClosingColumn, sourceRowNumber);
+                row.OpeningBalance = Amount(
+                    reader,
+                    layout.ReportOpeningColumn,
+                    sourceRowNumber);
+                row.DebitTurnover = Amount(reader,
+                    layout.ReportDebitColumn,
+                    sourceRowNumber);
+                row.CreditTurnover = Amount(
+                    reader,
+                    layout.CreditColumn,
+                    sourceRowNumber);
+                row.ClosingBalance = Amount(
+                    reader,
+                    layout.ClosingColumn,
+                    sourceRowNumber);
             }
             else if (kind == IvesGeneralLedgerRowKind.DocumentSummary)
             {
                 // Exact amount-column validation awaits an original XLS containing this row kind.
-                row.DebitTurnover = Amount(reader, DocumentDebitColumn, sourceRowNumber);
-                row.CreditTurnover = Amount(reader, CreditColumn, sourceRowNumber);
+                row.DebitTurnover = Amount(
+                    reader,
+                    layout.DocumentDebitColumn,
+                    sourceRowNumber);
+                row.CreditTurnover = Amount(
+                    reader,
+                    layout.CreditColumn,
+                    sourceRowNumber);
             }
 
             return row;
@@ -242,7 +305,16 @@ namespace ExcelApiPoc.AccountingImport.Services.Ives
         private static bool IsSyntheticAccount(string account, string description)
         {
             return !string.IsNullOrWhiteSpace(account) && account.IndexOf('=') >= 0 &&
-                string.Equals(description, "SU", StringComparison.OrdinalIgnoreCase);
+                (string.Equals(description, "SU", StringComparison.OrdinalIgnoreCase) ||
+                 IsSyntheticSubtotalLabel(description));
+        }
+
+        private static bool IsSyntheticSubtotalLabel(string value)
+        {
+            return !string.IsNullOrWhiteSpace(value) &&
+                value.Trim().StartsWith(
+                    "Spolu za SU",
+                    StringComparison.OrdinalIgnoreCase);
         }
 
         private static string ExtractSyntheticCode(string account)
@@ -268,11 +340,59 @@ namespace ExcelApiPoc.AccountingImport.Services.Ives
                 value.Trim().StartsWith("Spolu za zákazku", StringComparison.OrdinalIgnoreCase);
         }
 
-        private static bool HasAnyAmount(IExcelDataReader reader)
+        private static bool HasAnyAmount(
+            IExcelDataReader reader,
+            ColumnLayout layout)
         {
-            return HasValue(reader, AccountOpeningColumn) || HasValue(reader, DocumentDebitColumn) ||
-                HasValue(reader, AccountDebitColumn) || HasValue(reader, CreditColumn) ||
-                HasValue(reader, ClosingColumn);
+            return HasValue(reader, layout.AccountOpeningColumn) ||
+                HasValue(reader, layout.DocumentDebitColumn) ||
+                HasValue(reader, layout.AccountDebitColumn) ||
+                HasValue(reader, layout.CreditColumn) ||
+                HasValue(reader, layout.ClosingColumn);
+        }
+
+        private static void PopulateAccountAmounts(
+            IvesGeneralLedgerSourceRow row,
+            IExcelDataReader reader,
+            int sourceRowNumber,
+            ColumnLayout layout)
+        {
+            row.OpeningBalance = Amount(
+                reader,
+                layout.AccountOpeningColumn,
+                sourceRowNumber);
+            row.DebitTurnover = Amount(
+                reader,
+                layout.AccountDebitColumn,
+                sourceRowNumber);
+            row.CreditTurnover = Amount(
+                reader,
+                layout.CreditColumn,
+                sourceRowNumber);
+            row.ClosingBalance = Amount(
+                reader,
+                layout.ClosingColumn,
+                sourceRowNumber);
+        }
+
+        private static ColumnLayout DiscoverLayout(
+            IExcelDataReader reader,
+            string sourceFileName)
+        {
+            if (reader.FieldCount == 28)
+            {
+                return ColumnLayout.Compact;
+            }
+
+            if (reader.FieldCount == 37)
+            {
+                return ColumnLayout.Wide;
+            }
+
+            throw new InvalidDataException(
+                "IVES general-ledger column layout could not be discovered " +
+                "for '" + sourceFileName + "'. Expected 28 or 37 columns, " +
+                "found " + reader.FieldCount + ".");
         }
 
         private static bool IsEntireRowBlank(IExcelDataReader reader)
@@ -345,6 +465,54 @@ namespace ExcelApiPoc.AccountingImport.Services.Ives
                 case IvesGeneralLedgerRowKind.Unclassified: result.UnclassifiedRows.Add(row); break;
                 default: result.StructuralRows.Add(row); break;
             }
+        }
+
+        private sealed class ColumnLayout
+        {
+            public static readonly ColumnLayout Compact = new ColumnLayout
+            {
+                DateColumn = 1,
+                DocumentColumn = 3,
+                AccountColumn = 8,
+                TextColumn = 12,
+                ReportOpeningColumn = 13,
+                AccountOpeningColumn = 15,
+                DocumentDebitColumn = 18,
+                AccountDebitColumn = 19,
+                ReportDebitColumn = 19,
+                CreditColumn = 23,
+                ClosingColumn = 26,
+                UsesAmountContinuation = false
+            };
+
+            public static readonly ColumnLayout Wide = new ColumnLayout
+            {
+                DateColumn = 1,
+                DocumentColumn = 2,
+                AccountColumn = 7,
+                TextColumn = 11,
+                ReportOpeningColumn = 16,
+                AccountOpeningColumn = 16,
+                DocumentDebitColumn = 26,
+                AccountDebitColumn = 26,
+                ReportDebitColumn = 27,
+                CreditColumn = 31,
+                ClosingColumn = 35,
+                UsesAmountContinuation = true
+            };
+
+            public int DateColumn { get; private set; }
+            public int DocumentColumn { get; private set; }
+            public int AccountColumn { get; private set; }
+            public int TextColumn { get; private set; }
+            public int ReportOpeningColumn { get; private set; }
+            public int AccountOpeningColumn { get; private set; }
+            public int DocumentDebitColumn { get; private set; }
+            public int AccountDebitColumn { get; private set; }
+            public int ReportDebitColumn { get; private set; }
+            public int CreditColumn { get; private set; }
+            public int ClosingColumn { get; private set; }
+            public bool UsesAmountContinuation { get; private set; }
         }
 
         private static void ValidateSourceFile(string filePath)

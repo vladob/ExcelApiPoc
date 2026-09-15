@@ -138,12 +138,30 @@ namespace ExcelApiPoc.AccountingImport.Services.Ives
                 {
                     return new InvalidDataException(
                         "IVES general-ledger validation failed: " +
-                        diagnostic.Message);
+                        diagnostic.Message +
+                        FormatSourceLocation(diagnostic));
                 }
             }
 
             return new InvalidDataException(
                 "IVES general-ledger validation failed.");
+        }
+
+        private static string FormatSourceLocation(
+            ImportDiagnostic diagnostic)
+        {
+            if (diagnostic.Source == null ||
+                !diagnostic.Source.SourceRowNumber.HasValue)
+            {
+                return string.Empty;
+            }
+
+            return " Source: worksheet '" +
+                (diagnostic.Source.WorksheetName ?? "(unnamed)") +
+                "', row " +
+                diagnostic.Source.SourceRowNumber.Value.ToString(
+                    CultureInfo.InvariantCulture) +
+                ".";
         }
 
         private static string CalculateSha256(string path)
