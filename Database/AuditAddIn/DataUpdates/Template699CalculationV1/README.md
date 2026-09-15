@@ -6,7 +6,8 @@ income statement (RegisterUZ template 699) for the PROFIT account framework.
 Run the scripts against `AuditAddIn` in filename order:
 
 1. `010_PopulateTemplate699Calculation.sql`
-2. `020_ValidateTemplate699Calculation.sql`
+2. `015_CorrectTemplate699BalanceSides.sql`
+3. `020_ValidateTemplate699Calculation.sql`
 
 The population script is rerunnable. It creates the PROFIT calculation
 configuration, associates it with template 699, inserts account rules,

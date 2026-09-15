@@ -37,6 +37,51 @@ IF (SELECT COUNT_BIG(*) FROM [Accounts].[ReportAccountMappings]
     WHERE [TemplateFrameworkVersionId] = @TemplateFrameworkVersionId) <> 388
     THROW 52322, 'Template 699 must have exactly 388 report-account mappings.', 1;
 
+IF
+(
+    SELECT COUNT_BIG(*)
+    FROM [Accounts].[ReportAccountMappings] m
+    INNER JOIN [Template].[Rows] r ON r.[Id] = m.[TemplateRowId]
+    INNER JOIN [Template].[Tables] tt ON tt.[Id] = r.[TableId]
+    INNER JOIN [Accounts].[AccountCalculationRules] acr
+        ON acr.[Id] = m.[AccountCalculationRuleId]
+    INNER JOIN [Accounts].[Accounts] a ON a.[Id] = acr.[AccountId]
+    WHERE m.[TemplateFrameworkVersionId] = @TemplateFrameworkVersionId
+      AND a.[AccountCode] = N'221'
+      AND ((tt.[TableErpId] = 69901 AND r.[RowNumber] = 73)
+        OR (tt.[TableErpId] = 69902 AND r.[RowNumber] = 139))
+      AND m.[RequiresAnalyticalMapping] = 1
+) <> 2
+    THROW 52329, 'Account 221 must be analytically split between bank balances and overdrafts.', 1;
+
+IF EXISTS
+(
+    SELECT 1
+    FROM [Accounts].[AccountCalculationRules] acr
+    INNER JOIN [Accounts].[Accounts] a ON a.[Id] = acr.[AccountId]
+    WHERE acr.[CalculationConfigurationVersionId] = @ConfigurationId
+      AND a.[AccountCode] IN (N'341', N'342', N'343', N'345', N'346', N'347')
+      AND acr.[LiabilitiesValueSourceCode] <> N'ClosingCredit'
+)
+    THROW 52330, 'Tax-liability accounts must use the gross closing-credit balance.', 1;
+
+IF EXISTS
+(
+    SELECT 1
+    FROM [Accounts].[ReportAccountMappings] m
+    INNER JOIN [Template].[Rows] r ON r.[Id] = m.[TemplateRowId]
+    INNER JOIN [Template].[Tables] tt ON tt.[Id] = r.[TableId]
+    INNER JOIN [Accounts].[AccountCalculationRules] acr
+        ON acr.[Id] = m.[AccountCalculationRuleId]
+    INNER JOIN [Accounts].[Accounts] a ON a.[Id] = acr.[AccountId]
+    WHERE m.[TemplateFrameworkVersionId] = @TemplateFrameworkVersionId
+      AND tt.[TableErpId] = 69902
+      AND r.[RowNumber] = 133
+      AND a.[AccountCode] IN (N'341', N'342', N'343', N'345', N'346', N'347')
+      AND m.[ValueSourceCode] <> N'ClosingCredit'
+)
+    THROW 52331, 'Tax-liability mappings must use the gross closing-credit balance.', 1;
+
 IF EXISTS
 (
     SELECT 1

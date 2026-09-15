@@ -363,6 +363,7 @@ namespace ExcelApiPoc.AddIn.Forms
 
             try
             {
+                UseWaitCursor = true;
                 List<string> journalFilePaths = GetJournalFilePaths();
 
                 if (journalFilePaths.Count == 0 ||
@@ -509,6 +510,7 @@ namespace ExcelApiPoc.AddIn.Forms
                         accountingEntityEnvelope,
                         calculationFailure);
 
+                    UseWaitCursor = false;
                     MessageBox.Show(
                         "The accounting data was imported successfully, but " +
                         "a calculation report could not be created.\r\n\r\n" +
@@ -660,7 +662,9 @@ namespace ExcelApiPoc.AddIn.Forms
                     ? MessageBoxIcon.Warning
                     : MessageBoxIcon.Information;
 
+                UseWaitCursor = false;
                 MessageBox.Show(message.ToString(), "Accounting Journal Preflight", MessageBoxButtons.OK, icon);
+                UseWaitCursor = true;
 
                 workbookPopulationStarted = true;
                 var workbook = AuditWorkbookWriter.CreateWorkbook(
@@ -679,14 +683,17 @@ namespace ExcelApiPoc.AddIn.Forms
                     accountingFrameworkImport,
                     generalLedgerImport);
 
-                AuditWorkbookRecalculationDialog.Show(
-                    AuditWorkbookRecalculationService.Recalculate(workbook));
+                AuditWorkbookRecalculationResult recalculation =
+                    AuditWorkbookRecalculationService.Recalculate(workbook);
 
+                UseWaitCursor = false;
+                AuditWorkbookRecalculationDialog.Show(recalculation);
                 DialogResult = DialogResult.OK;
                 Close();
             }
             catch (Exception exception)
             {
+                UseWaitCursor = false;
                 // MessageBox.Show($"Accounting journal processing failed.\n\n" + exception.Message, "Create Audit Workbook", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 MessageBox.Show($"Accounting journal processing failed.\n\n" + exception.ToString(), "Create Audit Workbook", MessageBoxButtons.OK, MessageBoxIcon.Error);
 
@@ -695,6 +702,10 @@ namespace ExcelApiPoc.AddIn.Forms
                     DialogResult = DialogResult.Abort;
                     Close();
                 }
+            }
+            finally
+            {
+                UseWaitCursor = false;
             }
         }
 

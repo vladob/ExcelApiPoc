@@ -11,6 +11,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[4]
 BASELINE = ROOT / "Database/AuditAddIn/Baseline/V1_0"
 OUTPUT = Path(__file__).with_name("010_PopulateTemplate699Calculation.sql")
+TAX_BALANCE_ACCOUNTS = {"341", "342", "343", "345", "346", "347"}
+ANALYTICAL_SIDE_ACCOUNTS = {"221"}
 
 ROW_RE = re.compile(
     r"(?:SELECT\s+6990[123]\s+AS\s+\[TableErpId\]|(?:UNION ALL )?SELECT\s+(6990[123]))"
@@ -90,7 +92,12 @@ def mappings(rows: dict[tuple[int, int], tuple[str, bool]], accounts: set[str]):
                 result.append([table, row, code, 0, 1, "Liabilities", "ClosingCredit"])
         elif table == 69902:
             for code in sorted(codes(caption, accounts)):
-                result.append([table, row, code, 0, 1, "Liabilities", "ClosingNetto"])
+                source = (
+                    "ClosingCredit"
+                    if code in TAX_BALANCE_ACCOUNTS
+                    else "ClosingNetto"
+                )
+                result.append([table, row, code, 0, 1, "Liabilities", source])
         else:
             for code in sorted(codes(caption, accounts)):
                 result.append([
@@ -101,7 +108,11 @@ def mappings(rows: dict[tuple[int, int], tuple[str, bool]], accounts: set[str]):
 
     occurrences = Counter((table, code) for table, _, code, *_ in result)
     for item in result:
-        item.insert(3, 1 if occurrences[(item[0], item[2])] > 1 else 0)
+        requires_mapping = (
+            occurrences[(item[0], item[2])] > 1
+            or item[2] in ANALYTICAL_SIDE_ACCOUNTS
+        )
+        item.insert(3, 1 if requires_mapping else 0)
     return result
 
 
@@ -124,7 +135,11 @@ def sql() -> str:
     lines = ["/* Template 699 calculation package for the PROFIT framework. */", "USE [AuditAddIn];", "GO", "SET NOCOUNT ON;", "SET XACT_ABORT ON;", "GO", "BEGIN TRANSACTION;", ""]
     lines += ["DECLARE @FrameworkVersionId int = (SELECT afv.[Id] FROM [Accounts].[AccountFrameworkVersion] afv INNER JOIN [Accounts].[AccountFramework] af ON af.[Id]=afv.[AccountFrameworkId] WHERE af.[Code]=N'PROFIT' AND afv.[VersionCode]=N'2022-01-01');", "IF @FrameworkVersionId IS NULL THROW 52300, 'PROFIT 2022-01-01 framework version is missing.', 1;", ""]
     lines += ["IF NOT EXISTS (SELECT 1 FROM [Accounts].[CalculationConfigurationVersion] WHERE [AccountFrameworkVersionId]=@FrameworkVersionId AND [Code]=N'PROFIT-2022-01')", "    INSERT INTO [Accounts].[CalculationConfigurationVersion] ([AccountFrameworkVersionId],[AccountingModelCode],[Code],[Description],[ValidFrom],[ValidTo]) VALUES (@FrameworkVersionId,N'PROFIT',N'PROFIT-2022-01',N'Template 699 balance sheet and income statement',CONVERT(date,'2022-01-01'),NULL);", "DECLARE @ConfigurationId int = (SELECT [Id] FROM [Accounts].[CalculationConfigurationVersion] WHERE [AccountFrameworkVersionId]=@FrameworkVersionId AND [Code]=N'PROFIT-2022-01');", ""]
-    values = ",\n    ".join(f"(N'{c}',N'{('ClosingNetto' if c[0]=='5' else 'ClosingCreditNetto' if c[0]=='6' else 'ClosingDebit')}',N'{('ClosingDebit' if c[0]=='5' else 'ClosingNetto')}')" for c in used)
+    values = ",\n    ".join(
+        f"(N'{c}',N'{('ClosingNetto' if c[0]=='5' else 'ClosingCreditNetto' if c[0]=='6' else 'ClosingDebit')}',"
+        f"N'{('ClosingDebit' if c[0]=='5' else 'ClosingCredit' if c in TAX_BALANCE_ACCOUNTS else 'ClosingNetto')}')"
+        for c in used
+    )
     lines += ["IF NOT EXISTS (SELECT 1 FROM [Accounts].[ValueSource] WHERE [Code]=N'ClosingCreditNetto') INSERT INTO [Accounts].[ValueSource] ([Code],[Description]) VALUES (N'ClosingCreditNetto',N'Net closing credit balance (credit minus debit)');", "", "DECLARE @Rules TABLE ([AccountCode] nvarchar(10) NOT NULL PRIMARY KEY,[AssetsSource] nvarchar(50),[LiabilitiesSource] nvarchar(50));", "INSERT INTO @Rules VALUES", "    " + values + ";", "INSERT INTO [Accounts].[AccountCalculationRules] ([CalculationConfigurationVersionId],[AccountId],[AssetsValueSourceCode],[LiabilitiesValueSourceCode])", "SELECT @ConfigurationId,a.[Id],r.[AssetsSource],r.[LiabilitiesSource] FROM @Rules r INNER JOIN [Accounts].[Accounts] a ON a.[AccountFrameworkVersionId]=@FrameworkVersionId AND a.[AccountCode]=r.[AccountCode] LEFT JOIN [Accounts].[AccountCalculationRules] e ON e.[CalculationConfigurationVersionId]=@ConfigurationId AND e.[AccountId]=a.[Id] WHERE e.[Id] IS NULL;", ""]
     lines += ["DECLARE @TemplateId int=(SELECT [Id] FROM [Template].[Templates] WHERE [ErpId]=699);", "IF @TemplateId IS NULL THROW 52301, 'Template 699 is missing.', 1;", "IF NOT EXISTS (SELECT 1 FROM [Accounts].[TemplateFrameworkVersion] WHERE [TemplateId]=@TemplateId AND [CalculationConfigurationVersionId]=@ConfigurationId)", "    INSERT INTO [Accounts].[TemplateFrameworkVersion] ([TemplateId],[AccountFrameworkVersionId],[CalculationConfigurationVersionId]) VALUES (@TemplateId,@FrameworkVersionId,@ConfigurationId);", "DECLARE @TemplateFrameworkVersionId int=(SELECT [Id] FROM [Accounts].[TemplateFrameworkVersion] WHERE [TemplateId]=@TemplateId AND [CalculationConfigurationVersionId]=@ConfigurationId);", ""]
     vals=[]
@@ -144,5 +159,5 @@ def sql() -> str:
 
 
 if __name__ == "__main__":
-    OUTPUT.write_text(sql(), encoding="utf-8-sig", newline="\n")
+    OUTPUT.write_text(sql(), encoding="utf-8", newline="\n")
     print(OUTPUT)

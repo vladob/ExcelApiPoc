@@ -17,13 +17,19 @@ namespace ExcelApiPoc.AddIn.Services
             AnalyticalMappingSelectionReadResult mappingSelections = AnalyticalMappingWorksheetReader.Read(workbook);
             AuditReportCalculationResult calculation = AuditReportCalculationService.Calculate(accounts, package, mappingSelections.Selections);
 
-            AuditReportCalculationWorksheetWriter.Write(workbook, package, calculation);
+            Excel.Worksheet calculationWorksheet =
+                AuditReportCalculationWorksheetWriter.Write(
+                    workbook,
+                    package,
+                    calculation);
             AuditValidationResultsWorksheetWriter.Write(
                 workbook,
                 accounts,
                 mappingSelections,
                 package,
                 calculation);
+
+            calculationWorksheet.Activate();
 
             return new AuditWorkbookRecalculationResult
             {

@@ -200,8 +200,14 @@ namespace ExcelApiPoc.AddIn
                 if (workbook == null)
                     throw new InvalidOperationException("No active workbook was found.");
 
-                AuditWorkbookRecalculationDialog.Show(
-                    AuditWorkbookRecalculationService.Recalculate(workbook));
+                AuditWorkbookRecalculationResult result;
+
+                using (new ExcelBusyCursor(application))
+                {
+                    result = AuditWorkbookRecalculationService.Recalculate(workbook);
+                }
+
+                AuditWorkbookRecalculationDialog.Show(result);
             }
             catch (Exception exception)
             {
@@ -215,7 +221,13 @@ namespace ExcelApiPoc.AddIn
 
             try
             {
-                RegisterUzReportRenderingService.RenderSelectedReportTable();
+                Excel.Application application =
+                    (Excel.Application)ExcelDnaUtil.Application;
+
+                using (new ExcelBusyCursor(application))
+                {
+                    RegisterUzReportRenderingService.RenderSelectedReportTable();
+                }
             }
             catch (Exception exception)
             {

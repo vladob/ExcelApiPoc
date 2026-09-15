@@ -264,6 +264,7 @@
     <Compile Include="Services\CanonicalReconciliationAccountSummaryAdapter.cs" />
     <Compile Include="Services\CalculatedGeneralLedgerComparisonWorksheetWriter.cs" />
     <Compile Include="Services\ExcelTableNameHelper.cs" />
+    <Compile Include="Services\ExcelBusyCursor.cs" />
     <Compile Include="Services\GeneralLedgerReconciliationService.cs" />
     <Compile Include="Services\GeneralLedgerWorksheetWriter.cs" />
     <Compile Include="Services\IfoSoftCsvAccountingFrameworkImporter.cs" />
