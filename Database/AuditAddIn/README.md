@@ -93,6 +93,12 @@ configuration error.
 - Put reusable non-mutating checks in `Validation`.
 - Never edit an already deployed baseline to disguise a later database change.
 
+## Reviewed data updates
+
+- `DataUpdates/Template699CalculationV1` adds and validates the complete
+  PROFIT calculation package for RegisterUZ template 699. Run its population
+  and validation scripts after the `CalculationTemplateV1` migration.
+
 The removed temporary-database comparison and synchronization scripts documented
 the one-time V1.0 cutover. They are retained in Git history and are not part of
 the executable baseline.

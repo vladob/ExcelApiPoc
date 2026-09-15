@@ -1,4 +1,4 @@
-﻿using ExcelApiPoc.AddIn.Models;
+using ExcelApiPoc.AddIn.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -391,6 +391,11 @@ namespace ExcelApiPoc.AddIn.Services
                 }
 
                 throw new InvalidOperationException($"Unsupported balance side '{balanceSide}'.");
+            }
+
+            if (string.Equals(valueSource, "ClosingCreditNetto", StringComparison.OrdinalIgnoreCase))
+            {
+                return account.CreditBalance - account.DebitBalance;
             }
 
             throw new InvalidOperationException($"Unsupported value source '{valueSource}'.");
