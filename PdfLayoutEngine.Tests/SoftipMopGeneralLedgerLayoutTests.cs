@@ -89,6 +89,7 @@ public sealed class SoftipMopGeneralLedgerLayoutTests
             Token(13, "Dátum", 383.25, 406.8)));
         var reportTotal = SevenTokenRecord(12, "Spolu", 22.5);
         var summary = SevenTokenRecord(13, "Hospodársky výsledok", 132.7);
+        var offBalanceSummary = SevenTokenRecord(13, "Podsúvahové účty", 132.7);
         var unsupportedSummary = Record(Group(13, 450,
             Token(13, "Unknown summary", 132, 200),
             Token(13, "0,00", 735, 770)));
@@ -97,6 +98,7 @@ public sealed class SoftipMopGeneralLedgerLayoutTests
         AssertMatch("subtotal-row", matcher.Match(subtotal, definition.RecordRules));
         AssertMatch("report-total-row", matcher.Match(reportTotal, definition.RecordRules));
         AssertMatch("summary-row", matcher.Match(summary, definition.RecordRules));
+        AssertMatch("summary-row", matcher.Match(offBalanceSummary, definition.RecordRules));
         AssertMatch("signature-row", matcher.Match(signature, definition.RecordRules));
         Assert.Equal(
             RuleMatchStatus.Unmatched,
@@ -106,7 +108,35 @@ public sealed class SoftipMopGeneralLedgerLayoutTests
         AssertFields(definition, "subtotal-row", subtotal, 8);
         AssertFields(definition, "report-total-row", reportTotal, 7);
         AssertFields(definition, "summary-row", summary, 7);
+        AssertFields(definition, "summary-row", offBalanceSummary, 7);
         AssertFields(definition, "signature-row", signature, 3);
+    }
+
+    [Fact]
+    public void Continuation_rule_accepts_wide_amount_at_page_start()
+    {
+        var definition = Assert.IsType<LayoutDefinition>(Load().Definition);
+        var policy = new DefinitionRecordContinuationPolicy(
+            definition.RecordContinuations);
+        var previous = Record(Group(2, 500,
+            Token(2, "Medzisúčet za  :", 42.75, 103.65),
+            Token(2, "1", 112.5, 116.95)));
+        var next = Group(3, 103.88,
+            Token(3, "1 186 360,33", 325.18, 371.88),
+            Token(3, "31 889 667,16", 400.99, 452.14),
+            Token(3, "32 075 011,91", 480.49, 531.64),
+            Token(3, "80 829 310,03", 559.99, 611.14),
+            Token(3, "80 863 567,71", 639.49, 690.64),
+            Token(3, "1 152 102,65", 723.43, 770.13));
+
+        var decision = policy.Evaluate(previous, next);
+
+        Assert.Equal(
+            RecordContinuationDecisionStatus.Continued,
+            decision.Status);
+        Assert.Equal(
+            "values-continued-on-next-page",
+            Assert.Single(decision.Matches).DefinitionId);
     }
 
     private static void AssertFieldIds(

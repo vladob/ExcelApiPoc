@@ -43,7 +43,7 @@
         "rightAtMost": 340
       },
       "next": {
-        "leftAtLeast": 340
+        "leftAtLeast": 300
       }
     }
   ],
@@ -81,7 +81,7 @@
     {
       "id": "summary-row",
       "sectionId": "page-body",
-      "text": "^(Aktíva|Pasíva|Náklady|Výnosy|Hospodársky výsledok)\\s",
+      "text": "^(Aktíva|Pasíva|Náklady|Výnosy|Hospodársky výsledok|Podsúvahové účty)\\s",
       "textMatch": "RegularExpression",
       "minimumGroupCount": 1,
       "maximumGroupCount": 1,
