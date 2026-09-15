@@ -201,13 +201,22 @@ namespace ExcelApiPoc.AccountingImport.Services.Ives
                     layout.CreditColumn,
                     sourceRowNumber);
             }
-            else if (kind == IvesGeneralLedgerRowKind.Account || kind == IvesGeneralLedgerRowKind.SyntheticSubtotal)
+            else if (kind == IvesGeneralLedgerRowKind.Account)
             {
                 PopulateAccountAmounts(
                     row,
                     reader,
                     sourceRowNumber,
                     layout);
+            }
+            else if (kind == IvesGeneralLedgerRowKind.SyntheticSubtotal)
+            {
+                PopulateAmounts(
+                    row,
+                    reader,
+                    sourceRowNumber,
+                    layout,
+                    layout.SyntheticSubtotalDebitColumn);
             }
             else if (kind == IvesGeneralLedgerRowKind.ReportTotal)
             {
@@ -357,13 +366,28 @@ namespace ExcelApiPoc.AccountingImport.Services.Ives
             int sourceRowNumber,
             ColumnLayout layout)
         {
+            PopulateAmounts(
+                row,
+                reader,
+                sourceRowNumber,
+                layout,
+                layout.AccountDebitColumn);
+        }
+
+        private static void PopulateAmounts(
+            IvesGeneralLedgerSourceRow row,
+            IExcelDataReader reader,
+            int sourceRowNumber,
+            ColumnLayout layout,
+            int debitColumn)
+        {
             row.OpeningBalance = Amount(
                 reader,
                 layout.AccountOpeningColumn,
                 sourceRowNumber);
             row.DebitTurnover = Amount(
                 reader,
-                layout.AccountDebitColumn,
+                debitColumn,
                 sourceRowNumber);
             row.CreditTurnover = Amount(
                 reader,
@@ -479,6 +503,7 @@ namespace ExcelApiPoc.AccountingImport.Services.Ives
                 AccountOpeningColumn = 15,
                 DocumentDebitColumn = 18,
                 AccountDebitColumn = 19,
+                SyntheticSubtotalDebitColumn = 18,
                 ReportDebitColumn = 19,
                 CreditColumn = 23,
                 ClosingColumn = 26,
@@ -495,6 +520,7 @@ namespace ExcelApiPoc.AccountingImport.Services.Ives
                 AccountOpeningColumn = 16,
                 DocumentDebitColumn = 26,
                 AccountDebitColumn = 26,
+                SyntheticSubtotalDebitColumn = 26,
                 ReportDebitColumn = 27,
                 CreditColumn = 31,
                 ClosingColumn = 35,
@@ -509,6 +535,7 @@ namespace ExcelApiPoc.AccountingImport.Services.Ives
             public int AccountOpeningColumn { get; private set; }
             public int DocumentDebitColumn { get; private set; }
             public int AccountDebitColumn { get; private set; }
+            public int SyntheticSubtotalDebitColumn { get; private set; }
             public int ReportDebitColumn { get; private set; }
             public int CreditColumn { get; private set; }
             public int ClosingColumn { get; private set; }
