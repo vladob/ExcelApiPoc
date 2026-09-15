@@ -56,8 +56,11 @@ def expand_token(token: str, accounts: set[str]) -> set[str]:
     token = token.upper().rstrip("AÚ")
     if re.fullmatch(r"\d{3}", token):
         return {token} if token in accounts else set()
+    # XX placeholders denote entity-specific synthetic accounts outside the
+    # reviewed statutory chart. They must not expand to every official account
+    # in that class; such expansion would create false destinations.
     if re.fullmatch(r"\d{2}X", token):
-        return {code for code in accounts if code.startswith(token[:2])}
+        return set()
     return set()
 
 

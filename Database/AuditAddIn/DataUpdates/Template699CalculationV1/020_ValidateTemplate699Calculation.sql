@@ -30,12 +30,12 @@ IF @TemplateId IS NULL OR @FrameworkVersionId IS NULL OR @ConfigurationId IS NUL
     THROW 52320, 'Template 699 does not resolve to its PROFIT calculation configuration.', 1;
 
 IF (SELECT COUNT_BIG(*) FROM [Accounts].[AccountCalculationRules]
-    WHERE [CalculationConfigurationVersionId] = @ConfigurationId) <> 228
-    THROW 52321, 'Template 699 must have exactly 228 account calculation rules.', 1;
+    WHERE [CalculationConfigurationVersionId] = @ConfigurationId) <> 226
+    THROW 52321, 'Template 699 must have exactly 226 account calculation rules.', 1;
 
 IF (SELECT COUNT_BIG(*) FROM [Accounts].[ReportAccountMappings]
-    WHERE [TemplateFrameworkVersionId] = @TemplateFrameworkVersionId) <> 547
-    THROW 52322, 'Template 699 must have exactly 547 report-account mappings.', 1;
+    WHERE [TemplateFrameworkVersionId] = @TemplateFrameworkVersionId) <> 388
+    THROW 52322, 'Template 699 must have exactly 388 report-account mappings.', 1;
 
 IF EXISTS
 (
