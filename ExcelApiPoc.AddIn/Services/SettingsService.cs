@@ -156,6 +156,18 @@ namespace ExcelApiPoc.AddIn.Services
                         "Multiple accounting-journal files can currently be selected only for Softip-MOP monthly journals.",
                     ["Create.InvalidJournal"] =
                         "Select valid accounting journal files.",
+                    ["Create.Validation.JournalRequired"] =
+                        "Select an accounting journal.",
+                    ["Create.Validation.TechnicalTypeRequired"] =
+                        "Select the technical file type.",
+                    ["Create.Validation.AccountingFormatRequired"] =
+                        "Select the accounting format.",
+                    ["Create.Validation.IcoRequired"] =
+                        "Enter IČO.",
+                    ["Create.Validation.FiscalYearRequired"] =
+                        "Enter fiscal year.",
+                    ["Create.Validation.FiscalYearInvalid"] =
+                        "Enter a valid fiscal year.",
                     ["Create.MissingAccounts"] =
                         "The selected accounts-list file does not exist.",
                     ["Create.MissingLedger"] =
@@ -223,6 +235,18 @@ namespace ExcelApiPoc.AddIn.Services
                         "Viac súborov účtovného denníka možno zatiaľ vybrať iba pre mesačné denníky Softip-MOP.",
                     ["Create.InvalidJournal"] =
                         "Vyberte platné súbory účtovného denníka.",
+                    ["Create.Validation.JournalRequired"] =
+                        "Vyberte účtovný denník.",
+                    ["Create.Validation.TechnicalTypeRequired"] =
+                        "Vyberte technický typ súboru.",
+                    ["Create.Validation.AccountingFormatRequired"] =
+                        "Vyberte účtovný systém.",
+                    ["Create.Validation.IcoRequired"] =
+                        "Zadajte IČO.",
+                    ["Create.Validation.FiscalYearRequired"] =
+                        "Zadajte účtovný rok.",
+                    ["Create.Validation.FiscalYearInvalid"] =
+                        "Zadajte platný účtovný rok.",
                     ["Create.MissingAccounts"] =
                         "Vybraný súbor účtového rozvrhu neexistuje.",
                     ["Create.MissingLedger"] =
