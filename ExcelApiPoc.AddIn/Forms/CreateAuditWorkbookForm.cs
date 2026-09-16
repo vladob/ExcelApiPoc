@@ -168,8 +168,7 @@ namespace ExcelApiPoc.AddIn.Forms
 
             _continueButton = new Button
             {
-                Text = UiText.Get("Create.Continue", _uiLanguage),
-                Enabled = false
+                Text = UiText.Get("Create.Continue", _uiLanguage)
             };
 
             _continueButton.SetBounds(565, 360, 85, 30);
@@ -379,10 +378,76 @@ namespace ExcelApiPoc.AddIn.Forms
                 List<string> journalFilePaths = GetJournalFilePaths();
                 diagnosticInputPaths.AddRange(journalFilePaths);
 
-                if (journalFilePaths.Count == 0 ||
-                    journalFilePaths.Any(path => !File.Exists(path)))
+                if (journalFilePaths.Count == 0)
                 {
-                    throw new InvalidOperationException(UiText.Get("Create.InvalidJournal", _uiLanguage));
+                    ShowValidation(
+                        "Create.Validation.JournalRequired",
+                        "CAW-VALIDATION-JOURNAL",
+                        _journalPathTextBox,
+                        diagnosticInputPaths);
+                    return;
+                }
+
+                if (journalFilePaths.Any(path => !File.Exists(path)))
+                {
+                    ShowValidation(
+                        "Create.InvalidJournal",
+                        "CAW-VALIDATION-JOURNAL-FILE",
+                        _journalPathTextBox,
+                        diagnosticInputPaths);
+                    return;
+                }
+
+                if (IsUnknownSelection(_technicalTypeComboBox))
+                {
+                    ShowValidation(
+                        "Create.Validation.TechnicalTypeRequired",
+                        "CAW-VALIDATION-TECHNICAL-TYPE",
+                        _technicalTypeComboBox,
+                        diagnosticInputPaths);
+                    return;
+                }
+
+                if (IsUnknownSelection(_accountingFormatComboBox))
+                {
+                    ShowValidation(
+                        "Create.Validation.AccountingFormatRequired",
+                        "CAW-VALIDATION-ACCOUNTING-FORMAT",
+                        _accountingFormatComboBox,
+                        diagnosticInputPaths);
+                    return;
+                }
+
+                string selectedIco = _icoTextBox.Text.Trim();
+                if (string.IsNullOrWhiteSpace(selectedIco))
+                {
+                    ShowValidation(
+                        "Create.Validation.IcoRequired",
+                        "CAW-VALIDATION-ICO",
+                        _icoTextBox,
+                        diagnosticInputPaths);
+                    return;
+                }
+
+                string fiscalYearText = _fiscalYearTextBox.Text.Trim();
+                if (string.IsNullOrWhiteSpace(fiscalYearText))
+                {
+                    ShowValidation(
+                        "Create.Validation.FiscalYearRequired",
+                        "CAW-VALIDATION-FISCAL-YEAR",
+                        _fiscalYearTextBox,
+                        diagnosticInputPaths);
+                    return;
+                }
+
+                if (!int.TryParse(fiscalYearText, out int selectedFiscalYear))
+                {
+                    ShowValidation(
+                        "Create.Validation.FiscalYearInvalid",
+                        "CAW-VALIDATION-FISCAL-YEAR",
+                        _fiscalYearTextBox,
+                        diagnosticInputPaths);
+                    return;
                 }
 
                 string accountsPath = _accountsPathTextBox.Text.Trim();
@@ -399,14 +464,6 @@ namespace ExcelApiPoc.AddIn.Forms
                 }
                 if (!string.IsNullOrWhiteSpace(generalLedgerPath) && !File.Exists(generalLedgerPath))
                     throw new InvalidOperationException(UiText.Get("Create.MissingLedger", _uiLanguage));
-
-
-                if (!int.TryParse( _fiscalYearTextBox.Text.Trim(), out int selectedFiscalYear))
-                {
-                    throw new InvalidOperationException(UiText.Get("Create.InvalidFiscalYear", _uiLanguage));
-                }
-
-                string selectedIco = _icoTextBox.Text.Trim();
 
                 var importRequest = new AccountingImportRequest
                 {
@@ -745,6 +802,37 @@ namespace ExcelApiPoc.AddIn.Forms
             }
         }
 
+        private void ShowValidation(
+            string messageKey,
+            string errorCode,
+            Control focusControl,
+            IEnumerable<string> inputFilePaths)
+        {
+            SetBusy(false);
+
+            ErrorDialog.ShowError(
+                this,
+                UiText.Get("Create.Title", _uiLanguage),
+                UiText.Get(messageKey, _uiLanguage),
+                null,
+                "Create Audit Workbook / Validation",
+                errorCode,
+                inputFilePaths,
+                _uiLanguage);
+
+            focusControl?.Focus();
+        }
+
+        private static bool IsUnknownSelection(ComboBox comboBox)
+        {
+            return comboBox == null ||
+                string.IsNullOrWhiteSpace(comboBox.Text) ||
+                string.Equals(
+                    comboBox.Text,
+                    "Unknown",
+                    StringComparison.OrdinalIgnoreCase);
+        }
+
         private void DetectJournalInformation(string filePath)
         {
             // Reset values previously detected from another file.
@@ -783,7 +871,6 @@ namespace ExcelApiPoc.AddIn.Forms
         {
             string path = (filePath ?? string.Empty).Trim();
             bool fileExists = File.Exists(path);
-            _continueButton.Enabled = fileExists;
             if (!fileExists)
             {
                 return;
@@ -799,7 +886,6 @@ namespace ExcelApiPoc.AddIn.Forms
                 filePaths.Count > 0 &&
                 filePaths.All(File.Exists);
 
-            _continueButton.Enabled = filesExist;
             if (!filesExist)
             {
                 return;
