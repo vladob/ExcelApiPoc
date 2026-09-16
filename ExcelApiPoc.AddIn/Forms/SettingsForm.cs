@@ -410,6 +410,9 @@ namespace ExcelApiPoc.AddIn.Forms
 
             AcceptButton = _closeButton;
             CancelButton = _closeButton;
+
+            Resize += (sender, e) => LayoutControls();
+            LayoutControls();
         }
 
         private static string BuildMessageRtf(
@@ -501,9 +504,7 @@ namespace ExcelApiPoc.AddIn.Forms
             }
         }
 
-        private void DetailsButton_Click(
-            object sender,
-            EventArgs e)
+        private void DetailsButton_ClickOld(object sender, EventArgs e)
         {
             _detailsVisible = !_detailsVisible;
 
@@ -535,6 +536,46 @@ namespace ExcelApiPoc.AddIn.Forms
             finally
             {
                 ResumeLayout(true);
+            }
+        }
+
+        private void DetailsButton_Click(object sender, EventArgs e)
+        {
+            _detailsVisible = !_detailsVisible;
+
+            SuspendLayout();
+            try
+            {
+                Height = _detailsVisible ? ExpandedHeight : CollapsedHeight;
+                _detailsLabel.Visible = _detailsVisible;
+                _detailsBox.Visible = _detailsVisible;
+                _detailsButton.Text = UiText.Get(_detailsVisible ? "Error.HideDetails" : "Error.ShowDetails", _language);
+                LayoutControls();
+            }
+            finally
+            {
+                ResumeLayout(true);
+            }
+        }
+
+        private void LayoutControls()
+        {
+            const int margin = 15;
+            const int buttonHeight = 30;
+            const int buttonGap = 10;
+
+            int buttonTop = ClientSize.Height - margin - buttonHeight;
+
+            _detailsButton.SetBounds(margin, buttonTop, 130, buttonHeight);
+            _closeButton.SetBounds(ClientSize.Width - margin - 85, buttonTop, 85, buttonHeight);
+            _copyButton.SetBounds(_closeButton.Left - buttonGap - 145, buttonTop, 145, buttonHeight);
+            _messageBox.Width = ClientSize.Width - (2 * margin);
+
+            if (_detailsVisible)
+            {
+                const int detailsTop = 200;
+
+                _detailsBox.SetBounds(margin, detailsTop, ClientSize.Width - (2 * margin), Math.Max(60, buttonTop - buttonGap - detailsTop));
             }
         }
 
