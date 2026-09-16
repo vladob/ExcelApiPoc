@@ -482,6 +482,13 @@ namespace ExcelApiPoc.AddIn.Forms
                 language ??
                 SettingsService.Load().UiLanguage;
 
+            ClassifyKnownCreateWorkbookError(
+                ref userMessage,
+                exception,
+                ref operation,
+                ref errorCode,
+                effectiveLanguage);
+
             string details =
                 ErrorDiagnosticBuilder.Build(
                     exception,
@@ -502,6 +509,67 @@ namespace ExcelApiPoc.AddIn.Forms
                 else
                     dialog.ShowDialog(owner);
             }
+        }
+
+        private static void ClassifyKnownCreateWorkbookError(
+            ref string userMessage,
+            Exception exception,
+            ref string operation,
+            ref string errorCode,
+            string language)
+        {
+            if (!string.Equals(
+                    errorCode,
+                    "CAW-UNEXPECTED",
+                    StringComparison.Ordinal) ||
+                !(exception is InvalidDataException) ||
+                string.IsNullOrWhiteSpace(exception.Message) ||
+                exception.Message.IndexOf(
+                    "No registered importer recognizes the accounting-journal file",
+                    StringComparison.OrdinalIgnoreCase) < 0)
+            {
+                return;
+            }
+
+            string accountingFormat = "selected";
+            Match formatMatch = Regex.Match(
+                exception.Message,
+                @"accounting format '([^']+)'",
+                RegexOptions.IgnoreCase);
+
+            if (formatMatch.Success)
+                accountingFormat = formatMatch.Groups[1].Value;
+
+            string normalizedLanguage =
+                SettingsService.NormalizeUiLanguage(language);
+
+            if (string.Equals(
+                    normalizedLanguage,
+                    SettingsService.SlovakUiLanguage,
+                    StringComparison.Ordinal))
+            {
+                userMessage =
+                    "Vybraný účtovný denník nebol rozpoznaný ako formát " +
+                    accountingFormat +
+                    ". Vyberte správny účtovný systém alebo použite export " +
+                    "účtovného denníka v podporovanom formáte " +
+                    accountingFormat +
+                    ".";
+            }
+            else
+            {
+                userMessage =
+                    "The selected accounting journal is not recognized as " +
+                    accountingFormat +
+                    " format. Select the correct Accounting format, or " +
+                    "provide an accounting-journal export in a supported " +
+                    accountingFormat +
+                    " format.";
+            }
+
+            operation =
+                "Create Audit Workbook / Accounting journal import";
+            errorCode = "CAW-IMPORT-JOURNAL-FORMAT";
         }
 
         private void DetailsButton_ClickOld(object sender, EventArgs e)
