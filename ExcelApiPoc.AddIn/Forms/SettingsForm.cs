@@ -2,7 +2,6 @@ using ExcelApiPoc.AddIn.Models;
 using ExcelApiPoc.AddIn.Services;
 using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.IO;
 using System.Net.Http;
 using System.Security.Cryptography;
@@ -324,7 +323,6 @@ namespace ExcelApiPoc.AddIn.Forms
             MinimizeBox = false;
             MaximizeBox = false;
             ShowInTaskbar = false;
-            MinimumSize = new Size(650, CollapsedHeight);
             Width = 760;
             Height = CollapsedHeight;
 
@@ -332,7 +330,6 @@ namespace ExcelApiPoc.AddIn.Forms
             {
                 ReadOnly = true,
                 DetectUrls = false,
-                BackColor = SystemColors.Window,
                 BorderStyle = BorderStyle.FixedSingle,
                 TabStop = false
             };
@@ -342,21 +339,10 @@ namespace ExcelApiPoc.AddIn.Forms
                 AnchorStyles.Left |
                 AnchorStyles.Right;
 
-            _messageBox.SelectionFont =
-                new Font(
-                    _messageBox.Font,
-                    FontStyle.Bold);
-            _messageBox.AppendText(title);
-            _messageBox.AppendText(
-                Environment.NewLine +
-                Environment.NewLine);
-            _messageBox.SelectionFont =
-                new Font(
-                    _messageBox.Font,
-                    FontStyle.Regular);
-            _messageBox.AppendText(userMessage);
-            _messageBox.SelectionStart = 0;
-            _messageBox.SelectionLength = 0;
+            _messageBox.Rtf =
+                BuildMessageRtf(
+                    title,
+                    userMessage);
 
             _detailsLabel = new Label
             {
@@ -424,6 +410,59 @@ namespace ExcelApiPoc.AddIn.Forms
 
             AcceptButton = _closeButton;
             CancelButton = _closeButton;
+        }
+
+        private static string BuildMessageRtf(
+            string title,
+            string userMessage)
+        {
+            return
+                @"{\rtf1\ansi\deff0{\fonttbl{\f0 Segoe UI;}}" +
+                @"\fs18\b " +
+                EscapeRtf(title) +
+                @"\b0\par\par " +
+                EscapeRtf(userMessage) +
+                "}";
+        }
+
+        private static string EscapeRtf(string value)
+        {
+            var builder = new StringBuilder();
+
+            foreach (char character in value ?? string.Empty)
+            {
+                switch (character)
+                {
+                    case '\\':
+                        builder.Append(@"\\");
+                        break;
+                    case '{':
+                        builder.Append(@"\{");
+                        break;
+                    case '}':
+                        builder.Append(@"\}");
+                        break;
+                    case '\r':
+                        break;
+                    case '\n':
+                        builder.Append(@"\par ");
+                        break;
+                    default:
+                        if (character <= 0x7f)
+                        {
+                            builder.Append(character);
+                        }
+                        else
+                        {
+                            builder.Append(@"\u");
+                            builder.Append((short)character);
+                            builder.Append('?');
+                        }
+                        break;
+                }
+            }
+
+            return builder.ToString();
         }
 
         public static void ShowError(
