@@ -1,7 +1,8 @@
-﻿namespace ExcelApiPoc.AddIn.Models
+namespace ExcelApiPoc.AddIn.Models
 {
     internal sealed class AddInSettings
     {
         public string ApiBaseUrl { get; set; }
+        public string UiLanguage { get; set; }
     }
 }
