@@ -240,8 +240,7 @@ namespace ExcelApiPoc.AddIn.Forms
             }
         }
 
-        private static bool AreSoftipMopJournalFiles(
-            IEnumerable<string> filePaths)
+        private static bool AreSoftipMopJournalFiles(IEnumerable<string> filePaths)
         {
             foreach (string filePath in filePaths)
             {
@@ -479,6 +478,33 @@ namespace ExcelApiPoc.AddIn.Forms
                 AccountingImportPackage importPackage =
                     AccountingImportCoordinator.CreateDefault().Import(importRequest);
 
+                try
+                {
+                    importPackage =
+                        AccountingImportCoordinator.CreateDefault().Import(importRequest);
+                }
+                catch (InvalidDataException exception)
+                    when (IsUnrecognizedJournalFormat(exception))
+                {
+                    SetBusy(false);
+
+                    ErrorDialog.ShowError(
+                        this,
+                        UiText.Get("Create.Title", _uiLanguage),
+                        UiText.Format(
+                            "Create.Import.JournalFormatNotRecognized",
+                            _uiLanguage,
+                            importRequest.AccountingFormat),
+                        exception,
+                        "Create Audit Workbook / Accounting journal import",
+                        "CAW-IMPORT-JOURNAL-FORMAT",
+                        journalFilePaths,
+                        _uiLanguage);
+
+                    _accountingFormatComboBox.Focus();
+                    return;
+                }
+
                 JournalImport journalImport = importPackage.Journal;
                 GeneralLedgerImport generalLedgerImport = importPackage.GeneralLedger;
                 CalculatedGeneralLedger calculatedGeneralLedger =
@@ -488,11 +514,21 @@ namespace ExcelApiPoc.AddIn.Forms
 
                 if (generalLedgerImport == null && !journalImport.Rows.Any(row => row.RecordKind == JournalRecordKind.Opening))
                 {
+                    /*
                     throw new InvalidOperationException(
                         "The accounting journal does not contain opening " +
                         "balance records. Select the corresponding general " +
                         "ledger so that opening balances can be supplied " +
                         "and closing balances validated.");
+                    */
+                    ShowValidation(
+                        "Create.Validation.GeneralLedgerRequired",
+                        "CAW-GL-REQUIRED",
+                        _generalLedgerPathTextBox,
+                        diagnosticInputPaths);
+                    return;
+
+
                 }
 
                 AccountingFrameworkImport accountingFrameworkImport = null;
@@ -802,11 +838,7 @@ namespace ExcelApiPoc.AddIn.Forms
             }
         }
 
-        private void ShowValidation(
-            string messageKey,
-            string errorCode,
-            Control focusControl,
-            IEnumerable<string> inputFilePaths)
+        private void ShowValidation(string messageKey, string errorCode, Control focusControl, IEnumerable<string> inputFilePaths)
         {
             SetBusy(false);
 
@@ -917,6 +949,15 @@ namespace ExcelApiPoc.AddIn.Forms
             return path.Length == 0
                 ? new List<string>()
                 : new List<string> { path };
+        }
+
+        private static bool IsUnrecognizedJournalFormat(InvalidDataException exception)
+        {
+            return exception != null &&
+                exception.Message != null &&
+                exception.Message.IndexOf(
+                    "No registered importer recognizes the accounting-journal file",
+                    StringComparison.OrdinalIgnoreCase) >= 0;
         }
     }
 }

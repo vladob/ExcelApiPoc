@@ -11,14 +11,9 @@ namespace ExcelApiPoc.AccountingImport.Services.Ives
 {
     internal sealed class IvesExcelGeneralLedgerParser
     {
-        private static readonly Regex IcoPattern = new Regex(
-            @"I\s*[ČC]\s*O\s*:\s*(?<ico>\d{8})",
-            RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
+        private static readonly Regex IcoPattern = new Regex(@"I\s*[ČC]\s*O\s*:\s*(?<ico>\d{8})", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
 
-        private static readonly Regex PeriodPattern = new Regex(
-            @"Dátum\s+od\s*:\s*(?<from>\d{1,2}\.\d{1,2}\.\d{4})\s*,\s*" +
-            @"Dátum\s+do\s*:\s*(?<to>\d{1,2}\.\d{1,2}\.\d{4})",
-            RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
+        private static readonly Regex PeriodPattern = new Regex(@"Dátum\s+od\s*:\s*(?<from>\d{1,2}\.\d{1,2}\.\d{4})\s*,\s*" + @"Dátum\s+do\s*:\s*(?<to>\d{1,2}\.\d{1,2}\.\d{4})", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
 
         public IvesGeneralLedgerParseResult Parse(string filePath)
         {
@@ -126,12 +121,7 @@ namespace ExcelApiPoc.AccountingImport.Services.Ives
             ValidateMetadata(result);
         }
 
-        private static IvesGeneralLedgerRowKind Classify(
-            IExcelDataReader reader,
-            int sourceRowNumber,
-            string currentSyntheticAccount,
-            IvesGeneralLedgerSourceRow pendingAccount,
-            ColumnLayout layout)
+        private static IvesGeneralLedgerRowKind Classify(IExcelDataReader reader, int sourceRowNumber, string currentSyntheticAccount, IvesGeneralLedgerSourceRow pendingAccount, ColumnLayout layout)
         {
             if (sourceRowNumber <= 11) return IvesGeneralLedgerRowKind.Header;
             if (IsEntireRowBlank(reader)) return IvesGeneralLedgerRowKind.Blank;
@@ -141,7 +131,7 @@ namespace ExcelApiPoc.AccountingImport.Services.Ives
             string account = Text(reader, layout.AccountColumn);
             string description = Text(reader, layout.TextColumn);
 
-            if (Contains(dateText, "Dátum") && Contains(document, "Doklad"))
+            if (Contains(dateText, "Dátum") && IsDocumentHeader(document))
                 return IvesGeneralLedgerRowKind.Title;
             if (IsReportTotalLabel(dateText))
                 return IvesGeneralLedgerRowKind.ReportTotal;
@@ -169,11 +159,7 @@ namespace ExcelApiPoc.AccountingImport.Services.Ives
             return IvesGeneralLedgerRowKind.Unclassified;
         }
 
-        private static IvesGeneralLedgerSourceRow CreateRow(
-            IExcelDataReader reader,
-            int sourceRowNumber,
-            IvesGeneralLedgerRowKind kind,
-            ColumnLayout layout)
+        private static IvesGeneralLedgerSourceRow CreateRow(IExcelDataReader reader, int sourceRowNumber, IvesGeneralLedgerRowKind kind, ColumnLayout layout)
         {
             var row = new IvesGeneralLedgerSourceRow
             {
@@ -349,9 +335,7 @@ namespace ExcelApiPoc.AccountingImport.Services.Ives
                 value.Trim().StartsWith("Spolu za zákazku", StringComparison.OrdinalIgnoreCase);
         }
 
-        private static bool HasAnyAmount(
-            IExcelDataReader reader,
-            ColumnLayout layout)
+        private static bool HasAnyAmount(IExcelDataReader reader, ColumnLayout layout)
         {
             return HasValue(reader, layout.AccountOpeningColumn) ||
                 HasValue(reader, layout.DocumentDebitColumn) ||
@@ -360,11 +344,7 @@ namespace ExcelApiPoc.AccountingImport.Services.Ives
                 HasValue(reader, layout.ClosingColumn);
         }
 
-        private static void PopulateAccountAmounts(
-            IvesGeneralLedgerSourceRow row,
-            IExcelDataReader reader,
-            int sourceRowNumber,
-            ColumnLayout layout)
+        private static void PopulateAccountAmounts(IvesGeneralLedgerSourceRow row, IExcelDataReader reader, int sourceRowNumber, ColumnLayout layout)
         {
             PopulateAmounts(
                 row,
@@ -374,12 +354,7 @@ namespace ExcelApiPoc.AccountingImport.Services.Ives
                 layout.AccountDebitColumn);
         }
 
-        private static void PopulateAmounts(
-            IvesGeneralLedgerSourceRow row,
-            IExcelDataReader reader,
-            int sourceRowNumber,
-            ColumnLayout layout,
-            int debitColumn)
+        private static void PopulateAmounts(IvesGeneralLedgerSourceRow row, IExcelDataReader reader, int sourceRowNumber, ColumnLayout layout, int debitColumn)
         {
             row.OpeningBalance = Amount(
                 reader,
@@ -399,9 +374,7 @@ namespace ExcelApiPoc.AccountingImport.Services.Ives
                 sourceRowNumber);
         }
 
-        private static ColumnLayout DiscoverLayout(
-            IExcelDataReader reader,
-            string sourceFileName)
+        private static ColumnLayout DiscoverLayout(IExcelDataReader reader, string sourceFileName)
         {
             if (reader.FieldCount == 28)
             {
@@ -458,8 +431,7 @@ namespace ExcelApiPoc.AccountingImport.Services.Ives
             throw new InvalidDataException("Invalid IVES period date '" + value + "'.");
         }
 
-        private static int NextSequence(
-            IDictionary<IvesGeneralLedgerRowKind, int> sequences, IvesGeneralLedgerRowKind kind)
+        private static int NextSequence(IDictionary<IvesGeneralLedgerRowKind, int> sequences, IvesGeneralLedgerRowKind kind)
         {
             sequences.TryGetValue(kind, out int value);
             sequences[kind] = ++value;
@@ -571,6 +543,11 @@ namespace ExcelApiPoc.AccountingImport.Services.Ives
             throw new InvalidDataException("IVES workbook '" + fileName + "' contains " +
                 reader.ResultsCount + " worksheets: " + string.Join(", ", names) +
                 ". Exactly one worksheet is required.");
+        }
+
+        private static bool IsDocumentHeader(string value)
+        {
+            return Contains(value, "Doklad") || Contains(value, "Dokl.");
         }
     }
 }

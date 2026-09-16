@@ -152,36 +152,25 @@ namespace ExcelApiPoc.AddIn.Services
                     ["Create.SelectJournal"] = "Select Accounting Journal",
                     ["Create.SelectFramework"] = "Select Accounting Framework",
                     ["Create.SelectGeneralLedger"] = "Select General Ledger",
-                    ["Create.MultipleJournalFiles"] =
-                        "Multiple accounting-journal files can currently be selected only for Softip-MOP monthly journals.",
-                    ["Create.InvalidJournal"] =
-                        "Select valid accounting journal files.",
-                    ["Create.Validation.JournalRequired"] =
-                        "Select an accounting journal.",
-                    ["Create.Validation.TechnicalTypeRequired"] =
-                        "Select the technical file type.",
-                    ["Create.Validation.AccountingFormatRequired"] =
-                        "Select the accounting format.",
-                    ["Create.Validation.IcoRequired"] =
-                        "Enter IČO.",
-                    ["Create.Validation.FiscalYearRequired"] =
-                        "Enter fiscal year.",
-                    ["Create.Validation.FiscalYearInvalid"] =
-                        "Enter a valid fiscal year.",
-                    ["Create.MissingAccounts"] =
-                        "The selected accounts-list file does not exist.",
-                    ["Create.MissingLedger"] =
-                        "The selected general-ledger file does not exist.",
-                    ["Create.InvalidFiscalYear"] =
-                        "Enter a valid fiscal year.",
-                    ["Create.Failed"] =
-                        "Accounting journal processing failed.",
-                    ["Create.CalculationUnavailable"] =
-                        "The accounting data was imported successfully, but a calculation report could not be created.",
-                    ["Create.CalculationUnavailableTitle"] =
-                        "Calculation Report Unavailable",
-                    ["Create.PreflightTitle"] =
-                        "Accounting Journal Preflight",
+                    ["Create.MultipleJournalFiles"] = "Multiple accounting-journal files can currently be selected only for Softip-MOP monthly journals.",
+                    ["Create.InvalidJournal"] = "Select valid accounting journal files.",
+                    ["Create.Import.JournalFormatNotRecognized"] = "The selected accounting journal is not recognized as {0} format. " +
+                        "Select the correct Accounting format, or provide an accounting-journal " +
+                        "export in a supported {0} format.",
+                    ["Create.Validation.JournalRequired"] = "Select an accounting journal.",
+                    ["Create.Validation.TechnicalTypeRequired"] = "Select the technical file type.",
+                    ["Create.Validation.AccountingFormatRequired"] = "Select the accounting format.",
+                    ["Create.Validation.IcoRequired"] = "Enter IČO.",
+                    ["Create.Validation.FiscalYearRequired"] = "Enter fiscal year.",
+                    ["Create.Validation.FiscalYearInvalid"] = "Enter a valid fiscal year.",
+                    ["Create.Validation.GeneralLedgerRequired"] = "The accounting journal does not contain opening balances. Select the corresponding General Ledger so that opening balances can be supplied and closing balances validated.",
+                    ["Create.MissingAccounts"] = "The selected accounts-list file does not exist.",
+                    ["Create.MissingLedger"] = "The selected general-ledger file does not exist.",
+                    ["Create.InvalidFiscalYear"] = "Enter a valid fiscal year.",
+                    ["Create.Failed"] = "Accounting journal processing failed.",
+                    ["Create.CalculationUnavailable"] = "The accounting data was imported successfully, but a calculation report could not be created.",
+                    ["Create.CalculationUnavailableTitle"] = "Calculation Report Unavailable",
+                    ["Create.PreflightTitle"] = "Accounting Journal Preflight",
                     ["Error.ShowDetails"] = "Show Details",
                     ["Error.HideDetails"] = "Hide Details",
                     ["Error.TechnicalDetails"] = "Technical details",
@@ -194,6 +183,8 @@ namespace ExcelApiPoc.AddIn.Services
                     ["Error.Name"] = "Name",
                     ["Error.Size"] = "Size",
                     ["Error.Sha256"] = "SHA-256"
+
+
                 };
 
         private static readonly IReadOnlyDictionary<string, string>
@@ -231,36 +222,25 @@ namespace ExcelApiPoc.AddIn.Services
                     ["Create.SelectJournal"] = "Vybrať účtovný denník",
                     ["Create.SelectFramework"] = "Vybrať účtový rozvrh",
                     ["Create.SelectGeneralLedger"] = "Vybrať hlavnú knihu",
-                    ["Create.MultipleJournalFiles"] =
-                        "Viac súborov účtovného denníka možno zatiaľ vybrať iba pre mesačné denníky Softip-MOP.",
-                    ["Create.InvalidJournal"] =
-                        "Vyberte platné súbory účtovného denníka.",
-                    ["Create.Validation.JournalRequired"] =
-                        "Vyberte účtovný denník.",
-                    ["Create.Validation.TechnicalTypeRequired"] =
-                        "Vyberte technický typ súboru.",
-                    ["Create.Validation.AccountingFormatRequired"] =
-                        "Vyberte účtovný systém.",
-                    ["Create.Validation.IcoRequired"] =
-                        "Zadajte IČO.",
-                    ["Create.Validation.FiscalYearRequired"] =
-                        "Zadajte účtovný rok.",
-                    ["Create.Validation.FiscalYearInvalid"] =
-                        "Zadajte platný účtovný rok.",
-                    ["Create.MissingAccounts"] =
-                        "Vybraný súbor účtového rozvrhu neexistuje.",
-                    ["Create.MissingLedger"] =
-                        "Vybraný súbor hlavnej knihy neexistuje.",
-                    ["Create.InvalidFiscalYear"] =
-                        "Zadajte platný účtovný rok.",
-                    ["Create.Failed"] =
-                        "Spracovanie účtovného denníka zlyhalo.",
-                    ["Create.CalculationUnavailable"] =
-                        "Účtovné údaje boli úspešne importované, ale výpočet výkazu nebolo možné vytvoriť.",
-                    ["Create.CalculationUnavailableTitle"] =
-                        "Výpočet výkazu nie je dostupný",
-                    ["Create.PreflightTitle"] =
-                        "Kontrola účtovného denníka",
+                    ["Create.MultipleJournalFiles"] = "Viac súborov účtovného denníka možno zatiaľ vybrať iba pre mesačné denníky Softip-MOP.",
+                    ["Create.Import.JournalFormatNotRecognized"] = "Vybraný účtovný denník nebol rozpoznaný ako formát {0}. " +
+                        "Vyberte správny účtovný systém alebo použite export účtovného denníka " +
+                        "v podporovanom formáte {0}.",
+                    ["Create.InvalidJournal"] = "Vyberte platné súbory účtovného denníka.",
+                    ["Create.Validation.JournalRequired"] = "Vyberte účtovný denník.",
+                    ["Create.Validation.TechnicalTypeRequired"] = "Vyberte technický typ súboru.",
+                    ["Create.Validation.AccountingFormatRequired"] = "Vyberte účtovný systém.",
+                    ["Create.Validation.IcoRequired"] = "Zadajte IČO.",
+                    ["Create.Validation.FiscalYearRequired"] = "Zadajte účtovný rok.",
+                    ["Create.Validation.FiscalYearInvalid"] = "Zadajte platný účtovný rok.",
+                    ["Create.Validation.GeneralLedgerRequired"] = "Účtovný denník neobsahuje počiatočné stavy. Vyberte príslušnú hlavnú knihu, aby bolo možné doplniť počiatočné stavy a overiť konečné stavy.",
+                    ["Create.MissingAccounts"] = "Vybraný súbor účtového rozvrhu neexistuje.",
+                    ["Create.MissingLedger"] = "Vybraný súbor hlavnej knihy neexistuje.",
+                    ["Create.InvalidFiscalYear"] = "Zadajte platný účtovný rok.",
+                    ["Create.Failed"] = "Spracovanie účtovného denníka zlyhalo.",
+                    ["Create.CalculationUnavailable"] = "Účtovné údaje boli úspešne importované, ale výpočet výkazu nebolo možné vytvoriť.",
+                    ["Create.CalculationUnavailableTitle"] = "Výpočet výkazu nie je dostupný",
+                    ["Create.PreflightTitle"] = "Kontrola účtovného denníka",
                     ["Error.ShowDetails"] = "Zobraziť podrobnosti",
                     ["Error.HideDetails"] = "Skryť podrobnosti",
                     ["Error.TechnicalDetails"] = "Technické podrobnosti",
@@ -273,6 +253,7 @@ namespace ExcelApiPoc.AddIn.Services
                     ["Error.Name"] = "Názov",
                     ["Error.Size"] = "Veľkosť",
                     ["Error.Sha256"] = "SHA-256"
+
                 };
 
         public static string Get(string key)
