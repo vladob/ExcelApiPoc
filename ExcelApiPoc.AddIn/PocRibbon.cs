@@ -15,10 +15,10 @@ namespace ExcelApiPoc.AddIn
     [ComVisible(true)]
     public class PocRibbon : ExcelRibbon
     {
-        private const string RegisterUzReportsWorksheetName =
-            "RegisterUZ Reports";
         private const string RegisterUzReportsTableName =
             "RegisterUzReports";
+        private const string RecalculateAuditReportControlId =
+            "buttonRecalculateAuditReport";
         private const string OpenRegisterUzReportControlId =
             "buttonOpenRegisterUzReport";
 
@@ -53,7 +53,8 @@ namespace ExcelApiPoc.AddIn
                 label='Recalculate Report'
                 size='large'
                 imageMso='CalculateSheet'
-                onAction='OnRecalculateAuditReport'/>
+                onAction='OnRecalculateAuditReport'
+                getEnabled='GetRecalculateAuditReportEnabled'/>
         </group>
         <group id='groupRegisterUz' label='RegisterUZ'>
             <button
@@ -85,6 +86,23 @@ namespace ExcelApiPoc.AddIn
             _applicationEventsSubscribed = true;
         }
 
+        public bool GetRecalculateAuditReportEnabled(IRibbonControl control)
+        {
+            _ = control;
+
+            try
+            {
+                Excel.Application application =
+                    (Excel.Application)ExcelDnaUtil.Application;
+                return AuditWorkbookIdentity.IsAuditWorkbook(
+                    application.ActiveWorkbook);
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
         public bool GetOpenRegisterUzReportEnabled(IRibbonControl control)
         {
             _ = control;
@@ -93,14 +111,17 @@ namespace ExcelApiPoc.AddIn
             {
                 Excel.Application application =
                     (Excel.Application)ExcelDnaUtil.Application;
+
+                if (!AuditWorkbookIdentity.IsAuditWorkbook(
+                        application.ActiveWorkbook))
+                {
+                    return false;
+                }
+
                 Excel.Worksheet worksheet =
                     application.ActiveSheet as Excel.Worksheet;
 
-                if (worksheet == null ||
-                    !string.Equals(
-                        worksheet.Name,
-                        RegisterUzReportsWorksheetName,
-                        StringComparison.Ordinal))
+                if (worksheet == null)
                     return false;
 
                 Excel.ListObject table = null;
@@ -137,23 +158,24 @@ namespace ExcelApiPoc.AddIn
         {
             _ = sheet;
             _ = target;
-            InvalidateOpenRegisterUzReport();
+            InvalidateAuditControls();
         }
 
         private void OnSheetActivate(object sheet)
         {
             _ = sheet;
-            InvalidateOpenRegisterUzReport();
+            InvalidateAuditControls();
         }
 
         private void OnWorkbookActivate(Excel.Workbook workbook)
         {
             _ = workbook;
-            InvalidateOpenRegisterUzReport();
+            InvalidateAuditControls();
         }
 
-        private void InvalidateOpenRegisterUzReport()
+        private void InvalidateAuditControls()
         {
+            _ribbon?.InvalidateControl(RecalculateAuditReportControlId);
             _ribbon?.InvalidateControl(OpenRegisterUzReportControlId);
         }
 
@@ -200,6 +222,9 @@ namespace ExcelApiPoc.AddIn
                 if (workbook == null)
                     throw new InvalidOperationException("No active workbook was found.");
 
+                if (!AuditWorkbookIdentity.IsAuditWorkbook(workbook))
+                    throw new InvalidOperationException("The active workbook is not an audit workbook.");
+
                 AuditWorkbookRecalculationResult result;
 
                 using (new ExcelBusyCursor(application))
@@ -223,6 +248,13 @@ namespace ExcelApiPoc.AddIn
             {
                 Excel.Application application =
                     (Excel.Application)ExcelDnaUtil.Application;
+
+                if (!AuditWorkbookIdentity.IsAuditWorkbook(
+                        application.ActiveWorkbook))
+                {
+                    throw new InvalidOperationException(
+                        "The active workbook is not an audit workbook.");
+                }
 
                 using (new ExcelBusyCursor(application))
                 {
