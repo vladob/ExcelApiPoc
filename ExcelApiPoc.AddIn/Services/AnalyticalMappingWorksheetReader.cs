@@ -1,6 +1,7 @@
 ﻿using ExcelApiPoc.AddIn.Models;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Excel = Microsoft.Office.Interop.Excel;
 
 namespace ExcelApiPoc.AddIn.Services
@@ -215,6 +216,57 @@ namespace ExcelApiPoc.AddIn.Services
             string caption)
         {
             return syntheticCode + "\u001f" + caption;
+        }
+    }
+
+    internal static class AnalyticalMappingHeuristicRefreshService
+    {
+        public static AuditWorkbookRecalculationResult RefreshAndRecalculate(
+            Excel.Workbook workbook)
+        {
+            if (workbook == null)
+                throw new ArgumentNullException(nameof(workbook));
+
+            AnalyticalMappingSelectionReadResult existing =
+                AnalyticalMappingWorksheetReader.Read(workbook);
+            AuditTemplatePackageResponse package =
+                AuditCalculationPackageWorksheetReader.Read(workbook);
+            IReadOnlyList<AccountSummary> accounts =
+                AccountWorksheetReader.Read(workbook);
+
+            AnalyticalMappingSelection[] auditorSelections =
+                existing.Selections
+                    .Where(selection => string.Equals(
+                        selection.MappingSource,
+                        AnalyticalMappingBuilder.AuditorSource,
+                        StringComparison.OrdinalIgnoreCase))
+                    .ToArray();
+
+            // Rebuild the heuristic from auditor-owned decisions only. Previous
+            // heuristic selections are deliberately treated as unresolved so they
+            // can move or disappear when the journal-derived balances change.
+            AuditReportCalculationResult heuristicBase =
+                AuditReportCalculationService.Calculate(
+                    accounts,
+                    package,
+                    auditorSelections);
+
+            AnalyticalMappingData mapping =
+                AnalyticalMappingBuilder.Build(
+                    accounts,
+                    package,
+                    heuristicBase,
+                    existing.States);
+
+            AnalyticalMappingValidationWorksheetWriter
+                .ReplaceAnalyticalMappingOptions(
+                    workbook,
+                    mapping.Options);
+            AnalyticalMappingWorksheetWriter.ReplaceWorksheet(
+                workbook,
+                mapping.Rows);
+
+            return AuditWorkbookRecalculationService.Recalculate(workbook);
         }
     }
 }
