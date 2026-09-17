@@ -93,6 +93,12 @@ namespace ExcelApiPoc.AddIn.Services
                 AuditWorkbookIdentity.Stamp(workbook);
             }
 
+            // The residue heuristic needs the RegisterUZ reference tables, so run it
+            // after the workbook has been fully populated. This also gives the first
+            // Calculation Results sheet the same mappings that later GL recalculation uses.
+            if (analyticalMapping != null && analyticalMapping.Rows.Count > 0)
+                AnalyticalMappingHeuristicRefreshService.RefreshAndRecalculate(workbook);
+
             JournalDateExceptionWarning.Show(journalImport);
             return workbook;
         }
