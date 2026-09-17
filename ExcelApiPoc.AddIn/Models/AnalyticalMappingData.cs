@@ -19,6 +19,11 @@ namespace ExcelApiPoc.AddIn.Models
         public decimal CreditBalance { get; set; }
         public decimal NetBalance { get; set; }
         public string ValidationRangeName { get; set; }
+        public string MappedTo { get; set; }
+        public string MappingSource { get; set; }
+        public string SuggestedMapping { get; set; }
+        public string SuggestionConfidence { get; set; }
+        public string SuggestionReason { get; set; }
     }
 
     internal sealed class AnalyticalMappingOption
