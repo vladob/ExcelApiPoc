@@ -8,8 +8,10 @@ namespace ExcelApiPoc.AddIn.Services
 {
     internal static class AnalyticalMappingValidationWorksheetWriter
     {
-        private const string WorksheetName = "__Validation";
+        internal const string WorksheetName = "__Validation";
         private const string TableName = "__AnalyticalMappingOptions";
+        private const string DateExceptionTableName = "__JournalDateExceptionResolutions";
+        internal const string DateExceptionValidationRangeName = "__JournalDateExceptionResolutionOptions";
 
         private static readonly string[] Headers =
         {
@@ -62,6 +64,68 @@ namespace ExcelApiPoc.AddIn.Services
             return worksheet;
         }
 
+        public static void EnsureJournalDateExceptionOptions(Excel.Workbook workbook)
+        {
+            if (workbook == null)
+                throw new ArgumentNullException(nameof(workbook));
+
+            Excel.Worksheet worksheet = FindWorksheet(workbook, WorksheetName);
+            if (worksheet == null)
+            {
+                Excel.Worksheet lastWorksheet =
+                    (Excel.Worksheet)workbook.Worksheets[workbook.Worksheets.Count];
+                worksheet = (Excel.Worksheet)workbook.Worksheets.Add(After: lastWorksheet);
+                worksheet.Name = WorksheetName;
+            }
+
+            if (!ContainsTable(worksheet, DateExceptionTableName))
+            {
+                // Keep a dedicated block away from the analytical-mapping options.
+                const int firstColumn = 9; // I
+                const int firstRow = 1;
+                object[,] values =
+                {
+                    { "Key", "DisplayCaption" },
+                    { "Excluded", "Row Excluded" },
+                    { "OriginalIncluded", "Original Date Included" },
+                    { "ModifiedIncluded", "Modified Date Included" }
+                };
+
+                Excel.Range firstCell =
+                    (Excel.Range)worksheet.Cells[firstRow, firstColumn];
+                Excel.Range lastCell =
+                    (Excel.Range)worksheet.Cells[firstRow + 3, firstColumn + 1];
+                Excel.Range range = worksheet.Range[firstCell, lastCell];
+                range.NumberFormat = "@";
+                range.Value2 = values;
+
+                Excel.ListObject table = worksheet.ListObjects.Add(
+                    Excel.XlListObjectSourceType.xlSrcRange,
+                    range,
+                    Type.Missing,
+                    Excel.XlYesNoGuess.xlYes,
+                    Type.Missing);
+                table.Name = DateExceptionTableName;
+                table.TableStyle = "TableStyleMedium2";
+            }
+
+            Excel.ListObject optionTable = FindTable(worksheet, DateExceptionTableName);
+            Excel.Range captions = optionTable.ListColumns["DisplayCaption"].DataBodyRange;
+            string address = captions.get_Address(
+                true,
+                true,
+                Excel.XlReferenceStyle.xlA1,
+                false,
+                Type.Missing);
+
+            DeleteWorkbookNameIfPresent(workbook, DateExceptionValidationRangeName);
+            workbook.Names.Add(
+                Name: DateExceptionValidationRangeName,
+                RefersTo: $"='{WorksheetName}'!{address}");
+
+            worksheet.Visible = Excel.XlSheetVisibility.xlSheetHidden;
+        }
+
         private static object[,] CreateValues(IReadOnlyList<AnalyticalMappingOption> options)
         {
             var values = new object[options.Count + 1, Headers.Length];
@@ -102,6 +166,43 @@ namespace ExcelApiPoc.AddIn.Services
 
                 workbook.Names.Add(Name: group.Key, RefersTo: $"='{WorksheetName}'!{address}");
                 firstOptionRow += optionCount;
+            }
+        }
+
+        private static Excel.Worksheet FindWorksheet(Excel.Workbook workbook, string name)
+        {
+            foreach (Excel.Worksheet worksheet in workbook.Worksheets)
+            {
+                if (string.Equals(worksheet.Name, name, StringComparison.OrdinalIgnoreCase))
+                    return worksheet;
+            }
+            return null;
+        }
+
+        private static bool ContainsTable(Excel.Worksheet worksheet, string tableName)
+        {
+            return FindTable(worksheet, tableName) != null;
+        }
+
+        private static Excel.ListObject FindTable(Excel.Worksheet worksheet, string tableName)
+        {
+            foreach (Excel.ListObject table in worksheet.ListObjects)
+            {
+                if (string.Equals(table.Name, tableName, StringComparison.OrdinalIgnoreCase))
+                    return table;
+            }
+            return null;
+        }
+
+        private static void DeleteWorkbookNameIfPresent(Excel.Workbook workbook, string name)
+        {
+            try
+            {
+                workbook.Names.Item(name, Type.Missing, Type.Missing).Delete();
+            }
+            catch
+            {
+                // Name is absent.
             }
         }
     }
