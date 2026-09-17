@@ -187,11 +187,13 @@ namespace ExcelApiPoc.AddIn.Services
             }
 
             for (int columnNumber = 8;
-                 columnNumber <= 13;
+                 columnNumber <= 12;
                  columnNumber++)
             {
                 ((Excel.Range)dataRange.Columns[columnNumber]).NumberFormat = "@";
             }
+
+            ((Excel.Range)dataRange.Columns[13]).NumberFormat = "General";
 
             for (int columnNumber = 5;
                  columnNumber <= 7;
@@ -239,6 +241,7 @@ namespace ExcelApiPoc.AddIn.Services
         {
             Excel.Range statusRange =
                 table.ListColumns["MappingStatus"].DataBodyRange;
+            statusRange.NumberFormat = "General";
             statusRange.Formula =
                 "=IF([@MappedTo]=\"\"," +
                 "IF([@SuggestedMapping]=\"\",\"Unresolved\",\"Suggested\")," +
