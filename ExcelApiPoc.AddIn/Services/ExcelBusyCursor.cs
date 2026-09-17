@@ -39,6 +39,7 @@ namespace ExcelApiPoc.AddIn.Services
         private readonly Excel.Application _application;
         private readonly bool _previousScreenUpdating;
         private readonly bool _previousEnableEvents;
+        private readonly Excel.XlMousePointer _previousCursor;
         private readonly bool _disableEvents;
         private bool _disposed;
 
@@ -52,8 +53,10 @@ namespace ExcelApiPoc.AddIn.Services
             _disableEvents = disableEvents;
             _previousScreenUpdating = _application.ScreenUpdating;
             _previousEnableEvents = _application.EnableEvents;
+            _previousCursor = _application.Cursor;
 
             _application.ScreenUpdating = false;
+            _application.Cursor = Excel.XlMousePointer.xlWait;
 
             if (_disableEvents)
                 _application.EnableEvents = false;
@@ -83,6 +86,15 @@ namespace ExcelApiPoc.AddIn.Services
                 {
                     _application.ScreenUpdating =
                         _previousScreenUpdating;
+                }
+                catch
+                {
+                    // Best effort: do not mask the original operation error.
+                }
+
+                try
+                {
+                    _application.Cursor = _previousCursor;
                 }
                 catch
                 {
