@@ -9,6 +9,9 @@ namespace ExcelApiPoc.AddIn.Services
     {
         private const string LegacyAccountWorksheetName = "Accounts";
         private const string AccountWorksheetName = "Account Summary";
+        private const string CalculationResultsTableName = "CalculatedReportRows";
+        private const string GeneralLedgerComparisonTableName =
+            "GeneralLedgerComparisonRows";
 
         private static readonly string[] WorksheetOrder =
         {
@@ -68,6 +71,10 @@ namespace ExcelApiPoc.AddIn.Services
             Rgb(244, 176, 132);
         private static readonly int ExceptionalColor =
             Rgb(224, 102, 102);
+        private static readonly int DiagnosticRedColor =
+            Rgb(255, 199, 206);
+        private static readonly int DiagnosticYellowColor =
+            Rgb(255, 235, 156);
 
         public static void Apply(Excel.Workbook workbook)
         {
@@ -102,6 +109,7 @@ namespace ExcelApiPoc.AddIn.Services
             }
 
             PlaceMultiYearWorksheets(workbook);
+            ApplyDiagnosticConditionalFormatting(workbook);
         }
 
         private static void PlaceMultiYearWorksheets(
@@ -190,6 +198,130 @@ namespace ExcelApiPoc.AddIn.Services
             {
                 worksheet.Tab.Color = ExceptionalColor;
             }
+        }
+
+        private static void ApplyDiagnosticConditionalFormatting(
+            Excel.Workbook workbook)
+        {
+            Excel.ListObject calculationResults =
+                FindTable(workbook, CalculationResultsTableName);
+
+            if (calculationResults?.DataBodyRange != null)
+            {
+                ApplyDifferenceFormatting(
+                    calculationResults,
+                    "Difference1",
+                    "Difference3");
+            }
+
+            Excel.ListObject generalLedgerComparison =
+                FindTable(workbook, GeneralLedgerComparisonTableName);
+
+            if (generalLedgerComparison?.DataBodyRange != null)
+            {
+                ApplyGeneralLedgerStatusFormatting(
+                    generalLedgerComparison);
+            }
+        }
+
+        private static void ApplyDifferenceFormatting(
+            Excel.ListObject table,
+            string firstColumnName,
+            string lastColumnName)
+        {
+            Excel.Range first =
+                table.ListColumns[firstColumnName].DataBodyRange;
+            Excel.Range last =
+                table.ListColumns[lastColumnName].DataBodyRange;
+
+            if (first == null || last == null)
+                return;
+
+            Excel.Worksheet worksheet = (Excel.Worksheet)table.Parent;
+            Excel.Range target =
+                worksheet.Range[
+                    first.Cells[1, 1],
+                    last.Cells[last.Rows.Count, 1]];
+
+            target.FormatConditions.Delete();
+
+            Excel.FormatCondition blankCondition =
+                (Excel.FormatCondition)target.FormatConditions.Add(
+                    Excel.XlFormatConditionType.xlBlanksCondition);
+            blankCondition.StopIfTrue = true;
+
+            Excel.FormatCondition differenceCondition =
+                (Excel.FormatCondition)target.FormatConditions.Add(
+                    Excel.XlFormatConditionType.xlCellValue,
+                    Excel.XlFormatConditionOperator.xlNotEqual,
+                    "0");
+
+            differenceCondition.Interior.Color = DiagnosticRedColor;
+            differenceCondition.Font.Bold = true;
+        }
+
+        private static void ApplyGeneralLedgerStatusFormatting(
+            Excel.ListObject table)
+        {
+            Excel.Range status = table.ListColumns["Status"].DataBodyRange;
+
+            if (status == null)
+                return;
+
+            status.FormatConditions.Delete();
+
+            AddStatusCondition(
+                status,
+                "Different",
+                DiagnosticRedColor);
+            AddStatusCondition(
+                status,
+                "Different; opening unavailable",
+                DiagnosticRedColor);
+            AddStatusCondition(
+                status,
+                "Journal only",
+                DiagnosticYellowColor);
+            AddStatusCondition(
+                status,
+                "General-ledger only",
+                DiagnosticYellowColor);
+        }
+
+        private static void AddStatusCondition(
+            Excel.Range target,
+            string status,
+            int fillColor)
+        {
+            Excel.FormatCondition condition =
+                (Excel.FormatCondition)target.FormatConditions.Add(
+                    Excel.XlFormatConditionType.xlCellValue,
+                    Excel.XlFormatConditionOperator.xlEqual,
+                    "=\"" + status.Replace("\"", "\"\"") + "\"");
+
+            condition.Interior.Color = fillColor;
+            condition.Font.Bold = true;
+        }
+
+        private static Excel.ListObject FindTable(
+            Excel.Workbook workbook,
+            string tableName)
+        {
+            foreach (Excel.Worksheet worksheet in workbook.Worksheets)
+            {
+                foreach (Excel.ListObject table in worksheet.ListObjects)
+                {
+                    if (string.Equals(
+                            table.Name,
+                            tableName,
+                            StringComparison.OrdinalIgnoreCase))
+                    {
+                        return table;
+                    }
+                }
+            }
+
+            return null;
         }
 
         private static Excel.Worksheet FindWorksheet(
