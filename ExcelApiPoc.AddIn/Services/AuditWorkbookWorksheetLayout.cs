@@ -30,6 +30,15 @@ namespace ExcelApiPoc.AddIn.Services
             "No Calculation Report"
         };
 
+        private static readonly string[] GeneralLedgerDifferenceColumns =
+        {
+            "OpeningDebitDifference",
+            "OpeningCreditDifference",
+            "DebitTurnoverDifference",
+            "CreditTurnoverDifference",
+            "ClosingBalanceDifference"
+        };
+
         private static readonly HashSet<string> AccountingEvidenceWorksheets =
             new HashSet<string>(
                 new[]
@@ -75,6 +84,8 @@ namespace ExcelApiPoc.AddIn.Services
             Rgb(255, 199, 206);
         private static readonly int DiagnosticYellowColor =
             Rgb(255, 235, 156);
+        private static readonly int ComparisonColumnColor =
+            Rgb(252, 228, 214);
 
         public static void Apply(Excel.Workbook workbook)
         {
@@ -219,6 +230,8 @@ namespace ExcelApiPoc.AddIn.Services
 
             if (generalLedgerComparison?.DataBodyRange != null)
             {
+                ApplyGeneralLedgerDifferenceColumnFormatting(
+                    generalLedgerComparison);
                 ApplyGeneralLedgerStatusFormatting(
                     generalLedgerComparison);
             }
@@ -258,6 +271,22 @@ namespace ExcelApiPoc.AddIn.Services
 
             differenceCondition.Interior.Color = DiagnosticRedColor;
             differenceCondition.Font.Bold = true;
+        }
+
+        private static void ApplyGeneralLedgerDifferenceColumnFormatting(
+            Excel.ListObject table)
+        {
+            foreach (string columnName in GeneralLedgerDifferenceColumns)
+            {
+                Excel.Range target =
+                    table.ListColumns[columnName].DataBodyRange;
+
+                if (target == null)
+                    continue;
+
+                target.Interior.Color = ComparisonColumnColor;
+                target.Font.Bold = true;
+            }
         }
 
         private static void ApplyGeneralLedgerStatusFormatting(
