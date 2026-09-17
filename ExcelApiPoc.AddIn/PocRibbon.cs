@@ -182,7 +182,8 @@ namespace ExcelApiPoc.AddIn
                 AuditWorkbookRecalculationResult result;
                 using (new ExcelBusyCursor(application))
                 {
-                    result = AuditWorkbookRecalculationService.RecalculateGeneralLedgerFromJournal(workbook);
+                    AuditWorkbookRecalculationService.RecalculateGeneralLedgerFromJournal(workbook);
+                    result = AnalyticalMappingHeuristicRefreshService.RefreshAndRecalculate(workbook);
                 }
                 AuditWorkbookRecalculationDialog.Show(result);
             }
