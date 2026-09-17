@@ -461,6 +461,7 @@ namespace ExcelApiPoc.AccountingImport.Services.Ives
                 DocumentDebitColumn = 18,
                 AccountDebitColumn = 19,
                 SyntheticSubtotalDebitColumn = 18,
+                ReportCreditColumn = 23,
                 ReportDebitColumn = 19,
                 CreditColumn = 23,
                 ClosingColumn = 26,
