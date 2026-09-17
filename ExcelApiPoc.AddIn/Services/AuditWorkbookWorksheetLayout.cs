@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using Excel = Microsoft.Office.Interop.Excel;
 
@@ -37,6 +38,43 @@ namespace ExcelApiPoc.AddIn.Services
             "DebitTurnoverDifference",
             "CreditTurnoverDifference",
             "ClosingBalanceDifference"
+        };
+
+        private static readonly string[] CalculationValueColumns =
+        {
+            "CalculatedValue1",
+            "CalculatedValue2",
+            "CalculatedValue3"
+        };
+
+        private static readonly string[] RegisterUzValueColumns =
+        {
+            "RegisterUzValue1",
+            "RegisterUzValue2",
+            "RegisterUzValue3"
+        };
+
+        private static readonly string[] CalculationDifferenceColumns =
+        {
+            "Difference1",
+            "Difference2",
+            "Difference3"
+        };
+
+        private static readonly string[] GeneralLedgerAmountColumns =
+        {
+            "CalculatedOpeningDebit",
+            "CalculatedOpeningCredit",
+            "CalculatedDebitTurnover",
+            "CalculatedCreditTurnover",
+            "CalculatedClosingDebit",
+            "CalculatedClosingCredit",
+            "GeneralLedgerOpeningDebit",
+            "GeneralLedgerOpeningCredit",
+            "GeneralLedgerDebitTurnover",
+            "GeneralLedgerCreditTurnover",
+            "GeneralLedgerClosingDebit",
+            "GeneralLedgerClosingCredit"
         };
 
         private static readonly HashSet<string> AccountingEvidenceWorksheets =
@@ -120,7 +158,319 @@ namespace ExcelApiPoc.AddIn.Services
             }
 
             PlaceMultiYearWorksheets(workbook);
+
+            if (SettingsService.Load().RoundCalculatedAmountsToWholeEuros)
+                ApplyWholeEuroRounding(workbook);
+
             ApplyDiagnosticConditionalFormatting(workbook);
+        }
+
+        private static void ApplyWholeEuroRounding(Excel.Workbook workbook)
+        {
+            Excel.ListObject calculationResults =
+                FindTable(workbook, CalculationResultsTableName);
+
+            if (calculationResults?.DataBodyRange != null)
+                RoundCalculationResults(calculationResults);
+
+            Excel.ListObject generalLedgerComparison =
+                FindTable(workbook, GeneralLedgerComparisonTableName);
+
+            if (generalLedgerComparison?.DataBodyRange != null)
+                RoundGeneralLedgerComparison(generalLedgerComparison);
+        }
+
+        private static void RoundCalculationResults(Excel.ListObject table)
+        {
+            int rowCount = table.DataBodyRange.Rows.Count;
+
+            for (int rowIndex = 1; rowIndex <= rowCount; rowIndex++)
+            {
+                for (int slotIndex = 0; slotIndex < 3; slotIndex++)
+                {
+                    Excel.Range calculatedCell =
+                        (Excel.Range)table.ListColumns[
+                            CalculationValueColumns[slotIndex]].DataBodyRange.Cells[
+                                rowIndex,
+                                1];
+                    Excel.Range registerUzCell =
+                        (Excel.Range)table.ListColumns[
+                            RegisterUzValueColumns[slotIndex]].DataBodyRange.Cells[
+                                rowIndex,
+                                1];
+                    Excel.Range differenceCell =
+                        (Excel.Range)table.ListColumns[
+                            CalculationDifferenceColumns[slotIndex]].DataBodyRange.Cells[
+                                rowIndex,
+                                1];
+
+                    decimal? calculated = RoundCell(calculatedCell);
+                    decimal? registerUz = RoundCell(registerUzCell);
+
+                    if (registerUz.HasValue && calculated.HasValue)
+                    {
+                        differenceCell.Value2 =
+                            (double)(calculated.Value - registerUz.Value);
+                    }
+                    else
+                    {
+                        differenceCell.ClearContents();
+                    }
+                }
+            }
+        }
+
+        private static void RoundGeneralLedgerComparison(Excel.ListObject table)
+        {
+            int rowCount = table.DataBodyRange.Rows.Count;
+
+            foreach (string columnName in GeneralLedgerAmountColumns)
+            {
+                Excel.Range column = table.ListColumns[columnName].DataBodyRange;
+
+                if (column == null)
+                    continue;
+
+                for (int rowIndex = 1; rowIndex <= rowCount; rowIndex++)
+                    RoundCell((Excel.Range)column.Cells[rowIndex, 1]);
+            }
+
+            for (int rowIndex = 1; rowIndex <= rowCount; rowIndex++)
+            {
+                decimal? calculatedOpeningDebit = ReadDecimal(table, "CalculatedOpeningDebit", rowIndex);
+                decimal? calculatedOpeningCredit = ReadDecimal(table, "CalculatedOpeningCredit", rowIndex);
+                decimal? calculatedDebitTurnover = ReadDecimal(table, "CalculatedDebitTurnover", rowIndex);
+                decimal? calculatedCreditTurnover = ReadDecimal(table, "CalculatedCreditTurnover", rowIndex);
+                decimal? calculatedClosingDebit = ReadDecimal(table, "CalculatedClosingDebit", rowIndex);
+                decimal? calculatedClosingCredit = ReadDecimal(table, "CalculatedClosingCredit", rowIndex);
+                decimal? ledgerOpeningDebit = ReadDecimal(table, "GeneralLedgerOpeningDebit", rowIndex);
+                decimal? ledgerOpeningCredit = ReadDecimal(table, "GeneralLedgerOpeningCredit", rowIndex);
+                decimal? ledgerDebitTurnover = ReadDecimal(table, "GeneralLedgerDebitTurnover", rowIndex);
+                decimal? ledgerCreditTurnover = ReadDecimal(table, "GeneralLedgerCreditTurnover", rowIndex);
+                decimal? ledgerClosingDebit = ReadDecimal(table, "GeneralLedgerClosingDebit", rowIndex);
+                decimal? ledgerClosingCredit = ReadDecimal(table, "GeneralLedgerClosingCredit", rowIndex);
+
+                string status = Convert.ToString(
+                    ((Excel.Range)table.ListColumns["Status"].DataBodyRange.Cells[
+                        rowIndex,
+                        1]).Value2,
+                    CultureInfo.InvariantCulture);
+
+                if (string.Equals(status, "Journal only", StringComparison.Ordinal) ||
+                    string.Equals(status, "General-ledger only", StringComparison.Ordinal) ||
+                    string.Equals(status, "No imported general ledger", StringComparison.Ordinal))
+                {
+                    continue;
+                }
+
+                WriteDifference(
+                    table,
+                    "DebitTurnoverDifference",
+                    rowIndex,
+                    calculatedDebitTurnover,
+                    ledgerDebitTurnover);
+                WriteDifference(
+                    table,
+                    "CreditTurnoverDifference",
+                    rowIndex,
+                    calculatedCreditTurnover,
+                    ledgerCreditTurnover);
+
+                bool openingAvailable = ReadBoolean(
+                    table,
+                    "OpeningAvailableFromJournal",
+                    rowIndex);
+
+                if (!openingAvailable)
+                {
+                    ClearCell(table, "OpeningDebitDifference", rowIndex);
+                    ClearCell(table, "OpeningCreditDifference", rowIndex);
+                    ClearCell(table, "CalculatedNetClosingBalance", rowIndex);
+                    ClearCell(table, "GeneralLedgerNetClosingBalance", rowIndex);
+                    ClearCell(table, "ClosingBalanceDifference", rowIndex);
+
+                    bool turnoverMatches =
+                        DifferenceIsZero(table, "DebitTurnoverDifference", rowIndex) &&
+                        DifferenceIsZero(table, "CreditTurnoverDifference", rowIndex);
+
+                    WriteText(
+                        table,
+                        "Status",
+                        rowIndex,
+                        turnoverMatches
+                            ? "Turnover reconciled; opening unavailable"
+                            : "Different; opening unavailable");
+                    continue;
+                }
+
+                WriteDifference(
+                    table,
+                    "OpeningDebitDifference",
+                    rowIndex,
+                    calculatedOpeningDebit,
+                    ledgerOpeningDebit);
+                WriteDifference(
+                    table,
+                    "OpeningCreditDifference",
+                    rowIndex,
+                    calculatedOpeningCredit,
+                    ledgerOpeningCredit);
+
+                decimal? calculatedNetClosing =
+                    Subtract(calculatedClosingDebit, calculatedClosingCredit);
+                decimal? ledgerNetClosing =
+                    Subtract(ledgerClosingDebit, ledgerClosingCredit);
+
+                WriteDecimal(
+                    table,
+                    "CalculatedNetClosingBalance",
+                    rowIndex,
+                    calculatedNetClosing);
+                WriteDecimal(
+                    table,
+                    "GeneralLedgerNetClosingBalance",
+                    rowIndex,
+                    ledgerNetClosing);
+                WriteDifference(
+                    table,
+                    "ClosingBalanceDifference",
+                    rowIndex,
+                    calculatedNetClosing,
+                    ledgerNetClosing);
+
+                bool reconciled =
+                    DifferenceIsZero(table, "OpeningDebitDifference", rowIndex) &&
+                    DifferenceIsZero(table, "OpeningCreditDifference", rowIndex) &&
+                    DifferenceIsZero(table, "DebitTurnoverDifference", rowIndex) &&
+                    DifferenceIsZero(table, "CreditTurnoverDifference", rowIndex) &&
+                    DifferenceIsZero(table, "ClosingBalanceDifference", rowIndex);
+
+                WriteText(
+                    table,
+                    "Status",
+                    rowIndex,
+                    reconciled ? "Reconciled" : "Different");
+            }
+        }
+
+        private static decimal? RoundCell(Excel.Range cell)
+        {
+            decimal? value = ReadNullableDecimal(cell.Value2);
+
+            if (!value.HasValue)
+                return null;
+
+            decimal rounded = Math.Round(
+                value.Value,
+                0,
+                MidpointRounding.AwayFromZero);
+            cell.Value2 = (double)rounded;
+            return rounded;
+        }
+
+        private static decimal? ReadDecimal(
+            Excel.ListObject table,
+            string columnName,
+            int rowIndex)
+        {
+            Excel.Range cell =
+                (Excel.Range)table.ListColumns[columnName].DataBodyRange.Cells[
+                    rowIndex,
+                    1];
+            return ReadNullableDecimal(cell.Value2);
+        }
+
+        private static decimal? ReadNullableDecimal(object value)
+        {
+            if (value == null)
+                return null;
+
+            string text = Convert.ToString(value, CultureInfo.InvariantCulture);
+            if (string.IsNullOrWhiteSpace(text))
+                return null;
+
+            return Convert.ToDecimal(value, CultureInfo.InvariantCulture);
+        }
+
+        private static bool ReadBoolean(
+            Excel.ListObject table,
+            string columnName,
+            int rowIndex)
+        {
+            object value =
+                ((Excel.Range)table.ListColumns[columnName].DataBodyRange.Cells[
+                    rowIndex,
+                    1]).Value2;
+            return Convert.ToBoolean(value, CultureInfo.InvariantCulture);
+        }
+
+        private static decimal? Subtract(decimal? left, decimal? right)
+        {
+            if (!left.HasValue || !right.HasValue)
+                return null;
+
+            return left.Value - right.Value;
+        }
+
+        private static void WriteDifference(
+            Excel.ListObject table,
+            string columnName,
+            int rowIndex,
+            decimal? left,
+            decimal? right)
+        {
+            WriteDecimal(
+                table,
+                columnName,
+                rowIndex,
+                Subtract(left, right));
+        }
+
+        private static void WriteDecimal(
+            Excel.ListObject table,
+            string columnName,
+            int rowIndex,
+            decimal? value)
+        {
+            Excel.Range cell =
+                (Excel.Range)table.ListColumns[columnName].DataBodyRange.Cells[
+                    rowIndex,
+                    1];
+
+            if (value.HasValue)
+                cell.Value2 = (double)value.Value;
+            else
+                cell.ClearContents();
+        }
+
+        private static void ClearCell(
+            Excel.ListObject table,
+            string columnName,
+            int rowIndex)
+        {
+            ((Excel.Range)table.ListColumns[columnName].DataBodyRange.Cells[
+                rowIndex,
+                1]).ClearContents();
+        }
+
+        private static void WriteText(
+            Excel.ListObject table,
+            string columnName,
+            int rowIndex,
+            string value)
+        {
+            ((Excel.Range)table.ListColumns[columnName].DataBodyRange.Cells[
+                rowIndex,
+                1]).Value2 = value;
+        }
+
+        private static bool DifferenceIsZero(
+            Excel.ListObject table,
+            string columnName,
+            int rowIndex)
+        {
+            decimal? value = ReadDecimal(table, columnName, rowIndex);
+            return value.HasValue && value.Value == 0m;
         }
 
         private static void PlaceMultiYearWorksheets(

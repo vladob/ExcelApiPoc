@@ -4,5 +4,6 @@ namespace ExcelApiPoc.AddIn.Models
     {
         public string ApiBaseUrl { get; set; }
         public string UiLanguage { get; set; }
+        public bool RoundCalculatedAmountsToWholeEuros { get; set; }
     }
 }

@@ -91,7 +91,8 @@ namespace ExcelApiPoc.AddIn.Services
             return new AddInSettings
             {
                 ApiBaseUrl = DefaultApiBaseUrl,
-                UiLanguage = DefaultUiLanguage
+                UiLanguage = DefaultUiLanguage,
+                RoundCalculatedAmountsToWholeEuros = false
             };
         }
 
@@ -131,6 +132,7 @@ namespace ExcelApiPoc.AddIn.Services
                     ["Settings.Title"] = "Excel API PoC Settings",
                     ["Settings.ApiBaseUrl"] = "API base URL:",
                     ["Settings.UiLanguage"] = "UI language:",
+                    ["Settings.RoundWholeEuros"] = "Round calculated amounts to whole euros",
                     ["Settings.SettingsFile"] = "Settings file: {0}",
                     ["Settings.TestConnection"] = "Test connection",
                     ["Settings.ConnectionTitle"] = "API Connection",
@@ -183,8 +185,6 @@ namespace ExcelApiPoc.AddIn.Services
                     ["Error.Name"] = "Name",
                     ["Error.Size"] = "Size",
                     ["Error.Sha256"] = "SHA-256"
-
-
                 };
 
         private static readonly IReadOnlyDictionary<string, string>
@@ -201,6 +201,7 @@ namespace ExcelApiPoc.AddIn.Services
                     ["Settings.Title"] = "Nastavenia Excel API PoC",
                     ["Settings.ApiBaseUrl"] = "Základná URL API:",
                     ["Settings.UiLanguage"] = "Jazyk rozhrania:",
+                    ["Settings.RoundWholeEuros"] = "Zaokrúhliť vypočítané sumy na celé eurá",
                     ["Settings.SettingsFile"] = "Súbor nastavení: {0}",
                     ["Settings.TestConnection"] = "Otestovať pripojenie",
                     ["Settings.ConnectionTitle"] = "Pripojenie k API",
@@ -253,7 +254,6 @@ namespace ExcelApiPoc.AddIn.Services
                     ["Error.Name"] = "Názov",
                     ["Error.Size"] = "Veľkosť",
                     ["Error.Sha256"] = "SHA-256"
-
                 };
 
         public static string Get(string key)
