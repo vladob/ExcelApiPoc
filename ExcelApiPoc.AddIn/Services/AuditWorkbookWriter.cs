@@ -91,6 +91,7 @@ namespace ExcelApiPoc.AddIn.Services
                 AuditWorkbookIdentity.Stamp(workbook);
             }
 
+            JournalDateExceptionWarning.Show(journalImport);
             return workbook;
         }
 
@@ -156,6 +157,7 @@ namespace ExcelApiPoc.AddIn.Services
                 AuditWorkbookIdentity.Stamp(workbook);
             }
 
+            JournalDateExceptionWarning.Show(journalImport);
             return workbook;
         }
 
