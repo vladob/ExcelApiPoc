@@ -181,6 +181,7 @@ namespace ExcelApiPoc.AddIn
 
                 AuditWorkbookRecalculationResult result;
                 using (new ExcelBusyCursor(application))
+                using (new ExcelApplicationStateScope(application, disableEvents: false))
                 {
                     AuditWorkbookRecalculationService.RecalculateGeneralLedgerFromJournal(workbook);
                     result = AnalyticalMappingHeuristicRefreshService.RefreshAndRecalculate(workbook);
@@ -210,6 +211,7 @@ namespace ExcelApiPoc.AddIn
 
                 AuditWorkbookRecalculationResult result;
                 using (new ExcelBusyCursor(application))
+                using (new ExcelApplicationStateScope(application, disableEvents: false))
                     result = AuditWorkbookRecalculationService.Recalculate(workbook);
 
                 AuditWorkbookRecalculationDialog.Show(result);
@@ -234,6 +236,7 @@ namespace ExcelApiPoc.AddIn
                     throw new InvalidOperationException("The active workbook is not an audit workbook.");
 
                 using (new ExcelBusyCursor(application))
+                using (new ExcelApplicationStateScope(application, disableEvents: false))
                     RegisterUzReportRenderingService.RenderSelectedReportTable();
             }
             catch (Exception exception)
