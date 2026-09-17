@@ -77,6 +77,8 @@ namespace ExcelApiPoc.AddIn.Services
             window.SplitRow = 4;
             window.SplitColumn = 1;
             window.FreezePanes = true;
+
+            ApplyDateExceptionValidation(workbook, journalImport);
             return worksheet;
         }
 
