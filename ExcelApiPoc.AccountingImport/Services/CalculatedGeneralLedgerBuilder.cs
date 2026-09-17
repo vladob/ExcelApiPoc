@@ -14,7 +14,10 @@ namespace ExcelApiPoc.AccountingImport.Services
                 throw new ArgumentNullException(nameof(journal));
 
             bool containsOpening =
-                journal.Rows.Any(row => row.RecordKind == JournalRecordKind.Opening);
+                journal.Rows.Any(
+                    row =>
+                        row.RecordKind == JournalRecordKind.Opening &&
+                        row.UsedForReportCalculation);
             bool containsClosing =
                 journal.Rows.Any(row => row.RecordKind == JournalRecordKind.Closing);
 
@@ -24,7 +27,7 @@ namespace ExcelApiPoc.AccountingImport.Services
 
             foreach (JournalRow source in journal.Rows)
             {
-                if (source.RecordKind == JournalRecordKind.Closing)
+                if (!source.UsedForReportCalculation)
                     continue;
 
                 Add(

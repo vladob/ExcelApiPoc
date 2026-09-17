@@ -241,20 +241,9 @@ namespace ExcelApiPoc.AccountingImport.Services
                 journal.FiscalYear,
                 request.ExpectedFiscalYear);
 
-            JournalRow wrongYearRow = IsSoftipMop(request.AccountingFormat)
-                ? null
-                : journal.Rows.FirstOrDefault(
-                    row => row.PostingDate.Year != request.ExpectedFiscalYear);
-
-            if (wrongYearRow != null)
-            {
-                throw new InvalidDataException(
-                    "Accounting journal '" + journal.SourceFileName +
-                    "' contains a posting dated " +
-                    wrongYearRow.PostingDate.ToString("yyyy-MM-dd") +
-                    ", outside fiscal year " +
-                    request.ExpectedFiscalYear + ".");
-            }
+            JournalDateExceptionService.Apply(
+                journal,
+                request.ExpectedFiscalYear);
         }
 
         private static void ReconcileJournalFileNameMetadata(

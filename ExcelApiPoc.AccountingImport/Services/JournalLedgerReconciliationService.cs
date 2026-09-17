@@ -29,14 +29,13 @@ namespace ExcelApiPoc.AccountingImport.Services
             bool containsOpening =
                 journal.Rows.Any(
                     row =>
-                        row.RecordKind ==
-                        JournalRecordKind.Opening);
+                        row.RecordKind == JournalRecordKind.Opening &&
+                        row.UsedForReportCalculation);
 
             bool containsClosing =
                 journal.Rows.Any(
-                    rowbera =>
-                        rowbera.RecordKind ==
-                        JournalRecordKind.Closing);
+                    row =>
+                        row.RecordKind == JournalRecordKind.Closing);
 
             Dictionary<string, JournalAggregate> journalAccounts =
                 BuildJournalAccounts(journal);
@@ -47,18 +46,14 @@ namespace ExcelApiPoc.AccountingImport.Services
             var result =
                 new JournalLedgerReconciliationResult
                 {
-                    JournalContainsOpeningRecords =
-                        containsOpening,
-                    JournalContainsClosingRecords =
-                        containsClosing,
+                    JournalContainsOpeningRecords = containsOpening,
+                    JournalContainsClosingRecords = containsClosing,
                     OpeningBalanceSource =
                         containsOpening
                             ? OpeningBalanceSource.Journal
                             : OpeningBalanceSource.GeneralLedger,
-                    JournalAccountCount =
-                        journalAccounts.Count,
-                    LedgerAccountCount =
-                        ledgerAccounts.Count,
+                    JournalAccountCount = journalAccounts.Count,
+                    LedgerAccountCount = ledgerAccounts.Count,
                     JournalOnlyAccountCount =
                         journalAccounts.Keys
                             .Except(
@@ -77,16 +72,14 @@ namespace ExcelApiPoc.AccountingImport.Services
                 journalAccounts.Keys
                     .Concat(ledgerAccounts.Keys)
                     .Distinct(StringComparer.Ordinal)
-                    .OrderBy(
-                        code => code,
-                        StringComparer.Ordinal);
+                    .OrderBy(code => code, StringComparer.Ordinal);
 
             foreach (string accountCode in accountCodes)
             {
                 bool hasJournal =
                     journalAccounts.TryGetValue(
                         accountCode,
-                        out JournalAggregate reng);
+                        out JournalAggregate journalAggregate);
 
                 bool hasLedger =
                     ledgerAccounts.TryGetValue(
@@ -94,31 +87,26 @@ namespace ExcelApiPoc.AccountingImport.Services
                         out LedgerAggregate ledgerAggregate);
 
                 if (!hasJournal)
-                {
-                    reng = new JournalAggregate();
-                }
+                    journalAggregate = new JournalAggregate();
 
                 if (!hasLedger)
-                {
-                    ledgerAggregate =
-                        new LedgerAggregate();
-                }
+                    ledgerAggregate = new LedgerAggregate();
 
                 decimal effectiveOpeningDebit =
                     containsOpening
-                        ? reng.OpeningDebit
+                        ? journalAggregate.OpeningDebit
                         : ledgerAggregate.OpeningDebit;
 
                 decimal effectiveOpeningCredit =
                     containsOpening
-                        ? reng.OpeningCredit
+                        ? journalAggregate.OpeningCredit
                         : ledgerAggregate.OpeningCredit;
 
                 decimal calculatedClosingBalance =
                     effectiveOpeningDebit -
                     effectiveOpeningCredit +
-                    reng.DebitTurnover -
-                    reng.CreditTurnover;
+                    journalAggregate.DebitTurnover -
+                    journalAggregate.CreditTurnover;
 
                 decimal calculatedClosingDebit =
                     calculatedClosingBalance > 0m
@@ -132,22 +120,22 @@ namespace ExcelApiPoc.AccountingImport.Services
 
                 decimal openingDebitDifference =
                     containsOpening
-                        ? reng.OpeningDebit -
+                        ? journalAggregate.OpeningDebit -
                           ledgerAggregate.OpeningDebit
                         : 0m;
 
                 decimal openingCreditDifference =
                     containsOpening
-                        ? reng.OpeningCredit -
+                        ? journalAggregate.OpeningCredit -
                           ledgerAggregate.OpeningCredit
                         : 0m;
 
                 decimal debitTurnoverDifference =
-                    reng.DebitTurnover -
+                    journalAggregate.DebitTurnover -
                     ledgerAggregate.DebitTurnover;
 
                 decimal creditTurnoverDifference =
-                    reng.CreditTurnover -
+                    journalAggregate.CreditTurnover -
                     ledgerAggregate.CreditTurnover;
 
                 decimal ledgerClosingBalance =
@@ -155,8 +143,7 @@ namespace ExcelApiPoc.AccountingImport.Services
                     ledgerAggregate.ClosingCredit;
 
                 decimal closingBalanceDifference =
-                    calculatedClosingBalance -
-                    ledgerClosingBalance;
+                    calculatedClosingBalance - ledgerClosingBalance;
 
                 bool reconciled =
                     hasLedger &&
@@ -170,94 +157,53 @@ namespace ExcelApiPoc.AccountingImport.Services
                     new JournalLedgerAccountReconciliation
                     {
                         AccountCode = accountCode,
-                        GeneralLedgerAccountName =
-                            ledgerAggregate.AccountName,
-
+                        GeneralLedgerAccountName = ledgerAggregate.AccountName,
                         HasJournalActivity = hasJournal,
                         HasGeneralLedgerAccount = hasLedger,
-
-                        JournalOpeningDebit =
-                            reng.OpeningDebit,
-                        JournalOpeningCredit =
-                            reng.OpeningCredit,
-                        JournalDebitTurnover =
-                            reng.DebitTurnover,
-                        JournalCreditTurnover =
-                            reng.CreditTurnover,
-
-                        LedgerOpeningDebit =
-                            ledgerAggregate.OpeningDebit,
-                        LedgerOpeningCredit =
-                            ledgerAggregate.OpeningCredit,
-                        LedgerDebitTurnover =
-                            ledgerAggregate.DebitTurnover,
-                        LedgerCreditTurnover =
-                            ledgerAggregate.CreditTurnover,
-                        LedgerClosingDebit =
-                            ledgerAggregate.ClosingDebit,
-                        LedgerClosingCredit =
-                            ledgerAggregate.ClosingCredit,
-
-                        EffectiveOpeningDebit =
-                            effectiveOpeningDebit,
-                        EffectiveOpeningCredit =
-                            effectiveOpeningCredit,
-
-                        CalculatedClosingDebit =
-                            calculatedClosingDebit,
-                        CalculatedClosingCredit =
-                            calculatedClosingCredit,
-
-                        OpeningDebitDifference =
-                            openingDebitDifference,
-                        OpeningCreditDifference =
-                            openingCreditDifference,
-                        DebitTurnoverDifference =
-                            debitTurnoverDifference,
-                        CreditTurnoverDifference =
-                            creditTurnoverDifference,
-                        ClosingBalanceDifference =
-                            closingBalanceDifference,
-
+                        JournalOpeningDebit = journalAggregate.OpeningDebit,
+                        JournalOpeningCredit = journalAggregate.OpeningCredit,
+                        JournalDebitTurnover = journalAggregate.DebitTurnover,
+                        JournalCreditTurnover = journalAggregate.CreditTurnover,
+                        LedgerOpeningDebit = ledgerAggregate.OpeningDebit,
+                        LedgerOpeningCredit = ledgerAggregate.OpeningCredit,
+                        LedgerDebitTurnover = ledgerAggregate.DebitTurnover,
+                        LedgerCreditTurnover = ledgerAggregate.CreditTurnover,
+                        LedgerClosingDebit = ledgerAggregate.ClosingDebit,
+                        LedgerClosingCredit = ledgerAggregate.ClosingCredit,
+                        EffectiveOpeningDebit = effectiveOpeningDebit,
+                        EffectiveOpeningCredit = effectiveOpeningCredit,
+                        CalculatedClosingDebit = calculatedClosingDebit,
+                        CalculatedClosingCredit = calculatedClosingCredit,
+                        OpeningDebitDifference = openingDebitDifference,
+                        OpeningCreditDifference = openingCreditDifference,
+                        DebitTurnoverDifference = debitTurnoverDifference,
+                        CreditTurnoverDifference = creditTurnoverDifference,
+                        ClosingBalanceDifference = closingBalanceDifference,
                         IsReconciled = reconciled
                     };
 
                 result.Accounts.Add(account);
 
                 if (reconciled)
-                {
                     result.ReconciledAccountCount++;
-                }
                 else
-                {
                     result.DifferentAccountCount++;
-                }
             }
 
             result.OpeningDebitDifference =
-                result.Accounts.Sum(
-                    account =>
-                        account.OpeningDebitDifference);
+                result.Accounts.Sum(account => account.OpeningDebitDifference);
 
             result.OpeningCreditDifference =
-                result.Accounts.Sum(
-                    account =>
-                        account.OpeningCreditDifference);
+                result.Accounts.Sum(account => account.OpeningCreditDifference);
 
             result.DebitTurnoverDifference =
-                result.Accounts.Sum(
-                    account =>
-                        account.DebitTurnoverDifference);
+                result.Accounts.Sum(account => account.DebitTurnoverDifference);
 
             result.CreditTurnoverDifference =
-                result.Accounts.Sum(
-                    account =>
-                        account.CreditTurnoverDifference);
+                result.Accounts.Sum(account => account.CreditTurnoverDifference);
 
             result.ClosingBalanceDifference =
-                result.Accounts.Sum(
-                    account =>
-                        account.ClosingBalanceDifference);
+                result.Accounts.Sum(account => account.ClosingBalanceDifference);
 
             return result;
         }
@@ -271,11 +217,8 @@ namespace ExcelApiPoc.AccountingImport.Services
 
             foreach (JournalRow row in journal.Rows)
             {
-                if (row.RecordKind ==
-                    JournalRecordKind.Closing)
-                {
+                if (!row.UsedForReportCalculation)
                     continue;
-                }
 
                 AddJournalAmount(
                     result,
@@ -306,9 +249,7 @@ namespace ExcelApiPoc.AccountingImport.Services
                 AccountCodeNormalizer.Normalize(accountCode);
 
             if (normalizedCode.Length == 0)
-            {
                 return;
-            }
 
             if (!accounts.TryGetValue(
                     normalizedCode,
@@ -321,25 +262,17 @@ namespace ExcelApiPoc.AccountingImport.Services
             if (recordKind == JournalRecordKind.Opening)
             {
                 if (debit)
-                {
                     aggregate.OpeningDebit += amount;
-                }
                 else
-                {
                     aggregate.OpeningCredit += amount;
-                }
 
                 return;
             }
 
             if (debit)
-            {
                 aggregate.DebitTurnover += amount;
-            }
             else
-            {
                 aggregate.CreditTurnover += amount;
-            }
         }
 
         private static Dictionary<string, LedgerAggregate>
@@ -352,13 +285,10 @@ namespace ExcelApiPoc.AccountingImport.Services
             foreach (GeneralLedgerRow row in ledger.Rows)
             {
                 string accountCode =
-                    AccountCodeNormalizer.Normalize(
-                        row.AccountCode);
+                    AccountCodeNormalizer.Normalize(row.AccountCode);
 
                 if (accountCode.Length == 0)
-                {
                     continue;
-                }
 
                 if (!result.TryGetValue(
                         accountCode,
@@ -368,32 +298,18 @@ namespace ExcelApiPoc.AccountingImport.Services
                     result.Add(accountCode, aggregate);
                 }
 
-                if (string.IsNullOrWhiteSpace(
-                        aggregate.AccountName) &&
-                    !string.IsNullOrWhiteSpace(
-                        row.AccountName))
+                if (string.IsNullOrWhiteSpace(aggregate.AccountName) &&
+                    !string.IsNullOrWhiteSpace(row.AccountName))
                 {
-                    aggregate.AccountName =
-                        row.AccountName;
+                    aggregate.AccountName = row.AccountName;
                 }
 
-                aggregate.OpeningDebit +=
-                    row.OpeningDebit;
-
-                aggregate.OpeningCredit +=
-                    row.OpeningCredit;
-
-                aggregate.DebitTurnover +=
-                    row.AnnualDebitTurnover;
-
-                aggregate.CreditTurnover +=
-                    row.AnnualCreditTurnover;
-
-                aggregate.ClosingDebit +=
-                    row.ClosingDebit;
-
-                aggregate.ClosingCredit +=
-                    row.ClosingCredit;
+                aggregate.OpeningDebit += row.OpeningDebit;
+                aggregate.OpeningCredit += row.OpeningCredit;
+                aggregate.DebitTurnover += row.AnnualDebitTurnover;
+                aggregate.CreditTurnover += row.AnnualCreditTurnover;
+                aggregate.ClosingDebit += row.ClosingDebit;
+                aggregate.ClosingCredit += row.ClosingCredit;
             }
 
             return result;
