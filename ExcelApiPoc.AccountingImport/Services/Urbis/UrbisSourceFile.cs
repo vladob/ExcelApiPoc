@@ -1,6 +1,6 @@
-﻿using System;
+﻿using ExcelApiPoc.AccountingImport.Services.Common;
+using System;
 using System.IO;
-using System.Text.RegularExpressions;
 
 namespace ExcelApiPoc.AccountingImport.Services.Urbis
 {
@@ -12,17 +12,6 @@ namespace ExcelApiPoc.AccountingImport.Services.Urbis
 
     internal sealed class UrbisSourceFile
     {
-        private static readonly Regex FileNamePattern =
-            new Regex(
-                @"^(?<document>U_DENNIK|HL_KNIHA)_" +
-                @"(?<ico>\d{8})_" +
-                @"(?<year>\d{4})" +
-                @"(?<stage>\d{2})?" +
-                @"(?<extension>\.xls|\.xlsx)$",
-                RegexOptions.Compiled |
-                RegexOptions.CultureInvariant |
-                RegexOptions.IgnoreCase);
-
         public string FilePath { get; private set; }
 
         public string FileName { get; private set; }
@@ -56,9 +45,29 @@ namespace ExcelApiPoc.AccountingImport.Services.Urbis
             }
 
             string fileName = Path.GetFileName(filePath);
-            Match match = FileNamePattern.Match(fileName);
+            string extension = Path.GetExtension(filePath);
 
-            if (!match.Success)
+            if (!string.Equals(
+                    extension,
+                    ".xls",
+                    StringComparison.OrdinalIgnoreCase) &&
+                !string.Equals(
+                    extension,
+                    ".xlsx",
+                    StringComparison.OrdinalIgnoreCase))
+            {
+                throw new InvalidDataException(
+                    "The Urbis filename '" + fileName +
+                    "' must use .xls or .xlsx format.");
+            }
+
+            if (!AccountingFileNameMetadataParser.TryParse(
+                    fileName,
+                    out AccountingFileNameMetadata metadata) ||
+                (metadata.DocumentKind !=
+                    AccountingSourceDocumentKind.AccountingJournal &&
+                 metadata.DocumentKind !=
+                    AccountingSourceDocumentKind.GeneralLedger))
             {
                 throw new InvalidDataException(
                     "The Urbis filename '" + fileName + "' is invalid. " +
@@ -67,7 +76,10 @@ namespace ExcelApiPoc.AccountingImport.Services.Urbis
             }
 
             UrbisDocumentKind detectedDocumentKind =
-                ParseDocumentKind(match.Groups["document"].Value);
+                metadata.DocumentKind ==
+                    AccountingSourceDocumentKind.AccountingJournal
+                    ? UrbisDocumentKind.AccountingJournal
+                    : UrbisDocumentKind.GeneralLedger;
 
             if (detectedDocumentKind != expectedDocumentKind)
             {
@@ -79,37 +91,16 @@ namespace ExcelApiPoc.AccountingImport.Services.Urbis
                     " was expected.");
             }
 
-            int fiscalYear = int.Parse(match.Groups["year"].Value);
-            int? v = match.Groups["stage"].Success ? int.Parse(match.Groups["stage"].Value) : (int?)null;
-            int? exportStage = v;
-
-            if (fiscalYear < 1900 || fiscalYear > 9999)
-            {
-                throw new InvalidDataException(
-                    "The Urbis filename '" + fileName +
-                    "' contains invalid fiscal year " + fiscalYear + ".");
-            }
-
             return new UrbisSourceFile
             {
                 FilePath = Path.GetFullPath(filePath),
                 FileName = fileName,
                 DocumentKind = detectedDocumentKind,
-                Ico = match.Groups["ico"].Value,
-                FiscalYear = fiscalYear,
-                ExportStage = exportStage,
-                Extension = match.Groups["extension"].Value.ToLowerInvariant()
+                Ico = metadata.Ico,
+                FiscalYear = metadata.FiscalYear,
+                ExportStage = metadata.ExportStage,
+                Extension = extension.ToLowerInvariant()
             };
-        }
-
-        private static UrbisDocumentKind ParseDocumentKind(string value)
-        {
-            return string.Equals(
-                value,
-                "U_DENNIK",
-                StringComparison.OrdinalIgnoreCase)
-                ? UrbisDocumentKind.AccountingJournal
-                : UrbisDocumentKind.GeneralLedger;
         }
 
         private static string Describe(UrbisDocumentKind documentKind)
