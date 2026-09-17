@@ -1,7 +1,6 @@
 ﻿using ExcelApiPoc.AddIn.Models;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using Excel = Microsoft.Office.Interop.Excel;
 
 namespace ExcelApiPoc.AddIn.Services
@@ -234,22 +233,14 @@ namespace ExcelApiPoc.AddIn.Services
             IReadOnlyList<AccountSummary> accounts =
                 AccountWorksheetReader.Read(workbook);
 
-            AnalyticalMappingSelection[] auditorSelections =
-                existing.Selections
-                    .Where(selection => string.Equals(
-                        selection.MappingSource,
-                        AnalyticalMappingBuilder.AuditorSource,
-                        StringComparison.OrdinalIgnoreCase))
-                    .ToArray();
-
-            // Rebuild the heuristic from auditor-owned decisions only. Previous
-            // heuristic selections are deliberately treated as unresolved so they
-            // can move or disappear when the journal-derived balances change.
+            // Score every analytical account independently of its current mapping.
+            // Auditor-owned decisions are preserved by the builder, but they do not
+            // hide alternative heuristic suggestions after journal-derived values change.
             AuditReportCalculationResult heuristicBase =
                 AuditReportCalculationService.Calculate(
                     accounts,
                     package,
-                    auditorSelections);
+                    Array.Empty<AnalyticalMappingSelection>());
 
             AnalyticalMappingData mapping =
                 AnalyticalMappingBuilder.Build(
