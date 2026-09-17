@@ -78,7 +78,37 @@ namespace ExcelApiPoc.AddIn.Services
                 }
             }
 
+            ApplyFileNameMetadata(result);
             return result;
+        }
+
+        private static void ApplyFileNameMetadata(AccountingFrameworkImport result)
+        {
+            if (!AccountingFileNameMetadataParser.TryParse(
+                    result.SourceFileName,
+                    out AccountingFileNameMetadata metadata))
+            {
+                return;
+            }
+
+            if (metadata.DocumentKind !=
+                AccountingSourceDocumentKind.AccountingFramework)
+            {
+                throw new InvalidDataException(
+                    "Filename '" + result.SourceFileName +
+                    "' does not identify an accounting framework.");
+            }
+
+            result.Ico = AccountingFileNameMetadataParser.ResolveIco(
+                result.SourceFileName,
+                result.Ico,
+                metadata);
+            result.FiscalYear =
+                AccountingFileNameMetadataParser.ResolveFiscalYear(
+                    result.SourceFileName,
+                    result.FiscalYear,
+                    metadata);
+            result.ExportStage = metadata.ExportStage;
         }
 
         private static string CreateAccountCode(string synthetic, string analytical)
