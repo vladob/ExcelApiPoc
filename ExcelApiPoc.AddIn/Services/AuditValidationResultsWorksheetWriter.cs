@@ -522,11 +522,13 @@ namespace ExcelApiPoc.AddIn.Services
                         table.DataBodyRange.Cells[rowIndex, firstYearColumnIndex],
                         table.DataBodyRange.Cells[rowIndex, lastYearColumnIndex]];
 
-                    string sourceAddress = source.Address[
-                        true,
-                        true,
-                        Excel.XlReferenceStyle.xlA1,
-                        false];
+                    string sourceAddress =
+                        "'" + worksheet.Name.Replace("'", "''") + "'!" +
+                        source.Address[
+                            true,
+                            true,
+                            Excel.XlReferenceStyle.xlA1,
+                            false];
 
                     dynamic sparklineGroups = destination.SparklineGroups;
                     sparklineGroups.Add(
