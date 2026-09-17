@@ -2,6 +2,7 @@ using ExcelApiPoc.AccountingImport.Models;
 using ExcelApiPoc.AddIn.Models;
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 using Excel = Microsoft.Office.Interop.Excel;
 
 namespace ExcelApiPoc.AddIn.Services
@@ -87,6 +88,7 @@ namespace ExcelApiPoc.AddIn.Services
                     generalLedgerImport);
 
                 AuditWorkbookWorksheetLayout.Apply(workbook);
+                AuditWorkbookIdentity.Stamp(workbook);
             }
 
             return workbook;
@@ -151,6 +153,7 @@ namespace ExcelApiPoc.AddIn.Services
                     calculationFailure);
 
                 AuditWorkbookWorksheetLayout.Apply(workbook);
+                AuditWorkbookIdentity.Stamp(workbook);
             }
 
             return workbook;
@@ -187,6 +190,91 @@ namespace ExcelApiPoc.AddIn.Services
             }
 
             return journalWorksheet;
+        }
+    }
+
+    internal static class AuditWorkbookIdentity
+    {
+        internal const string WorkbookKindProperty = "ExcelApiPoc.WorkbookKind";
+        internal const string SchemaVersionProperty = "ExcelApiPoc.SchemaVersion";
+        internal const string AddInVersionProperty = "ExcelApiPoc.AddInVersion";
+        internal const string WorkbookIdProperty = "ExcelApiPoc.WorkbookId";
+
+        internal const string AuditWorkbookKind = "AuditWorkbook";
+        internal const string CurrentSchemaVersion = "1";
+
+        private const int OfficeStringPropertyType = 4;
+
+        public static void Stamp(Excel.Workbook workbook)
+        {
+            if (workbook == null)
+                throw new ArgumentNullException(nameof(workbook));
+
+            string workbookId = GetProperty(workbook, WorkbookIdProperty);
+            if (string.IsNullOrWhiteSpace(workbookId))
+                workbookId = Guid.NewGuid().ToString("D");
+
+            SetProperty(workbook, WorkbookKindProperty, AuditWorkbookKind);
+            SetProperty(workbook, SchemaVersionProperty, CurrentSchemaVersion);
+            SetProperty(
+                workbook,
+                AddInVersionProperty,
+                Assembly.GetExecutingAssembly().GetName().Version.ToString());
+            SetProperty(workbook, WorkbookIdProperty, workbookId);
+        }
+
+        public static bool IsAuditWorkbook(Excel.Workbook workbook)
+        {
+            if (workbook == null)
+                return false;
+
+            return string.Equals(
+                       GetProperty(workbook, WorkbookKindProperty),
+                       AuditWorkbookKind,
+                       StringComparison.Ordinal) &&
+                   string.Equals(
+                       GetProperty(workbook, SchemaVersionProperty),
+                       CurrentSchemaVersion,
+                       StringComparison.Ordinal);
+        }
+
+        private static string GetProperty(
+            Excel.Workbook workbook,
+            string propertyName)
+        {
+            try
+            {
+                dynamic properties = workbook.CustomDocumentProperties;
+                dynamic property = properties[propertyName];
+                object value = property.Value;
+                return Convert.ToString(value);
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        private static void SetProperty(
+            Excel.Workbook workbook,
+            string propertyName,
+            string value)
+        {
+            dynamic properties = workbook.CustomDocumentProperties;
+
+            try
+            {
+                dynamic property = properties[propertyName];
+                property.Value = value;
+            }
+            catch
+            {
+                properties.Add(
+                    propertyName,
+                    false,
+                    OfficeStringPropertyType,
+                    value);
+            }
         }
     }
 }
