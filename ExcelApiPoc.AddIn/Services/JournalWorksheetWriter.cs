@@ -14,25 +14,14 @@ namespace ExcelApiPoc.AddIn.Services
         private const int HeaderRow = JournalImportCapacity.JournalHeaderRow;
         private const int FirstColumn = 1;
 
+        internal const string ExcludedCaption = "Row Excluded";
+        internal const string OriginalIncludedCaption = "Original Date Included";
+        internal const string ModifiedIncludedCaption = "Modified Date Included";
+
         private static readonly int[] BaseTextColumns =
         {
-            3,  // DocumentType
-            4,  // DocumentNumber
-            5,  // Description
-            6,  // DebitAccount
-            8,  // DebitSection
-            9,  // DebitItem
-            10, // DebitFundingSource
-            11, // DebitCostCenter
-            12, // DebitOrder
-            13, // CreditAccount
-            15, // CreditSection
-            16, // CreditItem
-            17, // CreditFundingSource
-            18, // CreditCostCenter
-            19, // CreditOrder
-            20, // RecordKind
-            25  // SourceLocation
+            3, 4, 5, 6, 8, 9, 10, 11, 12,
+            13, 15, 16, 17, 18, 19, 20, 25
         };
 
         public static Excel.Worksheet AddWorksheet(
@@ -43,50 +32,29 @@ namespace ExcelApiPoc.AddIn.Services
                 throw new ArgumentNullException(nameof(workbook));
             if (journalImport == null)
                 throw new ArgumentNullException(nameof(journalImport));
-
             if (journalImport.Rows.Count == 0)
-            {
-                throw new InvalidOperationException(
-                    "The canonical journal does not contain any rows.");
-            }
+                throw new InvalidOperationException("The canonical journal does not contain any rows.");
 
-            JournalImportCapacity.EnsureCanAppend(
-                0,
-                journalImport.Rows.Count,
-                journalImport.SourceFileName);
+            JournalImportCapacity.EnsureCanAppend(0, journalImport.Rows.Count, journalImport.SourceFileName);
 
             bool includeDateExceptionColumns =
-                journalImport.Rows.Any(
-                    row => row.DateExceptionResolution.HasValue);
+                journalImport.Rows.Any(row => row.DateExceptionResolution.HasValue);
             int lastColumn =
-                JournalWorksheetDataProjector.GetColumnCount(
-                    includeDateExceptionColumns);
+                JournalWorksheetDataProjector.GetColumnCount(includeDateExceptionColumns);
 
-            Excel.Worksheet worksheet =
-                (Excel.Worksheet)workbook.Worksheets[1];
+            Excel.Worksheet worksheet = (Excel.Worksheet)workbook.Worksheets[1];
             worksheet.Name = WorksheetName;
 
             int lastRow = HeaderRow + journalImport.Rows.Count;
-            Excel.Range firstCell =
-                (Excel.Range)worksheet.Cells[HeaderRow, FirstColumn];
-            Excel.Range lastCell =
-                (Excel.Range)worksheet.Cells[lastRow, lastColumn];
+            Excel.Range firstCell = (Excel.Range)worksheet.Cells[HeaderRow, FirstColumn];
+            Excel.Range lastCell = (Excel.Range)worksheet.Cells[lastRow, lastColumn];
             Excel.Range tableRange = worksheet.Range[firstCell, lastCell];
-
-            Excel.Range firstDataCell =
-                (Excel.Range)worksheet.Cells[HeaderRow + 1, FirstColumn];
+            Excel.Range firstDataCell = (Excel.Range)worksheet.Cells[HeaderRow + 1, FirstColumn];
             Excel.Range dataRange = worksheet.Range[firstDataCell, lastCell];
             ApplyDataFormats(dataRange, includeDateExceptionColumns);
 
-            WriteHeader(
-                worksheet,
-                lastColumn,
-                includeDateExceptionColumns);
-            WriteDataChunks(
-                worksheet,
-                journalImport,
-                lastColumn,
-                includeDateExceptionColumns);
+            WriteHeader(worksheet, lastColumn, includeDateExceptionColumns);
+            WriteDataChunks(worksheet, journalImport, lastColumn, includeDateExceptionColumns);
 
             Excel.ListObject table = worksheet.ListObjects.Add(
                 Excel.XlListObjectSourceType.xlSrcRange,
@@ -96,11 +64,7 @@ namespace ExcelApiPoc.AddIn.Services
                 Type.Missing);
             table.Name = TableName;
             table.TableStyle = "TableStyleMedium2";
-            ApplyWorksheetLayout(
-                worksheet,
-                table,
-                dataRange,
-                includeDateExceptionColumns);
+            ApplyWorksheetLayout(worksheet, table, dataRange, includeDateExceptionColumns);
 
             Excel.Range countCell = (Excel.Range)worksheet.Cells[3, 1];
             countCell.Formula = "=SUBTOTAL(3,JournalRows[SequenceNumber])";
@@ -110,12 +74,129 @@ namespace ExcelApiPoc.AddIn.Services
 
             Excel.Application application = workbook.Application;
             Excel.Window window = application.ActiveWindow;
-
             window.SplitRow = 4;
             window.SplitColumn = 1;
             window.FreezePanes = true;
-
             return worksheet;
+        }
+
+        public static void ApplyDateExceptionValidation(
+            Excel.Workbook workbook,
+            JournalImport journalImport)
+        {
+            if (workbook == null)
+                throw new ArgumentNullException(nameof(workbook));
+            if (journalImport == null)
+                throw new ArgumentNullException(nameof(journalImport));
+
+            if (!journalImport.Rows.Any(row => row.DateExceptionResolution.HasValue))
+                return;
+
+            AnalyticalMappingValidationWorksheetWriter.EnsureJournalDateExceptionOptions(workbook);
+            Excel.ListObject table = FindTable(workbook, TableName);
+            Excel.Range resolutionColumn = table.ListColumns["DateExceptionResolution"].DataBodyRange;
+
+            try
+            {
+                resolutionColumn.Validation.Delete();
+            }
+            catch
+            {
+                // The column has no validation yet.
+            }
+
+            for (int index = 0; index < journalImport.Rows.Count; index++)
+            {
+                JournalRow row = journalImport.Rows[index];
+                if (!row.DateExceptionResolution.HasValue)
+                    continue;
+
+                Excel.Range cell = (Excel.Range)resolutionColumn.Cells[index + 1, 1];
+                cell.Value2 = ToResolutionCaption(row.DateExceptionResolution.Value);
+                cell.Validation.Add(
+                    Excel.XlDVType.xlValidateList,
+                    Excel.XlDVAlertStyle.xlValidAlertStop,
+                    Excel.XlFormatConditionOperator.xlBetween,
+                    "=" + AnalyticalMappingValidationWorksheetWriter.DateExceptionValidationRangeName,
+                    Type.Missing);
+                cell.Validation.IgnoreBlank = false;
+                cell.Validation.InCellDropdown = true;
+                cell.Validation.ShowError = true;
+            }
+        }
+
+        public static void SynchronizeDerivedColumns(
+            Excel.Workbook workbook,
+            JournalImport journalImport)
+        {
+            Excel.ListObject table = FindTable(workbook, TableName);
+            Excel.Range usedColumn = table.ListColumns["UsedForReportCalculation"].DataBodyRange;
+            Excel.Range resolutionColumn = null;
+
+            try
+            {
+                resolutionColumn = table.ListColumns["DateExceptionResolution"].DataBodyRange;
+            }
+            catch
+            {
+                // Clean journals do not have date-exception columns.
+            }
+
+            for (int index = 0; index < journalImport.Rows.Count; index++)
+            {
+                JournalRow row = journalImport.Rows[index];
+                ((Excel.Range)usedColumn.Cells[index + 1, 1]).Value2 =
+                    row.UsedForReportCalculation;
+
+                if (resolutionColumn != null && row.DateExceptionResolution.HasValue)
+                {
+                    ((Excel.Range)resolutionColumn.Cells[index + 1, 1]).Value2 =
+                        ToResolutionCaption(row.DateExceptionResolution.Value);
+                }
+            }
+        }
+
+        internal static string ToResolutionCaption(JournalDateExceptionResolution resolution)
+        {
+            switch (resolution)
+            {
+                case JournalDateExceptionResolution.Excluded:
+                    return ExcludedCaption;
+                case JournalDateExceptionResolution.OriginalIncluded:
+                    return OriginalIncludedCaption;
+                case JournalDateExceptionResolution.ModifiedIncluded:
+                    return ModifiedIncludedCaption;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(resolution));
+            }
+        }
+
+        internal static bool TryParseResolutionCaption(
+            string value,
+            out JournalDateExceptionResolution resolution)
+        {
+            string text = (value ?? string.Empty).Trim();
+            if (string.Equals(text, ExcludedCaption, StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(text, "Excluded", StringComparison.OrdinalIgnoreCase))
+            {
+                resolution = JournalDateExceptionResolution.Excluded;
+                return true;
+            }
+            if (string.Equals(text, OriginalIncludedCaption, StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(text, "OriginalIncluded", StringComparison.OrdinalIgnoreCase))
+            {
+                resolution = JournalDateExceptionResolution.OriginalIncluded;
+                return true;
+            }
+            if (string.Equals(text, ModifiedIncludedCaption, StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(text, "ModifiedIncluded", StringComparison.OrdinalIgnoreCase))
+            {
+                resolution = JournalDateExceptionResolution.ModifiedIncluded;
+                return true;
+            }
+
+            resolution = default(JournalDateExceptionResolution);
+            return false;
         }
 
         private static void WriteHeader(
@@ -123,14 +204,10 @@ namespace ExcelApiPoc.AddIn.Services
             int lastColumn,
             bool includeDateExceptionColumns)
         {
-            Excel.Range firstCell =
-                (Excel.Range)worksheet.Cells[HeaderRow, FirstColumn];
-            Excel.Range lastCell =
-                (Excel.Range)worksheet.Cells[HeaderRow, lastColumn];
+            Excel.Range firstCell = (Excel.Range)worksheet.Cells[HeaderRow, FirstColumn];
+            Excel.Range lastCell = (Excel.Range)worksheet.Cells[HeaderRow, lastColumn];
             Excel.Range headerRange = worksheet.Range[firstCell, lastCell];
-            headerRange.Value2 =
-                JournalWorksheetDataProjector.CreateHeaderValues(
-                    includeDateExceptionColumns);
+            headerRange.Value2 = JournalWorksheetDataProjector.CreateHeaderValues(includeDateExceptionColumns);
         }
 
         private static void WriteDataChunks(
@@ -139,83 +216,43 @@ namespace ExcelApiPoc.AddIn.Services
             int lastColumn,
             bool includeDateExceptionColumns)
         {
-            foreach (JournalWorksheetChunk chunk in
-                JournalWorksheetDataProjector.PlanChunks(
-                    journalImport.Rows.Count))
+            foreach (JournalWorksheetChunk chunk in JournalWorksheetDataProjector.PlanChunks(journalImport.Rows.Count))
             {
-                int firstWorksheetRow =
-                    HeaderRow + 1 + chunk.StartIndex;
-                int lastWorksheetRow =
-                    firstWorksheetRow + chunk.RowCount - 1;
-                Excel.Range firstCell =
-                    (Excel.Range)worksheet.Cells[
-                        firstWorksheetRow,
-                        FirstColumn];
-                Excel.Range lastCell =
-                    (Excel.Range)worksheet.Cells[
-                        lastWorksheetRow,
-                        lastColumn];
-                Excel.Range targetRange =
-                    worksheet.Range[firstCell, lastCell];
-
-                targetRange.Value2 =
-                    JournalWorksheetDataProjector.CreateDataValues(
-                        journalImport.Rows,
-                        chunk.StartIndex,
-                        chunk.RowCount,
-                        includeDateExceptionColumns);
+                int firstWorksheetRow = HeaderRow + 1 + chunk.StartIndex;
+                int lastWorksheetRow = firstWorksheetRow + chunk.RowCount - 1;
+                Excel.Range firstCell = (Excel.Range)worksheet.Cells[firstWorksheetRow, FirstColumn];
+                Excel.Range lastCell = (Excel.Range)worksheet.Cells[lastWorksheetRow, lastColumn];
+                Excel.Range targetRange = worksheet.Range[firstCell, lastCell];
+                targetRange.Value2 = JournalWorksheetDataProjector.CreateDataValues(
+                    journalImport.Rows,
+                    chunk.StartIndex,
+                    chunk.RowCount,
+                    includeDateExceptionColumns);
             }
         }
 
-        private static void ApplyDataFormats(
-            Excel.Range dataRange,
-            bool includeDateExceptionColumns)
+        private static void ApplyDataFormats(Excel.Range dataRange, bool includeDateExceptionColumns)
         {
             int offset = includeDateExceptionColumns ? 2 : 0;
-
             foreach (int baseColumnNumber in BaseTextColumns)
             {
                 int columnNumber = baseColumnNumber + offset;
-                Excel.Range column =
-                    (Excel.Range)dataRange.Columns[columnNumber];
-
-                // Must be applied before assigning values,
-                // otherwise numeric-looking identifiers may be converted.
-                column.NumberFormat = "@";
+                ((Excel.Range)dataRange.Columns[columnNumber]).NumberFormat = "@";
             }
 
             if (includeDateExceptionColumns)
             {
-                Excel.Range resolutionColumn =
-                    (Excel.Range)dataRange.Columns[3];
-                Excel.Range correctedDateColumn =
-                    (Excel.Range)dataRange.Columns[4];
-                resolutionColumn.NumberFormat = "@";
-                correctedDateColumn.NumberFormat = "yyyy-mm-dd";
+                ((Excel.Range)dataRange.Columns[3]).NumberFormat = "@";
+                ((Excel.Range)dataRange.Columns[4]).NumberFormat = "yyyy-mm-dd";
             }
 
-            Excel.Range sequenceColumn =
-                (Excel.Range)dataRange.Columns[1];
-            Excel.Range postingDateColumn =
-                (Excel.Range)dataRange.Columns[2];
-            Excel.Range debitAmountColumn =
-                (Excel.Range)dataRange.Columns[7 + offset];
-            Excel.Range creditAmountColumn =
-                (Excel.Range)dataRange.Columns[14 + offset];
-            Excel.Range sourceRecordColumn =
-                (Excel.Range)dataRange.Columns[22 + offset];
-            Excel.Range sourceStartLineColumn =
-                (Excel.Range)dataRange.Columns[23 + offset];
-            Excel.Range sourceEndLineColumn =
-                (Excel.Range)dataRange.Columns[24 + offset];
-
-            sequenceColumn.NumberFormat = "0";
-            postingDateColumn.NumberFormat = "yyyy-mm-dd";
-            debitAmountColumn.NumberFormat = "#,##0.00;[Red]-#,##0.00";
-            creditAmountColumn.NumberFormat = "#,##0.00;[Red]-#,##0.00";
-            sourceRecordColumn.NumberFormat = "0";
-            sourceStartLineColumn.NumberFormat = "0";
-            sourceEndLineColumn.NumberFormat = "0";
+            ((Excel.Range)dataRange.Columns[1]).NumberFormat = "0";
+            ((Excel.Range)dataRange.Columns[2]).NumberFormat = "yyyy-mm-dd";
+            ((Excel.Range)dataRange.Columns[7 + offset]).NumberFormat = "#,##0.00;[Red]-#,##0.00";
+            ((Excel.Range)dataRange.Columns[14 + offset]).NumberFormat = "#,##0.00;[Red]-#,##0.00";
+            ((Excel.Range)dataRange.Columns[22 + offset]).NumberFormat = "0";
+            ((Excel.Range)dataRange.Columns[23 + offset]).NumberFormat = "0";
+            ((Excel.Range)dataRange.Columns[24 + offset]).NumberFormat = "0";
         }
 
         private static void ApplyWorksheetLayout(
@@ -226,81 +263,48 @@ namespace ExcelApiPoc.AddIn.Services
         {
             int offset = includeDateExceptionColumns ? 2 : 0;
             Excel.Range headerRange = table.HeaderRowRange;
-
             headerRange.WrapText = false;
             headerRange.HorizontalAlignment = Excel.XlHAlign.xlHAlignCenter;
             headerRange.VerticalAlignment = Excel.XlVAlign.xlVAlignCenter;
             headerRange.RowHeight = 20;
 
-            Excel.Range firstVisibleHeader =
-                (Excel.Range)worksheet.Cells[HeaderRow, 1];
-            Excel.Range lastVisibleHeader =
-                (Excel.Range)worksheet.Cells[HeaderRow, 19 + offset];
-            Excel.Range visibleHeaderRange =
-                worksheet.Range[firstVisibleHeader, lastVisibleHeader];
+            Excel.Range firstVisibleHeader = (Excel.Range)worksheet.Cells[HeaderRow, 1];
+            Excel.Range lastVisibleHeader = (Excel.Range)worksheet.Cells[HeaderRow, 19 + offset];
+            worksheet.Range[firstVisibleHeader, lastVisibleHeader].Columns.AutoFit();
 
-            // Fit only according to visible business columns.
-            visibleHeaderRange.Columns.AutoFit();
-
-            for (int columnNumber = 1;
-                 columnNumber <= 19 + offset;
-                 columnNumber++)
+            for (int columnNumber = 1; columnNumber <= 19 + offset; columnNumber++)
             {
-                Excel.Range column =
-                    (Excel.Range)worksheet.Columns[columnNumber];
+                Excel.Range column = (Excel.Range)worksheet.Columns[columnNumber];
                 double currentWidth = Convert.ToDouble(column.ColumnWidth);
                 column.ColumnWidth = Math.Min(currentWidth + 2, 40);
             }
 
-            SetMinimumColumnWidth(worksheet, 2, 12); // PostingDate
+            SetMinimumColumnWidth(worksheet, 2, 12);
             if (includeDateExceptionColumns)
             {
-                SetMinimumColumnWidth(worksheet, 3, 22); // Resolution
-                SetMinimumColumnWidth(worksheet, 4, 18); // Corrected date
+                SetMinimumColumnWidth(worksheet, 3, 24);
+                SetMinimumColumnWidth(worksheet, 4, 18);
             }
-            SetMinimumColumnWidth(worksheet, 4 + offset, 16); // DocumentNumber
-            SetMinimumColumnWidth(worksheet, 5 + offset, 40); // Description
-            SetMinimumColumnWidth(worksheet, 7 + offset, 14); // DebitAmount
-            SetMinimumColumnWidth(worksheet, 14 + offset, 14); // CreditAmount
+            SetMinimumColumnWidth(worksheet, 4 + offset, 16);
+            SetMinimumColumnWidth(worksheet, 5 + offset, 40);
+            SetMinimumColumnWidth(worksheet, 7 + offset, 14);
+            SetMinimumColumnWidth(worksheet, 14 + offset, 14);
 
-            Excel.Range sequenceColumn =
-                (Excel.Range)dataRange.Columns[1];
-            Excel.Range postingDateColumn =
-                (Excel.Range)dataRange.Columns[2];
-            Excel.Range descriptionColumn =
-                (Excel.Range)dataRange.Columns[5 + offset];
-            Excel.Range debitAmountColumn =
-                (Excel.Range)dataRange.Columns[7 + offset];
-            Excel.Range creditAmountColumn =
-                (Excel.Range)dataRange.Columns[14 + offset];
-
-            sequenceColumn.HorizontalAlignment = Excel.XlHAlign.xlHAlignRight;
-            postingDateColumn.HorizontalAlignment = Excel.XlHAlign.xlHAlignCenter;
-            descriptionColumn.HorizontalAlignment = Excel.XlHAlign.xlHAlignLeft;
-            debitAmountColumn.HorizontalAlignment = Excel.XlHAlign.xlHAlignRight;
-            creditAmountColumn.HorizontalAlignment = Excel.XlHAlign.xlHAlignRight;
+            ((Excel.Range)dataRange.Columns[1]).HorizontalAlignment = Excel.XlHAlign.xlHAlignRight;
+            ((Excel.Range)dataRange.Columns[2]).HorizontalAlignment = Excel.XlHAlign.xlHAlignCenter;
+            ((Excel.Range)dataRange.Columns[5 + offset]).HorizontalAlignment = Excel.XlHAlign.xlHAlignLeft;
+            ((Excel.Range)dataRange.Columns[7 + offset]).HorizontalAlignment = Excel.XlHAlign.xlHAlignRight;
+            ((Excel.Range)dataRange.Columns[14 + offset]).HorizontalAlignment = Excel.XlHAlign.xlHAlignRight;
 
             if (includeDateExceptionColumns)
             {
-                Excel.Range resolutionColumn =
-                    (Excel.Range)dataRange.Columns[3];
-                Excel.Range correctedDateColumn =
-                    (Excel.Range)dataRange.Columns[4];
-                resolutionColumn.HorizontalAlignment =
-                    Excel.XlHAlign.xlHAlignCenter;
-                correctedDateColumn.HorizontalAlignment =
-                    Excel.XlHAlign.xlHAlignCenter;
+                ((Excel.Range)dataRange.Columns[3]).HorizontalAlignment = Excel.XlHAlign.xlHAlignCenter;
+                ((Excel.Range)dataRange.Columns[4]).HorizontalAlignment = Excel.XlHAlign.xlHAlignCenter;
             }
 
-            // Preserve row-level source traceability in the table,
-            // but keep technical columns out of the auditor's default view.
-            Excel.Range firstTechnicalColumn =
-                (Excel.Range)worksheet.Columns[22 + offset];
-            Excel.Range lastTechnicalColumn =
-                (Excel.Range)worksheet.Columns[26 + offset];
-            Excel.Range technicalColumns =
-                worksheet.Range[firstTechnicalColumn, lastTechnicalColumn];
-            technicalColumns.EntireColumn.Hidden = true;
+            Excel.Range firstTechnicalColumn = (Excel.Range)worksheet.Columns[22 + offset];
+            Excel.Range lastTechnicalColumn = (Excel.Range)worksheet.Columns[26 + offset];
+            worksheet.Range[firstTechnicalColumn, lastTechnicalColumn].EntireColumn.Hidden = true;
         }
 
         private static void SetMinimumColumnWidth(
@@ -308,11 +312,23 @@ namespace ExcelApiPoc.AddIn.Services
             int columnNumber,
             double minimumWidth)
         {
-            Excel.Range column =
-                (Excel.Range)worksheet.Columns[columnNumber];
+            Excel.Range column = (Excel.Range)worksheet.Columns[columnNumber];
             double currentWidth = Convert.ToDouble(column.ColumnWidth);
             if (currentWidth < minimumWidth)
                 column.ColumnWidth = minimumWidth;
+        }
+
+        private static Excel.ListObject FindTable(Excel.Workbook workbook, string tableName)
+        {
+            foreach (Excel.Worksheet worksheet in workbook.Worksheets)
+            {
+                foreach (Excel.ListObject table in worksheet.ListObjects)
+                {
+                    if (string.Equals(table.Name, tableName, StringComparison.OrdinalIgnoreCase))
+                        return table;
+                }
+            }
+            throw new InvalidOperationException("The workbook does not contain table '" + tableName + "'.");
         }
     }
 }
