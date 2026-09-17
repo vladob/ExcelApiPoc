@@ -15,59 +15,60 @@ namespace ExcelApiPoc.AddIn.Services
 
         private static readonly string[] Headers =
         {
-            "SyntheticAccountCode",
-            "OptionKey",
-            "DisplayCaption",
-            "TableErpId",
-            "ReportRowNumber",
-            "SortOrder",
-            "ValidationRangeName"
+            "SyntheticAccountCode", "OptionKey", "DisplayCaption", "TableErpId",
+            "ReportRowNumber", "SortOrder", "ValidationRangeName"
         };
 
-        public static Excel.Worksheet AddWorksheet(Excel.Workbook workbook,IReadOnlyList<AnalyticalMappingOption> options)
+        public static Excel.Worksheet AddWorksheet(
+            Excel.Workbook workbook,
+            IReadOnlyList<AnalyticalMappingOption> options)
         {
-            if (workbook == null)
-                throw new ArgumentNullException(nameof(workbook));
-
-            if (options == null)
-                throw new ArgumentNullException(nameof(options));
-
+            if (workbook == null) throw new ArgumentNullException(nameof(workbook));
+            if (options == null) throw new ArgumentNullException(nameof(options));
             if (options.Count == 0)
+                throw new InvalidOperationException("The analytical mapping does not contain validation options.");
+
+            Excel.Worksheet worksheet = FindWorksheet(workbook, WorksheetName);
+            if (worksheet == null)
             {
-                throw new InvalidOperationException("The analytical mapping does not contain validation " + "options.");
+                Excel.Worksheet lastWorksheet =
+                    (Excel.Worksheet)workbook.Worksheets[workbook.Worksheets.Count];
+                worksheet = (Excel.Worksheet)workbook.Worksheets.Add(After: lastWorksheet);
+                worksheet.Name = WorksheetName;
             }
 
-            Excel.Worksheet lastWorksheet = (Excel.Worksheet)workbook.Worksheets[workbook.Worksheets.Count];
-            Excel.Worksheet worksheet = (Excel.Worksheet)workbook.Worksheets.Add(After: lastWorksheet);
-            worksheet.Name = WorksheetName;
+            if (!ContainsTable(worksheet, TableName))
+            {
+                int lastRow = options.Count + 1;
+                int lastColumn = Headers.Length;
+                Excel.Range firstCell = (Excel.Range)worksheet.Cells[1, 1];
+                Excel.Range lastCell = (Excel.Range)worksheet.Cells[lastRow, lastColumn];
+                Excel.Range tableRange = worksheet.Range[firstCell, lastCell];
+                Excel.Range textRange = worksheet.Range[
+                    (Excel.Range)worksheet.Cells[2, 1],
+                    (Excel.Range)worksheet.Cells[lastRow, 3]];
 
-            int lastRow = options.Count + 1;
-            int lastColumn = Headers.Length;
-            Excel.Range firstCell = (Excel.Range)worksheet.Cells[1, 1];
-            Excel.Range lastCell = (Excel.Range)worksheet.Cells[lastRow, lastColumn];
-            Excel.Range tableRange = worksheet.Range[firstCell, lastCell];
-            Excel.Range textRange = worksheet.Range[(Excel.Range)worksheet.Cells[2, 1], (Excel.Range)worksheet.Cells[lastRow, 3]];
+                textRange.NumberFormat = "@";
+                tableRange.Value2 = CreateValues(options);
 
-            textRange.NumberFormat = "@";
-            tableRange.Value2 = CreateValues(options);
+                Excel.ListObject table = worksheet.ListObjects.Add(
+                    Excel.XlListObjectSourceType.xlSrcRange,
+                    tableRange,
+                    Type.Missing,
+                    Excel.XlYesNoGuess.xlYes,
+                    Type.Missing);
+                table.Name = TableName;
+                table.TableStyle = "TableStyleMedium2";
+                AddValidationNames(workbook, worksheet, options);
+            }
 
-            Excel.ListObject table = worksheet.ListObjects.Add(Excel.XlListObjectSourceType.xlSrcRange, tableRange, Type.Missing, Excel.XlYesNoGuess.xlYes, Type.Missing);
-
-            table.Name = TableName;
-            table.TableStyle = "TableStyleMedium2";
-
-            AddValidationNames(workbook, worksheet, options);
-
-            // Users may unhide this worksheet to inspect the exact options.
             worksheet.Visible = Excel.XlSheetVisibility.xlSheetHidden;
-
             return worksheet;
         }
 
         public static void EnsureJournalDateExceptionOptions(Excel.Workbook workbook)
         {
-            if (workbook == null)
-                throw new ArgumentNullException(nameof(workbook));
+            if (workbook == null) throw new ArgumentNullException(nameof(workbook));
 
             Excel.Worksheet worksheet = FindWorksheet(workbook, WorksheetName);
             if (worksheet == null)
@@ -80,9 +81,7 @@ namespace ExcelApiPoc.AddIn.Services
 
             if (!ContainsTable(worksheet, DateExceptionTableName))
             {
-                // Keep a dedicated block away from the analytical-mapping options.
                 const int firstColumn = 9; // I
-                const int firstRow = 1;
                 object[,] values =
                 {
                     { "Key", "DisplayCaption" },
@@ -91,10 +90,8 @@ namespace ExcelApiPoc.AddIn.Services
                     { "ModifiedIncluded", "Modified Date Included" }
                 };
 
-                Excel.Range firstCell =
-                    (Excel.Range)worksheet.Cells[firstRow, firstColumn];
-                Excel.Range lastCell =
-                    (Excel.Range)worksheet.Cells[firstRow + 3, firstColumn + 1];
+                Excel.Range firstCell = (Excel.Range)worksheet.Cells[1, firstColumn];
+                Excel.Range lastCell = (Excel.Range)worksheet.Cells[4, firstColumn + 1];
                 Excel.Range range = worksheet.Range[firstCell, lastCell];
                 range.NumberFormat = "@";
                 range.Value2 = values;
@@ -112,11 +109,7 @@ namespace ExcelApiPoc.AddIn.Services
             Excel.ListObject optionTable = FindTable(worksheet, DateExceptionTableName);
             Excel.Range captions = optionTable.ListColumns["DisplayCaption"].DataBodyRange;
             string address = captions.get_Address(
-                true,
-                true,
-                Excel.XlReferenceStyle.xlA1,
-                false,
-                Type.Missing);
+                true, true, Excel.XlReferenceStyle.xlA1, false, Type.Missing);
 
             DeleteWorkbookNameIfPresent(workbook, DateExceptionValidationRangeName);
             workbook.Names.Add(
@@ -129,17 +122,13 @@ namespace ExcelApiPoc.AddIn.Services
         private static object[,] CreateValues(IReadOnlyList<AnalyticalMappingOption> options)
         {
             var values = new object[options.Count + 1, Headers.Length];
-
             for (int columnIndex = 0; columnIndex < Headers.Length; columnIndex++)
-            {
                 values[0, columnIndex] = Headers[columnIndex];
-            }
 
-            for (int optionIndex = 0;optionIndex < options.Count;optionIndex++)
+            for (int optionIndex = 0; optionIndex < options.Count; optionIndex++)
             {
                 AnalyticalMappingOption option = options[optionIndex];
                 int rowIndex = optionIndex + 1;
-
                 values[rowIndex, 0] = option.SyntheticAccountCode;
                 values[rowIndex, 1] = option.OptionKey;
                 values[rowIndex, 2] = option.DisplayCaption;
@@ -151,19 +140,22 @@ namespace ExcelApiPoc.AddIn.Services
             return values;
         }
 
-        private static void AddValidationNames(Excel.Workbook workbook, Excel.Worksheet worksheet, IReadOnlyList<AnalyticalMappingOption> options)
+        private static void AddValidationNames(
+            Excel.Workbook workbook,
+            Excel.Worksheet worksheet,
+            IReadOnlyList<AnalyticalMappingOption> options)
         {
             int firstOptionRow = 2;
-
-            foreach (IGrouping<string, AnalyticalMappingOption> group in options.GroupBy(option => option.ValidationRangeName, StringComparer.Ordinal))
+            foreach (IGrouping<string, AnalyticalMappingOption> group in
+                options.GroupBy(option => option.ValidationRangeName, StringComparer.Ordinal))
             {
                 int optionCount = group.Count();
                 Excel.Range firstCaptionCell = (Excel.Range)worksheet.Cells[firstOptionRow, 3];
-                Excel.Range lastCaptionCell = (Excel.Range)worksheet.Cells[firstOptionRow + optionCount - 1, 3];
+                Excel.Range lastCaptionCell =
+                    (Excel.Range)worksheet.Cells[firstOptionRow + optionCount - 1, 3];
                 Excel.Range captionRange = worksheet.Range[firstCaptionCell, lastCaptionCell];
-
-                string address = captionRange.get_Address(true, true, Excel.XlReferenceStyle.xlA1, false, Type.Missing);
-
+                string address = captionRange.get_Address(
+                    true, true, Excel.XlReferenceStyle.xlA1, false, Type.Missing);
                 workbook.Names.Add(Name: group.Key, RefersTo: $"='{WorksheetName}'!{address}");
                 firstOptionRow += optionCount;
             }
@@ -172,10 +164,8 @@ namespace ExcelApiPoc.AddIn.Services
         private static Excel.Worksheet FindWorksheet(Excel.Workbook workbook, string name)
         {
             foreach (Excel.Worksheet worksheet in workbook.Worksheets)
-            {
                 if (string.Equals(worksheet.Name, name, StringComparison.OrdinalIgnoreCase))
                     return worksheet;
-            }
             return null;
         }
 
@@ -187,10 +177,8 @@ namespace ExcelApiPoc.AddIn.Services
         private static Excel.ListObject FindTable(Excel.Worksheet worksheet, string tableName)
         {
             foreach (Excel.ListObject table in worksheet.ListObjects)
-            {
                 if (string.Equals(table.Name, tableName, StringComparison.OrdinalIgnoreCase))
                     return table;
-            }
             return null;
         }
 
