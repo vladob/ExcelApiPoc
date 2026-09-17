@@ -42,8 +42,6 @@ namespace ExcelApiPoc.AddIn.Services
         {
             if (workbook == null) throw new ArgumentNullException(nameof(workbook));
             if (options == null) throw new ArgumentNullException(nameof(options));
-            if (options.Count == 0)
-                throw new InvalidOperationException("The analytical mapping does not contain validation options.");
 
             Excel.Worksheet worksheet = GetOrCreateWorksheet(workbook);
             Excel.ListObject existing = FindTable(worksheet, TableName);
@@ -87,7 +85,9 @@ namespace ExcelApiPoc.AddIn.Services
                 oldRange.Clear();
             }
 
-            WriteAnalyticalOptions(workbook, worksheet, options);
+            if (options.Count > 0)
+                WriteAnalyticalOptions(workbook, worksheet, options);
+
             worksheet.Visible = Excel.XlSheetVisibility.xlSheetHidden;
             return worksheet;
         }
