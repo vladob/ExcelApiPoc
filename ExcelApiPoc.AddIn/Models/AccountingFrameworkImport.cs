@@ -21,6 +21,7 @@ namespace ExcelApiPoc.AddIn.Models
         public string Ico { get; set; }
         public string CompanyName { get; set; }
         public int FiscalYear { get; set; }
+        public int? ExportStage { get; set; }
         public DateTime ImportedAtUtc { get; set; }
         public int NormalizedTextFieldCount { get; set; }
         public List<AccountingFrameworkRow> Rows { get; } =
