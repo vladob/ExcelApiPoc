@@ -1,0 +1,268 @@
+{
+  "schemaVersion": 1,
+  "id": "softip-mop-general-ledger",
+  "name": "Softip-MOP General Ledger",
+  "defaults": {
+    "horizontalTolerance": 5,
+    "baselineTolerance": 4
+  },
+  "sections": [
+    {
+      "id": "page-body",
+      "startRuleId": "header-end",
+      "endRuleId": "footer-start",
+      "scope": "PerPage",
+      "mayContinueOnNextPage": true
+    }
+  ],
+  "rules": [
+    {
+      "id": "header-end",
+      "text": "^\\s*Dal\\s*$",
+      "textMatch": "RegularExpression",
+      "horizontal": {
+        "anchor": "Right",
+        "position": 661.5,
+        "tolerance": 5
+      },
+      "pageScope": "Repeated"
+    },
+    {
+      "id": "footer-start",
+      "text": "© Softip a.s.",
+      "textMatch": "Contains",
+      "pageScope": "Repeated"
+    }
+  ],
+  "recordContinuations": [
+    {
+      "id": "values-continued-on-next-page",
+      "sectionId": "page-body",
+      "acrossPageBoundaryOnly": true,
+      "previous": {
+        "rightAtMost": 340
+      },
+      "next": {
+        "leftAtLeast": 300
+      }
+    }
+  ],
+  "recordRules": [
+    {
+      "id": "account-row",
+      "sectionId": "page-body",
+      "text": "^\\d{5}\\s",
+      "textMatch": "RegularExpression",
+      "minimumTokenCount": 8,
+      "maximumTokenCount": 8,
+      "rightAtLeast": 760
+    },
+    {
+      "id": "subtotal-row",
+      "sectionId": "page-body",
+      "text": "^Medzisúčet za\\s+:\\s+\\d+",
+      "textMatch": "RegularExpression",
+      "minimumTokenCount": 8,
+      "maximumTokenCount": 8,
+      "rightAtLeast": 760
+    },
+    {
+      "id": "report-total-row",
+      "sectionId": "page-body",
+      "text": "^Spolu\\s",
+      "textMatch": "RegularExpression",
+      "minimumGroupCount": 1,
+      "maximumGroupCount": 1,
+      "minimumTokenCount": 7,
+      "maximumTokenCount": 7,
+      "leftAtMost": 30,
+      "rightAtLeast": 760
+    },
+    {
+      "id": "summary-row",
+      "sectionId": "page-body",
+      "text": "^(Aktíva|Pasíva|Náklady|Výnosy|Hospodársky výsledok|Podsúvahové účty)\\s",
+      "textMatch": "RegularExpression",
+      "minimumGroupCount": 1,
+      "maximumGroupCount": 1,
+      "minimumTokenCount": 7,
+      "maximumTokenCount": 7,
+      "leftAtLeast": 125,
+      "rightAtLeast": 760
+    },
+    {
+      "id": "signature-row",
+      "sectionId": "page-body",
+      "text": "^Vypracoval\\s+Schválil\\s+Dátum$",
+      "textMatch": "RegularExpression",
+      "minimumGroupCount": 1,
+      "maximumGroupCount": 1,
+      "minimumTokenCount": 3,
+      "maximumTokenCount": 3
+    }
+  ],
+  "recordFields": [
+    {
+      "recordRuleId": "account-row",
+      "fields": [
+        {
+          "id": "key",
+          "text": "^\\d{5}$",
+          "textMatch": "RegularExpression",
+          "horizontal": { "anchor": "Left", "position": 22.5 }
+        },
+        {
+          "id": "label",
+          "horizontal": { "anchor": "Left", "position": 81 }
+        },
+        {
+          "id": "value-1",
+          "horizontal": { "anchor": "Right", "position": 372 }
+        },
+        {
+          "id": "value-2",
+          "horizontal": { "anchor": "Right", "position": 452 }
+        },
+        {
+          "id": "value-3",
+          "horizontal": { "anchor": "Right", "position": 532 }
+        },
+        {
+          "id": "value-4",
+          "horizontal": { "anchor": "Right", "position": 611 }
+        },
+        {
+          "id": "value-5",
+          "horizontal": { "anchor": "Right", "position": 691 }
+        },
+        {
+          "id": "value-6",
+          "horizontal": { "anchor": "Right", "position": 770 }
+        }
+      ]
+    },
+    {
+      "recordRuleId": "subtotal-row",
+      "fields": [
+        {
+          "id": "label",
+          "text": "Medzisúčet za  :",
+          "horizontal": { "anchor": "Left", "position": 42.75 }
+        },
+        {
+          "id": "key",
+          "text": "^\\d+$",
+          "textMatch": "RegularExpression",
+          "horizontal": { "anchor": "Left", "position": 112.5 }
+        },
+        {
+          "id": "value-1",
+          "horizontal": { "anchor": "Right", "position": 372 }
+        },
+        {
+          "id": "value-2",
+          "horizontal": { "anchor": "Right", "position": 452 }
+        },
+        {
+          "id": "value-3",
+          "horizontal": { "anchor": "Right", "position": 532 }
+        },
+        {
+          "id": "value-4",
+          "horizontal": { "anchor": "Right", "position": 611 }
+        },
+        {
+          "id": "value-5",
+          "horizontal": { "anchor": "Right", "position": 691 }
+        },
+        {
+          "id": "value-6",
+          "horizontal": { "anchor": "Right", "position": 770 }
+        }
+      ]
+    },
+    {
+      "recordRuleId": "report-total-row",
+      "fields": [
+        {
+          "id": "label",
+          "horizontal": { "anchor": "Left", "position": 22.5 }
+        },
+        {
+          "id": "value-1",
+          "horizontal": { "anchor": "Right", "position": 372 }
+        },
+        {
+          "id": "value-2",
+          "horizontal": { "anchor": "Right", "position": 452 }
+        },
+        {
+          "id": "value-3",
+          "horizontal": { "anchor": "Right", "position": 532 }
+        },
+        {
+          "id": "value-4",
+          "horizontal": { "anchor": "Right", "position": 611 }
+        },
+        {
+          "id": "value-5",
+          "horizontal": { "anchor": "Right", "position": 691 }
+        },
+        {
+          "id": "value-6",
+          "horizontal": { "anchor": "Right", "position": 770 }
+        }
+      ]
+    },
+    {
+      "recordRuleId": "summary-row",
+      "fields": [
+        {
+          "id": "label",
+          "horizontal": { "anchor": "Left", "position": 132.75 }
+        },
+        {
+          "id": "value-1",
+          "horizontal": { "anchor": "Right", "position": 372 }
+        },
+        {
+          "id": "value-2",
+          "horizontal": { "anchor": "Right", "position": 452 }
+        },
+        {
+          "id": "value-3",
+          "horizontal": { "anchor": "Right", "position": 532 }
+        },
+        {
+          "id": "value-4",
+          "horizontal": { "anchor": "Right", "position": 611 }
+        },
+        {
+          "id": "value-5",
+          "horizontal": { "anchor": "Right", "position": 691 }
+        },
+        {
+          "id": "value-6",
+          "horizontal": { "anchor": "Right", "position": 769 }
+        }
+      ]
+    },
+    {
+      "recordRuleId": "signature-row",
+      "fields": [
+        {
+          "id": "label-1",
+          "horizontal": { "anchor": "Left", "position": 30 }
+        },
+        {
+          "id": "label-2",
+          "horizontal": { "anchor": "Left", "position": 212.25 }
+        },
+        {
+          "id": "label-3",
+          "horizontal": { "anchor": "Left", "position": 383.25 }
+        }
+      ]
+    }
+  ]
+}

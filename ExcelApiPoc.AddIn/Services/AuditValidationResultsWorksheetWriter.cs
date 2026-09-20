@@ -163,6 +163,7 @@ namespace ExcelApiPoc.AddIn.Services
             }
 
             WriteTable(FindMetadataWorksheet(workbook), rows);
+            AuditWorkbookComparisonEnhancementService.Apply(workbook, package);
         }
 
         private static ValidationRow Check(
@@ -305,6 +306,345 @@ namespace ExcelApiPoc.AddIn.Services
             public string Expected { get; set; }
             public string Message { get; set; }
             public DateTime CheckedAtUtc { get; set; }
+        }
+    }
+
+    internal static class AuditWorkbookComparisonEnhancementService
+    {
+        private const string CalculationResultsTableName = "CalculatedReportRows";
+        private const string PercentChangeColumnName = "% change";
+        private const string RegisterUzReportTablesName = "__RegisterUzReportTables";
+        private const string RegisterUzReportValuesName = "__RegisterUzReportValues";
+        private const string TrendColumnName = "Trend";
+
+        public static void Apply(
+            Excel.Workbook workbook,
+            AuditTemplatePackageResponse package)
+        {
+            if (workbook == null)
+                throw new ArgumentNullException(nameof(workbook));
+            if (package == null || package.Template == null)
+                throw new ArgumentNullException(nameof(package));
+
+            ApplyRegisterUzPercentChange(workbook, package);
+            ApplyMultiYearSparklines(workbook);
+        }
+
+        private static void ApplyRegisterUzPercentChange(
+            Excel.Workbook workbook,
+            AuditTemplatePackageResponse package)
+        {
+            Excel.ListObject calculationTable =
+                FindTable(workbook, CalculationResultsTableName);
+            if (calculationTable?.DataBodyRange == null)
+                return;
+
+            Excel.ListColumn percentColumn =
+                FindColumn(calculationTable, PercentChangeColumnName) ??
+                calculationTable.ListColumns.Add(Type.Missing);
+            percentColumn.Name = PercentChangeColumnName;
+
+            Excel.Range percentRange = percentColumn.DataBodyRange;
+            percentRange.NumberFormat = "+0.00%;-0.00%;0.00%";
+            percentRange.HorizontalAlignment = Excel.XlHAlign.xlHAlignRight;
+            ((Excel.Range)percentColumn.Range.EntireColumn).ColumnWidth = 14;
+
+            Dictionary<int, long> registerUzTableIdsByOrdinal =
+                ReadRegisterUzTableIdsByOrdinal(workbook);
+            Dictionary<string, IDictionary<string, object>> registerUzRows =
+                ReadRegisterUzRows(workbook);
+            Dictionary<int, AuditReportTableDefinitionResponse> definitionsByErpId =
+                (package.Template.Tables ?? Array.Empty<AuditReportTableDefinitionResponse>())
+                    .ToDictionary(table => table.TableErpId);
+
+            int rowCount = calculationTable.DataBodyRange.Rows.Count;
+            for (int rowIndex = 1; rowIndex <= rowCount; rowIndex++)
+            {
+                Excel.Range destination =
+                    (Excel.Range)percentRange.Cells[rowIndex, 1];
+                destination.ClearContents();
+
+                int tableErpId = Convert.ToInt32(
+                    ((Excel.Range)calculationTable.ListColumns["TableErpId"]
+                        .DataBodyRange.Cells[rowIndex, 1]).Value2,
+                    CultureInfo.InvariantCulture);
+                int reportRowNumber = Convert.ToInt32(
+                    ((Excel.Range)calculationTable.ListColumns["RowNumber"]
+                        .DataBodyRange.Cells[rowIndex, 1]).Value2,
+                    CultureInfo.InvariantCulture);
+
+                decimal? currentValue = ReadNullableDecimal(
+                    ((Excel.Range)calculationTable.ListColumns["RegisterUzValue3"]
+                        .DataBodyRange.Cells[rowIndex, 1]).Value2);
+
+                if (!currentValue.HasValue || currentValue.Value == 0m)
+                    continue;
+
+                if (!definitionsByErpId.TryGetValue(
+                        tableErpId,
+                        out AuditReportTableDefinitionResponse reportTable) ||
+                    !reportTable.NumberOfDataColumns.HasValue ||
+                    reportTable.NumberOfDataColumns.Value < 1)
+                {
+                    continue;
+                }
+
+                AuditReportRowDefinitionResponse reportRow =
+                    (reportTable.Rows ?? Array.Empty<AuditReportRowDefinitionResponse>())
+                        .FirstOrDefault(row => row.RowNumber == reportRowNumber);
+                if (reportRow == null)
+                    continue;
+
+                if (!registerUzTableIdsByOrdinal.TryGetValue(
+                        reportTable.TableOrdinal,
+                        out long registerUzTableId))
+                {
+                    continue;
+                }
+
+                string rawRowKey = CreateRegisterUzRowKey(
+                    registerUzTableId,
+                    reportRow.RowOrdinal);
+                if (!registerUzRows.TryGetValue(
+                        rawRowKey,
+                        out IDictionary<string, object> rawRow))
+                {
+                    continue;
+                }
+
+                string previousValueColumn =
+                    "NumericValue" +
+                    reportTable.NumberOfDataColumns.Value.ToString(
+                        CultureInfo.InvariantCulture);
+
+                decimal? previousValue =
+                    rawRow.ContainsKey(previousValueColumn)
+                        ? ReadNullableDecimal(rawRow[previousValueColumn])
+                        : null;
+
+                if (!previousValue.HasValue || previousValue.Value == 0m)
+                    continue;
+
+                decimal percentChange =
+                    currentValue.Value / previousValue.Value - 1m;
+                destination.Value2 = (double)percentChange;
+            }
+        }
+
+        private static Dictionary<int, long> ReadRegisterUzTableIdsByOrdinal(
+            Excel.Workbook workbook)
+        {
+            var result = new Dictionary<int, long>();
+            foreach (IDictionary<string, object> row in
+                AuditWorkbookTableReader.ReadRows(
+                    workbook,
+                    RegisterUzReportTablesName))
+            {
+                int ordinal =
+                    AuditWorkbookTableReader.GetInt32(row, "TableOrdinal");
+                long tableId = Convert.ToInt64(
+                    row["TableId"],
+                    CultureInfo.InvariantCulture);
+                result[ordinal] = tableId;
+            }
+            return result;
+        }
+
+        private static Dictionary<string, IDictionary<string, object>>
+            ReadRegisterUzRows(Excel.Workbook workbook)
+        {
+            var result =
+                new Dictionary<string, IDictionary<string, object>>(
+                    StringComparer.Ordinal);
+
+            foreach (IDictionary<string, object> row in
+                AuditWorkbookTableReader.ReadRows(
+                    workbook,
+                    RegisterUzReportValuesName))
+            {
+                long tableId = Convert.ToInt64(
+                    row["TableId"],
+                    CultureInfo.InvariantCulture);
+                int rowOrdinal =
+                    AuditWorkbookTableReader.GetInt32(row, "RowOrdinal");
+                result[CreateRegisterUzRowKey(tableId, rowOrdinal)] = row;
+            }
+            return result;
+        }
+
+        private static void ApplyMultiYearSparklines(Excel.Workbook workbook)
+        {
+            foreach (Excel.Worksheet worksheet in workbook.Worksheets)
+            {
+                if (!worksheet.Name.StartsWith(
+                        "Multi-year ",
+                        StringComparison.OrdinalIgnoreCase))
+                {
+                    continue;
+                }
+
+                Excel.ListObject table = FindMultiYearTable(worksheet);
+                if (table?.DataBodyRange == null)
+                    continue;
+
+                Excel.ListColumn dataColumn = FindColumn(table, "data");
+                if (dataColumn == null)
+                    continue;
+
+                Excel.ListColumn trendColumn =
+                    FindColumn(table, TrendColumnName) ??
+                    table.ListColumns.Add(Type.Missing);
+                trendColumn.Name = TrendColumnName;
+                ((Excel.Range)trendColumn.Range.EntireColumn).ColumnWidth = 25;
+
+                int dataColumnIndex = dataColumn.Index;
+                int trendColumnIndex = trendColumn.Index;
+                int firstYearColumnIndex = dataColumnIndex + 1;
+                int lastYearColumnIndex = trendColumnIndex - 1;
+
+                if (lastYearColumnIndex < firstYearColumnIndex)
+                    continue;
+
+                int rowCount = table.DataBodyRange.Rows.Count;
+                for (int rowIndex = 1; rowIndex <= rowCount; rowIndex++)
+                {
+                    Excel.Range destination =
+                        (Excel.Range)trendColumn.DataBodyRange.Cells[rowIndex, 1];
+                    ClearSparklines(destination);
+                    destination.ClearContents();
+
+                    object dataValue =
+                        ((Excel.Range)dataColumn.DataBodyRange.Cells[rowIndex, 1]).Value2;
+                    if (!IsOne(dataValue))
+                        continue;
+
+                    Excel.Range source = worksheet.Range[
+                        table.DataBodyRange.Cells[rowIndex, firstYearColumnIndex],
+                        table.DataBodyRange.Cells[rowIndex, lastYearColumnIndex]];
+
+                    string sourceAddress =
+                        "'" + worksheet.Name.Replace("'", "''") + "'!" +
+                        source.Address[
+                            true,
+                            true,
+                            Excel.XlReferenceStyle.xlA1,
+                            false];
+
+                    dynamic sparklineGroups = destination.SparklineGroups;
+                    sparklineGroups.Add(
+                        Excel.XlSparkType.xlSparkLine,
+                        sourceAddress);
+                }
+
+                int lastRow = table.Range.Row + table.Range.Rows.Count - 1;
+                worksheet.PageSetup.PrintArea = worksheet.Range[
+                    worksheet.Cells[1, 1],
+                    worksheet.Cells[lastRow, trendColumnIndex]].Address;
+            }
+        }
+
+        private static void ClearSparklines(Excel.Range destination)
+        {
+            try
+            {
+                dynamic groups = destination.SparklineGroups;
+                if (groups.Count > 0)
+                    groups.Clear();
+            }
+            catch
+            {
+                // The cell simply has no existing sparkline group.
+            }
+        }
+
+        private static bool IsOne(object value)
+        {
+            if (value == null)
+                return false;
+
+            try
+            {
+                return Convert.ToInt32(
+                    value,
+                    CultureInfo.InvariantCulture) == 1;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        private static decimal? ReadNullableDecimal(object value)
+        {
+            if (value == null)
+                return null;
+
+            string text = Convert.ToString(
+                value,
+                CultureInfo.InvariantCulture);
+            if (string.IsNullOrWhiteSpace(text))
+                return null;
+
+            return Convert.ToDecimal(
+                value,
+                CultureInfo.InvariantCulture);
+        }
+
+        private static Excel.ListObject FindTable(
+            Excel.Workbook workbook,
+            string tableName)
+        {
+            foreach (Excel.Worksheet worksheet in workbook.Worksheets)
+            {
+                foreach (Excel.ListObject table in worksheet.ListObjects)
+                {
+                    if (string.Equals(
+                            table.Name,
+                            tableName,
+                            StringComparison.OrdinalIgnoreCase))
+                    {
+                        return table;
+                    }
+                }
+            }
+            return null;
+        }
+
+        private static Excel.ListObject FindMultiYearTable(
+            Excel.Worksheet worksheet)
+        {
+            foreach (Excel.ListObject table in worksheet.ListObjects)
+            {
+                if (FindColumn(table, "data") != null)
+                    return table;
+            }
+            return null;
+        }
+
+        private static Excel.ListColumn FindColumn(
+            Excel.ListObject table,
+            string columnName)
+        {
+            foreach (Excel.ListColumn column in table.ListColumns)
+            {
+                if (string.Equals(
+                        column.Name,
+                        columnName,
+                        StringComparison.OrdinalIgnoreCase))
+                {
+                    return column;
+                }
+            }
+            return null;
+        }
+
+        private static string CreateRegisterUzRowKey(
+            long tableId,
+            int rowOrdinal)
+        {
+            return tableId.ToString(CultureInfo.InvariantCulture) +
+                   ":" +
+                   rowOrdinal.ToString(CultureInfo.InvariantCulture);
         }
     }
 }

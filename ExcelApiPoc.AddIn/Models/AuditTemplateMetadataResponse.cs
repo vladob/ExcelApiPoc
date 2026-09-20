@@ -9,6 +9,8 @@ namespace ExcelApiPoc.AddIn.Models
         public string MfSpecification { get; set; }
         public DateTime? ValidFrom { get; set; }
         public DateTime? ValidTo { get; set; }
+        public bool CreateMultiYear { get; set; }
+        public string MultiYearWorksheetName { get; set; }
         public AuditTableMetadataResponse[] Tables { get; set; }
     }
 

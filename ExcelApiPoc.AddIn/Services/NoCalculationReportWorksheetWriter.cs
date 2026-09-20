@@ -1,0 +1,146 @@
+using ExcelApiPoc.AccountingImport.Models;
+using ExcelApiPoc.AddIn.Models;
+using System;
+using Excel = Microsoft.Office.Interop.Excel;
+
+namespace ExcelApiPoc.AddIn.Services
+{
+    internal static class NoCalculationReportWorksheetWriter
+    {
+        private const string WorksheetName = "No Calculation Report";
+
+        public static Excel.Worksheet AddWorksheet(
+            Excel.Workbook workbook,
+            JournalImport journalImport,
+            AccountingFrameworkImport accountingFrameworkImport,
+            GeneralLedgerImport generalLedgerImport,
+            AccountingEntityPackageEnvelope accountingEntityPackage,
+            Exception calculationFailure)
+        {
+            if (workbook == null)
+                throw new ArgumentNullException(nameof(workbook));
+            if (journalImport == null)
+                throw new ArgumentNullException(nameof(journalImport));
+            if (calculationFailure == null)
+                throw new ArgumentNullException(nameof(calculationFailure));
+
+            Excel.Worksheet worksheet =
+                (Excel.Worksheet)workbook.Worksheets.Add(
+                    After: workbook.Worksheets[workbook.Worksheets.Count]);
+            worksheet.Name = WorksheetName;
+
+            Excel.Range titleCell =
+                (Excel.Range)worksheet.Cells[1, 1];
+            titleCell.Value2 = "Calculation report unavailable";
+            Excel.Range title = worksheet.Range["A1:B1"];
+            title.Merge();
+            title.Font.Bold = true;
+            title.Font.Size = 16;
+            title.Interior.Color = 10092543;
+
+            WriteValue(worksheet, 3, "Status", "Source data imported successfully");
+            WriteValue(worksheet, 4, "Calculation", "Not available");
+            WriteValue(worksheet, 5, "Reason", calculationFailure.Message);
+            WriteValue(
+                worksheet,
+                6,
+                "Exception type",
+                calculationFailure.GetType().FullName);
+
+            WriteValue(worksheet, 8, "Accounting format", journalImport.AccountingFormat);
+            WriteValue(worksheet, 9, "IČO", journalImport.Ico);
+            WriteValue(worksheet, 10, "Fiscal year", journalImport.FiscalYear);
+
+            WriteValue(
+                worksheet,
+                12,
+                "Accounting journal",
+                journalImport.SourceFileName);
+            WriteValue(
+                worksheet,
+                13,
+                "Journal rows",
+                journalImport.Rows.Count);
+
+            WriteValue(
+                worksheet,
+                15,
+                "General ledger",
+                generalLedgerImport == null
+                    ? "Not provided"
+                    : generalLedgerImport.SourceFileName);
+            WriteValue(
+                worksheet,
+                16,
+                "General-ledger rows",
+                generalLedgerImport == null
+                    ? 0
+                    : generalLedgerImport.Rows.Count);
+
+            WriteValue(
+                worksheet,
+                18,
+                "Accounting framework",
+                accountingFrameworkImport == null
+                    ? "Not provided"
+                    : accountingFrameworkImport.SourceFileName);
+            WriteValue(
+                worksheet,
+                19,
+                "Accounting-framework rows",
+                accountingFrameworkImport == null
+                    ? 0
+                    : accountingFrameworkImport.Rows.Count);
+
+            WriteValue(
+                worksheet,
+                21,
+                "RegisterUZ financial reports",
+                accountingEntityPackage == null
+                    ? 0
+                    : accountingEntityPackage.FinancialReportCount);
+            WriteValue(
+                worksheet,
+                22,
+                "RegisterUZ annual-report attachments",
+                accountingEntityPackage == null
+                    ? 0
+                    : accountingEntityPackage.AnnualReportAttachmentCount);
+            WriteValue(
+                worksheet,
+                23,
+                "RegisterUZ financial-report attachments",
+                accountingEntityPackage == null
+                    ? 0
+                    : accountingEntityPackage.FinancialReportAttachmentCount);
+
+            Excel.Range labelColumn =
+                (Excel.Range)worksheet.Columns[1];
+            Excel.Range valueColumn =
+                (Excel.Range)worksheet.Columns[2];
+            Excel.Range rows = (Excel.Range)worksheet.Rows;
+
+            labelColumn.ColumnWidth = 28;
+            valueColumn.ColumnWidth = 100;
+            valueColumn.WrapText = true;
+            rows.AutoFit();
+            worksheet.Activate();
+
+            return worksheet;
+        }
+
+        private static void WriteValue(
+            Excel.Worksheet worksheet,
+            int row,
+            string label,
+            object value)
+        {
+            Excel.Range labelCell = (Excel.Range)worksheet.Cells[row, 1];
+            Excel.Range valueCell = (Excel.Range)worksheet.Cells[row, 2];
+
+            labelCell.Value2 = label;
+            labelCell.Font.Bold = true;
+            valueCell.Value2 = value;
+        }
+    }
+}

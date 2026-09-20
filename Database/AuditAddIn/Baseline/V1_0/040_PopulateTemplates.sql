@@ -449,3 +449,10 @@ WHERE e.[Id] IS NULL;
 COMMIT TRANSACTION;
 PRINT '040 template-catalog population completed.';
 GO
+
+
+-- Multi-year comparison templates approved for audit workbooks.
+UPDATE [Template].[Templates] SET [CreateMultiYear]=1,[MultiYearWorksheetName]=N'Multi-year Income Statement' WHERE [ErpId] IN (1,7,10,12,13,14,18,19,22,27,30,61,62,521,696,727,1142);
+UPDATE [Template].[Templates] SET [CreateMultiYear]=1,[MultiYearWorksheetName]=N'Multi-year Balance Sheet' WHERE [ErpId] IN (2,3,9,11,17,20,21,29,522,541,542,684,690,1141);
+UPDATE [Template].[Templates] SET [CreateMultiYear]=1,[MultiYearWorksheetName]=N'Multi-year Balance & Income' WHERE [ErpId] IN (662,663,687,699,711,723,738,801,941,1001,1021,1101,1121,1180,5181,5184);
+GO

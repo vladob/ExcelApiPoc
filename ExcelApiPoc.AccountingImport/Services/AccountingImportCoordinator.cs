@@ -1,9 +1,10 @@
 ﻿using ExcelApiPoc.AccountingImport.Models;
+using ExcelApiPoc.AccountingImport.Models.Reporting;
+using ExcelApiPoc.AccountingImport.Services.Common;
 using ExcelApiPoc.AccountingImport.Services.IfoSoft;
 using ExcelApiPoc.AccountingImport.Services.Ives;
 using ExcelApiPoc.AccountingImport.Services.SoftipMop;
 using ExcelApiPoc.AccountingImport.Services.Urbis;
-using ExcelApiPoc.AccountingImport.Models.Reporting;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -14,28 +15,20 @@ namespace ExcelApiPoc.AccountingImport.Services
     public sealed class AccountingImportCoordinator
     {
         private readonly IReadOnlyList<IJournalImporter> journalImporters;
-
         private readonly IReadOnlyList<IGeneralLedgerImporter> generalLedgerImporters;
 
-        public AccountingImportCoordinator(IEnumerable<IJournalImporter> journalImporters, IEnumerable<IGeneralLedgerImporter> generalLedgerImporters)
+        public AccountingImportCoordinator(
+            IEnumerable<IJournalImporter> journalImporters,
+            IEnumerable<IGeneralLedgerImporter> generalLedgerImporters)
         {
             if (journalImporters == null)
-            {
-                throw new ArgumentNullException(
-                    nameof(journalImporters));
-            }
+                throw new ArgumentNullException(nameof(journalImporters));
 
             if (generalLedgerImporters == null)
-            {
-                throw new ArgumentNullException(
-                    nameof(generalLedgerImporters));
-            }
+                throw new ArgumentNullException(nameof(generalLedgerImporters));
 
-            this.journalImporters =
-                journalImporters.ToList();
-
-            this.generalLedgerImporters =
-                generalLedgerImporters.ToList();
+            this.journalImporters = journalImporters.ToList();
+            this.generalLedgerImporters = generalLedgerImporters.ToList();
 
             if (this.journalImporters.Count == 0)
             {
@@ -59,6 +52,7 @@ namespace ExcelApiPoc.AccountingImport.Services
                 {
                     new IfoSoftCsvGeneralLedgerImporter(),
                     new IvesExcelGeneralLedgerImporter(),
+                    new SoftipMopPdfGeneralLedgerImporter(),
                     new UrbisExcelGeneralLedgerImporter()
                 });
         }
@@ -72,12 +66,13 @@ namespace ExcelApiPoc.AccountingImport.Services
 
             ValidateJournal(journal, request);
 
-            GeneralLedgerImport generalLedger = null;
+            CalculatedGeneralLedger calculatedGeneralLedger =
+                CalculatedGeneralLedgerBuilder.Build(journal);
 
+            GeneralLedgerImport generalLedger = null;
             JournalLedgerReconciliationResult reconciliation = null;
 
-            if (!string.IsNullOrWhiteSpace(
-                    request.GeneralLedgerFilePath))
+            if (!string.IsNullOrWhiteSpace(request.GeneralLedgerFilePath))
             {
                 IGeneralLedgerImporter ledgerImporter =
                     SelectExactlyOne(
@@ -89,30 +84,24 @@ namespace ExcelApiPoc.AccountingImport.Services
                         request.GeneralLedgerFilePath,
                         request.AccountingFormat);
 
-                generalLedger =
-                    ledgerImporter.Import(
-                        request.GeneralLedgerFilePath);
+                generalLedger = ledgerImporter.Import(request.GeneralLedgerFilePath);
 
-                ValidateGeneralLedger(
-                    generalLedger,
+                ValidateGeneralLedger(generalLedger, journal, request);
+
+                reconciliation = JournalLedgerReconciliationService.Reconcile(
                     journal,
-                    request);
-
-                reconciliation =
-                    JournalLedgerReconciliationService.Reconcile(
-                        journal,
-                        generalLedger);
+                    generalLedger);
             }
 
             return new AccountingImportPackage
             {
-                AccountingFormat =
-                    journal.AccountingFormat,
+                AccountingFormat = journal.AccountingFormat,
                 Ico = journal.Ico,
                 FiscalYear = journal.FiscalYear,
                 ExportStage = journal.ExportStage,
                 Journal = journal,
                 GeneralLedger = generalLedger,
+                CalculatedGeneralLedger = calculatedGeneralLedger,
                 JournalLedgerReconciliation = reconciliation
             };
         }
@@ -147,33 +136,31 @@ namespace ExcelApiPoc.AccountingImport.Services
             return journalImporter.Import(journalFilePath);
         }
 
-        private static TImporter SelectExactlyOne<TImporter>(IEnumerable<TImporter> importers, Func<TImporter, bool> canImport, string documentDescription, string filePath,  string accountingFormat)
+        private static TImporter SelectExactlyOne<TImporter>(
+            IEnumerable<TImporter> importers,
+            Func<TImporter, bool> canImport,
+            string documentDescription,
+            string filePath,
+            string accountingFormat)
         {
-            List<TImporter> matches =
-                importers.Where(canImport).ToList();
+            List<TImporter> matches = importers.Where(canImport).ToList();
 
             if (matches.Count == 0)
             {
                 throw new InvalidDataException(
                     "No registered importer recognizes the " +
                     documentDescription +
-                    " file '" +
-                    Path.GetFileName(filePath) +
-                    "' as accounting format '" +
-                    accountingFormat +
-                    "'.");
+                    " file '" + Path.GetFileName(filePath) +
+                    "' as accounting format '" + accountingFormat + "'.");
             }
 
             if (matches.Count > 1)
             {
                 throw new InvalidOperationException(
-                    "More than one registered importer recognizes " +
-                    "the " +
+                    "More than one registered importer recognizes the " +
                     documentDescription +
-                    " file '" +
-                    Path.GetFileName(filePath) +
-                    "' as accounting format '" +
-                    accountingFormat +
+                    " file '" + Path.GetFileName(filePath) +
+                    "' as accounting format '" + accountingFormat +
                     "'. Importer selection is ambiguous.");
             }
 
@@ -183,21 +170,16 @@ namespace ExcelApiPoc.AccountingImport.Services
         private static void ValidateRequest(AccountingImportRequest request)
         {
             if (request == null)
-            {
-                throw new ArgumentNullException(
-                    nameof(request));
-            }
+                throw new ArgumentNullException(nameof(request));
 
-            if (string.IsNullOrWhiteSpace(
-                    request.AccountingFormat))
+            if (string.IsNullOrWhiteSpace(request.AccountingFormat))
             {
                 throw new ArgumentException(
                     "An accounting format is required.",
                     nameof(request));
             }
 
-            IReadOnlyList<string> journalFilePaths =
-                ResolveJournalFilePaths(request);
+            IReadOnlyList<string> journalFilePaths = ResolveJournalFilePaths(request);
 
             if (journalFilePaths.Count == 0)
             {
@@ -213,8 +195,7 @@ namespace ExcelApiPoc.AccountingImport.Services
                     nameof(request));
             }
 
-            if (string.IsNullOrWhiteSpace(
-                    request.ExpectedIco))
+            if (string.IsNullOrWhiteSpace(request.ExpectedIco))
             {
                 throw new ArgumentException(
                     "The expected IČO is required.",
@@ -230,7 +211,9 @@ namespace ExcelApiPoc.AccountingImport.Services
             }
         }
 
-        private static void ValidateJournal(JournalImport journal, AccountingImportRequest request)
+        private static void ValidateJournal(
+            JournalImport journal,
+            AccountingImportRequest request)
         {
             if (journal == null)
             {
@@ -243,6 +226,7 @@ namespace ExcelApiPoc.AccountingImport.Services
                 journal.AccountingFormat,
                 request.AccountingFormat);
 
+            ReconcileJournalFileNameMetadata(journal);
             AdmitMissingSoftipMopIco(journal, request);
 
             ValidateIco(
@@ -257,23 +241,73 @@ namespace ExcelApiPoc.AccountingImport.Services
                 journal.FiscalYear,
                 request.ExpectedFiscalYear);
 
-            JournalRow wrongYearRow = IsSoftipMop(request.AccountingFormat)
-                ? null
-                : journal.Rows.FirstOrDefault(
-                    row => row.PostingDate.Year != request.ExpectedFiscalYear);
+            JournalDateExceptionService.Apply(
+                journal,
+                request.ExpectedFiscalYear);
+        }
 
-            if (wrongYearRow != null)
+        private static void ReconcileJournalFileNameMetadata(
+            JournalImport journal)
+        {
+            if (!AccountingFileNameMetadataParser.TryParse(
+                    journal.SourceFileName,
+                    out AccountingFileNameMetadata metadata))
+            {
+                return;
+            }
+
+            if (metadata.DocumentKind !=
+                AccountingSourceDocumentKind.AccountingJournal)
             {
                 throw new InvalidDataException(
-                    "Accounting journal '" +
-                    journal.SourceFileName +
-                    "' contains a posting dated " +
-                    wrongYearRow.PostingDate.ToString(
-                        "yyyy-MM-dd") +
-                    ", outside fiscal year " +
-                    request.ExpectedFiscalYear +
-                    ".");
+                    "Filename '" + journal.SourceFileName +
+                    "' does not identify an accounting journal.");
             }
+
+            journal.Ico = AccountingFileNameMetadataParser.ResolveIco(
+                journal.SourceFileName,
+                journal.Ico,
+                metadata);
+            journal.FiscalYear =
+                AccountingFileNameMetadataParser.ResolveFiscalYear(
+                    journal.SourceFileName,
+                    journal.FiscalYear,
+                    metadata);
+
+            if (!journal.ExportStage.HasValue)
+                journal.ExportStage = metadata.ExportStage;
+        }
+
+        private static void ReconcileGeneralLedgerFileNameMetadata(
+            GeneralLedgerImport ledger)
+        {
+            if (!AccountingFileNameMetadataParser.TryParse(
+                    ledger.SourceFileName,
+                    out AccountingFileNameMetadata metadata))
+            {
+                return;
+            }
+
+            if (metadata.DocumentKind !=
+                AccountingSourceDocumentKind.GeneralLedger)
+            {
+                throw new InvalidDataException(
+                    "Filename '" + ledger.SourceFileName +
+                    "' does not identify a general ledger.");
+            }
+
+            ledger.Ico = AccountingFileNameMetadataParser.ResolveIco(
+                ledger.SourceFileName,
+                ledger.Ico,
+                metadata);
+            ledger.FiscalYear =
+                AccountingFileNameMetadataParser.ResolveFiscalYear(
+                    ledger.SourceFileName,
+                    ledger.FiscalYear,
+                    metadata);
+
+            if (!ledger.ExportStage.HasValue)
+                ledger.ExportStage = metadata.ExportStage;
         }
 
         private static void AdmitMissingSoftipMopIco(
@@ -313,9 +347,7 @@ namespace ExcelApiPoc.AccountingImport.Services
             }
 
             if (string.IsNullOrWhiteSpace(request.JournalFilePath))
-            {
                 return Array.Empty<string>();
-            }
 
             return new[] { request.JournalFilePath };
         }
@@ -328,7 +360,10 @@ namespace ExcelApiPoc.AccountingImport.Services
                 StringComparison.OrdinalIgnoreCase);
         }
 
-        private static void ValidateGeneralLedger(GeneralLedgerImport ledger, JournalImport journal, AccountingImportRequest request)
+        private static void ValidateGeneralLedger(
+            GeneralLedgerImport ledger,
+            JournalImport journal,
+            AccountingImportRequest request)
         {
             if (ledger == null)
             {
@@ -340,6 +375,8 @@ namespace ExcelApiPoc.AccountingImport.Services
                 "general ledger",
                 ledger.AccountingFormat,
                 request.AccountingFormat);
+
+            ReconcileGeneralLedgerFileNameMetadata(ledger);
 
             ValidateIco(
                 "general ledger",
@@ -361,10 +398,7 @@ namespace ExcelApiPoc.AccountingImport.Services
                 throw new InvalidDataException(
                     "The accounting journal and general ledger " +
                     "belong to different entities: IČO '" +
-                    journal.Ico +
-                    "' and '" +
-                    ledger.Ico +
-                    "'.");
+                    journal.Ico + "' and '" + ledger.Ico + "'.");
             }
 
             if (ledger.FiscalYear != journal.FiscalYear)
@@ -372,14 +406,15 @@ namespace ExcelApiPoc.AccountingImport.Services
                 throw new InvalidDataException(
                     "The accounting journal and general ledger " +
                     "belong to different fiscal years: " +
-                    journal.FiscalYear +
-                    " and " +
-                    ledger.FiscalYear +
-                    ".");
+                    journal.FiscalYear + " and " +
+                    ledger.FiscalYear + ".");
             }
         }
 
-        private static void ValidateFormat(string documentDescription, string actual, string expected)
+        private static void ValidateFormat(
+            string documentDescription,
+            string actual,
+            string expected)
         {
             if (!string.Equals(
                     actual,
@@ -387,49 +422,41 @@ namespace ExcelApiPoc.AccountingImport.Services
                     StringComparison.OrdinalIgnoreCase))
             {
                 throw new InvalidDataException(
-                    "The imported " +
-                    documentDescription +
-                    " reports accounting format '" +
-                    actual +
-                    "', but format '" +
-                    expected +
-                    "' was requested.");
+                    "The imported " + documentDescription +
+                    " reports accounting format '" + actual +
+                    "', but format '" + expected + "' was requested.");
             }
         }
 
-        private static void ValidateIco(string documentDescription, string fileName, string actual, string expected)
+        private static void ValidateIco(
+            string documentDescription,
+            string fileName,
+            string actual,
+            string expected)
         {
-            if (!string.Equals(
-                    actual,
-                    expected,
-                    StringComparison.Ordinal))
+            if (!string.Equals(actual, expected, StringComparison.Ordinal))
             {
                 throw new InvalidDataException(
-                    "The " +
-                    documentDescription +
-                    " file '" +
-                    fileName +
-                    "' belongs to IČO '" +
-                    actual +
-                    "', but IČO '" +
-                    expected +
-                    "' was requested.");
+                    "The " + documentDescription +
+                    " file '" + fileName +
+                    "' belongs to IČO '" + actual +
+                    "', but IČO '" + expected + "' was requested.");
             }
         }
 
-        private static void ValidateFiscalYear(string documentDescription, string fileName, int actual, int expected)
+        private static void ValidateFiscalYear(
+            string documentDescription,
+            string fileName,
+            int actual,
+            int expected)
         {
             if (actual != expected)
             {
                 throw new InvalidDataException(
-                    "The " +
-                    documentDescription +
-                    " file '" +
-                    fileName +
-                    "' belongs to fiscal year " +
-                    actual +
-                    ", but fiscal year " +
-                    expected +
+                    "The " + documentDescription +
+                    " file '" + fileName +
+                    "' belongs to fiscal year " + actual +
+                    ", but fiscal year " + expected +
                     " was requested.");
             }
         }

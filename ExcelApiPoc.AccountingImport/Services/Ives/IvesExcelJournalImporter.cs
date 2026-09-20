@@ -46,6 +46,22 @@ namespace ExcelApiPoc.AccountingImport.Services.Ives
                     " transaction records. This file size is not supported.");
             }
 
+            AccountingFileNameMetadata fileNameMetadata = null;
+            if (AccountingFileNameMetadataParser.TryParse(
+                    source.SourceFileName,
+                    out AccountingFileNameMetadata parsedMetadata))
+            {
+                if (parsedMetadata.DocumentKind !=
+                    AccountingSourceDocumentKind.AccountingJournal)
+                {
+                    throw new InvalidDataException(
+                        "Filename '" + source.SourceFileName +
+                        "' does not identify an accounting journal.");
+                }
+
+                fileNameMetadata = parsedMetadata;
+            }
+
             var result = new JournalImport
             {
                 SourceFileName = source.SourceFileName,
@@ -53,8 +69,15 @@ namespace ExcelApiPoc.AccountingImport.Services.Ives
                 SourceFileHash = CalculateSha256(source.SourceFilePath),
                 TechnicalType = "Excel",
                 AccountingFormat = "IVES",
-                Ico = source.Ico,
-                FiscalYear = source.FiscalYear,
+                Ico = AccountingFileNameMetadataParser.ResolveIco(
+                    source.SourceFileName,
+                    source.Ico,
+                    fileNameMetadata),
+                FiscalYear = AccountingFileNameMetadataParser.ResolveFiscalYear(
+                    source.SourceFileName,
+                    source.FiscalYear,
+                    fileNameMetadata),
+                ExportStage = fileNameMetadata?.ExportStage,
                 ImportedAtUtc = DateTime.UtcNow,
                 ImportReport = report
             };

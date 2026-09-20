@@ -9,6 +9,13 @@ namespace ExcelApiPoc.AccountingImport.Models
         Closing = 2
     }
 
+    public enum JournalDateExceptionResolution
+    {
+        Excluded = 0,
+        OriginalIncluded = 1,
+        ModifiedIncluded = 2
+    }
+
     public sealed class JournalRow
     {
         public int SequenceNumber { get; set; }
@@ -20,11 +27,29 @@ namespace ExcelApiPoc.AccountingImport.Models
         public string DocumentType { get; set; }
         public string DocumentNumber { get; set; }
         public DateTime PostingDate { get; set; }
+        public JournalDateExceptionResolution? DateExceptionResolution { get; set; }
+        public DateTime? CorrectedPostingDate { get; set; }
+        public DateTime EffectivePostingDate
+        {
+            get
+            {
+                return DateExceptionResolution ==
+                           JournalDateExceptionResolution.ModifiedIncluded &&
+                       CorrectedPostingDate.HasValue
+                    ? CorrectedPostingDate.Value
+                    : PostingDate;
+            }
+        }
         public string Description { get; set; }
         public JournalRecordKind RecordKind { get; set; }
         public bool UsedForReportCalculation
         {
-            get { return RecordKind != JournalRecordKind.Closing; }
+            get
+            {
+                return RecordKind != JournalRecordKind.Closing &&
+                       DateExceptionResolution !=
+                       JournalDateExceptionResolution.Excluded;
+            }
         }
         public string DebitAccount { get; set; }
         public decimal? DebitAmount { get; set; }

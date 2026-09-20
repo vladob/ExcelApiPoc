@@ -8,7 +8,7 @@ namespace ExcelApiPoc.AddIn.Services
 {
     internal static class AccountWorksheetWriter
     {
-        private const string WorksheetName = "Accounts";
+        private const string WorksheetName = "Account Summary";
         private const string TableName = "AccountRows";
         private const int HeaderRow = 4;
         private const int FirstColumn = 1;

@@ -133,8 +133,7 @@ public sealed class UrbisExcelJournalImporterTests
     private static void DeleteCopiedFixture(
         string copiedPath)
     {
-        string directory =
-            Path.GetDirectoryName(copiedPath);
+        string? directory = Path.GetDirectoryName(copiedPath);
 
         if (File.Exists(copiedPath))
         {

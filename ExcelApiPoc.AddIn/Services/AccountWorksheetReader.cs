@@ -1,5 +1,7 @@
 ﻿using ExcelApiPoc.AddIn.Models;
+using System;
 using System.Collections.Generic;
+using System.Globalization;
 using Excel = Microsoft.Office.Interop.Excel;
 
 namespace ExcelApiPoc.AddIn.Services
@@ -8,7 +10,8 @@ namespace ExcelApiPoc.AddIn.Services
     {
         public static IReadOnlyList<AccountSummary> Read(Excel.Workbook workbook)
         {
-            IReadOnlyList<IDictionary<string, object>> rows = AuditWorkbookTableReader.ReadRows(workbook, "AccountRows");
+            IReadOnlyList<IDictionary<string, object>> rows =
+                AuditWorkbookTableReader.ReadRows(workbook, "AccountRows");
             var result = new List<AccountSummary>();
 
             foreach (IDictionary<string, object> row in rows)
@@ -22,6 +25,7 @@ namespace ExcelApiPoc.AddIn.Services
                     SyntheticAccountCode = AuditWorkbookTableReader.GetString(row, "SyntheticAccountCode"),
                     FrameworkAccountCode = AuditWorkbookTableReader.GetString(row, "FrameworkAccountCode"),
                     FrameworkAccountName = AuditWorkbookTableReader.GetString(row, "FrameworkAccountName"),
+                    IsFrameworkMatch = GetNullableBoolean(row, "IsFrameworkMatch"),
                     GeneralLedgerAccountName = AuditWorkbookTableReader.GetString(row, "GeneralLedgerAccountName"),
                     AccountNameComparisonStatus = AuditWorkbookTableReader.GetString(row, "AccountNameComparisonStatus"),
                     DebitEntryCount = AuditWorkbookTableReader.GetInt32(row, "DebitEntryCount"),
@@ -42,6 +46,29 @@ namespace ExcelApiPoc.AddIn.Services
                 });
             }
             return result;
+        }
+
+        private static bool? GetNullableBoolean(
+            IDictionary<string, object> row,
+            string columnName)
+        {
+            if (!row.TryGetValue(columnName, out object value) ||
+                value == null ||
+                string.IsNullOrWhiteSpace(Convert.ToString(value, CultureInfo.InvariantCulture)))
+            {
+                return null;
+            }
+
+            if (value is bool booleanValue)
+                return booleanValue;
+
+            string text = Convert.ToString(value, CultureInfo.InvariantCulture);
+            if (string.Equals(text, "TRUE", StringComparison.OrdinalIgnoreCase))
+                return true;
+            if (string.Equals(text, "FALSE", StringComparison.OrdinalIgnoreCase))
+                return false;
+
+            return Convert.ToDouble(value, CultureInfo.InvariantCulture) != 0;
         }
     }
 }

@@ -20,7 +20,9 @@ public sealed class AuditTemplateRepository
                 [Name_sk] AS [Name],
                 [MfSpecification],
                 [ValidFrom],
-                [ValidTo]
+                [ValidTo],
+                [CreateMultiYear],
+                [MultiYearWorksheetName]
             FROM [Template].[Templates]
             WHERE [ErpId] = @TemplateErpId;
 
@@ -54,6 +56,8 @@ public sealed class AuditTemplateRepository
         string? mfSpecification = reader.IsDBNull(2) ? null : reader.GetString(2);
         DateOnly? validFrom = reader.IsDBNull(3) ? null : DateOnly.FromDateTime(reader.GetDateTime(3));
         DateOnly? validTo = reader.IsDBNull(4) ? null : DateOnly.FromDateTime(reader.GetDateTime(4));
+        bool createMultiYear = !reader.IsDBNull(5) && reader.GetBoolean(5);
+        string? multiYearWorksheetName = reader.IsDBNull(6) ? null : reader.GetString(6);
         var tables = new List<AuditTableMetadata>();
 
         await reader.NextResultAsync(cancellationToken);
@@ -78,6 +82,8 @@ public sealed class AuditTemplateRepository
             MfSpecification = mfSpecification,
             ValidFrom = validFrom,
             ValidTo = validTo,
+            CreateMultiYear = createMultiYear,
+            MultiYearWorksheetName = multiYearWorksheetName,
             Tables = tables
         };
     }

@@ -1,5 +1,6 @@
 using ExcelApiPoc.AccountingImport.Models;
 using ExcelApiPoc.AccountingImport.Services.Ives;
+using System.IO;
 
 namespace ExcelApiPoc.AccountingImport.Tests.Ives;
 
@@ -60,6 +61,68 @@ public sealed class IvesExcelJournalImporterTests
         Assert.True(result.ImportReport.IsValid);
         Assert.Empty(result.ImportReport.Diagnostics);
         Assert.Equal(rowCount, result.ImportReport.RecordCounts["Transactions"]);
+    }
+
+    [Fact]
+    public void Import_PreservesOptionalExportStageFromFilename()
+    {
+        string copiedPath = CopyFixtureWithName(
+            "U_DENNIK_00322881_202414.xls");
+
+        try
+        {
+            JournalImport result = new IvesExcelJournalImporter().Import(copiedPath);
+
+            Assert.Equal("00322881", result.Ico);
+            Assert.Equal(2024, result.FiscalYear);
+            Assert.Equal(14, result.ExportStage);
+        }
+        finally
+        {
+            DeleteCopiedFixture(copiedPath);
+        }
+    }
+
+    [Fact]
+    public void Import_ReportsIcoConflictBetweenContentsAndFilename()
+    {
+        string copiedPath = CopyFixtureWithName(
+            "U_DENNIK_00325791_2024.xls");
+
+        try
+        {
+            InvalidDataException exception = Assert.Throws<InvalidDataException>(
+                () => new IvesExcelJournalImporter().Import(copiedPath));
+
+            Assert.Contains("00325791", exception.Message);
+            Assert.Contains("00322881", exception.Message);
+            Assert.Contains("file contents", exception.Message);
+        }
+        finally
+        {
+            DeleteCopiedFixture(copiedPath);
+        }
+    }
+
+    [Fact]
+    public void Import_ReportsFiscalYearConflictBetweenContentsAndFilename()
+    {
+        string copiedPath = CopyFixtureWithName(
+            "U_DENNIK_00322881_2023.xls");
+
+        try
+        {
+            InvalidDataException exception = Assert.Throws<InvalidDataException>(
+                () => new IvesExcelJournalImporter().Import(copiedPath));
+
+            Assert.Contains("2023", exception.Message);
+            Assert.Contains("2024", exception.Message);
+            Assert.Contains("file contents", exception.Message);
+        }
+        finally
+        {
+            DeleteCopiedFixture(copiedPath);
+        }
     }
 
     [Fact]
@@ -143,5 +206,30 @@ public sealed class IvesExcelJournalImporterTests
             "TestData",
             "Ives",
             fileName);
+    }
+
+    private static string CopyFixtureWithName(string fileName)
+    {
+        string directory = Path.Combine(
+            Path.GetTempPath(),
+            "ExcelApiPoc-" + Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(directory);
+
+        string copiedPath = Path.Combine(directory, fileName);
+        File.Copy(
+            GetFixturePath("U_DENNIK_00322881_2024.xls"),
+            copiedPath);
+        return copiedPath;
+    }
+
+    private static void DeleteCopiedFixture(string copiedPath)
+    {
+        string? directory = Path.GetDirectoryName(copiedPath);
+
+        if (File.Exists(copiedPath))
+            File.Delete(copiedPath);
+
+        if (!string.IsNullOrWhiteSpace(directory) && Directory.Exists(directory))
+            Directory.Delete(directory);
     }
 }

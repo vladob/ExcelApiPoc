@@ -15,40 +15,41 @@ namespace ExcelApiPoc.AddIn
     [ComVisible(true)]
     public class PocRibbon : ExcelRibbon
     {
+        private const string RegisterUzReportsTableName = "RegisterUzReports";
+        private const string RecalculateGeneralLedgerControlId = "buttonRecalculateGeneralLedger";
+        private const string RecalculateAuditReportControlId = "buttonRecalculateAuditReport";
+        private const string OpenRegisterUzReportControlId = "buttonOpenRegisterUzReport";
+
+        private IRibbonUI _ribbon;
+        private bool _applicationEventsSubscribed;
+
         public override string GetCustomUI(string ribbonId)
         {
             return @"
-<customUI xmlns='http://schemas.microsoft.com/office/2009/07/customui'>
+<customUI xmlns='http://schemas.microsoft.com/office/2009/07/customui' onLoad='OnRibbonLoad'>
   <ribbon>
     <tabs>
       <tab id='tabExcelApiPoc' label='API PoC'>
         <group id='groupAuditWorkbook' label='Audit Workbook'>
-            <button
-                id='buttonCreateAuditWorkbook'
-                label='Create Audit Workbook'
-                size='large'
-                imageMso='FileNew'
-                onAction='OnCreateAuditWorkbook'/>
-            <button
-                id='buttonRecalculateAuditReport'
-                label='Recalculate Report'
+            <button id='buttonCreateAuditWorkbook' label='Create Audit Workbook' size='large' imageMso='FileNew' onAction='OnCreateAuditWorkbook'/>
+            <button id='buttonSettings' label='Settings' size='large' imageMso='ApplicationOptionsDialog' onAction='OnSettings'/>
+        </group>
+        <group id='groupAnalysis' label='Analysis'>
+            <button id='buttonRecalculateGeneralLedger'
+                label='Recalculate General Ledger from Accounting Journal'
                 size='large'
                 imageMso='RefreshAll'
-                onAction='OnRecalculateAuditReport'/>
-            <button
-                id='buttonOpenRegisterUzReport'
-                label='Open RegisterUZ Report'
+                onAction='OnRecalculateGeneralLedger'
+                getEnabled='GetRecalculateGeneralLedgerEnabled'/>
+            <button id='buttonRecalculateAuditReport'
+                label='Recalculate Report'
                 size='large'
-                imageMso='FileOpen'
-                onAction='OnOpenRegisterUzReport'/>
+                imageMso='CalculateSheet'
+                onAction='OnRecalculateAuditReport'
+                getEnabled='GetRecalculateAuditReportEnabled'/>
         </group>
-        <group id='groupTools' label='Tools'>
-            <button
-                id='buttonSettings'
-                label='Settings'
-                size='large'
-                imageMso='FileProperties'
-                onAction='OnSettings'/>
+        <group id='groupRegisterUz' label='RegisterUZ'>
+            <button id='buttonOpenRegisterUzReport' label='Open RegisterUZ Report' size='large' imageMso='FieldChooser' onAction='OnOpenRegisterUzReport' getEnabled='GetOpenRegisterUzReportEnabled'/>
         </group>
       </tab>
     </tabs>
@@ -56,70 +57,192 @@ namespace ExcelApiPoc.AddIn
 </customUI>";
         }
 
+        public void OnRibbonLoad(IRibbonUI ribbon)
+        {
+            _ribbon = ribbon;
+            if (_applicationEventsSubscribed) return;
+
+            Excel.Application application = (Excel.Application)ExcelDnaUtil.Application;
+            application.SheetSelectionChange += OnSheetSelectionChange;
+            application.SheetActivate += OnSheetActivate;
+            application.WorkbookActivate += OnWorkbookActivate;
+            _applicationEventsSubscribed = true;
+        }
+
+        public bool GetRecalculateGeneralLedgerEnabled(IRibbonControl control)
+        {
+            _ = control;
+            return IsActiveAuditWorkbook();
+        }
+
+        public bool GetRecalculateAuditReportEnabled(IRibbonControl control)
+        {
+            _ = control;
+            return IsActiveAuditWorkbook();
+        }
+
+        private static bool IsActiveAuditWorkbook()
+        {
+            try
+            {
+                Excel.Application application = (Excel.Application)ExcelDnaUtil.Application;
+                return AuditWorkbookIdentity.IsAuditWorkbook(application.ActiveWorkbook);
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        public bool GetOpenRegisterUzReportEnabled(IRibbonControl control)
+        {
+            _ = control;
+            try
+            {
+                Excel.Application application = (Excel.Application)ExcelDnaUtil.Application;
+                if (!AuditWorkbookIdentity.IsAuditWorkbook(application.ActiveWorkbook)) return false;
+
+                Excel.Worksheet worksheet = application.ActiveSheet as Excel.Worksheet;
+                if (worksheet == null) return false;
+
+                Excel.ListObject table = null;
+                foreach (Excel.ListObject candidate in worksheet.ListObjects)
+                {
+                    if (string.Equals(candidate.Name, RegisterUzReportsTableName, StringComparison.OrdinalIgnoreCase))
+                    {
+                        table = candidate;
+                        break;
+                    }
+                }
+
+                Excel.Range data = table?.DataBodyRange;
+                Excel.Range activeCell = application.ActiveCell as Excel.Range;
+                return data != null && activeCell != null &&
+                    activeCell.Row >= data.Row && activeCell.Row < data.Row + data.Rows.Count &&
+                    activeCell.Column >= data.Column && activeCell.Column < data.Column + data.Columns.Count;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        private void OnSheetSelectionChange(object sheet, Excel.Range target)
+        {
+            _ = sheet; _ = target; InvalidateAuditControls();
+        }
+
+        private void OnSheetActivate(object sheet)
+        {
+            _ = sheet; InvalidateAuditControls();
+        }
+
+        private void OnWorkbookActivate(Excel.Workbook workbook)
+        {
+            _ = workbook; InvalidateAuditControls();
+        }
+
+        private void InvalidateAuditControls()
+        {
+            _ribbon?.InvalidateControl(RecalculateGeneralLedgerControlId);
+            _ribbon?.InvalidateControl(RecalculateAuditReportControlId);
+            _ribbon?.InvalidateControl(OpenRegisterUzReportControlId);
+        }
+
         public void OnSettings(IRibbonControl control)
         {
             _ = control;
-
-            using (var dialog = new SettingsForm())
-            {
-                dialog.ShowDialog();
-            }
+            using (var dialog = new SettingsForm()) dialog.ShowDialog();
         }
 
         public void OnCreateAuditWorkbook(IRibbonControl control)
         {
             _ = control;
-
-            Excel.Application application =
-                (Excel.Application)ExcelDnaUtil.Application;
-
-            Excel.Workbook auditWorkbook =
-                application.Workbooks.Add();
-
+            Excel.Application application = (Excel.Application)ExcelDnaUtil.Application;
+            Excel.Workbook auditWorkbook = application.Workbooks.Add();
             auditWorkbook.Activate();
-
             using (var dialog = new CreateAuditWorkbookForm(auditWorkbook))
             {
                 if (dialog.ShowDialog() != DialogResult.OK)
-                {
                     auditWorkbook.Close(SaveChanges: false);
+            }
+        }
+
+        public void OnRecalculateGeneralLedger(IRibbonControl control)
+        {
+            _ = control;
+            try
+            {
+                Excel.Application application = (Excel.Application)ExcelDnaUtil.Application;
+                Excel.Workbook workbook = application.ActiveWorkbook;
+                if (workbook == null) throw new InvalidOperationException("No active workbook was found.");
+                if (!AuditWorkbookIdentity.IsAuditWorkbook(workbook))
+                    throw new InvalidOperationException("The active workbook is not an audit workbook.");
+
+                AuditWorkbookRecalculationResult result;
+                using (new ExcelBusyCursor(application))
+                using (new ExcelApplicationStateScope(application, disableEvents: false))
+                {
+                    AuditWorkbookRecalculationService.RecalculateGeneralLedgerFromJournal(workbook);
+                    result = AnalyticalMappingHeuristicRefreshService.RefreshAndRecalculate(workbook);
                 }
+                AuditWorkbookRecalculationDialog.Show(result);
+            }
+            catch (Exception exception)
+            {
+                MessageBox.Show(
+                    "General-ledger recalculation failed.\n\n" + exception.Message,
+                    "Recalculate General Ledger from Accounting Journal",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
             }
         }
 
         public void OnRecalculateAuditReport(IRibbonControl control)
         {
             _ = control;
-
             try
             {
                 Excel.Application application = (Excel.Application)ExcelDnaUtil.Application;
                 Excel.Workbook workbook = application.ActiveWorkbook;
+                if (workbook == null) throw new InvalidOperationException("No active workbook was found.");
+                if (!AuditWorkbookIdentity.IsAuditWorkbook(workbook))
+                    throw new InvalidOperationException("The active workbook is not an audit workbook.");
 
-                if (workbook == null)
-                    throw new InvalidOperationException("No active workbook was found.");
+                AuditWorkbookRecalculationResult result;
+                using (new ExcelBusyCursor(application))
+                using (new ExcelApplicationStateScope(application, disableEvents: false))
+                    result = AuditWorkbookRecalculationService.Recalculate(workbook);
 
-                AuditWorkbookRecalculationDialog.Show(
-                    AuditWorkbookRecalculationService.Recalculate(workbook));
+                AuditWorkbookRecalculationDialog.Show(result);
             }
             catch (Exception exception)
             {
-                MessageBox.Show($"Audit report calculation failed.\n\n{exception.Message}", "Audit Report Calculation", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(
+                    "Audit report calculation failed.\n\n" + exception.Message,
+                    "Audit Report Calculation",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
             }
         }
 
         public void OnOpenRegisterUzReport(IRibbonControl control)
         {
             _ = control;
-
             try
             {
-                RegisterUzReportRenderingService.RenderSelectedReportTable();
+                Excel.Application application = (Excel.Application)ExcelDnaUtil.Application;
+                if (!AuditWorkbookIdentity.IsAuditWorkbook(application.ActiveWorkbook))
+                    throw new InvalidOperationException("The active workbook is not an audit workbook.");
+
+                using (new ExcelBusyCursor(application))
+                using (new ExcelApplicationStateScope(application, disableEvents: false))
+                    RegisterUzReportRenderingService.RenderSelectedReportTable();
             }
             catch (Exception exception)
             {
                 MessageBox.Show(
-                    $"RegisterUZ report rendering failed.\n\n{exception.Message}",
+                    "RegisterUZ report rendering failed.\n\n" + exception.Message,
                     "Open RegisterUZ Report",
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Error);
@@ -130,94 +253,36 @@ namespace ExcelApiPoc.AddIn
         {
             try
             {
-                // string ico = "36206075"; // CONSULTING, s.r.o.
-                // string ico = "00325554"; // Obec Oreské
-                 string ico = "00312011"; // Obec Svinná
-                // string ico = "36601837"; // BOJKUN spol. s r.o.
-                /*
-
-                AccountingEntityPackageDto package = AccountingEntityPackageApiClient.GetPackage(ico);
-
-                                MessageBox.Show(
-                                    BuildAccountingEntityPackageSummary(package),
-                                    "Accounting Entity Package",
-                                    MessageBoxButtons.OK,
-                                    MessageBoxIcon.Information);
-                */
-
-
+                string ico = "00312011";
                 string summary = AccountingEntityPackageApiClient.GetEnvelopeSummary(ico);
-
-                MessageBox.Show(
-                    summary,
-                    "Accounting Entity Graph",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Information);
+                MessageBox.Show(summary, "Accounting Entity Graph", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
             catch (AccountingEntityPackageNotFoundException ex)
             {
-                MessageBox.Show(
-                    ex.Message,
-                    "Accounting Entity Package",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Warning);
+                MessageBox.Show(ex.Message, "Accounting Entity Package", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
             catch (AccountingEntityPackageAmbiguousException ex)
             {
-                MessageBox.Show(
-                    ex.Message,
-                    "Accounting Entity Package",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Warning);
+                MessageBox.Show(ex.Message, "Accounting Entity Package", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
             catch (Exception ex)
             {
-                MessageBox.Show(
-                    ex.ToString(),
-                    "Accounting Entity Package",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Error);
+                MessageBox.Show(ex.ToString(), "Accounting Entity Package", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
-        private static string BuildAccountingEntityPackageSummary(
-            AccountingEntityPackageDto package)
+        private static string BuildAccountingEntityPackageSummary(AccountingEntityPackageDto package)
         {
             int statementCount = package.FinancialStatements?.Count ?? 0;
-
-            int reportCount =
-                package.FinancialStatements?
-                    .Sum(statement =>
-                        statement.FinancialReports?.Count ?? 0)
-                ?? 0;
-
-            int tableCount =
-                package.FinancialStatements?
-                    .Sum(statement =>
-                        statement.FinancialReports?
-                            .Sum(report =>
-                                report.Tables?.Count ?? 0)
-                        ?? 0)
-                ?? 0;
-
-            int valueCount =
-                package.FinancialStatements?
-                    .Sum(statement =>
-                        statement.FinancialReports?
-                            .Sum(report =>
-                                report.Tables?
-                                    .Sum(table =>
-                                        table.Values?.Count ?? 0)
-                                ?? 0)
-                        ?? 0)
-                ?? 0;
-            return
-                $"IČO: {package.Entity?.Ico}\r\n" +
-                $"Name: {package.Entity?.Name}\r\n" +
-                $"Statements: {statementCount}\r\n" +
-                $"Tables: {tableCount}\r\n" +
-                $"Values: {valueCount}\r\n" +
-                $"Generated: {package.GeneratedAtUtc:u}";
+            int reportCount = package.FinancialStatements?.Sum(statement => statement.FinancialReports?.Count ?? 0) ?? 0;
+            int tableCount = package.FinancialStatements?.Sum(statement => statement.FinancialReports?.Sum(report => report.Tables?.Count ?? 0) ?? 0) ?? 0;
+            int valueCount = package.FinancialStatements?.Sum(statement => statement.FinancialReports?.Sum(report => report.Tables?.Sum(table => table.Values?.Count ?? 0) ?? 0) ?? 0) ?? 0;
+            return $"IČO: {package.Entity?.Ico}\r\n" +
+                   $"Name: {package.Entity?.Name}\r\n" +
+                   $"Statements: {statementCount}\r\n" +
+                   $"Tables: {tableCount}\r\n" +
+                   $"Values: {valueCount}\r\n" +
+                   $"Generated: {package.GeneratedAtUtc:u}";
         }
     }
 }

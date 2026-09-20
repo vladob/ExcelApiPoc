@@ -1,4 +1,4 @@
-﻿using ExcelApiPoc.AccountingImport.Models;
+using ExcelApiPoc.AccountingImport.Models;
 using ExcelApiPoc.AccountingImport.Services;
 using ExcelApiPoc.AddIn.Models;
 using ExcelApiPoc.AddIn.Services;
@@ -28,13 +28,15 @@ namespace ExcelApiPoc.AddIn.Forms
         private readonly Workbook _auditWorkbook;
         private readonly List<string> _journalFilePaths = new List<string>();
         private bool _updatingJournalPathDisplay;
+        private readonly string _uiLanguage;
 
         public CreateAuditWorkbookForm(Workbook auditWorkbook)
         {
             _auditWorkbook = auditWorkbook ??
                 throw new ArgumentNullException(nameof(auditWorkbook));
+            _uiLanguage = SettingsService.Load().UiLanguage;
 
-            Text = "Create Audit Workbook";
+            Text = UiText.Get("Create.Title", _uiLanguage);
             StartPosition = FormStartPosition.CenterScreen;
             FormBorderStyle = FormBorderStyle.FixedDialog;
             MaximizeBox = false;
@@ -44,7 +46,7 @@ namespace ExcelApiPoc.AddIn.Forms
             Height = 460;
 
             // Accounting journal
-            AddLabel("Accounting journal: *",15,22,145);
+            AddLabel(UiText.Get("Create.AccountingJournal", _uiLanguage),15,22,145);
 
             _journalPathTextBox = new TextBox();
             _journalPathTextBox.SetBounds(165, 19, 430, 23);
@@ -59,7 +61,7 @@ namespace ExcelApiPoc.AddIn.Forms
             journalBrowseButton.Click += JournalBrowseButton_Click;
 
             // Entity-specific accounting framework
-            AddLabel("Accounting framework:",15,62,145);
+            AddLabel(UiText.Get("Create.AccountingFramework", _uiLanguage),15,62,145);
 
             _accountsPathTextBox = new TextBox();
             _accountsPathTextBox.SetBounds(165, 59, 430, 23);
@@ -74,14 +76,14 @@ namespace ExcelApiPoc.AddIn.Forms
 
             var accountsOptionalLabel = new Label
             {
-                Text = "Optional",
+                Text = UiText.Get("Create.Optional", _uiLanguage),
                 AutoSize = true
             };
 
             accountsOptionalLabel.SetBounds(165, 85, 100, 20);
 
             // General ledger
-            AddLabel("General ledger:",15,112,145);
+            AddLabel(UiText.Get("Create.GeneralLedger", _uiLanguage),15,112,145);
 
             _generalLedgerPathTextBox = new TextBox();
             _generalLedgerPathTextBox.SetBounds(165,109,430,23);
@@ -90,11 +92,11 @@ namespace ExcelApiPoc.AddIn.Forms
             generalLedgerBrowseButton.SetBounds(605,108,45,25);
             generalLedgerBrowseButton.Click += GeneralLedgerBrowseButton_Click;
 
-            var generalLedgerOptionalLabel = new Label { Text = "Optional", AutoSize = true };
+            var generalLedgerOptionalLabel = new Label { Text = UiText.Get("Create.Optional", _uiLanguage), AutoSize = true };
             generalLedgerOptionalLabel.SetBounds(165,135,100,20);
 
             // Technical file type
-            AddLabel("Technical type:",15,175,145);
+            AddLabel(UiText.Get("Create.TechnicalType", _uiLanguage),15,175,145);
 
             _technicalTypeComboBox = new ComboBox
             {
@@ -106,7 +108,7 @@ namespace ExcelApiPoc.AddIn.Forms
             _technicalTypeComboBox.SelectedIndex = 0;
 
             // Accounting-system format
-            AddLabel("Accounting format:",15,215,145);
+            AddLabel(UiText.Get("Create.AccountingFormat", _uiLanguage),15,215,145);
 
             _accountingFormatComboBox = new ComboBox
             {
@@ -128,7 +130,7 @@ namespace ExcelApiPoc.AddIn.Forms
             _accountingFormatComboBox.SelectedIndex = 0;
 
             // IČO
-            AddLabel("IČO:",15,255,145);
+            AddLabel(UiText.Get("Create.Ico", _uiLanguage),15,255,145);
 
             _icoTextBox = new TextBox
             {
@@ -138,7 +140,7 @@ namespace ExcelApiPoc.AddIn.Forms
             _icoTextBox.SetBounds(165, 252, 200, 23);
 
             // Fiscal year
-            AddLabel("Fiscal year:",15,295,145);
+            AddLabel(UiText.Get("Create.FiscalYear", _uiLanguage),15,295,145);
 
             _fiscalYearTextBox = new TextBox
             {
@@ -150,7 +152,7 @@ namespace ExcelApiPoc.AddIn.Forms
             // Bottom buttons
             var settingsButton = new Button
             {
-                Text = "Settings..."
+                Text = UiText.Get("Create.Settings", _uiLanguage)
             };
 
             settingsButton.SetBounds(15, 360, 105, 30);
@@ -158,7 +160,7 @@ namespace ExcelApiPoc.AddIn.Forms
 
             var cancelButton = new Button
             {
-                Text = "Cancel",
+                Text = UiText.Get("Common.Cancel", _uiLanguage),
                 DialogResult = DialogResult.Cancel
             };
 
@@ -166,8 +168,7 @@ namespace ExcelApiPoc.AddIn.Forms
 
             _continueButton = new Button
             {
-                Text = "Continue",
-                Enabled = false
+                Text = UiText.Get("Create.Continue", _uiLanguage)
             };
 
             _continueButton.SetBounds(565, 360, 85, 30);
@@ -204,7 +205,7 @@ namespace ExcelApiPoc.AddIn.Forms
         {
             using (var dialog = CreateOpenFileDialog())
             {
-                dialog.Title = "Select Accounting Journal";
+                dialog.Title = UiText.Get("Create.SelectJournal", _uiLanguage);
                 dialog.Multiselect = true;
                 if (dialog.ShowDialog() != DialogResult.OK)
                 {
@@ -216,8 +217,8 @@ namespace ExcelApiPoc.AddIn.Forms
                     !AreSoftipMopJournalFiles(selectedPaths))
                 {
                     MessageBox.Show(
-                        "Multiple accounting-journal files can currently be selected only for Softip-MOP monthly journals.",
-                        "Select Accounting Journal",
+                        UiText.Get("Create.MultipleJournalFiles", _uiLanguage),
+                        UiText.Get("Create.SelectJournal", _uiLanguage),
                         MessageBoxButtons.OK,
                         MessageBoxIcon.Warning);
                     return;
@@ -226,12 +227,20 @@ namespace ExcelApiPoc.AddIn.Forms
                 _journalFilePaths.Clear();
                 _journalFilePaths.AddRange(selectedPaths);
                 UpdateJournalPathDisplay();
-                ProcessJournalFiles(_journalFilePaths);
+
+                SetBusy(true);
+                try
+                {
+                    ProcessJournalFiles(_journalFilePaths);
+                }
+                finally
+                {
+                    SetBusy(false);
+                }
             }
         }
 
-        private static bool AreSoftipMopJournalFiles(
-            IEnumerable<string> filePaths)
+        private static bool AreSoftipMopJournalFiles(IEnumerable<string> filePaths)
         {
             foreach (string filePath in filePaths)
             {
@@ -272,7 +281,7 @@ namespace ExcelApiPoc.AddIn.Forms
         {
             using (var dialog = CreateOpenFileDialog())
             {
-                dialog.Title = "Select Accounting Framework";
+                dialog.Title = UiText.Get("Create.SelectFramework", _uiLanguage);
                 if (dialog.ShowDialog() == DialogResult.OK)
                 {
                     _accountsPathTextBox.Text = dialog.FileName;
@@ -284,7 +293,7 @@ namespace ExcelApiPoc.AddIn.Forms
         {
             using (var dialog = CreateOpenFileDialog())
             {
-                dialog.Title = "Select General Ledger";
+                dialog.Title = UiText.Get("Create.SelectGeneralLedger", _uiLanguage);
                 if (dialog.ShowDialog() == DialogResult.OK)
                     _generalLedgerPathTextBox.Text = dialog.FileName;
             }
@@ -360,34 +369,100 @@ namespace ExcelApiPoc.AddIn.Forms
         private void ContinueButton_Click(object sender, EventArgs e)
         {
             bool workbookPopulationStarted = false;
+            var diagnosticInputPaths = new List<string>();
 
             try
             {
+                SetBusy(true);
                 List<string> journalFilePaths = GetJournalFilePaths();
+                diagnosticInputPaths.AddRange(journalFilePaths);
 
-                if (journalFilePaths.Count == 0 ||
-                    journalFilePaths.Any(path => !File.Exists(path)))
+                if (journalFilePaths.Count == 0)
                 {
-                    throw new InvalidOperationException("Select valid accounting journal files.");
+                    ShowValidation(
+                        "Create.Validation.JournalRequired",
+                        "CAW-VALIDATION-JOURNAL",
+                        _journalPathTextBox,
+                        diagnosticInputPaths);
+                    return;
+                }
+
+                if (journalFilePaths.Any(path => !File.Exists(path)))
+                {
+                    ShowValidation(
+                        "Create.InvalidJournal",
+                        "CAW-VALIDATION-JOURNAL-FILE",
+                        _journalPathTextBox,
+                        diagnosticInputPaths);
+                    return;
+                }
+
+                if (IsUnknownSelection(_technicalTypeComboBox))
+                {
+                    ShowValidation(
+                        "Create.Validation.TechnicalTypeRequired",
+                        "CAW-VALIDATION-TECHNICAL-TYPE",
+                        _technicalTypeComboBox,
+                        diagnosticInputPaths);
+                    return;
+                }
+
+                if (IsUnknownSelection(_accountingFormatComboBox))
+                {
+                    ShowValidation(
+                        "Create.Validation.AccountingFormatRequired",
+                        "CAW-VALIDATION-ACCOUNTING-FORMAT",
+                        _accountingFormatComboBox,
+                        diagnosticInputPaths);
+                    return;
+                }
+
+                string selectedIco = _icoTextBox.Text.Trim();
+                if (string.IsNullOrWhiteSpace(selectedIco))
+                {
+                    ShowValidation(
+                        "Create.Validation.IcoRequired",
+                        "CAW-VALIDATION-ICO",
+                        _icoTextBox,
+                        diagnosticInputPaths);
+                    return;
+                }
+
+                string fiscalYearText = _fiscalYearTextBox.Text.Trim();
+                if (string.IsNullOrWhiteSpace(fiscalYearText))
+                {
+                    ShowValidation(
+                        "Create.Validation.FiscalYearRequired",
+                        "CAW-VALIDATION-FISCAL-YEAR",
+                        _fiscalYearTextBox,
+                        diagnosticInputPaths);
+                    return;
+                }
+
+                if (!int.TryParse(fiscalYearText, out int selectedFiscalYear))
+                {
+                    ShowValidation(
+                        "Create.Validation.FiscalYearInvalid",
+                        "CAW-VALIDATION-FISCAL-YEAR",
+                        _fiscalYearTextBox,
+                        diagnosticInputPaths);
+                    return;
                 }
 
                 string accountsPath = _accountsPathTextBox.Text.Trim();
                 string generalLedgerPath = _generalLedgerPathTextBox.Text.Trim();
 
+                if (!string.IsNullOrWhiteSpace(accountsPath))
+                    diagnosticInputPaths.Add(accountsPath);
+                if (!string.IsNullOrWhiteSpace(generalLedgerPath))
+                    diagnosticInputPaths.Add(generalLedgerPath);
+
                 if (!string.IsNullOrWhiteSpace(accountsPath) && !File.Exists(accountsPath))
                 {
-                    throw new InvalidOperationException( "The selected accounts-list file does not exist.");
+                    throw new InvalidOperationException(UiText.Get("Create.MissingAccounts", _uiLanguage));
                 }
                 if (!string.IsNullOrWhiteSpace(generalLedgerPath) && !File.Exists(generalLedgerPath))
-                    throw new InvalidOperationException("The selected general-ledger file does not exist.");
-
-
-                if (!int.TryParse( _fiscalYearTextBox.Text.Trim(), out int selectedFiscalYear))
-                {
-                    throw new InvalidOperationException("Enter a valid fiscal year.");
-                }
-
-                string selectedIco = _icoTextBox.Text.Trim();
+                    throw new InvalidOperationException(UiText.Get("Create.MissingLedger", _uiLanguage));
 
                 var importRequest = new AccountingImportRequest
                 {
@@ -403,29 +478,57 @@ namespace ExcelApiPoc.AddIn.Forms
                 AccountingImportPackage importPackage =
                     AccountingImportCoordinator.CreateDefault().Import(importRequest);
 
+                try
+                {
+                    importPackage =
+                        AccountingImportCoordinator.CreateDefault().Import(importRequest);
+                }
+                catch (InvalidDataException exception)
+                    when (IsUnrecognizedJournalFormat(exception))
+                {
+                    SetBusy(false);
+
+                    ErrorDialog.ShowError(
+                        this,
+                        UiText.Get("Create.Title", _uiLanguage),
+                        UiText.Format(
+                            "Create.Import.JournalFormatNotRecognized",
+                            _uiLanguage,
+                            importRequest.AccountingFormat),
+                        exception,
+                        "Create Audit Workbook / Accounting journal import",
+                        "CAW-IMPORT-JOURNAL-FORMAT",
+                        journalFilePaths,
+                        _uiLanguage);
+
+                    _accountingFormatComboBox.Focus();
+                    return;
+                }
+
                 JournalImport journalImport = importPackage.Journal;
                 GeneralLedgerImport generalLedgerImport = importPackage.GeneralLedger;
-                JournalLedgerReconciliationResult canonicalReconciliation = importPackage.JournalLedgerReconciliation;
+                CalculatedGeneralLedger calculatedGeneralLedger =
+                    importPackage.CalculatedGeneralLedger;
+                JournalLedgerReconciliationResult canonicalReconciliation =
+                    importPackage.JournalLedgerReconciliation;
 
                 if (generalLedgerImport == null && !journalImport.Rows.Any(row => row.RecordKind == JournalRecordKind.Opening))
                 {
-                    if (string.Equals(
-                            importPackage.AccountingFormat,
-                            "Softip-MOP",
-                            StringComparison.OrdinalIgnoreCase))
-                    {
-                        throw new InvalidOperationException(
-                            "The selected Softip-MOP journals were imported successfully, " +
-                            "but they do not contain opening balances. Creating the audit " +
-                            "workbook requires the corresponding general ledger. Softip-MOP " +
-                            "general-ledger PDF import is not implemented yet.");
-                    }
-
+                    /*
                     throw new InvalidOperationException(
                         "The accounting journal does not contain opening " +
                         "balance records. Select the corresponding general " +
                         "ledger so that opening balances can be supplied " +
                         "and closing balances validated.");
+                    */
+                    ShowValidation(
+                        "Create.Validation.GeneralLedgerRequired",
+                        "CAW-GL-REQUIRED",
+                        _generalLedgerPathTextBox,
+                        diagnosticInputPaths);
+                    return;
+
+
                 }
 
                 AccountingFrameworkImport accountingFrameworkImport = null;
@@ -476,9 +579,82 @@ namespace ExcelApiPoc.AddIn.Forms
                     generalLedgerReconciliation = CanonicalReconciliationAccountSummaryAdapter.Apply(canonicalReconciliation, accountSummaries);
                 }
 
-                AccountFrameworkLoadResult frameworkLoad = AccountFrameworkService.Load("GOV_LOCAL", selectedFiscalYear);
-                ApplicableAccountFrameworkResponse framework = frameworkLoad.Framework;
-                AccountFrameworkEnrichmentResult enrichmentResult = AccountFrameworkEnricher.Enrich(accountSummaries, framework);
+                AccountingEntityPackageEnvelope accountingEntityEnvelope =
+                    AccountingEntityPackageApiClient.GetEnvelope(
+                        journalImport.Ico);
+
+                AuditCalculationPackageSelectionResponse calculationSelection;
+
+                try
+                {
+                    calculationSelection =
+                        AuditCalculationPackageSelectionService.Load(
+                            journalImport.Ico,
+                            selectedFiscalYear);
+                }
+                catch (Exception calculationFailure)
+                {
+                    if (accountingFrameworkImport != null)
+                    {
+                        accountingFrameworkEnrichment =
+                            AccountingFrameworkAccountEnricher.Enrich(
+                                accountSummaries,
+                                accountingFrameworkImport);
+                    }
+
+                    if (generalLedgerImport != null)
+                    {
+                        GeneralLedgerReconciliationService.ResolveNames(
+                            accountSummaries,
+                            generalLedgerImport);
+                    }
+
+                    workbookPopulationStarted = true;
+                    AuditWorkbookWriter.CreateWithoutCalculation(
+                        _auditWorkbook,
+                        journalImport,
+                        accountSummaries,
+                        calculatedGeneralLedger,
+                        canonicalReconciliation,
+                        accountingFrameworkImport,
+                        generalLedgerImport,
+                        accountingEntityEnvelope,
+                        calculationFailure);
+
+                    SetBusy(false);
+                    ErrorDialog.ShowError(
+                        this,
+                        UiText.Get(
+                            "Create.CalculationUnavailableTitle",
+                            _uiLanguage),
+                        UiText.Get(
+                            "Create.CalculationUnavailable",
+                            _uiLanguage),
+                        calculationFailure,
+                        "Create Audit Workbook / Calculation package",
+                        "CAW-CALCULATION-UNAVAILABLE",
+                        diagnosticInputPaths,
+                        _uiLanguage);
+
+                    DialogResult = DialogResult.OK;
+                    Close();
+                    return;
+                }
+
+                string selectedFrameworkCode =
+                    calculationSelection.CalculationPackage.FrameworkCode;
+
+                AccountFrameworkLoadResult frameworkLoad =
+                    AccountFrameworkService.Load(
+                        selectedFrameworkCode,
+                        selectedFiscalYear);
+                ApplicableAccountFrameworkResponse framework =
+                    frameworkLoad.Framework;
+                AccountFrameworkEnrichmentResult enrichmentResult =
+                    AccountFrameworkEnricher.Enrich(
+                        accountSummaries,
+                        framework);
+
                 if (accountingFrameworkImport != null)
                     accountingFrameworkEnrichment = AccountingFrameworkAccountEnricher.Enrich( accountSummaries, accountingFrameworkImport);
                 if (generalLedgerImport != null)
@@ -490,11 +666,13 @@ namespace ExcelApiPoc.AddIn.Forms
                 bool fiscalYearMatches =
                     journalImport.FiscalYear == selectedFiscalYear;
 
-                AccountingEntityPackageEnvelope accountingEntityEnvelope =
-                    AccountingEntityPackageApiClient.GetEnvelope( journalImport.Ico);
-
                 RegisterUzFinancialReportSelection reportSelection =
-                    RegisterUzFinancialReportSelector.Select(accountingEntityEnvelope, selectedFiscalYear);
+                    RegisterUzFinancialReportSelector.Select(
+                        accountingEntityEnvelope,
+                        selectedFiscalYear,
+                        calculationSelection.FinancialStatementId,
+                        calculationSelection.FinancialReportId,
+                        calculationSelection.RegisterUzTemplateId);
 
                 var reportContext = new AuditReportContext
                     {
@@ -601,13 +779,21 @@ namespace ExcelApiPoc.AddIn.Forms
                     ? MessageBoxIcon.Warning
                     : MessageBoxIcon.Information;
 
-                MessageBox.Show(message.ToString(), "Accounting Journal Preflight", MessageBoxButtons.OK, icon);
+                SetBusy(false);
+                MessageBox.Show(
+                    message.ToString(),
+                    UiText.Get("Create.PreflightTitle", _uiLanguage),
+                    MessageBoxButtons.OK,
+                    icon);
+                SetBusy(true);
 
                 workbookPopulationStarted = true;
                 var workbook = AuditWorkbookWriter.CreateWorkbook(
                     _auditWorkbook,
                     journalImport,
                     accountSummaries,
+                    calculatedGeneralLedger,
+                    canonicalReconciliation,
                     frameworkLoad,
                     analyticalMapping,
                     templatePackage,
@@ -618,16 +804,27 @@ namespace ExcelApiPoc.AddIn.Forms
                     accountingFrameworkImport,
                     generalLedgerImport);
 
-                AuditWorkbookRecalculationDialog.Show(
-                    AuditWorkbookRecalculationService.Recalculate(workbook));
+                AuditWorkbookRecalculationResult recalculation =
+                    AuditWorkbookRecalculationService.Recalculate(workbook);
 
+                SetBusy(false);
+                AuditWorkbookRecalculationDialog.Show(recalculation);
                 DialogResult = DialogResult.OK;
                 Close();
             }
             catch (Exception exception)
             {
-                // MessageBox.Show($"Accounting journal processing failed.\n\n" + exception.Message, "Create Audit Workbook", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                MessageBox.Show($"Accounting journal processing failed.\n\n" + exception.ToString(), "Create Audit Workbook", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                SetBusy(false);
+
+                ErrorDialog.ShowError(
+                    this,
+                    UiText.Get("Create.Title", _uiLanguage),
+                    UiText.Get("Create.Failed", _uiLanguage),
+                    exception,
+                    "Create Audit Workbook",
+                    "CAW-UNEXPECTED",
+                    diagnosticInputPaths,
+                    _uiLanguage);
 
                 if (workbookPopulationStarted)
                 {
@@ -635,6 +832,37 @@ namespace ExcelApiPoc.AddIn.Forms
                     Close();
                 }
             }
+            finally
+            {
+                SetBusy(false);
+            }
+        }
+
+        private void ShowValidation(string messageKey, string errorCode, Control focusControl, IEnumerable<string> inputFilePaths)
+        {
+            SetBusy(false);
+
+            ErrorDialog.ShowError(
+                this,
+                UiText.Get("Create.Title", _uiLanguage),
+                UiText.Get(messageKey, _uiLanguage),
+                null,
+                "Create Audit Workbook / Validation",
+                errorCode,
+                inputFilePaths,
+                _uiLanguage);
+
+            focusControl?.Focus();
+        }
+
+        private static bool IsUnknownSelection(ComboBox comboBox)
+        {
+            return comboBox == null ||
+                string.IsNullOrWhiteSpace(comboBox.Text) ||
+                string.Equals(
+                    comboBox.Text,
+                    "Unknown",
+                    StringComparison.OrdinalIgnoreCase);
         }
 
         private void DetectJournalInformation(string filePath)
@@ -675,7 +903,6 @@ namespace ExcelApiPoc.AddIn.Forms
         {
             string path = (filePath ?? string.Empty).Trim();
             bool fileExists = File.Exists(path);
-            _continueButton.Enabled = fileExists;
             if (!fileExists)
             {
                 return;
@@ -691,13 +918,24 @@ namespace ExcelApiPoc.AddIn.Forms
                 filePaths.Count > 0 &&
                 filePaths.All(File.Exists);
 
-            _continueButton.Enabled = filesExist;
             if (!filesExist)
             {
                 return;
             }
 
             ProcessJournalFile(filePaths[0]);
+        }
+
+        private void SetBusy(bool busy)
+        {
+            UseWaitCursor = busy;
+            Cursor = busy
+                ? Cursors.WaitCursor
+                : Cursors.Default;
+            System.Windows.Forms.Cursor.Current = Cursor;
+
+            if (busy)
+                Update();
         }
 
         private List<string> GetJournalFilePaths()
@@ -711,6 +949,15 @@ namespace ExcelApiPoc.AddIn.Forms
             return path.Length == 0
                 ? new List<string>()
                 : new List<string> { path };
+        }
+
+        private static bool IsUnrecognizedJournalFormat(InvalidDataException exception)
+        {
+            return exception != null &&
+                exception.Message != null &&
+                exception.Message.IndexOf(
+                    "No registered importer recognizes the accounting-journal file",
+                    StringComparison.OrdinalIgnoreCase) >= 0;
         }
     }
 }

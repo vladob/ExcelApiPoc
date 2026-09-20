@@ -116,6 +116,15 @@ namespace ExcelApiPoc.AddIn.Services
                 throw new InvalidOperationException($"Expected template " + $"{reportContext.TemplateErpId}, but received " + $"{package.Template.TemplateErpId}.");
             }
 
+            if (package.Template.CreateMultiYear &&
+                string.IsNullOrWhiteSpace(
+                    package.Template.MultiYearWorksheetName))
+            {
+                throw new InvalidOperationException(
+                    "The template enables multi-year reporting but does not " +
+                    "define a worksheet name.");
+            }
+
             if (!string.Equals(package.FrameworkCode, reportContext.FrameworkCode, StringComparison.OrdinalIgnoreCase))
             {
                 throw new InvalidOperationException(

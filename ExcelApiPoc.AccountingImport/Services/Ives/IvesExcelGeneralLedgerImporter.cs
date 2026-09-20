@@ -38,6 +38,28 @@ namespace ExcelApiPoc.AccountingImport.Services.Ives
                 throw CreateValidationException(report);
             }
 
+            AccountingFileNameMetadata fileNameMetadata = null;
+            if (AccountingFileNameMetadataParser.TryParse(
+                    source.SourceFileName,
+                    out AccountingFileNameMetadata parsedMetadata))
+            {
+                if (parsedMetadata.DocumentKind !=
+                    AccountingSourceDocumentKind.GeneralLedger)
+                {
+                    throw new InvalidDataException(
+                        "Filename '" + source.SourceFileName +
+                        "' does not identify a general ledger.");
+                }
+
+                fileNameMetadata = parsedMetadata;
+            }
+
+            int fiscalYear =
+                AccountingFileNameMetadataParser.ResolveFiscalYear(
+                    source.SourceFileName,
+                    source.FiscalYear,
+                    fileNameMetadata);
+
             var result = new GeneralLedgerImport
             {
                 SourceFileName = source.SourceFileName,
@@ -45,14 +67,18 @@ namespace ExcelApiPoc.AccountingImport.Services.Ives
                 SourceFileHash = CalculateSha256(source.SourceFilePath),
                 TechnicalType = "Excel",
                 AccountingFormat = "IVES",
-                Ico = source.Ico,
-                FiscalYear = source.FiscalYear,
+                Ico = AccountingFileNameMetadataParser.ResolveIco(
+                    source.SourceFileName,
+                    source.Ico,
+                    fileNameMetadata),
+                FiscalYear = fiscalYear,
+                ExportStage = fileNameMetadata?.ExportStage,
                 ThroughMonth = source.PeriodEnd.Value.Month,
                 PeriodHeader =
                     source.PeriodEnd.Value.Month.ToString(
                         CultureInfo.InvariantCulture) +
                     "/" +
-                    source.FiscalYear.ToString(
+                    fiscalYear.ToString(
                         CultureInfo.InvariantCulture),
                 ImportedAtUtc = DateTime.UtcNow,
                 ImportReport = report
@@ -138,12 +164,30 @@ namespace ExcelApiPoc.AccountingImport.Services.Ives
                 {
                     return new InvalidDataException(
                         "IVES general-ledger validation failed: " +
-                        diagnostic.Message);
+                        diagnostic.Message +
+                        FormatSourceLocation(diagnostic));
                 }
             }
 
             return new InvalidDataException(
                 "IVES general-ledger validation failed.");
+        }
+
+        private static string FormatSourceLocation(
+            ImportDiagnostic diagnostic)
+        {
+            if (diagnostic.Source == null ||
+                !diagnostic.Source.SourceRowNumber.HasValue)
+            {
+                return string.Empty;
+            }
+
+            return " Source: worksheet '" +
+                (diagnostic.Source.WorksheetName ?? "(unnamed)") +
+                "', row " +
+                diagnostic.Source.SourceRowNumber.Value.ToString(
+                    CultureInfo.InvariantCulture) +
+                ".";
         }
 
         private static string CalculateSha256(string path)

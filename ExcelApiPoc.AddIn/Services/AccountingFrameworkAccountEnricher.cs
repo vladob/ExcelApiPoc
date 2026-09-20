@@ -56,8 +56,7 @@ namespace ExcelApiPoc.AddIn.Services
                 }
 
                 AccountingFrameworkRow selected = matches[0];
-                if (selected.RowKind == AccountingFrameworkRowKind.AnalyticalAccount &&
-                    !string.IsNullOrWhiteSpace(selected.AccountName))
+                if (!string.IsNullOrWhiteSpace(selected.AccountName))
                 {
                     account.EntityAccountName = selected.AccountName;
                     account.AccountName = selected.AccountName;

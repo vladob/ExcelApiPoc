@@ -30,7 +30,8 @@ namespace ExcelApiPoc.AccountingImport.Services
                 journal.Rows.Any(
                     row =>
                         row.RecordKind ==
-                        JournalRecordKind.Opening);
+                        JournalRecordKind.Opening &&
+                        row.UsedForReportCalculation);
 
             bool containsClosing =
                 journal.Rows.Any(
@@ -271,8 +272,7 @@ namespace ExcelApiPoc.AccountingImport.Services
 
             foreach (JournalRow row in journal.Rows)
             {
-                if (row.RecordKind ==
-                    JournalRecordKind.Closing)
+                if (!row.UsedForReportCalculation)
                 {
                     continue;
                 }

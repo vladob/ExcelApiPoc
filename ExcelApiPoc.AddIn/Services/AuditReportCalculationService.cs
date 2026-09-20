@@ -1,4 +1,4 @@
-﻿using ExcelApiPoc.AddIn.Models;
+using ExcelApiPoc.AddIn.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -82,8 +82,10 @@ namespace ExcelApiPoc.AddIn.Services
 
                 result.AutomaticRuleCount++;
 
-                decimal value = candidateAccounts.Sum(account =>
-                    ResolveRuleValue(account, rule, accountGroupsByCode));
+                decimal value = ResolveAutomaticRuleValue(
+                    candidateAccounts,
+                    rule,
+                    accountGroupsByCode);
                 if (value != 0)
                     result.AutomaticRulesWithValues++;
 
@@ -278,6 +280,33 @@ namespace ExcelApiPoc.AddIn.Services
             AuditReportMappingRuleDefinitionResponse rule,
             IReadOnlyDictionary<string, AuditAccountGroupDefinitionResponse> accountGroupsByCode)
         {
+            return ResolveRuleValue(
+                account.NetBalance,
+                rule,
+                accountGroupsByCode);
+        }
+
+        private static decimal ResolveAutomaticRuleValue(
+            IEnumerable<AccountSummary> accounts,
+            AuditReportMappingRuleDefinitionResponse rule,
+            IReadOnlyDictionary<string, AuditAccountGroupDefinitionResponse> accountGroupsByCode)
+        {
+            // Automatic mappings classify the balance of the three-digit account
+            // group. Classifying every analytical account separately would gross
+            // up groups that contain both debit and credit analytical balances.
+            decimal netBalance = accounts.Sum(account => account.NetBalance);
+
+            return ResolveRuleValue(
+                netBalance,
+                rule,
+                accountGroupsByCode);
+        }
+
+        private static decimal ResolveRuleValue(
+            decimal netBalance,
+            AuditReportMappingRuleDefinitionResponse rule,
+            IReadOnlyDictionary<string, AuditAccountGroupDefinitionResponse> accountGroupsByCode)
+        {
             if (!accountGroupsByCode.TryGetValue(
                     rule.Account3,
                     out AuditAccountGroupDefinitionResponse accountGroup))
@@ -304,7 +333,7 @@ namespace ExcelApiPoc.AddIn.Services
             if (string.IsNullOrWhiteSpace(valueSource))
                 return 0;
 
-            return ResolveValue(account, balanceSide, valueSource);
+            return ResolveValue(netBalance, balanceSide, valueSource);
         }
 
         private static Dictionary<string, AnalyticalMappingSelection> ValidateAnalyticalSelections(
@@ -366,31 +395,36 @@ namespace ExcelApiPoc.AddIn.Services
             return result;
         }
 
-        private static decimal ResolveValue(AccountSummary account, string balanceSide, string valueSource)
+        private static decimal ResolveValue(decimal netBalance, string balanceSide, string valueSource)
         {
             if (string.Equals(valueSource, "ClosingDebit", StringComparison.OrdinalIgnoreCase))
             {
-                return account.DebitBalance;
+                return netBalance > 0 ? netBalance : 0;
             }
 
             if (string.Equals(valueSource, "ClosingCredit", StringComparison.OrdinalIgnoreCase))
             {
-                return account.CreditBalance;
+                return netBalance < 0 ? -netBalance : 0;
             }
 
             if (string.Equals(valueSource, "ClosingNetto", StringComparison.OrdinalIgnoreCase))
             {
                 if (string.Equals(balanceSide, "Assets", StringComparison.OrdinalIgnoreCase))
                 {
-                    return account.NetBalance;
+                    return netBalance;
                 }
 
                 if (string.Equals(balanceSide, "Liabilities", StringComparison.OrdinalIgnoreCase))
                 {
-                    return -account.NetBalance;
+                    return -netBalance;
                 }
 
                 throw new InvalidOperationException($"Unsupported balance side '{balanceSide}'.");
+            }
+
+            if (string.Equals(valueSource, "ClosingCreditNetto", StringComparison.OrdinalIgnoreCase))
+            {
+                return -netBalance;
             }
 
             throw new InvalidOperationException($"Unsupported value source '{valueSource}'.");

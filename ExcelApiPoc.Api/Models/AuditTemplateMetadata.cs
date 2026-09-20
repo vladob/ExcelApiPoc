@@ -7,6 +7,8 @@ public sealed class AuditTemplateMetadata
     public string? MfSpecification { get; init; }
     public DateOnly? ValidFrom { get; init; }
     public DateOnly? ValidTo { get; init; }
+    public bool CreateMultiYear { get; init; }
+    public string? MultiYearWorksheetName { get; init; }
     public IReadOnlyList<AuditTableMetadata> Tables { get; init; } = Array.Empty<AuditTableMetadata>();
 }
 

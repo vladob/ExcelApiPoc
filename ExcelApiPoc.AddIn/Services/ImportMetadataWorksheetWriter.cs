@@ -245,6 +245,118 @@ namespace ExcelApiPoc.AddIn.Services
             return worksheet;
         }
 
+        public static Excel.Worksheet AddWithoutCalculation(
+            Excel.Workbook workbook,
+            JournalImport journalImport,
+            AccountingFrameworkImport accountingFrameworkImport,
+            GeneralLedgerImport generalLedgerImport)
+        {
+            if (workbook == null)
+                throw new ArgumentNullException(nameof(workbook));
+
+            if (journalImport == null)
+                throw new ArgumentNullException(nameof(journalImport));
+
+            Excel.Worksheet lastWorksheet =
+                (Excel.Worksheet)workbook.Worksheets[workbook.Worksheets.Count];
+            Excel.Worksheet worksheet =
+                (Excel.Worksheet)workbook.Worksheets.Add(After: lastWorksheet);
+
+            worksheet.Name = WorksheetName;
+
+            DateTime dateFrom = journalImport.Rows.Min(row => row.PostingDate);
+            DateTime dateTo = journalImport.Rows.Max(row => row.PostingDate);
+            var values = new object[2, Headers.Length];
+
+            for (int columnIndex = 0; columnIndex < Headers.Length; columnIndex++)
+                values[0, columnIndex] = Headers[columnIndex];
+
+            values[1, 0] = "AccountingJournal";
+            values[1, 1] = journalImport.SourceFileName;
+            values[1, 2] = journalImport.SourceFilePath;
+            values[1, 3] = journalImport.SourceFileHash;
+            values[1, 4] = journalImport.TechnicalType;
+            values[1, 5] = journalImport.AccountingFormat;
+            values[1, 6] = journalImport.Ico;
+            values[1, 7] = journalImport.CompanyName;
+            values[1, 8] = journalImport.FiscalYear;
+            values[1, 9] = journalImport.FiscalYear;
+            values[1, 10] = dateFrom;
+            values[1, 11] = dateTo;
+            values[1, 12] = journalImport.ImportedAtUtc;
+            values[1, 13] = journalImport.Rows.Count;
+            values[1, 14] = 0;
+            values[1, 15] = journalImport.NormalizedTextFieldCount;
+
+            if (accountingFrameworkImport != null)
+            {
+                values[1, 33] = accountingFrameworkImport.SourceFileName;
+                values[1, 34] = accountingFrameworkImport.SourceFilePath;
+                values[1, 35] = accountingFrameworkImport.SourceFileHash;
+                values[1, 36] = accountingFrameworkImport.Ico;
+                values[1, 37] = accountingFrameworkImport.FiscalYear;
+                values[1, 38] = accountingFrameworkImport.ImportedAtUtc;
+                values[1, 39] = accountingFrameworkImport.Rows.Count;
+                values[1, 40] =
+                    accountingFrameworkImport.NormalizedTextFieldCount;
+            }
+
+            if (generalLedgerImport != null)
+            {
+                values[1, 41] = generalLedgerImport.SourceFileName;
+                values[1, 42] = generalLedgerImport.SourceFilePath;
+                values[1, 43] = generalLedgerImport.SourceFileHash;
+                values[1, 44] = generalLedgerImport.Ico;
+                values[1, 45] = generalLedgerImport.FiscalYear;
+                values[1, 46] = generalLedgerImport.ThroughMonth;
+                values[1, 47] = generalLedgerImport.ImportedAtUtc;
+                values[1, 48] = generalLedgerImport.Rows.Count;
+                values[1, 49] = generalLedgerImport.NormalizedTextFieldCount;
+            }
+
+            Excel.Range firstCell = (Excel.Range)worksheet.Cells[1, 1];
+            Excel.Range lastCell =
+                (Excel.Range)worksheet.Cells[2, Headers.Length];
+            Excel.Range tableRange = worksheet.Range[firstCell, lastCell];
+
+            tableRange.NumberFormat = "@";
+            tableRange.Value2 = values;
+
+            ((Excel.Range)worksheet.Cells[2, 9]).NumberFormat = "0";
+            ((Excel.Range)worksheet.Cells[2, 10]).NumberFormat = "0";
+            ((Excel.Range)worksheet.Cells[2, 11]).NumberFormat = "yyyy-mm-dd";
+            ((Excel.Range)worksheet.Cells[2, 12]).NumberFormat = "yyyy-mm-dd";
+            ((Excel.Range)worksheet.Cells[2, 13]).NumberFormat =
+                "yyyy-mm-dd hh:mm:ss";
+            ((Excel.Range)worksheet.Cells[2, 14]).NumberFormat = "#,##0";
+            ((Excel.Range)worksheet.Cells[2, 15]).NumberFormat = "#,##0";
+            ((Excel.Range)worksheet.Cells[2, 16]).NumberFormat = "#,##0";
+            ((Excel.Range)worksheet.Cells[2, 38]).NumberFormat = "0";
+            ((Excel.Range)worksheet.Cells[2, 39]).NumberFormat =
+                "yyyy-mm-dd hh:mm:ss";
+            ((Excel.Range)worksheet.Cells[2, 40]).NumberFormat = "#,##0";
+            ((Excel.Range)worksheet.Cells[2, 41]).NumberFormat = "#,##0";
+            ((Excel.Range)worksheet.Cells[2, 46]).NumberFormat = "0";
+            ((Excel.Range)worksheet.Cells[2, 47]).NumberFormat = "0";
+            ((Excel.Range)worksheet.Cells[2, 48]).NumberFormat =
+                "yyyy-mm-dd hh:mm:ss";
+            ((Excel.Range)worksheet.Cells[2, 49]).NumberFormat = "#,##0";
+            ((Excel.Range)worksheet.Cells[2, 50]).NumberFormat = "#,##0";
+
+            Excel.ListObject table = worksheet.ListObjects.Add(
+                Excel.XlListObjectSourceType.xlSrcRange,
+                tableRange,
+                Type.Missing,
+                Excel.XlYesNoGuess.xlYes,
+                Type.Missing);
+
+            table.Name = TableName;
+            table.TableStyle = "TableStyleMedium2";
+            worksheet.Visible = Excel.XlSheetVisibility.xlSheetHidden;
+
+            return worksheet;
+        }
+
         private static void AddAccountFrameworkTable(Excel.Worksheet worksheet,AccountFrameworkLoadResult frameworkLoad)
         {
             ApplicableAccountFrameworkResponse framework = frameworkLoad.Framework;

@@ -166,6 +166,9 @@ namespace ExcelApiPoc.AddIn.Services
             window.SplitColumn = descriptiveColumnCount;
             window.FreezePanes = true;
 
+            AuditWorkbookWorksheetLayout.ApplyRegisterUzEvidenceColor(
+                worksheet);
+
             return worksheet;
         }
 
@@ -403,9 +406,27 @@ namespace ExcelApiPoc.AddIn.Services
                 int lastRow = firstRow + header.RowSpan - 1;
                 int lastColumn = firstColumn + header.ColumnSpan - 1;
 
-                worksheet.Range[
+                Excel.Range headerRange = worksheet.Range[
                     worksheet.Cells[firstRow, firstColumn],
-                    worksheet.Cells[lastRow, lastColumn]].Merge();
+                    worksheet.Cells[lastRow, lastColumn]];
+
+                if (header.RowSpan > 1)
+                {
+                    for (int column = firstColumn;
+                         column <= lastColumn;
+                         column++)
+                    {
+                        worksheet.Range[
+                            worksheet.Cells[firstRow, column],
+                            worksheet.Cells[lastRow, column]].Merge();
+                    }
+                }
+
+                if (header.ColumnSpan > 1)
+                {
+                    headerRange.HorizontalAlignment =
+                        Excel.XlHAlign.xlHAlignCenterAcrossSelection;
+                }
             }
         }
 

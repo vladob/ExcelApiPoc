@@ -1,0 +1,211 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text.RegularExpressions;
+using PdfLayoutEngine.Definitions;
+
+namespace PdfLayoutEngine.Validation;
+
+public sealed class LayoutDefinitionValidator
+{
+    public IReadOnlyList<ValidationMessage> Validate(LayoutDefinition definition)
+    {
+        if (definition == null) throw new ArgumentNullException(nameof(definition));
+        var messages = new List<ValidationMessage>();
+
+        if (definition.SchemaVersion != LayoutDefinition.CurrentSchemaVersion)
+            Error("$.schemaVersion", $"Unsupported schema version {definition.SchemaVersion}; expected {LayoutDefinition.CurrentSchemaVersion}.");
+        Required(definition.Id, "$.id");
+        PositiveFinite(definition.Defaults?.HorizontalTolerance, "$.defaults.horizontalTolerance");
+        PositiveFinite(definition.Defaults?.BaselineTolerance, "$.defaults.baselineTolerance");
+
+        var sections = definition.Sections ?? new List<SectionDefinition>();
+        var rules = definition.Rules ?? new List<RecognitionRuleDefinition>();
+        var continuations = definition.RecordContinuations ?? new List<RecordContinuationDefinition>();
+        var recordRules = definition.RecordRules ?? new List<RecordRecognitionRuleDefinition>();
+        var recordFields = definition.RecordFields ?? new List<RecordFieldSetDefinition>();
+        DuplicateIds(sections.Select(section => section.Id), "$.sections", "section");
+        DuplicateIds(rules.Select(rule => rule.Id), "$.rules", "rule");
+        DuplicateIds(continuations.Select(item => item.Id), "$.recordContinuations", "record continuation");
+        DuplicateIds(recordRules.Select(rule => rule.Id), "$.recordRules", "record rule");
+        DuplicateIds(recordFields.Select(set => set.RecordRuleId), "$.recordFields", "record field set");
+
+        var sectionIds = new HashSet<string>(sections.Select(section => section.Id), StringComparer.Ordinal);
+        var ruleIds = new HashSet<string>(rules.Select(rule => rule.Id), StringComparer.Ordinal);
+        var recordRuleIds = new HashSet<string>(recordRules.Select(rule => rule.Id), StringComparer.Ordinal);
+        for (var index = 0; index < sections.Count; index++)
+        {
+            var section = sections[index];
+            Required(section.Id, $"$.sections[{index}].id");
+            Reference(section.StartRuleId, ruleIds, $"$.sections[{index}].startRuleId", "rule");
+            Reference(section.EndRuleId, ruleIds, $"$.sections[{index}].endRuleId", "rule");
+        }
+
+        for (var index = 0; index < rules.Count; index++)
+        {
+            var rule = rules[index];
+            var path = $"$.rules[{index}]";
+            Required(rule.Id, path + ".id");
+            Reference(rule.SectionId, sectionIds, path + ".sectionId", "section");
+            if (rule.Text == string.Empty) Error(path + ".text", "Text cannot be empty when specified.");
+            if (rule.Text != null && rule.TextMatch == TextMatchMode.RegularExpression)
+            {
+                try { _ = new Regex(rule.Text); }
+                catch (ArgumentException exception) { Error(path + ".text", $"Invalid regular expression: {exception.Message}"); }
+            }
+            if (rule.Horizontal != null)
+            {
+                OptionalFinite(rule.Horizontal.Position, path + ".horizontal.position");
+                OptionalPositiveFinite(rule.Horizontal.Tolerance, path + ".horizontal.tolerance");
+            }
+            OptionalFinite(rule.Baseline, path + ".baseline");
+            OptionalPositiveFinite(rule.BaselineTolerance, path + ".baselineTolerance");
+            if (rule.Text == null && rule.Horizontal == null && !rule.Baseline.HasValue && !rule.IsBold.HasValue && !rule.IsItalic.HasValue)
+                Error(path, "At least one matching criterion is required.");
+        }
+
+        for (var index = 0; index < continuations.Count; index++)
+        {
+            var continuation = continuations[index];
+            var path = $"$.recordContinuations[{index}]";
+            Required(continuation.Id, path + ".id");
+            Required(continuation.SectionId, path + ".sectionId");
+            Reference(continuation.SectionId, sectionIds, path + ".sectionId", "section");
+            ValidateConditions(continuation.Previous, path + ".previous");
+            ValidateConditions(continuation.Next, path + ".next");
+            if (!HasCondition(continuation.Previous) && !HasCondition(continuation.Next))
+                Error(path, "At least one baseline-group condition is required.");
+        }
+
+        for (var index = 0; index < recordRules.Count; index++)
+        {
+            var rule = recordRules[index];
+            var path = $"$.recordRules[{index}]";
+            Required(rule.Id, path + ".id");
+            Reference(rule.SectionId, sectionIds, path + ".sectionId", "section");
+            if (rule.Text == string.Empty) Error(path + ".text", "Text cannot be empty when specified.");
+            if (rule.Text != null && rule.TextMatch == TextMatchMode.RegularExpression)
+            {
+                try { _ = new Regex(rule.Text); }
+                catch (ArgumentException exception) { Error(path + ".text", $"Invalid regular expression: {exception.Message}"); }
+            }
+            OptionalNonNegative(rule.MinimumGroupCount, path + ".minimumGroupCount");
+            OptionalNonNegative(rule.MaximumGroupCount, path + ".maximumGroupCount");
+            OptionalNonNegative(rule.MinimumTokenCount, path + ".minimumTokenCount");
+            OptionalNonNegative(rule.MaximumTokenCount, path + ".maximumTokenCount");
+            Range(rule.MinimumGroupCount, rule.MaximumGroupCount, path, "group count");
+            Range(rule.MinimumTokenCount, rule.MaximumTokenCount, path, "token count");
+            OptionalFinite(rule.LeftAtLeast, path + ".leftAtLeast");
+            OptionalFinite(rule.LeftAtMost, path + ".leftAtMost");
+            OptionalFinite(rule.RightAtLeast, path + ".rightAtLeast");
+            OptionalFinite(rule.RightAtMost, path + ".rightAtMost");
+            CoordinateRange(rule.LeftAtLeast, rule.LeftAtMost, path, "left");
+            CoordinateRange(rule.RightAtLeast, rule.RightAtMost, path, "right");
+            if (!HasRecordCriterion(rule))
+                Error(path, "At least one record matching criterion is required.");
+        }
+
+        for (var setIndex = 0; setIndex < recordFields.Count; setIndex++)
+        {
+            var fieldSet = recordFields[setIndex];
+            var setPath = $"$.recordFields[{setIndex}]";
+            Required(fieldSet.RecordRuleId, setPath + ".recordRuleId");
+            Reference(fieldSet.RecordRuleId, recordRuleIds, setPath + ".recordRuleId", "record rule");
+            var fields = fieldSet.Fields ?? new List<RecordFieldDefinition>();
+            DuplicateIds(fields.Select(field => field.Id), setPath + ".fields", "field");
+            for (var fieldIndex = 0; fieldIndex < fields.Count; fieldIndex++)
+            {
+                var field = fields[fieldIndex];
+                var path = $"{setPath}.fields[{fieldIndex}]";
+                Required(field.Id, path + ".id");
+                if (field.Text == string.Empty) Error(path + ".text", "Text cannot be empty when specified.");
+                if (field.Text != null && field.TextMatch == TextMatchMode.RegularExpression)
+                {
+                    try { _ = new Regex(field.Text); }
+                    catch (ArgumentException exception) { Error(path + ".text", $"Invalid regular expression: {exception.Message}"); }
+                }
+                if (field.Horizontal != null)
+                {
+                    OptionalFinite(field.Horizontal.Position, path + ".horizontal.position");
+                    OptionalPositiveFinite(field.Horizontal.Tolerance, path + ".horizontal.tolerance");
+                }
+                if (field.Text == null && field.Horizontal == null && !field.IsBold.HasValue && !field.IsItalic.HasValue)
+                    Error(path, "At least one field matching criterion is required.");
+            }
+        }
+
+        return messages;
+
+        void Error(string path, string message) => messages.Add(new ValidationMessage(ValidationSeverity.Error, path, message));
+        void Required(string? value, string path)
+        {
+            if (string.IsNullOrWhiteSpace(value)) Error(path, "A value is required.");
+        }
+        void PositiveFinite(double? value, string path)
+        {
+            if (!value.HasValue || !IsFinite(value.Value) || value.Value < 0) Error(path, "A finite, non-negative value is required.");
+        }
+        void OptionalFinite(double? value, string path)
+        {
+            if (value.HasValue && !IsFinite(value.Value)) Error(path, "The value must be finite.");
+        }
+        void OptionalPositiveFinite(double? value, string path)
+        {
+            if (value.HasValue && (!IsFinite(value.Value) || value.Value < 0)) Error(path, "The value must be finite and non-negative.");
+        }
+        void Reference(string? value, HashSet<string> ids, string path, string kind)
+        {
+            if (value != null && !string.IsNullOrWhiteSpace(value) && !ids.Contains(value))
+                Error(path, $"Unknown {kind} id '{value}'.");
+        }
+        void DuplicateIds(IEnumerable<string> ids, string path, string kind)
+        {
+            foreach (var id in ids.Where(id => !string.IsNullOrWhiteSpace(id)).GroupBy(id => id, StringComparer.Ordinal).Where(group => group.Count() > 1).Select(group => group.Key))
+                Error(path, $"Duplicate {kind} id '{id}'.");
+        }
+        void ValidateConditions(BaselineGroupConditionDefinition? conditions, string path)
+        {
+            if (conditions == null)
+            {
+                Error(path, "A value is required.");
+                return;
+            }
+            OptionalFinite(conditions.LeftAtLeast, path + ".leftAtLeast");
+            OptionalFinite(conditions.LeftAtMost, path + ".leftAtMost");
+            OptionalFinite(conditions.RightAtLeast, path + ".rightAtLeast");
+            OptionalFinite(conditions.RightAtMost, path + ".rightAtMost");
+            if (conditions.LeftAtLeast.HasValue && conditions.LeftAtMost.HasValue &&
+                conditions.LeftAtLeast.Value > conditions.LeftAtMost.Value)
+                Error(path, "leftAtLeast cannot exceed leftAtMost.");
+            if (conditions.RightAtLeast.HasValue && conditions.RightAtMost.HasValue &&
+                conditions.RightAtLeast.Value > conditions.RightAtMost.Value)
+                Error(path, "rightAtLeast cannot exceed rightAtMost.");
+        }
+        bool HasCondition(BaselineGroupConditionDefinition? conditions) =>
+            conditions != null &&
+            (conditions.LeftAtLeast.HasValue || conditions.LeftAtMost.HasValue ||
+             conditions.RightAtLeast.HasValue || conditions.RightAtMost.HasValue);
+        void OptionalNonNegative(int? value, string path)
+        {
+            if (value.HasValue && value.Value < 0) Error(path, "The value must be non-negative.");
+        }
+        void Range(int? minimum, int? maximum, string path, string name)
+        {
+            if (minimum.HasValue && maximum.HasValue && minimum.Value > maximum.Value)
+                Error(path, $"Minimum {name} cannot exceed maximum {name}.");
+        }
+        void CoordinateRange(double? minimum, double? maximum, string path, string name)
+        {
+            if (minimum.HasValue && maximum.HasValue && minimum.Value > maximum.Value)
+                Error(path, $"{name}AtLeast cannot exceed {name}AtMost.");
+        }
+        bool HasRecordCriterion(RecordRecognitionRuleDefinition rule) =>
+            rule.Text != null || rule.MinimumGroupCount.HasValue || rule.MaximumGroupCount.HasValue ||
+            rule.MinimumTokenCount.HasValue || rule.MaximumTokenCount.HasValue ||
+            rule.LeftAtLeast.HasValue || rule.LeftAtMost.HasValue ||
+            rule.RightAtLeast.HasValue || rule.RightAtMost.HasValue ||
+            rule.CrossesPageBoundary.HasValue;
+    }
+
+    private static bool IsFinite(double value) => !double.IsNaN(value) && !double.IsInfinity(value);
+}

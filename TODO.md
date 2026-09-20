@@ -21,11 +21,13 @@ contracts continue to use full domain names rather than informal abbreviations.
 - [x] Verify on-demand RegisterUZ loading with a previously uncached IČO.
 - [x] Create and verify the checksum-protected, compressed, copy-only
       `AuditAddIn` V1.0 backup.
+- [ ] Check hourglass when multiple files are selected from filedialog and after initial load.
 - [ ] Add the final scripts 000 through 090 to the repository.
 - [ ] Archive the old 095 comparison scripts; do not include them in the normal
       rebuild sequence.
 - [ ] Record the V1.0 backup filename, date, Git commit and validation result.
 - [ ] Commit and push the reproducible AuditAddIn V1.0 database milestone.
+
 
 ## 1. Remove hardcoded accounting-framework selection
 
