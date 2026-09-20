@@ -30,7 +30,7 @@ public sealed class IvesTabularJournalStructureDiagnosticTests
         IvesJournalParseResult parsed =
             new IvesCsvJournalParser().Parse(path);
 
-        IvesJournalSourceRow row = parsed.TransactionRows
+        IvesJournalSourceRow? row = parsed.TransactionRows
             .FirstOrDefault(item => string.IsNullOrWhiteSpace(item.Module));
 
         Assert.NotNull(row);
@@ -69,7 +69,7 @@ public sealed class IvesTabularJournalStructureDiagnosticTests
         IvesJournalParseResult parsed =
             new IvesXlsxJournalParser().Parse(path);
 
-        IvesJournalSourceRow row = parsed.TransactionRows
+        IvesJournalSourceRow? row = parsed.TransactionRows
             .FirstOrDefault(item => string.IsNullOrWhiteSpace(item.Module));
 
         Assert.NotNull(row);
