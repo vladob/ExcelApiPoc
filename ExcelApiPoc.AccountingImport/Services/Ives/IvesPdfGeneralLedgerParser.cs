@@ -205,30 +205,33 @@ namespace ExcelApiPoc.AccountingImport.Services.Ives
             name = null;
             currency = null;
 
-            if (compact.IndexOf(
-                    "Hlavnáčinnosť",
-                    StringComparison.OrdinalIgnoreCase) >= 0)
+            // An IVES activity header is a short standalone row near the left
+            // margin. Do not classify ordinary account/document text that
+            // merely contains an activity name.
+            if (record.Left > 35.0 || record.Right > 170.0)
+                return false;
+
+            if (string.Equals(
+                    compact,
+                    "HlavnáčinnosťEUR",
+                    StringComparison.OrdinalIgnoreCase))
             {
                 name = "Hlavná činnosť";
+                currency = "EUR";
+                return true;
             }
-            else if (compact.IndexOf(
-                         "Stravovanie",
-                         StringComparison.OrdinalIgnoreCase) >= 0)
+
+            if (string.Equals(
+                    compact,
+                    "StravovanieEUR",
+                    StringComparison.OrdinalIgnoreCase))
             {
                 name = "Stravovanie";
-            }
-            else
-            {
-                return false;
+                currency = "EUR";
+                return true;
             }
 
-            currency = compact.IndexOf(
-                "EUR",
-                StringComparison.OrdinalIgnoreCase) >= 0
-                ? "EUR"
-                : ReadCompact(record, 130.0, 160.0);
-
-            return true;
+            return false;
         }
 
         private static bool IsAnalyticalSummary(string compact)
@@ -243,11 +246,12 @@ namespace ExcelApiPoc.AccountingImport.Services.Ives
 
         private static bool IsSyntheticSummary(string compact)
         {
+            // In this PDF the S and U glyphs can be interleaved with the
+            // underline '=' tokens, so "SU" is not reliably contiguous.
+            // The repeated '=' run is the stable discriminator from an
+            // analytical account summary.
             return compact.StartsWith("--", StringComparison.Ordinal) &&
-                   compact.IndexOf("====", StringComparison.Ordinal) >= 0 &&
-                   compact.IndexOf(
-                       "SU",
-                       StringComparison.OrdinalIgnoreCase) >= 0;
+                   compact.IndexOf("====", StringComparison.Ordinal) >= 0;
         }
 
         private static string ReadSyntheticCode(BaselineRecord record)
