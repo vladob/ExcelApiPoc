@@ -249,7 +249,7 @@ namespace ExcelApiPoc.AccountingImport.Services.Ives
 
                 if (builder.Length > 0 &&
                     previous != null &&
-                    token.Left - previous.Right > 0.75d)
+                    token.Left - previous.Right > 0.05d)
                 {
                     builder.Append(' ');
                 }
