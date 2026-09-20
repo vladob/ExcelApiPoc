@@ -82,6 +82,24 @@ public sealed class IvesGeneralLedgerFourFormatEquivalenceTests
                 activity => activity.ReportTotalRows.Count));
         output.WriteLine("Mismatches          : " + mismatches.Count);
 
+        if (mismatches.Count > 0)
+        {
+            output.WriteLine("Mismatch categories :");
+
+            foreach (var category in mismatches
+                .GroupBy(MismatchCategory)
+                .OrderByDescending(group => group.Count())
+                .ThenBy(group => group.Key, StringComparer.Ordinal))
+            {
+                output.WriteLine(
+                    "  {0,-44} {1,5}",
+                    category.Key,
+                    category.Count());
+            }
+
+            output.WriteLine("Mismatch samples    :");
+        }
+
         foreach (string mismatch in mismatches.Take(40))
             output.WriteLine("  " + mismatch);
 
@@ -369,6 +387,39 @@ public sealed class IvesGeneralLedgerFourFormatEquivalenceTests
             {
                 builder.Append(' ');
                 pendingSpace = false;
+            }
+
+            builder.Append(character);
+        }
+
+        return builder.ToString();
+    }
+
+    private static string MismatchCategory(string mismatch)
+    {
+        int colon = mismatch.IndexOf(':');
+        string path = colon < 0
+            ? mismatch
+            : mismatch.Substring(0, colon);
+
+        var builder = new System.Text.StringBuilder(path.Length);
+        bool insideIndex = false;
+
+        foreach (char character in path)
+        {
+            if (character == '[')
+            {
+                insideIndex = true;
+                builder.Append("[]");
+                continue;
+            }
+
+            if (insideIndex)
+            {
+                if (character == ']')
+                    insideIndex = false;
+
+                continue;
             }
 
             builder.Append(character);
