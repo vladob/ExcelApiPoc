@@ -247,9 +247,17 @@ namespace ExcelApiPoc.AccountingImport.Services.Ives
                 if (text.Length == 0)
                     continue;
 
-                if (builder.Length > 0 &&
+                bool hasGeometricGap =
                     previous != null &&
-                    token.Left - previous.Right > 0.05d)
+                    token.Left - previous.Right > 0.05d;
+
+                bool digitToLetterBoundary =
+                    builder.Length > 0 &&
+                    char.IsDigit(builder[builder.Length - 1]) &&
+                    char.IsLetter(text[0]);
+
+                if (builder.Length > 0 &&
+                    (hasGeometricGap || digitToLetterBoundary))
                 {
                     builder.Append(' ');
                 }
