@@ -81,6 +81,9 @@ public sealed class IvesGeneralLedgerFourFormatEquivalenceTests
             expected.Parsed.Activities.Sum(
                 activity => activity.ReportTotalRows.Count));
         output.WriteLine("Mismatches          : " + mismatches.Count);
+        output.WriteLine(
+            "PDF descriptions    : excluded from equivalence because the " +
+            "source report visibly truncates/clips them.");
 
         if (mismatches.Count > 0)
         {
@@ -191,18 +194,36 @@ public sealed class IvesGeneralLedgerFourFormatEquivalenceTests
                 scope + ".Currency",
                 mismatches);
 
+            bool compareDescriptions =
+                !string.Equals(
+                    actual.Name,
+                    "PDF",
+                    StringComparison.Ordinal);
+
             CompareRows(
                 expectedActivity.DocumentRows,
                 actualActivity.DocumentRows,
                 scope + ".Documents",
-                CompareDocument,
+                (expectedRow, actualRow, rowScope, rowMismatches) =>
+                    CompareDocument(
+                        expectedRow,
+                        actualRow,
+                        rowScope,
+                        rowMismatches,
+                        compareDescriptions),
                 mismatches);
 
             CompareRows(
                 expectedActivity.AccountRows,
                 actualActivity.AccountRows,
                 scope + ".Accounts",
-                CompareAccount,
+                (expectedRow, actualRow, rowScope, rowMismatches) =>
+                    CompareAccount(
+                        expectedRow,
+                        actualRow,
+                        rowScope,
+                        rowMismatches,
+                        compareDescriptions),
                 mismatches);
 
             CompareRows(
@@ -254,7 +275,8 @@ public sealed class IvesGeneralLedgerFourFormatEquivalenceTests
         IvesGeneralLedgerSourceRow expected,
         IvesGeneralLedgerSourceRow actual,
         string scope,
-        ICollection<string> mismatches)
+        ICollection<string> mismatches,
+        bool compareDescription)
     {
         Equal(expected.SequenceNumber, actual.SequenceNumber,
             scope + ".SequenceNumber", mismatches);
@@ -266,9 +288,15 @@ public sealed class IvesGeneralLedgerFourFormatEquivalenceTests
         Equal(NormalizeAccount(expected.AccountCode),
             NormalizeAccount(actual.AccountCode),
             scope + ".AccountCode", mismatches);
-        Equal(NormalizeText(expected.Text),
-            NormalizeText(actual.Text),
-            scope + ".Text", mismatches);
+        if (compareDescription)
+        {
+            Equal(
+                NormalizeText(expected.Text),
+                NormalizeText(actual.Text),
+                scope + ".Text",
+                mismatches);
+        }
+
         Equal(Value(expected.DebitTurnover),
             Value(actual.DebitTurnover),
             scope + ".Debit", mismatches);
@@ -281,16 +309,23 @@ public sealed class IvesGeneralLedgerFourFormatEquivalenceTests
         IvesGeneralLedgerSourceRow expected,
         IvesGeneralLedgerSourceRow actual,
         string scope,
-        ICollection<string> mismatches)
+        ICollection<string> mismatches,
+        bool compareDescription)
     {
         Equal(expected.SequenceNumber, actual.SequenceNumber,
             scope + ".SequenceNumber", mismatches);
         Equal(NormalizeAccount(expected.AccountCode),
             NormalizeAccount(actual.AccountCode),
             scope + ".AccountCode", mismatches);
-        Equal(NormalizeText(expected.Text),
-            NormalizeText(actual.Text),
-            scope + ".Text", mismatches);
+        if (compareDescription)
+        {
+            Equal(
+                NormalizeText(expected.Text),
+                NormalizeText(actual.Text),
+                scope + ".Text",
+                mismatches);
+        }
+
         Equal(Value(expected.OpeningBalance),
             Value(actual.OpeningBalance),
             scope + ".Opening", mismatches);
