@@ -4,12 +4,12 @@ using System.IO;
 
 namespace ExcelApiPoc.AccountingImport.Tests.Ives;
 
-public sealed class IvesExcelJournalImporterTests
+public sealed class IvesJournalImporterTests
 {
     [Fact]
     public void CanImport_RecognizesOnlyIvesJournalXlsFiles()
     {
-        var importer = new IvesExcelJournalImporter();
+        var importer = new IvesJournalImporter();
         string fixture = GetFixturePath("U_DENNIK_00322881_2024.xls");
 
         Assert.True(importer.CanImport(fixture, "IVES"));
@@ -71,7 +71,7 @@ public sealed class IvesExcelJournalImporterTests
 
         try
         {
-            JournalImport result = new IvesExcelJournalImporter().Import(copiedPath);
+            JournalImport result = new IvesJournalImporter().Import(copiedPath);
 
             Assert.Equal("00322881", result.Ico);
             Assert.Equal(2024, result.FiscalYear);
@@ -92,7 +92,7 @@ public sealed class IvesExcelJournalImporterTests
         try
         {
             InvalidDataException exception = Assert.Throws<InvalidDataException>(
-                () => new IvesExcelJournalImporter().Import(copiedPath));
+                () => new IvesJournalImporter().Import(copiedPath));
 
             Assert.Contains("00325791", exception.Message);
             Assert.Contains("00322881", exception.Message);
@@ -113,7 +113,7 @@ public sealed class IvesExcelJournalImporterTests
         try
         {
             InvalidDataException exception = Assert.Throws<InvalidDataException>(
-                () => new IvesExcelJournalImporter().Import(copiedPath));
+                () => new IvesJournalImporter().Import(copiedPath));
 
             Assert.Contains("2023", exception.Message);
             Assert.Contains("2024", exception.Message);
@@ -196,7 +196,7 @@ public sealed class IvesExcelJournalImporterTests
 
     private static JournalImport ImportFixture(string fileName)
     {
-        return new IvesExcelJournalImporter().Import(GetFixturePath(fileName));
+        return new IvesJournalImporter().Import(GetFixturePath(fileName));
     }
 
     private static string GetFixturePath(string fileName)

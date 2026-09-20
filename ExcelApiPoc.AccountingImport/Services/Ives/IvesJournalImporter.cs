@@ -7,7 +7,7 @@ using System.Security.Cryptography;
 
 namespace ExcelApiPoc.AccountingImport.Services.Ives
 {
-    public sealed class IvesExcelJournalImporter : IJournalImporter
+    public sealed class IvesJournalImporter : IJournalImporter
     {
         public const int MaximumJournalRows = 500_000;
 
