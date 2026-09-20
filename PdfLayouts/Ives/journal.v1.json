@@ -28,6 +28,82 @@
     }
   ],
   "recordContinuations": [],
-  "recordRules": [],
-  "recordFields": []
+  "recordRules": [
+    {
+      "id": "transaction-row",
+      "sectionId": "page-body",
+      "text": "^\\d{2}\\.\\d{2}\\.\\d{4}\\s+",
+      "textMatch": "RegularExpression",
+      "minimumTokenCount": 6,
+      "maximumTokenCount": 12,
+      "leftAtMost": 50,
+      "rightAtLeast": 457
+    },
+    {
+      "id": "module-row",
+      "sectionId": "page-body",
+      "minimumTokenCount": 1,
+      "maximumTokenCount": 4,
+      "rightAtLeast": 480
+    },
+    {
+      "id": "report-total-row",
+      "sectionId": "page-body",
+      "text": "^Spolu\\s*:",
+      "textMatch": "RegularExpression",
+      "minimumTokenCount": 3,
+      "maximumTokenCount": 3,
+      "leftAtMost": 50,
+      "rightAtLeast": 450
+    }
+  ],
+  "recordFields": [
+    {
+      "recordRuleId": "transaction-row",
+      "fields": [
+        {
+          "id": "posting-date",
+          "horizontal": { "anchor": "Left", "position": 46 }
+        },
+        {
+          "id": "document-number",
+          "horizontal": { "anchor": "Left", "position": 83.55 }
+        },
+        {
+          "id": "debit-account",
+          "horizontal": { "anchor": "Left", "position": 137.7 }
+        },
+        {
+          "id": "credit-account",
+          "horizontal": { "anchor": "Left", "position": 265.95 }
+        },
+        {
+          "id": "amount",
+          "horizontal": { "anchor": "Right", "position": 451.15 }
+        },
+        {
+          "id": "currency",
+          "horizontal": { "anchor": "Left", "position": 454.3 }
+        }
+      ]
+    },
+    {
+      "recordRuleId": "module-row",
+      "fields": [
+        {
+          "id": "module",
+          "horizontal": { "anchor": "Left", "position": 474 }
+        }
+      ]
+    },
+    {
+      "recordRuleId": "report-total-row",
+      "fields": [
+        {
+          "id": "amount",
+          "horizontal": { "anchor": "Right", "position": 451.15 }
+        }
+      ]
+    }
+  ]
 }

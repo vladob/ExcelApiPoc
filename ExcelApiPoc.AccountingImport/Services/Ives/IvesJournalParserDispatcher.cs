@@ -12,7 +12,8 @@ namespace ExcelApiPoc.AccountingImport.Services.Ives
                 new IvesExcelJournalParser(),
                 new IvesXlsxJournalParser(),
                 new IvesCsvJournalParser(),
-                new IvesXmlJournalParser()
+                new IvesXmlJournalParser(),
+                new IvesPdfJournalParser()
             };
 
         public static bool CanParse(string filePath)

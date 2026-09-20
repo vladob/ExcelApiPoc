@@ -24,7 +24,7 @@ public sealed class IvesJournalImporterTests
         Assert.True(importer.CanImport(
             Path.ChangeExtension(fixture, ".xml"),
             "IVES"));
-        Assert.False(importer.CanImport(
+        Assert.True(importer.CanImport(
             Path.ChangeExtension(fixture, ".pdf"),
             "IVES"));
         Assert.False(importer.CanImport(
