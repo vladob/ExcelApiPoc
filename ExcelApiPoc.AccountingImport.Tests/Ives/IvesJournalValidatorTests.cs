@@ -64,6 +64,57 @@ public sealed class IvesJournalValidatorTests
         Assert.Equal(3361, debit.Source.SourceRowNumber);
     }
 
+
+    [Fact]
+    public void Validate_AcceptsFormatIndependentSemanticJournalWithoutExcelLayoutOrModuleRows()
+    {
+        var source = new IvesJournalParseResult
+        {
+            SourceFileName = "U_DENNIK_00999999_2025.xml",
+            SourceFilePath = "U_DENNIK_00999999_2025.xml",
+            Ico = "00999999",
+            FiscalYear = 2025,
+            PeriodStart = new DateTime(2025, 1, 1),
+            PeriodEnd = new DateTime(2025, 12, 31),
+            SourceRowCount = 1
+        };
+
+        source.TransactionRows.Add(new IvesJournalSourceRow
+        {
+            SequenceNumber = 1,
+            SourceRowNumber = 1,
+            Kind = IvesJournalRowKind.Transaction,
+            PostingDate = new DateTime(2025, 1, 2),
+            DocumentNumber = "TEST001",
+            DebitCompositeAccount = "518",
+            CreditCompositeAccount = "321",
+            Amount = 100m,
+            Currency = "€",
+            Text = "Synthetic XML transaction",
+            Module = "UCT",
+            SourceLocation = "U_DENNIK_00999999_2025.xml, detail 1"
+        });
+
+        var total = new IvesJournalSourceRow
+        {
+            SequenceNumber = 1,
+            SourceRowNumber = 2,
+            Kind = IvesJournalRowKind.ReportTotal,
+            SourceLocation = "U_DENNIK_00999999_2025.xml, report total"
+        };
+        total.ReportedAmounts.Add(100m);
+        source.ReportTotalRows.Add(total);
+
+        ImportReport report = new IvesJournalValidator().Validate(source);
+
+        Assert.True(report.IsValid);
+        Assert.Empty(report.Diagnostics);
+        Assert.Equal(1, report.RecordCounts["Transactions"]);
+        Assert.Equal(0, report.RecordCounts["Modules"]);
+        Assert.Equal(1, report.RecordCounts["ReportTotals"]);
+        Assert.All(report.ValidationResults, result => Assert.True(result.IsValid));
+    }
+
     [Fact]
     public void Validate_ReportsUnbalancedJournalWithSourceIndependentScope()
     {

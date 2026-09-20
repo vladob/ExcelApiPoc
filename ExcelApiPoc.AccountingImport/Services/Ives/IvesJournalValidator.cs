@@ -56,17 +56,6 @@ namespace ExcelApiPoc.AccountingImport.Services.Ives
             IvesJournalParseResult source,
             ImportReport report)
         {
-            if (source.Layout == null)
-            {
-                AddDiagnostic(
-                    report,
-                    "IVES.JOURNAL.LAYOUT.MISSING",
-                    "The journal column layout is missing.",
-                    source,
-                    null,
-                    "Structure");
-            }
-
             if (source.TransactionRows.Count == 0)
             {
                 AddDiagnostic(
@@ -76,19 +65,6 @@ namespace ExcelApiPoc.AccountingImport.Services.Ives
                     source,
                     null,
                     "Transactions");
-            }
-
-            if (source.TransactionRows.Count != source.ModuleRows.Count)
-            {
-                AddDiagnostic(
-                    report,
-                    "IVES.JOURNAL.MODULE.COUNT",
-                    "Every transaction must have exactly one module record. " +
-                    "Transactions: " + source.TransactionRows.Count +
-                    ", modules: " + source.ModuleRows.Count + ".",
-                    source,
-                    null,
-                    "Modules");
             }
 
             foreach (IvesJournalSourceRow row in source.UnclassifiedRows)
@@ -107,47 +83,67 @@ namespace ExcelApiPoc.AccountingImport.Services.Ives
             IvesJournalParseResult source,
             ImportReport report)
         {
-            var modulesBySourceRow = new Dictionary<int, IvesJournalSourceRow>();
+            Dictionary<int, IvesJournalSourceRow> modulesBySourceRow = null;
 
-            for (int index = 0; index < source.ModuleRows.Count; index++)
+            if (source.ModuleRows.Count > 0)
             {
-                IvesJournalSourceRow module = source.ModuleRows[index];
+                modulesBySourceRow =
+                    new Dictionary<int, IvesJournalSourceRow>();
 
-                if (module.SequenceNumber != index + 1)
+                for (int index = 0; index < source.ModuleRows.Count; index++)
+                {
+                    IvesJournalSourceRow module = source.ModuleRows[index];
+
+                    if (module.SequenceNumber != index + 1)
+                    {
+                        AddDiagnostic(
+                            report,
+                            "IVES.JOURNAL.MODULE.SEQUENCE",
+                            "Module sequence numbers must be contiguous and one-based.",
+                            source,
+                            module,
+                            "Modules");
+                    }
+
+                    if (string.IsNullOrWhiteSpace(module.Module))
+                    {
+                        AddDiagnostic(
+                            report,
+                            "IVES.JOURNAL.MODULE.VALUE_MISSING",
+                            "A module record has no module value.",
+                            source,
+                            module,
+                            "Modules");
+                    }
+
+                    if (!modulesBySourceRow.ContainsKey(module.SourceRowNumber))
+                    {
+                        modulesBySourceRow.Add(module.SourceRowNumber, module);
+                    }
+                    else
+                    {
+                        AddDiagnostic(
+                            report,
+                            "IVES.JOURNAL.MODULE.DUPLICATE_SOURCE_ROW",
+                            "More than one module record references source row " +
+                            module.SourceRowNumber + ".",
+                            source,
+                            module,
+                            "Modules");
+                    }
+                }
+
+                if (source.TransactionRows.Count != source.ModuleRows.Count)
                 {
                     AddDiagnostic(
                         report,
-                        "IVES.JOURNAL.MODULE.SEQUENCE",
-                        "Module sequence numbers must be contiguous and one-based.",
+                        "IVES.JOURNAL.MODULE.COUNT",
+                        "Every transaction must have exactly one module evidence record " +
+                        "when the source parser exposes separate module records. " +
+                        "Transactions: " + source.TransactionRows.Count +
+                        ", modules: " + source.ModuleRows.Count + ".",
                         source,
-                        module,
-                        "Modules");
-                }
-
-                if (string.IsNullOrWhiteSpace(module.Module))
-                {
-                    AddDiagnostic(
-                        report,
-                        "IVES.JOURNAL.MODULE.VALUE_MISSING",
-                        "A module record has no module value.",
-                        source,
-                        module,
-                        "Modules");
-                }
-
-                if (!modulesBySourceRow.ContainsKey(module.SourceRowNumber))
-                {
-                    modulesBySourceRow.Add(module.SourceRowNumber, module);
-                }
-                else
-                {
-                    AddDiagnostic(
-                        report,
-                        "IVES.JOURNAL.MODULE.DUPLICATE_SOURCE_ROW",
-                        "More than one module record references source row " +
-                        module.SourceRowNumber + ".",
-                        source,
-                        module,
+                        null,
                         "Modules");
                 }
             }
@@ -168,7 +164,15 @@ namespace ExcelApiPoc.AccountingImport.Services.Ives
                 }
 
                 ValidateTransactionFields(source, transaction, report);
-                ValidateModulePair(source, transaction, modulesBySourceRow, report);
+
+                if (modulesBySourceRow != null)
+                {
+                    ValidateModulePair(
+                        source,
+                        transaction,
+                        modulesBySourceRow,
+                        report);
+                }
             }
         }
 
@@ -231,6 +235,17 @@ namespace ExcelApiPoc.AccountingImport.Services.Ives
                     report,
                     "IVES.JOURNAL.AMOUNT.MISSING",
                     "A transaction has no amount.",
+                    source,
+                    transaction,
+                    "Transactions");
+            }
+
+            if (string.IsNullOrWhiteSpace(transaction.Module))
+            {
+                AddDiagnostic(
+                    report,
+                    "IVES.JOURNAL.MODULE.VALUE_MISSING",
+                    "A transaction has no module value.",
                     source,
                     transaction,
                     "Transactions");

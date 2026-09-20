@@ -8,6 +8,7 @@ namespace ExcelApiPoc.AccountingImport.Services.Ives
         public int SequenceNumber { get; set; }
         public int SourceRowNumber { get; set; }
         public int? RelatedSourceRowNumber { get; set; }
+        public string SourceLocation { get; set; }
         public IvesJournalRowKind Kind { get; set; }
         public DateTime? PostingDate { get; set; }
         public string DocumentNumber { get; set; }

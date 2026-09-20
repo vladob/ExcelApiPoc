@@ -164,11 +164,19 @@ namespace ExcelApiPoc.AccountingImport.Services.Ives
             IvesJournalParseResult source,
             IvesJournalSourceRow row)
         {
-            return source.SourceFileName + ", worksheet " +
-                (source.WorksheetName ?? "(unnamed)") + ", rows " +
-                row.SourceRowNumber + "-" +
-                row.RelatedSourceRowNumber.GetValueOrDefault(
-                    row.SourceRowNumber);
+            if (!string.IsNullOrWhiteSpace(row.SourceLocation))
+                return row.SourceLocation;
+
+            if (!string.IsNullOrWhiteSpace(source.WorksheetName))
+            {
+                return source.SourceFileName + ", worksheet " +
+                    source.WorksheetName + ", rows " +
+                    row.SourceRowNumber + "-" +
+                    row.RelatedSourceRowNumber.GetValueOrDefault(
+                        row.SourceRowNumber);
+            }
+
+            return source.SourceFileName + ", record " + row.SourceRowNumber;
         }
 
         private static InvalidDataException CreateValidationException(
