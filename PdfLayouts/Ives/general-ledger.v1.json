@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "id": "ives-general-ledger",
+  "name": "IVES General Ledger",
+  "defaults": {
+    "horizontalTolerance": 5,
+    "baselineTolerance": 4
+  },
+  "sections": [
+    {
+      "id": "document",
+      "scope": "Document",
+      "mayContinueOnNextPage": true
+    }
+  ],
+  "rules": [],
+  "recordContinuations": [],
+  "recordRules": [],
+  "recordFields": []
+}
