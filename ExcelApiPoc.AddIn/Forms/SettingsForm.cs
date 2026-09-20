@@ -17,7 +17,7 @@ namespace ExcelApiPoc.AddIn.Forms
         private readonly Button _testConnectionButton;
         private readonly Button _saveButton;
         private readonly Button _cancelButton;
-        private AddInSettings _settings;
+        private readonly AddInSettings _settings;
 
         public SettingsForm()
         {
@@ -46,12 +46,9 @@ namespace ExcelApiPoc.AddIn.Forms
                 DropDownStyle = ComboBoxStyle.DropDownList
             };
             _uiLanguageComboBox.SetBounds(145, 55, 210, 25);
-            _uiLanguageComboBox.Items.Add(
-                new UiLanguageItem("English", SettingsService.DefaultUiLanguage));
-            _uiLanguageComboBox.Items.Add(
-                new UiLanguageItem("Slovenčina", SettingsService.SlovakUiLanguage));
-            _uiLanguageComboBox.SelectedIndexChanged +=
-                UiLanguageComboBox_SelectedIndexChanged;
+            _uiLanguageComboBox.Items.Add(new UiLanguageItem("English", SettingsService.DefaultUiLanguage));
+            _uiLanguageComboBox.Items.Add(new UiLanguageItem("Slovenčina", SettingsService.SlovakUiLanguage));
+            _uiLanguageComboBox.SelectedIndexChanged += UiLanguageComboBox_SelectedIndexChanged;
 
             _roundWholeEurosCheckBox = new CheckBox
             {
@@ -102,43 +99,27 @@ namespace ExcelApiPoc.AddIn.Forms
         {
             get
             {
-                var selected =
-                    _uiLanguageComboBox.SelectedItem as UiLanguageItem;
-
-                return selected?.Code ??
-                    SettingsService.DefaultUiLanguage;
+                var selected = _uiLanguageComboBox.SelectedItem as UiLanguageItem;
+                return selected?.Code ?? SettingsService.DefaultUiLanguage;
             }
         }
 
         private void SelectLanguage(string language)
         {
-            string normalized =
-                SettingsService.NormalizeUiLanguage(language);
+            string normalized = SettingsService.NormalizeUiLanguage(language);
 
-            for (int index = 0;
-                 index < _uiLanguageComboBox.Items.Count;
-                 index++)
+            for (int index = 0; index < _uiLanguageComboBox.Items.Count; index++)
             {
-                var item =
-                    _uiLanguageComboBox.Items[index] as UiLanguageItem;
-
-                if (item != null &&
-                    string.Equals(
-                        item.Code,
-                        normalized,
-                        StringComparison.Ordinal))
+                if (_uiLanguageComboBox.Items[index] is UiLanguageItem item && string.Equals(item.Code, normalized, StringComparison.Ordinal))
                 {
                     _uiLanguageComboBox.SelectedIndex = index;
                     return;
                 }
             }
-
             _uiLanguageComboBox.SelectedIndex = 0;
         }
 
-        private void UiLanguageComboBox_SelectedIndexChanged(
-            object sender,
-            EventArgs e)
+        private void UiLanguageComboBox_SelectedIndexChanged(object sender, EventArgs e)
         {
             ApplyLanguage(SelectedLanguage);
         }
@@ -146,62 +127,34 @@ namespace ExcelApiPoc.AddIn.Forms
         private void ApplyLanguage(string language)
         {
             Text = UiText.Get("Settings.Title", language);
-            _apiUrlLabel.Text =
-                UiText.Get("Settings.ApiBaseUrl", language);
-            _uiLanguageLabel.Text =
-                UiText.Get("Settings.UiLanguage", language);
-            _roundWholeEurosCheckBox.Text =
-                UiText.Get("Settings.RoundWholeEuros", language);
-            _settingsPathLabel.Text =
-                UiText.Format(
-                    "Settings.SettingsFile",
-                    language,
-                    SettingsService.SettingsPath);
-            _testConnectionButton.Text =
-                UiText.Get("Settings.TestConnection", language);
-            _saveButton.Text =
-                UiText.Get("Common.Save", language);
-            _cancelButton.Text =
-                UiText.Get("Common.Cancel", language);
+            _apiUrlLabel.Text = UiText.Get("Settings.ApiBaseUrl", language);
+            _uiLanguageLabel.Text = UiText.Get("Settings.UiLanguage", language);
+            _roundWholeEurosCheckBox.Text = UiText.Get("Settings.RoundWholeEuros", language);
+            _settingsPathLabel.Text = UiText.Format("Settings.SettingsFile", language, SettingsService.SettingsPath);
+            _testConnectionButton.Text = UiText.Get("Settings.TestConnection", language);
+            _saveButton.Text = UiText.Get("Common.Save", language);
+            _cancelButton.Text = UiText.Get("Common.Cancel", language);
         }
 
-        private void TestConnectionButton_Click(
-            object sender,
-            EventArgs e)
+        private void TestConnectionButton_Click(object sender, EventArgs e)
         {
             string language = SelectedLanguage;
-
             try
             {
-                string baseUrl =
-                    ValidateAndNormalizeUrl(
-                        _apiBaseUrlTextBox.Text,
-                        language);
-
-                var healthUri =
-                    new Uri(
-                        $"{baseUrl}/api/health",
-                        UriKind.Absolute);
-
+                string baseUrl = ValidateAndNormalizeUrl( _apiBaseUrlTextBox.Text, language);
+                var healthUri = new Uri( $"{baseUrl}/api/health", UriKind.Absolute);
                 using (var client = new HttpClient())
                 {
                     client.Timeout = TimeSpan.FromSeconds(10);
-                    string response =
-                        client.GetStringAsync(healthUri)
-                            .GetAwaiter()
-                            .GetResult();
+                    string response = client.GetStringAsync(healthUri).GetAwaiter().GetResult();
 
                     MessageBox.Show(
                         this,
-                        UiText.Get(
-                            "Settings.ConnectionSuccessful",
-                            language) +
+                        UiText.Get("Settings.ConnectionSuccessful", language) +
                         Environment.NewLine +
                         Environment.NewLine +
                         response,
-                        UiText.Get(
-                            "Settings.ConnectionTitle",
-                            language),
+                        UiText.Get("Settings.ConnectionTitle", language),
                         MessageBoxButtons.OK,
                         MessageBoxIcon.Information);
                 }
@@ -226,13 +179,9 @@ namespace ExcelApiPoc.AddIn.Forms
 
             try
             {
-                string baseUrl =
-                    ValidateAndNormalizeUrl(
-                        _apiBaseUrlTextBox.Text,
-                        language);
+                string baseUrl = ValidateAndNormalizeUrl(_apiBaseUrlTextBox.Text, language);
 
-                SettingsService.Save(
-                    new AddInSettings
+                SettingsService.Save(new AddInSettings
                     {
                         ApiBaseUrl = baseUrl,
                         UiLanguage = language,
@@ -245,36 +194,19 @@ namespace ExcelApiPoc.AddIn.Forms
             }
             catch (Exception exception)
             {
-                ErrorDialog.ShowError(
-                    this,
+                ErrorDialog.ShowError(this,
                     UiText.Get("Settings.InvalidTitle", language),
-                    exception.Message,
-                    exception,
-                    "Settings / Save",
-                    "SETTINGS-INVALID",
-                    null,
-                    language);
+                    exception.Message, exception, "Settings / Save", "SETTINGS-INVALID", null, language);
             }
         }
 
-        private static string ValidateAndNormalizeUrl(
-            string value,
-            string language)
+        private static string ValidateAndNormalizeUrl(string value, string language)
         {
-            string normalized =
-                (value ?? string.Empty).Trim().TrimEnd('/');
-
-            if (!Uri.TryCreate(
-                    normalized,
-                    UriKind.Absolute,
-                    out Uri uri) ||
-                (uri.Scheme != Uri.UriSchemeHttp &&
-                 uri.Scheme != Uri.UriSchemeHttps))
+            string normalized = (value ?? string.Empty).Trim().TrimEnd('/');
+            if (!Uri.TryCreate(normalized, UriKind.Absolute, out Uri uri) || (uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps))
             {
-                throw new InvalidOperationException(
-                    UiText.Get("Settings.InvalidUrl", language));
+                throw new InvalidOperationException(UiText.Get("Settings.InvalidUrl", language));
             }
-
             return normalized;
         }
 
