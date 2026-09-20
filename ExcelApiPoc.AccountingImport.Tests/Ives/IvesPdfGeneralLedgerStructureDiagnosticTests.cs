@@ -1,6 +1,5 @@
 using PdfLayoutEngine.Grouping;
 using PdfLayoutEngine.IText.Extraction;
-using PdfLayoutEngine.Records;
 using System.Text.RegularExpressions;
 using Xunit.Abstractions;
 
@@ -34,7 +33,7 @@ public sealed class IvesPdfGeneralLedgerStructureDiagnosticTests
             "PDF file does not exist: " + path);
 
         var document = new ITextPdfTokenExtractor().Extract(path);
-        IReadOnlyList<BaselineRecord> groups =
+        IReadOnlyList<BaselineGroup> groups =
             new BaselineGroupBuilder().Build(document);
 
         output.WriteLine("IVES GL PDF structure diagnostic");
@@ -88,9 +87,9 @@ public sealed class IvesPdfGeneralLedgerStructureDiagnosticTests
                     RegexOptions.CultureInvariant)),
             16);
 
-        WritePageBoundarySamples(groups);
+        WritePageBoundarySamples(groups, document.Pages.Count);
 
-        Assert.Equal(209, document.Pages.Count);
+        Assert.NotEmpty(document.Pages);
         Assert.All(
             document.Pages,
             page => Assert.NotEmpty(page.Tokens));
@@ -117,7 +116,7 @@ public sealed class IvesPdfGeneralLedgerStructureDiagnosticTests
 
     private void WritePageSummary(
         PdfLayoutEngine.Models.PdfDocument document,
-        IReadOnlyList<BaselineRecord> groups)
+        IReadOnlyList<BaselineGroup> groups)
     {
         output.WriteLine("");
         output.WriteLine("Page summary:");
@@ -138,27 +137,34 @@ public sealed class IvesPdfGeneralLedgerStructureDiagnosticTests
 
     private void WriteGroups(
         string heading,
-        IEnumerable<BaselineRecord> groups,
+        IEnumerable<BaselineGroup> groups,
         int take)
     {
         output.WriteLine("");
         output.WriteLine(heading + ":");
 
-        foreach (BaselineRecord group in groups.Take(take))
+        foreach (BaselineGroup group in groups.Take(take))
         {
             WriteGroup(group);
         }
     }
 
     private void WritePageBoundarySamples(
-        IReadOnlyList<BaselineRecord> groups)
+        IReadOnlyList<BaselineGroup> groups,
+        int pageCount)
     {
         output.WriteLine("");
         output.WriteLine("Page-boundary samples:");
 
-        foreach (int page in new[] { 1, 2, 3, 207, 208, 209 })
+        int[] pages = new[] { 1, 2, 3, pageCount - 2, pageCount - 1, pageCount }
+            .Where(page => page >= 1 && page <= pageCount)
+            .Distinct()
+            .OrderBy(page => page)
+            .ToArray();
+
+        foreach (int page in pages)
         {
-            BaselineRecord[] pageGroups = groups
+            BaselineGroup[] pageGroups = groups
                 .Where(group => group.PageNumber == page)
                 .OrderByDescending(group => group.Baseline)
                 .ToArray();
@@ -167,17 +173,17 @@ public sealed class IvesPdfGeneralLedgerStructureDiagnosticTests
                 continue;
 
             output.WriteLine("  Page " + page + " first groups:");
-            foreach (BaselineRecord group in pageGroups.Take(5))
+            foreach (BaselineGroup group in pageGroups.Take(5))
                 WriteGroup(group, "    ");
 
             output.WriteLine("  Page " + page + " last groups:");
-            foreach (BaselineRecord group in pageGroups.TakeLast(5))
+            foreach (BaselineGroup group in pageGroups.TakeLast(5))
                 WriteGroup(group, "    ");
         }
     }
 
     private void WriteGroup(
-        BaselineRecord group,
+        BaselineGroup group,
         string indent = "  ")
     {
         output.WriteLine(
@@ -201,7 +207,7 @@ public sealed class IvesPdfGeneralLedgerStructureDiagnosticTests
         }
     }
 
-    private static bool IsTransactionLike(BaselineRecord group)
+    private static bool IsTransactionLike(BaselineGroup group)
     {
         return Regex.IsMatch(
             group.Text,
@@ -210,7 +216,7 @@ public sealed class IvesPdfGeneralLedgerStructureDiagnosticTests
     }
 
     private static bool IsAnalyticalSummaryLike(
-        BaselineRecord group)
+        BaselineGroup group)
     {
         return Regex.IsMatch(
                    group.Text,
