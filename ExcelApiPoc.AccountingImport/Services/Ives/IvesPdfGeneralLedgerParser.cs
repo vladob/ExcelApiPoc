@@ -205,21 +205,25 @@ namespace ExcelApiPoc.AccountingImport.Services.Ives
             name = null;
             currency = null;
 
-            bool knownActivity =
-                compact.IndexOf(
+            if (compact.IndexOf(
                     "Hlavnáčinnosť",
-                    StringComparison.OrdinalIgnoreCase) >= 0 ||
-                compact.IndexOf(
-                    "Stravovanie",
-                    StringComparison.OrdinalIgnoreCase) >= 0;
-
-            if (!knownActivity)
+                    StringComparison.OrdinalIgnoreCase) >= 0)
+            {
+                name = "Hlavná činnosť";
+            }
+            else if (compact.IndexOf(
+                         "Stravovanie",
+                         StringComparison.OrdinalIgnoreCase) >= 0)
+            {
+                name = "Stravovanie";
+            }
+            else
+            {
                 return false;
+            }
 
-            name = ReadText(record, 27.0, 120.0);
             currency = ReadCompact(record, 130.0, 160.0);
-
-            return !string.IsNullOrWhiteSpace(name);
+            return true;
         }
 
         private static bool IsAnalyticalSummary(string compact)
