@@ -97,7 +97,7 @@ public sealed class IvesCrystalTabularJournalTests
                 "Obec Test", "IČO:00999999", "Účtovný denník",
                 "Dátum", "Čís. dokladu", "Účet MD", "Účet D", "Suma", "Mena", "Text",
                 "2025-01-03", "TEST002", "321.200", "518.100", "50.00", "€", "Synthetic second",
-                "", "", "", "", "UCT", "", "",
+                "", "", "", "", "DOD", "4", "/ 250002",
                 "Spolu :", "150.00", "€")
         };
 
