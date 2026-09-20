@@ -222,7 +222,12 @@ namespace ExcelApiPoc.AccountingImport.Services.Ives
                 return false;
             }
 
-            currency = ReadCompact(record, 130.0, 160.0);
+            currency = compact.IndexOf(
+                "EUR",
+                StringComparison.OrdinalIgnoreCase) >= 0
+                ? "EUR"
+                : ReadCompact(record, 130.0, 160.0);
+
             return true;
         }
 
