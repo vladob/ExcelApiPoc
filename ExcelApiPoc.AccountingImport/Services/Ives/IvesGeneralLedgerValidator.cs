@@ -1,4 +1,4 @@
-﻿using ExcelApiPoc.AccountingImport.Models.Reporting;
+using ExcelApiPoc.AccountingImport.Models.Reporting;
 using System;
 using System.Collections.Generic;
 
@@ -11,9 +11,7 @@ namespace ExcelApiPoc.AccountingImport.Services.Ives
         public ImportReport Validate(IvesGeneralLedgerParseResult source)
         {
             if (source == null)
-            {
                 throw new ArgumentNullException(nameof(source));
-            }
 
             var report = new ImportReport
             {
@@ -24,18 +22,29 @@ namespace ExcelApiPoc.AccountingImport.Services.Ives
 
             AddRecordCounts(source, report);
             AddSourceStructureDiagnostics(source, report);
-            Dictionary<string, IvesGeneralLedgerSourceRow> accounts =
-                IndexAccounts(source, report);
 
-            ValidateAccountBalances(source, report);
-            ValidateDocuments(source, accounts, report);
+            if (source.Activities.Count == 0)
+            {
+                AddDiagnostic(report, "IVES.ACTIVITY.NONE",
+                    "The general ledger contains no semantic activity.",
+                    source, null, "Activities");
+                return report;
+            }
 
-            Dictionary<string, IvesGeneralLedgerSourceRow> subtotals =
-                IndexSyntheticSubtotals(source, report);
+            foreach (IvesGeneralLedgerActivity activity in source.Activities)
+            {
+                Dictionary<string, IvesGeneralLedgerSourceRow> accounts =
+                    IndexAccounts(source, activity, report);
 
-            ValidateSyntheticHeadings(source, subtotals, report);
-            ValidateSyntheticSubtotals(source, subtotals, report);
-            ValidateReportTotal(source, report);
+                ValidateAccountBalances(source, activity, report);
+                ValidateDocuments(source, activity, accounts, report);
+
+                Dictionary<string, IvesGeneralLedgerSourceRow> summaries =
+                    IndexSyntheticSummaries(source, activity, report);
+
+                ValidateSyntheticSummaries(source, activity, summaries, report);
+                ValidateReportTotal(source, activity, report);
+            }
 
             return report;
         }
@@ -51,17 +60,20 @@ namespace ExcelApiPoc.AccountingImport.Services.Ives
                     source, row, "Unclassified");
             }
 
-            foreach (IvesGeneralLedgerSourceRow row in source.DocumentSummaryRows)
+            foreach (IvesGeneralLedgerActivity activity in source.Activities)
             {
-                report.Diagnostics.Add(new ImportDiagnostic
+                foreach (IvesGeneralLedgerSourceRow row in activity.DocumentSummaryRows)
                 {
-                    Code = "IVES.DOCUMENT_SUMMARY.NOT_VALIDATED",
-                    Severity = ImportDiagnosticSeverity.Warning,
-                    Message = "The document-summary row was retained, but its " +
-                        "amounts were not included in financial validation because " +
-                        "no original XLS containing this row kind is available yet.",
-                    Source = Provenance(source, row, "DocumentSummaries")
-                });
+                    report.Diagnostics.Add(new ImportDiagnostic
+                    {
+                        Code = "IVES.DOCUMENT_SUMMARY.NOT_VALIDATED",
+                        Severity = ImportDiagnosticSeverity.Warning,
+                        Message = "The document-summary row was retained, but its " +
+                            "amounts were not included in financial validation because " +
+                            "no original XLS containing this row kind is available yet.",
+                        Source = Provenance(source, row, "DocumentSummaries")
+                    });
+                }
             }
         }
 
@@ -69,27 +81,45 @@ namespace ExcelApiPoc.AccountingImport.Services.Ives
             IvesGeneralLedgerParseResult source,
             ImportReport report)
         {
-            report.RecordCounts["Accounts"] = source.AccountRows.Count;
-            report.RecordCounts["Documents"] = source.DocumentRows.Count;
-            report.RecordCounts["DocumentSummaries"] = source.DocumentSummaryRows.Count;
-            report.RecordCounts["SyntheticAccounts"] = source.SyntheticAccountRows.Count;
-            report.RecordCounts["SyntheticSubtotals"] = source.SyntheticSubtotalRows.Count;
-            report.RecordCounts["ReportTotals"] = source.ReportTotalRows.Count;
+            int accounts = 0;
+            int documents = 0;
+            int documentSummaries = 0;
+            int syntheticSummaries = 0;
+            int reportTotals = 0;
+
+            foreach (IvesGeneralLedgerActivity activity in source.Activities)
+            {
+                accounts += activity.AccountRows.Count;
+                documents += activity.DocumentRows.Count;
+                documentSummaries += activity.DocumentSummaryRows.Count;
+                syntheticSummaries += activity.SyntheticSummaryRows.Count;
+                reportTotals += activity.ReportTotalRows.Count;
+            }
+
+            report.RecordCounts["Activities"] = source.Activities.Count;
+            report.RecordCounts["Accounts"] = accounts;
+            report.RecordCounts["Documents"] = documents;
+            report.RecordCounts["DocumentSummaries"] = documentSummaries;
+            report.RecordCounts["SyntheticSummaries"] = syntheticSummaries;
+            report.RecordCounts["ReportTotals"] = reportTotals;
             report.RecordCounts["Unclassified"] = source.UnclassifiedRows.Count;
         }
 
         private static Dictionary<string, IvesGeneralLedgerSourceRow> IndexAccounts(
             IvesGeneralLedgerParseResult source,
+            IvesGeneralLedgerActivity activity,
             ImportReport report)
         {
-            var result = new Dictionary<string, IvesGeneralLedgerSourceRow>(StringComparer.Ordinal);
+            var result = new Dictionary<string, IvesGeneralLedgerSourceRow>(
+                StringComparer.Ordinal);
 
-            foreach (IvesGeneralLedgerSourceRow row in source.AccountRows)
+            foreach (IvesGeneralLedgerSourceRow row in activity.AccountRows)
             {
                 if (string.IsNullOrWhiteSpace(row.AccountCode))
                 {
                     AddDiagnostic(report, "IVES.ACCOUNT.CODE_MISSING",
-                        "An account record has no account code.", source, row, "Accounts");
+                        "An account record has no account code.",
+                        source, row, "Accounts");
                     continue;
                 }
 
@@ -100,7 +130,8 @@ namespace ExcelApiPoc.AccountingImport.Services.Ives
                 else
                 {
                     AddDiagnostic(report, "IVES.ACCOUNT.DUPLICATE",
-                        "Duplicate account record '" + row.AccountCode + "'.",
+                        "Duplicate account record '" + row.AccountCode +
+                        "' within activity '" + ActivityName(activity) + "'.",
                         source, row, "Accounts");
                 }
             }
@@ -110,32 +141,37 @@ namespace ExcelApiPoc.AccountingImport.Services.Ives
 
         private static void ValidateAccountBalances(
             IvesGeneralLedgerParseResult source,
+            IvesGeneralLedgerActivity activity,
             ImportReport report)
         {
-            foreach (IvesGeneralLedgerSourceRow account in source.AccountRows)
+            foreach (IvesGeneralLedgerSourceRow account in activity.AccountRows)
             {
                 decimal expected = Value(account.OpeningBalance) +
                     Value(account.DebitTurnover) - Value(account.CreditTurnover);
 
-                AddAmountValidation(report, "IVES.ACCOUNT.BALANCE", account.AccountCode,
+                AddAmountValidation(report, "IVES.ACCOUNT.BALANCE",
+                    account.AccountCode,
                     "Closing balance equals opening balance plus debit turnover minus credit turnover.",
-                    expected, Value(account.ClosingBalance), source, account, "Accounts");
+                    expected, Value(account.ClosingBalance),
+                    source, account, "Accounts");
             }
         }
 
         private static void ValidateDocuments(
             IvesGeneralLedgerParseResult source,
+            IvesGeneralLedgerActivity activity,
             IDictionary<string, IvesGeneralLedgerSourceRow> accounts,
             ImportReport report)
         {
             var totals = new Dictionary<string, AmountSet>(StringComparer.Ordinal);
 
-            foreach (IvesGeneralLedgerSourceRow document in source.DocumentRows)
+            foreach (IvesGeneralLedgerSourceRow document in activity.DocumentRows)
             {
                 if (string.IsNullOrWhiteSpace(document.AccountCode))
                 {
                     AddDiagnostic(report, "IVES.DOCUMENT.ACCOUNT_MISSING",
-                        "A document record has no account code.", source, document, "Documents");
+                        "A document record has no account code.",
+                        source, document, "Documents");
                     continue;
                 }
 
@@ -154,43 +190,52 @@ namespace ExcelApiPoc.AccountingImport.Services.Ives
                 if (!accounts.ContainsKey(item.Key))
                 {
                     IvesGeneralLedgerSourceRow firstDocument =
-                        FindFirst(source.DocumentRows, item.Key);
+                        FindFirst(activity.DocumentRows, item.Key);
                     AddDiagnostic(report, "IVES.DOCUMENT.ACCOUNT_NOT_FOUND",
                         "Documents reference account '" + item.Key +
-                        "', but no account record exists.",
+                        "', but no account record exists in activity '" +
+                        ActivityName(activity) + "'.",
                         source, firstDocument, "Documents");
                 }
             }
 
-            foreach (IvesGeneralLedgerSourceRow account in source.AccountRows)
+            foreach (IvesGeneralLedgerSourceRow account in activity.AccountRows)
             {
-                totals.TryGetValue(account.AccountCode ?? string.Empty, out AmountSet documentTotal);
+                totals.TryGetValue(
+                    account.AccountCode ?? string.Empty,
+                    out AmountSet documentTotal);
                 documentTotal = documentTotal ?? new AmountSet();
 
-                AddAmountValidation(report, "IVES.DOCUMENTS.DEBIT", account.AccountCode,
+                AddAmountValidation(report, "IVES.DOCUMENTS.DEBIT",
+                    account.AccountCode,
                     "Document debit turnover equals account debit turnover.",
                     documentTotal.Debit, Value(account.DebitTurnover),
                     source, account, "Accounts");
-                AddAmountValidation(report, "IVES.DOCUMENTS.CREDIT", account.AccountCode,
+
+                AddAmountValidation(report, "IVES.DOCUMENTS.CREDIT",
+                    account.AccountCode,
                     "Document credit turnover equals account credit turnover.",
                     documentTotal.Credit, Value(account.CreditTurnover),
                     source, account, "Accounts");
             }
         }
 
-        private static Dictionary<string, IvesGeneralLedgerSourceRow> IndexSyntheticSubtotals(
-            IvesGeneralLedgerParseResult source,
-            ImportReport report)
+        private static Dictionary<string, IvesGeneralLedgerSourceRow>
+            IndexSyntheticSummaries(
+                IvesGeneralLedgerParseResult source,
+                IvesGeneralLedgerActivity activity,
+                ImportReport report)
         {
-            var result = new Dictionary<string, IvesGeneralLedgerSourceRow>(StringComparer.Ordinal);
+            var result = new Dictionary<string, IvesGeneralLedgerSourceRow>(
+                StringComparer.Ordinal);
 
-            foreach (IvesGeneralLedgerSourceRow row in source.SyntheticSubtotalRows)
+            foreach (IvesGeneralLedgerSourceRow row in activity.SyntheticSummaryRows)
             {
                 if (string.IsNullOrWhiteSpace(row.AccountCode))
                 {
                     AddDiagnostic(report, "IVES.SYNTHETIC.CODE_MISSING",
-                        "A synthetic subtotal has no synthetic account code.",
-                        source, row, "SyntheticSubtotals");
+                        "A synthetic summary has no synthetic account code.",
+                        source, row, "SyntheticSummaries");
                 }
                 else if (!result.ContainsKey(row.AccountCode))
                 {
@@ -199,76 +244,28 @@ namespace ExcelApiPoc.AccountingImport.Services.Ives
                 else
                 {
                     AddDiagnostic(report, "IVES.SYNTHETIC.DUPLICATE",
-                        "Duplicate synthetic subtotal '" + row.AccountCode + "'.",
-                        source, row, "SyntheticSubtotals");
+                        "Duplicate synthetic summary '" + row.AccountCode +
+                        "' within activity '" + ActivityName(activity) + "'.",
+                        source, row, "SyntheticSummaries");
                 }
             }
 
             return result;
         }
 
-        private static void ValidateSyntheticHeadings(
+        private static void ValidateSyntheticSummaries(
             IvesGeneralLedgerParseResult source,
-            IDictionary<string, IvesGeneralLedgerSourceRow> subtotals,
+            IvesGeneralLedgerActivity activity,
+            IDictionary<string, IvesGeneralLedgerSourceRow> summaries,
             ImportReport report)
         {
-            var headings = new Dictionary<string, IvesGeneralLedgerSourceRow>(StringComparer.Ordinal);
+            var accountTotals = new Dictionary<string, AmountSet>(
+                StringComparer.Ordinal);
 
-            foreach (IvesGeneralLedgerSourceRow heading in source.SyntheticAccountRows)
-            {
-                string code = GetSyntheticCode(heading.AccountCode);
-
-                if (code == null)
-                {
-                    AddDiagnostic(report, "IVES.SYNTHETIC.HEADING_CODE_INVALID",
-                        "A synthetic-account heading has no recognizable code.",
-                        source, heading, "SyntheticAccounts");
-                }
-                else if (headings.ContainsKey(code))
-                {
-                    AddDiagnostic(report, "IVES.SYNTHETIC.HEADING_DUPLICATE",
-                        "Duplicate synthetic-account heading '" + code + "'.",
-                        source, heading, "SyntheticAccounts");
-                }
-                else
-                {
-                    headings.Add(code, heading);
-                }
-            }
-
-            foreach (KeyValuePair<string, IvesGeneralLedgerSourceRow> heading in headings)
-            {
-                if (!subtotals.ContainsKey(heading.Key))
-                {
-                    AddDiagnostic(report, "IVES.SYNTHETIC.HEADING_WITHOUT_SUBTOTAL",
-                        "Synthetic-account heading '" + heading.Key +
-                        "' has no subtotal record.",
-                        source, heading.Value, "SyntheticAccounts");
-                }
-            }
-
-            foreach (KeyValuePair<string, IvesGeneralLedgerSourceRow> subtotal in subtotals)
-            {
-                if (!headings.ContainsKey(subtotal.Key))
-                {
-                    AddDiagnostic(report, "IVES.SYNTHETIC.SUBTOTAL_WITHOUT_HEADING",
-                        "Synthetic subtotal '" + subtotal.Key +
-                        "' has no heading record.",
-                        source, subtotal.Value, "SyntheticSubtotals");
-                }
-            }
-        }
-
-        private static void ValidateSyntheticSubtotals(
-            IvesGeneralLedgerParseResult source,
-            IDictionary<string, IvesGeneralLedgerSourceRow> subtotals,
-            ImportReport report)
-        {
-            var accountTotals = new Dictionary<string, AmountSet>(StringComparer.Ordinal);
-
-            foreach (IvesGeneralLedgerSourceRow account in source.AccountRows)
+            foreach (IvesGeneralLedgerSourceRow account in activity.AccountRows)
             {
                 string syntheticCode = GetSyntheticCode(account.AccountCode);
+
                 if (syntheticCode == null)
                 {
                     AddDiagnostic(report, "IVES.ACCOUNT.SYNTHETIC_CODE_INVALID",
@@ -278,7 +275,8 @@ namespace ExcelApiPoc.AccountingImport.Services.Ives
                     continue;
                 }
 
-                if (!accountTotals.TryGetValue(syntheticCode, out AmountSet amountSet))
+                if (!accountTotals.TryGetValue(
+                    syntheticCode, out AmountSet amountSet))
                 {
                     amountSet = new AmountSet();
                     accountTotals.Add(syntheticCode, amountSet);
@@ -289,102 +287,134 @@ namespace ExcelApiPoc.AccountingImport.Services.Ives
 
             foreach (KeyValuePair<string, AmountSet> item in accountTotals)
             {
-                if (!subtotals.TryGetValue(item.Key, out IvesGeneralLedgerSourceRow subtotal))
+                if (!summaries.TryGetValue(
+                    item.Key, out IvesGeneralLedgerSourceRow summary))
                 {
                     IvesGeneralLedgerSourceRow firstAccount =
-                        FindFirstBySyntheticCode(source.AccountRows, item.Key);
-                    AddDiagnostic(report, "IVES.SYNTHETIC.SUBTOTAL_NOT_FOUND",
+                        FindFirstBySyntheticCode(
+                            activity.AccountRows, item.Key);
+
+                    AddDiagnostic(report, "IVES.SYNTHETIC.SUMMARY_NOT_FOUND",
                         "Accounts exist for synthetic account '" + item.Key +
-                        "', but its subtotal is missing.",
+                        "', but its summary is missing in activity '" +
+                        ActivityName(activity) + "'.",
                         source, firstAccount, "Accounts");
                     continue;
                 }
 
-                AddSyntheticValidations(source, report, item.Key, item.Value, subtotal);
+                AddSyntheticValidations(
+                    source, report, item.Key, item.Value, summary);
             }
 
-            foreach (KeyValuePair<string, IvesGeneralLedgerSourceRow> item in subtotals)
+            foreach (KeyValuePair<string, IvesGeneralLedgerSourceRow> item
+                in summaries)
             {
                 if (!accountTotals.ContainsKey(item.Key))
                 {
                     AddDiagnostic(report, "IVES.SYNTHETIC.ACCOUNTS_NOT_FOUND",
-                        "Synthetic subtotal '" + item.Key +
-                        "' has no account records.",
-                        source, item.Value, "SyntheticSubtotals");
+                        "Synthetic summary '" + item.Key +
+                        "' has no account records in activity '" +
+                        ActivityName(activity) + "'.",
+                        source, item.Value, "SyntheticSummaries");
                 }
             }
         }
 
         private static void AddSyntheticValidations(
-            IvesGeneralLedgerParseResult source, ImportReport report, string code,
-            AmountSet accounts, IvesGeneralLedgerSourceRow subtotal)
+            IvesGeneralLedgerParseResult source,
+            ImportReport report,
+            string code,
+            AmountSet accounts,
+            IvesGeneralLedgerSourceRow summary)
         {
             AddAmountValidation(report, "IVES.SYNTHETIC.OPENING", code,
-                "Account opening balances equal the synthetic subtotal.",
-                accounts.Opening, Value(subtotal.OpeningBalance),
-                source, subtotal, "SyntheticSubtotals");
+                "Account opening balances equal the synthetic summary.",
+                accounts.Opening, Value(summary.OpeningBalance),
+                source, summary, "SyntheticSummaries");
+
             AddAmountValidation(report, "IVES.SYNTHETIC.DEBIT", code,
-                "Account debit turnovers equal the synthetic subtotal.",
-                accounts.Debit, Value(subtotal.DebitTurnover),
-                source, subtotal, "SyntheticSubtotals");
+                "Account debit turnovers equal the synthetic summary.",
+                accounts.Debit, Value(summary.DebitTurnover),
+                source, summary, "SyntheticSummaries");
+
             AddAmountValidation(report, "IVES.SYNTHETIC.CREDIT", code,
-                "Account credit turnovers equal the synthetic subtotal.",
-                accounts.Credit, Value(subtotal.CreditTurnover),
-                source, subtotal, "SyntheticSubtotals");
+                "Account credit turnovers equal the synthetic summary.",
+                accounts.Credit, Value(summary.CreditTurnover),
+                source, summary, "SyntheticSummaries");
+
             AddAmountValidation(report, "IVES.SYNTHETIC.CLOSING", code,
-                "Account closing balances equal the synthetic subtotal.",
-                accounts.Closing, Value(subtotal.ClosingBalance),
-                source, subtotal, "SyntheticSubtotals");
+                "Account closing balances equal the synthetic summary.",
+                accounts.Closing, Value(summary.ClosingBalance),
+                source, summary, "SyntheticSummaries");
         }
 
         private static void ValidateReportTotal(
             IvesGeneralLedgerParseResult source,
+            IvesGeneralLedgerActivity activity,
             ImportReport report)
         {
-            if (source.ReportTotalRows.Count != 1)
+            if (activity.ReportTotalRows.Count != 1)
             {
                 AddDiagnostic(report, "IVES.REPORT_TOTAL.COUNT",
-                    "Expected exactly one report-total record, but found " +
-                    source.ReportTotalRows.Count + ".",
+                    "Expected exactly one report-total record in activity '" +
+                    ActivityName(activity) + "', but found " +
+                    activity.ReportTotalRows.Count + ".",
                     source,
-                    source.ReportTotalRows.Count == 0 ? null : source.ReportTotalRows[0],
+                    activity.ReportTotalRows.Count == 0
+                        ? null
+                        : activity.ReportTotalRows[0],
                     "ReportTotals");
                 return;
             }
 
-            var subtotalSum = new AmountSet();
-            foreach (IvesGeneralLedgerSourceRow subtotal in source.SyntheticSubtotalRows)
+            var summarySum = new AmountSet();
+            foreach (IvesGeneralLedgerSourceRow summary
+                in activity.SyntheticSummaryRows)
             {
-                subtotalSum.Add(subtotal);
+                summarySum.Add(summary);
             }
 
-            IvesGeneralLedgerSourceRow total = source.ReportTotalRows[0];
-            AddAmountValidation(report, "IVES.REPORT_TOTAL.OPENING", "Report",
-                "Synthetic opening subtotals equal the report total.",
-                subtotalSum.Opening, Value(total.OpeningBalance),
+            IvesGeneralLedgerSourceRow total = activity.ReportTotalRows[0];
+            string scope = string.IsNullOrWhiteSpace(activity.Name)
+                ? "Report"
+                : activity.Name;
+
+            AddAmountValidation(report, "IVES.REPORT_TOTAL.OPENING", scope,
+                "Synthetic opening summaries equal the activity report total.",
+                summarySum.Opening, Value(total.OpeningBalance),
                 source, total, "ReportTotals");
-            AddAmountValidation(report, "IVES.REPORT_TOTAL.DEBIT", "Report",
-                "Synthetic debit subtotals equal the report total.",
-                subtotalSum.Debit, Value(total.DebitTurnover),
+
+            AddAmountValidation(report, "IVES.REPORT_TOTAL.DEBIT", scope,
+                "Synthetic debit summaries equal the activity report total.",
+                summarySum.Debit, Value(total.DebitTurnover),
                 source, total, "ReportTotals");
-            AddAmountValidation(report, "IVES.REPORT_TOTAL.CREDIT", "Report",
-                "Synthetic credit subtotals equal the report total.",
-                subtotalSum.Credit, Value(total.CreditTurnover),
+
+            AddAmountValidation(report, "IVES.REPORT_TOTAL.CREDIT", scope,
+                "Synthetic credit summaries equal the activity report total.",
+                summarySum.Credit, Value(total.CreditTurnover),
                 source, total, "ReportTotals");
-            AddAmountValidation(report, "IVES.REPORT_TOTAL.CLOSING", "Report",
-                "Synthetic closing subtotals equal the report total.",
-                subtotalSum.Closing, Value(total.ClosingBalance),
+
+            AddAmountValidation(report, "IVES.REPORT_TOTAL.CLOSING", scope,
+                "Synthetic closing summaries equal the activity report total.",
+                summarySum.Closing, Value(total.ClosingBalance),
                 source, total, "ReportTotals");
         }
 
         private static void AddAmountValidation(
-            ImportReport report, string code, string scope, string description,
-            decimal expected, decimal actual, IvesGeneralLedgerParseResult source,
-            IvesGeneralLedgerSourceRow row, string recordSet)
+            ImportReport report,
+            string code,
+            string scope,
+            string description,
+            decimal expected,
+            decimal actual,
+            IvesGeneralLedgerParseResult source,
+            IvesGeneralLedgerSourceRow row,
+            string recordSet)
         {
             decimal difference = actual - expected;
             bool valid = Math.Abs(difference) <= AmountTolerance;
-            SourceProvenance provenance = Provenance(source, row, recordSet);
+            SourceProvenance provenance = Provenance(
+                source, row, recordSet);
 
             report.ValidationResults.Add(new ImportValidationResult
             {
@@ -414,8 +444,11 @@ namespace ExcelApiPoc.AccountingImport.Services.Ives
         }
 
         private static void AddDiagnostic(
-            ImportReport report, string code, string message,
-            IvesGeneralLedgerParseResult source, IvesGeneralLedgerSourceRow row,
+            ImportReport report,
+            string code,
+            string message,
+            IvesGeneralLedgerParseResult source,
+            IvesGeneralLedgerSourceRow row,
             string recordSet)
         {
             report.Diagnostics.Add(new ImportDiagnostic
@@ -437,33 +470,66 @@ namespace ExcelApiPoc.AccountingImport.Services.Ives
                 SourceFileName = source.SourceFileName,
                 WorksheetName = source.WorksheetName,
                 RecordSet = recordSet,
-                SequenceNumber = row == null ? (int?)null : row.SequenceNumber,
-                SourceRowNumber = row == null ? (int?)null : row.SourceRowNumber
+                SequenceNumber = row == null
+                    ? (int?)null
+                    : row.SequenceNumber,
+                SourceRowNumber = row == null
+                    ? (int?)null
+                    : row.SourceRowNumber
             };
+        }
+
+        private static string ActivityName(IvesGeneralLedgerActivity activity)
+        {
+            return string.IsNullOrWhiteSpace(activity.Name)
+                ? "(default)"
+                : activity.Name;
         }
 
         private static string GetSyntheticCode(string accountCode)
         {
-            if (string.IsNullOrWhiteSpace(accountCode)) return null;
+            if (string.IsNullOrWhiteSpace(accountCode))
+                return null;
+
             int dot = accountCode.IndexOf('.');
-            string code = (dot < 0 ? accountCode : accountCode.Substring(0, dot)).Trim();
+            string code = (dot < 0
+                ? accountCode
+                : accountCode.Substring(0, dot)).Trim();
+
             return code.Length == 3 ? code : null;
         }
 
         private static IvesGeneralLedgerSourceRow FindFirst(
-            IEnumerable<IvesGeneralLedgerSourceRow> rows, string accountCode)
+            IEnumerable<IvesGeneralLedgerSourceRow> rows,
+            string accountCode)
         {
             foreach (IvesGeneralLedgerSourceRow row in rows)
-                if (string.Equals(row.AccountCode, accountCode, StringComparison.Ordinal)) return row;
+            {
+                if (string.Equals(
+                    row.AccountCode, accountCode, StringComparison.Ordinal))
+                {
+                    return row;
+                }
+            }
+
             return null;
         }
 
         private static IvesGeneralLedgerSourceRow FindFirstBySyntheticCode(
-            IEnumerable<IvesGeneralLedgerSourceRow> rows, string syntheticCode)
+            IEnumerable<IvesGeneralLedgerSourceRow> rows,
+            string syntheticCode)
         {
             foreach (IvesGeneralLedgerSourceRow row in rows)
-                if (string.Equals(GetSyntheticCode(row.AccountCode), syntheticCode,
-                    StringComparison.Ordinal)) return row;
+            {
+                if (string.Equals(
+                    GetSyntheticCode(row.AccountCode),
+                    syntheticCode,
+                    StringComparison.Ordinal))
+                {
+                    return row;
+                }
+            }
+
             return null;
         }
 

@@ -18,8 +18,8 @@ public sealed class IvesGeneralLedgerValidatorTests
         Assert.Equal(320, report.RecordCounts["Accounts"]);
         Assert.Equal(3382, report.RecordCounts["Documents"]);
         Assert.Equal(0, report.RecordCounts["DocumentSummaries"]);
-        Assert.Equal(52, report.RecordCounts["SyntheticAccounts"]);
-        Assert.Equal(52, report.RecordCounts["SyntheticSubtotals"]);
+        Assert.Equal(1, report.RecordCounts["Activities"]);
+        Assert.Equal(52, report.RecordCounts["SyntheticSummaries"]);
         Assert.Equal(1, report.RecordCounts["ReportTotals"]);
         Assert.Equal(0, report.RecordCounts["Unclassified"]);
     }
@@ -28,7 +28,7 @@ public sealed class IvesGeneralLedgerValidatorTests
     public void Validate_ReportsAccountBalanceDifferenceWithSourceProvenance()
     {
         IvesGeneralLedgerParseResult source = ParseFixture();
-        source.AccountRows[0].ClosingBalance += 1m;
+        source.Activities[0].AccountRows[0].ClosingBalance += 1m;
 
         ImportReport report = new IvesGeneralLedgerValidator().Validate(source);
         ImportValidationResult failure = Assert.Single(report.ValidationResults,
@@ -47,14 +47,14 @@ public sealed class IvesGeneralLedgerValidatorTests
     public void Validate_ReportsDocumentToAccountTurnoverDifference()
     {
         IvesGeneralLedgerParseResult source = ParseFixture();
-        source.DocumentRows[0].DebitTurnover += 1m;
+        source.Activities[0].DocumentRows[0].DebitTurnover += 1m;
 
         ImportReport report = new IvesGeneralLedgerValidator().Validate(source);
 
         Assert.False(report.IsValid);
         Assert.Contains(report.ValidationResults,
             result => result.Code == "IVES.DOCUMENTS.DEBIT" &&
-                      result.Scope == source.DocumentRows[0].AccountCode &&
+                      result.Scope == source.Activities[0].DocumentRows[0].AccountCode &&
                       !result.IsValid && result.Difference == -1m);
     }
 
@@ -62,7 +62,7 @@ public sealed class IvesGeneralLedgerValidatorTests
     public void Validate_ReportsAccountToSyntheticDifference()
     {
         IvesGeneralLedgerParseResult source = ParseFixture();
-        source.AccountRows[0].OpeningBalance += 1m;
+        source.Activities[0].AccountRows[0].OpeningBalance += 1m;
 
         ImportReport report = new IvesGeneralLedgerValidator().Validate(source);
 
@@ -77,7 +77,7 @@ public sealed class IvesGeneralLedgerValidatorTests
     public void Validate_ReportsSyntheticToReportTotalDifference()
     {
         IvesGeneralLedgerParseResult source = ParseFixture();
-        source.ReportTotalRows[0].DebitTurnover += 1m;
+        source.Activities[0].ReportTotalRows[0].DebitTurnover += 1m;
 
         ImportReport report = new IvesGeneralLedgerValidator().Validate(source);
 

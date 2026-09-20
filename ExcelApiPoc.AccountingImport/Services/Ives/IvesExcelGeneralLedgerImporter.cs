@@ -84,9 +84,12 @@ namespace ExcelApiPoc.AccountingImport.Services.Ives
                 ImportReport = report
             };
 
-            foreach (IvesGeneralLedgerSourceRow sourceRow in source.AccountRows)
+            foreach (IvesGeneralLedgerActivity activity in source.Activities)
             {
-                AddCanonicalRow(result, sourceRow);
+                foreach (IvesGeneralLedgerSourceRow sourceRow in activity.AccountRows)
+                {
+                    AddCanonicalRow(result, sourceRow);
+                }
             }
 
             if (result.Rows.Count == 0)

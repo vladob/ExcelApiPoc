@@ -38,6 +38,7 @@ namespace ExcelApiPoc.AccountingImport.Services.Ives
         private static void ParseWorksheet(IExcelDataReader reader, IvesGeneralLedgerParseResult result)
         {
             string currentSyntheticAccount = null;
+            IvesGeneralLedgerActivity currentActivity = null;
             IvesGeneralLedgerSourceRow pendingAmountTarget = null;
             ColumnLayout layout = null;
             bool compactLayoutResolved = false;
@@ -128,7 +129,7 @@ namespace ExcelApiPoc.AccountingImport.Services.Ives
                     pendingAmountTarget = null;
                 }
 
-                AddRow(result, row);
+                currentActivity = AddRow(result, row, currentActivity);
             }
 
             result.SourceRowCount = lastMeaningfulSourceRowNumber;
@@ -184,7 +185,7 @@ namespace ExcelApiPoc.AccountingImport.Services.Ives
                 return IvesGeneralLedgerRowKind.Document;
             }
 
-            if (Contains(dateText, "Hlavná činnosť"))
+            if (IsActivityTitle(dateText, document, account, description))
                 return IvesGeneralLedgerRowKind.SectionTitle;
 
             return IvesGeneralLedgerRowKind.Unclassified;
@@ -201,7 +202,15 @@ namespace ExcelApiPoc.AccountingImport.Services.Ives
                 Text = Text(reader, layout.TextColumn)
             };
 
-            if (kind == IvesGeneralLedgerRowKind.Document)
+            if (kind == IvesGeneralLedgerRowKind.SectionTitle)
+            {
+                row.Text = FirstNonBlank(
+                    Text(reader, layout.DateColumn),
+                    Text(reader, layout.TextColumn),
+                    Text(reader, layout.DocumentColumn),
+                    Text(reader, layout.AccountColumn));
+            }
+            else if (kind == IvesGeneralLedgerRowKind.Document)
             {
                 if (TryGetDocumentDate(Value(reader, layout.DateColumn), out DateTime date))
                 {
@@ -432,19 +441,96 @@ namespace ExcelApiPoc.AccountingImport.Services.Ives
                 kind == IvesGeneralLedgerRowKind.ReportTotal;
         }
 
-        private static void AddRow(IvesGeneralLedgerParseResult result, IvesGeneralLedgerSourceRow row)
+        private static IvesGeneralLedgerActivity AddRow(
+            IvesGeneralLedgerParseResult result,
+            IvesGeneralLedgerSourceRow row,
+            IvesGeneralLedgerActivity currentActivity)
         {
+            if (row.Kind == IvesGeneralLedgerRowKind.SectionTitle)
+            {
+                var activity = new IvesGeneralLedgerActivity
+                {
+                    Name = row.Text
+                };
+                result.Activities.Add(activity);
+                result.StructuralRows.Add(row);
+                return activity;
+            }
+
             switch (row.Kind)
             {
-                case IvesGeneralLedgerRowKind.Account: result.AccountRows.Add(row); break;
-                case IvesGeneralLedgerRowKind.Document: result.DocumentRows.Add(row); break;
-                case IvesGeneralLedgerRowKind.DocumentSummary: result.DocumentSummaryRows.Add(row); break;
-                case IvesGeneralLedgerRowKind.SyntheticAccount: result.SyntheticAccountRows.Add(row); break;
-                case IvesGeneralLedgerRowKind.SyntheticSubtotal: result.SyntheticSubtotalRows.Add(row); break;
-                case IvesGeneralLedgerRowKind.ReportTotal: result.ReportTotalRows.Add(row); break;
-                case IvesGeneralLedgerRowKind.Unclassified: result.UnclassifiedRows.Add(row); break;
-                default: result.StructuralRows.Add(row); break;
+                case IvesGeneralLedgerRowKind.Account:
+                    currentActivity = EnsureActivity(result, currentActivity);
+                    currentActivity.AccountRows.Add(row);
+                    break;
+                case IvesGeneralLedgerRowKind.Document:
+                    currentActivity = EnsureActivity(result, currentActivity);
+                    currentActivity.DocumentRows.Add(row);
+                    break;
+                case IvesGeneralLedgerRowKind.DocumentSummary:
+                    currentActivity = EnsureActivity(result, currentActivity);
+                    currentActivity.DocumentSummaryRows.Add(row);
+                    break;
+                case IvesGeneralLedgerRowKind.SyntheticSubtotal:
+                    currentActivity = EnsureActivity(result, currentActivity);
+                    currentActivity.SyntheticSummaryRows.Add(row);
+                    break;
+                case IvesGeneralLedgerRowKind.ReportTotal:
+                    currentActivity = EnsureActivity(result, currentActivity);
+                    currentActivity.ReportTotalRows.Add(row);
+                    break;
+                case IvesGeneralLedgerRowKind.Unclassified:
+                    result.UnclassifiedRows.Add(row);
+                    break;
+                default:
+                    result.StructuralRows.Add(row);
+                    break;
             }
+
+            return currentActivity;
+        }
+
+        private static IvesGeneralLedgerActivity EnsureActivity(
+            IvesGeneralLedgerParseResult result,
+            IvesGeneralLedgerActivity currentActivity)
+        {
+            if (currentActivity != null)
+                return currentActivity;
+
+            var activity = new IvesGeneralLedgerActivity();
+            result.Activities.Add(activity);
+            return activity;
+        }
+
+        private static bool IsActivityTitle(
+            string dateText,
+            string document,
+            string account,
+            string description)
+        {
+            if (!string.IsNullOrWhiteSpace(document) ||
+                !string.IsNullOrWhiteSpace(account))
+            {
+                return false;
+            }
+
+            return Contains(dateText, "činnosť") ||
+                Contains(description, "činnosť") ||
+                string.Equals(dateText?.Trim(), "Stravovanie",
+                    StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(description?.Trim(), "Stravovanie",
+                    StringComparison.OrdinalIgnoreCase);
+        }
+
+        private static string FirstNonBlank(params string[] values)
+        {
+            foreach (string value in values)
+            {
+                if (!string.IsNullOrWhiteSpace(value))
+                    return value.Trim();
+            }
+
+            return null;
         }
 
         private sealed class ColumnLayout

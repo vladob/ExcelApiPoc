@@ -114,8 +114,8 @@ public sealed class IvesExcelGeneralLedgerImporterTests
         Assert.Equal(11, result.ImportReport.ValidationResults.Count);
         Assert.Equal(1, result.ImportReport.RecordCounts["Accounts"]);
         Assert.Equal(1, result.ImportReport.RecordCounts["Documents"]);
-        Assert.Equal(1, result.ImportReport.RecordCounts["SyntheticAccounts"]);
-        Assert.Equal(1, result.ImportReport.RecordCounts["SyntheticSubtotals"]);
+        Assert.Equal(1, result.ImportReport.RecordCounts["Activities"]);
+        Assert.Equal(1, result.ImportReport.RecordCounts["SyntheticSummaries"]);
         Assert.Equal(1, result.ImportReport.RecordCounts["ReportTotals"]);
         Assert.Equal(0, result.ImportReport.RecordCounts["Unclassified"]);
     }

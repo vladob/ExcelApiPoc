@@ -17,12 +17,12 @@ public sealed class IvesExcelGeneralLedgerParserTests
         Assert.Equal(new DateTime(2024, 12, 31), result.PeriodEnd);
         Assert.Equal(3824, result.SourceRowCount);
 
-        Assert.Equal(320, result.AccountRows.Count);
-        Assert.Equal(3382, result.DocumentRows.Count);
-        Assert.Empty(result.DocumentSummaryRows);
-        Assert.Equal(52, result.SyntheticAccountRows.Count);
-        Assert.Equal(52, result.SyntheticSubtotalRows.Count);
-        Assert.Single(result.ReportTotalRows);
+        IvesGeneralLedgerActivity activity = Assert.Single(result.Activities);
+        Assert.Equal(320, activity.AccountRows.Count);
+        Assert.Equal(3382, activity.DocumentRows.Count);
+        Assert.Empty(activity.DocumentSummaryRows);
+        Assert.Equal(52, activity.SyntheticSummaryRows.Count);
+        Assert.Single(activity.ReportTotalRows);
         Assert.Empty(result.UnclassifiedRows);
     }
 
@@ -31,34 +31,36 @@ public sealed class IvesExcelGeneralLedgerParserTests
     {
         IvesGeneralLedgerParseResult result = ParseFixture();
 
-        Assert.Equal((1, 17),
-            (result.AccountRows[0].SequenceNumber, result.AccountRows[0].SourceRowNumber));
-        Assert.Equal((1, 29),
-            (result.DocumentRows[0].SequenceNumber, result.DocumentRows[0].SourceRowNumber));
-        Assert.Equal((1, 31),
-            (result.SyntheticAccountRows[0].SequenceNumber,
-             result.SyntheticAccountRows[0].SourceRowNumber));
-        Assert.Equal((1, 32),
-            (result.SyntheticSubtotalRows[0].SequenceNumber,
-             result.SyntheticSubtotalRows[0].SourceRowNumber));
-        Assert.Equal((1, 3824),
-            (result.ReportTotalRows[0].SequenceNumber,
-             result.ReportTotalRows[0].SourceRowNumber));
+        IvesGeneralLedgerActivity activity = Assert.Single(result.Activities);
 
-        Assert.Equal(320, result.AccountRows[^1].SequenceNumber);
-        Assert.Equal(3382, result.DocumentRows[^1].SequenceNumber);
-        Assert.Equal(52, result.SyntheticAccountRows[^1].SequenceNumber);
-        Assert.Equal(52, result.SyntheticSubtotalRows[^1].SequenceNumber);
+        Assert.Equal((1, 17),
+            (activity.AccountRows[0].SequenceNumber,
+             activity.AccountRows[0].SourceRowNumber));
+        Assert.Equal((1, 29),
+            (activity.DocumentRows[0].SequenceNumber,
+             activity.DocumentRows[0].SourceRowNumber));
+        Assert.Equal((1, 32),
+            (activity.SyntheticSummaryRows[0].SequenceNumber,
+             activity.SyntheticSummaryRows[0].SourceRowNumber));
+        Assert.Equal((1, 3824),
+            (activity.ReportTotalRows[0].SequenceNumber,
+             activity.ReportTotalRows[0].SourceRowNumber));
+
+        Assert.Equal(320, activity.AccountRows[^1].SequenceNumber);
+        Assert.Equal(3382, activity.DocumentRows[^1].SequenceNumber);
+        Assert.Equal(52, activity.SyntheticSummaryRows[^1].SequenceNumber);
     }
 
     [Fact]
     public void Parse_ExtractsRepresentativeTypedValuesWithoutNormalizingAccountLayout()
     {
         IvesGeneralLedgerParseResult result = ParseFixture();
-        IvesGeneralLedgerSourceRow firstAccount = result.AccountRows[0];
-        IvesGeneralLedgerSourceRow firstDocument = result.DocumentRows[0];
-        IvesGeneralLedgerSourceRow firstSyntheticSubtotal = result.SyntheticSubtotalRows[0];
-        IvesGeneralLedgerSourceRow total = result.ReportTotalRows[0];
+        IvesGeneralLedgerActivity activity = Assert.Single(result.Activities);
+        IvesGeneralLedgerSourceRow firstAccount = activity.AccountRows[0];
+        IvesGeneralLedgerSourceRow firstDocument = activity.DocumentRows[0];
+        IvesGeneralLedgerSourceRow firstSyntheticSummary =
+            activity.SyntheticSummaryRows[0];
+        IvesGeneralLedgerSourceRow total = activity.ReportTotalRows[0];
 
         Assert.Equal("021.1    .      .    .       .   . .", firstAccount.AccountCode);
         Assert.Equal("Pociatocny stav budov", firstAccount.Text);
@@ -71,11 +73,11 @@ public sealed class IvesExcelGeneralLedgerParserTests
         Assert.Equal(12104.44m, firstDocument.DebitTurnover);
         Assert.Equal(0m, firstDocument.CreditTurnover);
 
-        Assert.Equal("021", firstSyntheticSubtotal.AccountCode);
-        Assert.Equal(391637.48m, firstSyntheticSubtotal.OpeningBalance);
-        Assert.Equal(12104.44m, firstSyntheticSubtotal.DebitTurnover);
-        Assert.Equal(0m, firstSyntheticSubtotal.CreditTurnover);
-        Assert.Equal(403741.92m, firstSyntheticSubtotal.ClosingBalance);
+        Assert.Equal("021", firstSyntheticSummary.AccountCode);
+        Assert.Equal(391637.48m, firstSyntheticSummary.OpeningBalance);
+        Assert.Equal(12104.44m, firstSyntheticSummary.DebitTurnover);
+        Assert.Equal(0m, firstSyntheticSummary.CreditTurnover);
+        Assert.Equal(403741.92m, firstSyntheticSummary.ClosingBalance);
 
         Assert.Equal(0m, total.OpeningBalance);
         Assert.Equal(1997652.32m, total.DebitTurnover);

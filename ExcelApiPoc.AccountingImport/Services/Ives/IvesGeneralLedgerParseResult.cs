@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 namespace ExcelApiPoc.AccountingImport.Services.Ives
@@ -13,13 +13,14 @@ namespace ExcelApiPoc.AccountingImport.Services.Ives
         public DateTime? PeriodStart { get; set; }
         public DateTime? PeriodEnd { get; set; }
         public int SourceRowCount { get; set; }
-        public List<IvesGeneralLedgerSourceRow> StructuralRows { get; } = new List<IvesGeneralLedgerSourceRow>();
-        public List<IvesGeneralLedgerSourceRow> AccountRows { get; } = new List<IvesGeneralLedgerSourceRow>();
-        public List<IvesGeneralLedgerSourceRow> DocumentRows { get; } = new List<IvesGeneralLedgerSourceRow>();
-        public List<IvesGeneralLedgerSourceRow> DocumentSummaryRows { get; } = new List<IvesGeneralLedgerSourceRow>();
-        public List<IvesGeneralLedgerSourceRow> SyntheticAccountRows { get; } = new List<IvesGeneralLedgerSourceRow>();
-        public List<IvesGeneralLedgerSourceRow> SyntheticSubtotalRows { get; } = new List<IvesGeneralLedgerSourceRow>();
-        public List<IvesGeneralLedgerSourceRow> ReportTotalRows { get; } = new List<IvesGeneralLedgerSourceRow>();
-        public List<IvesGeneralLedgerSourceRow> UnclassifiedRows { get; } = new List<IvesGeneralLedgerSourceRow>();
+
+        public List<IvesGeneralLedgerActivity> Activities { get; } =
+            new List<IvesGeneralLedgerActivity>();
+
+        public List<IvesGeneralLedgerSourceRow> StructuralRows { get; } =
+            new List<IvesGeneralLedgerSourceRow>();
+
+        public List<IvesGeneralLedgerSourceRow> UnclassifiedRows { get; } =
+            new List<IvesGeneralLedgerSourceRow>();
     }
 }
