@@ -94,12 +94,27 @@ namespace ExcelApiPoc.AccountingImport.Services.Ives
                         out activityName,
                         out activityCurrency))
                 {
-                    currentActivity = new IvesGeneralLedgerActivity
+                    currentActivity = result.Activities.FirstOrDefault(
+                        activity =>
+                            string.Equals(
+                                activity.Name,
+                                activityName,
+                                StringComparison.Ordinal) &&
+                            string.Equals(
+                                activity.Currency,
+                                activityCurrency,
+                                StringComparison.Ordinal));
+
+                    if (currentActivity == null)
                     {
-                        Name = activityName,
-                        Currency = activityCurrency
-                    };
-                    result.Activities.Add(currentActivity);
+                        currentActivity = new IvesGeneralLedgerActivity
+                        {
+                            Name = activityName,
+                            Currency = activityCurrency
+                        };
+                        result.Activities.Add(currentActivity);
+                    }
+
                     continue;
                 }
 
