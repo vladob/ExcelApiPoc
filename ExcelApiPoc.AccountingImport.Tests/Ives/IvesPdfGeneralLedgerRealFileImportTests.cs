@@ -32,6 +32,22 @@ public sealed class IvesPdfGeneralLedgerRealFileImportTests
 
         Assert.Equal("00325465", result.Ico);
         Assert.Equal(2025, result.FiscalYear);
+
+        output.WriteLine("Activities found:");
+        for (int index = 0; index < result.Activities.Count; index++)
+        {
+            IvesGeneralLedgerActivity activity = result.Activities[index];
+            output.WriteLine(
+                "  {0}: '{1}' / '{2}' - docs {3}, accounts {4}, synthetic {5}, totals {6}",
+                index + 1,
+                activity.Name,
+                activity.Currency,
+                activity.DocumentRows.Count,
+                activity.AccountRows.Count,
+                activity.SyntheticSummaryRows.Count,
+                activity.ReportTotalRows.Count);
+        }
+
         Assert.Equal(2, result.Activities.Count);
 
         IvesGeneralLedgerActivity main = result.Activities[0];
