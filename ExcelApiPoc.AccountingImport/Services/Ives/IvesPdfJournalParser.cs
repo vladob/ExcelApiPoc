@@ -240,24 +240,25 @@ namespace ExcelApiPoc.AccountingImport.Services.Ives
             for (int index = currencyIndex + 1; index < tokens.Count; index++)
             {
                 PdfTextToken token = tokens[index];
-                string text = token.Text == null
-                    ? string.Empty
-                    : token.Text.Trim();
+                string rawText = token.Text ?? string.Empty;
+                string text = rawText.Trim();
 
                 if (text.Length == 0)
                     continue;
+
+                bool sourceHasBoundaryWhitespace =
+                    (previous != null &&
+                     !string.IsNullOrEmpty(previous.Text) &&
+                     char.IsWhiteSpace(
+                         previous.Text[previous.Text.Length - 1])) ||
+                    char.IsWhiteSpace(rawText[0]);
 
                 bool hasGeometricGap =
                     previous != null &&
                     token.Left - previous.Right > 0.05d;
 
-                bool digitToLetterBoundary =
-                    builder.Length > 0 &&
-                    char.IsDigit(builder[builder.Length - 1]) &&
-                    char.IsLetter(text[0]);
-
                 if (builder.Length > 0 &&
-                    (hasGeometricGap || digitToLetterBoundary))
+                    (sourceHasBoundaryWhitespace || hasGeometricGap))
                 {
                     builder.Append(' ');
                 }
