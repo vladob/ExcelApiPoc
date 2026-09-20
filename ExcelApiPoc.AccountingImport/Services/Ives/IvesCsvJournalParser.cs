@@ -33,7 +33,7 @@ namespace ExcelApiPoc.AccountingImport.Services.Ives
 
             using (var reader = new StreamReader(
                 filePath,
-                Encoding.GetEncoding(1250),
+                DetectEncoding(filePath),
                 true))
             {
                 string firstLine = reader.ReadLine();
@@ -64,6 +64,33 @@ namespace ExcelApiPoc.AccountingImport.Services.Ives
                         Values = ParseFields(line ?? string.Empty, delimiter)
                     };
                 }
+            }
+        }
+
+        private static Encoding DetectEncoding(string filePath)
+        {
+            var utf8 = new UTF8Encoding(
+                encoderShouldEmitUTF8Identifier: false,
+                throwOnInvalidBytes: true);
+
+            try
+            {
+                using (var reader = new StreamReader(
+                    filePath,
+                    utf8,
+                    detectEncodingFromByteOrderMarks: true))
+                {
+                    var buffer = new char[4096];
+                    while (reader.Read(buffer, 0, buffer.Length) > 0)
+                    {
+                    }
+                }
+
+                return new UTF8Encoding(false);
+            }
+            catch (DecoderFallbackException)
+            {
+                return Encoding.GetEncoding(1250);
             }
         }
 
