@@ -131,10 +131,10 @@ namespace ExcelApiPoc.AccountingImport.Services.Ives
                             SequenceNumber = ++totalSequence,
                             SourceRowNumber = index + 1,
                             Kind = IvesGeneralLedgerRowKind.ReportTotal,
-                            OpeningBalance = ReadAmount(record, 319.0, 364.0),
-                            DebitTurnover = ReadAmount(record, 386.0, 435.0),
-                            CreditTurnover = ReadAmount(record, 454.0, 503.0),
-                            ClosingBalance = ReadAmount(record, 526.0, 571.0)
+                            OpeningBalance = ReadAmount(record, 363.4),
+                            DebitTurnover = ReadAmount(record, 434.7),
+                            CreditTurnover = ReadAmount(record, 502.2),
+                            ClosingBalance = ReadAmount(record, 570.1)
                         });
                     continue;
                 }
@@ -148,10 +148,10 @@ namespace ExcelApiPoc.AccountingImport.Services.Ives
                             SourceRowNumber = index + 1,
                             Kind = IvesGeneralLedgerRowKind.SyntheticSubtotal,
                             AccountCode = ReadSyntheticCode(record),
-                            OpeningBalance = ReadAmount(record, 319.0, 364.0),
-                            DebitTurnover = ReadAmount(record, 386.0, 435.0),
-                            CreditTurnover = ReadAmount(record, 454.0, 503.0),
-                            ClosingBalance = ReadAmount(record, 526.0, 571.0)
+                            OpeningBalance = ReadAmount(record, 363.4),
+                            DebitTurnover = ReadAmount(record, 434.7),
+                            CreditTurnover = ReadAmount(record, 502.2),
+                            ClosingBalance = ReadAmount(record, 570.1)
                         });
                     continue;
                 }
@@ -166,10 +166,10 @@ namespace ExcelApiPoc.AccountingImport.Services.Ives
                             Kind = IvesGeneralLedgerRowKind.Account,
                             AccountCode = ReadCompact(record, 103.0, 221.0),
                             Text = ReadText(record, 228.0, 321.0),
-                            OpeningBalance = ReadAmount(record, 319.0, 364.0),
-                            DebitTurnover = ReadAmount(record, 386.0, 435.0),
-                            CreditTurnover = ReadAmount(record, 454.0, 503.0),
-                            ClosingBalance = ReadAmount(record, 526.0, 571.0)
+                            OpeningBalance = ReadAmount(record, 363.4),
+                            DebitTurnover = ReadAmount(record, 434.7),
+                            CreditTurnover = ReadAmount(record, 502.2),
+                            ClosingBalance = ReadAmount(record, 570.1)
                         });
                     continue;
                 }
@@ -189,8 +189,8 @@ namespace ExcelApiPoc.AccountingImport.Services.Ives
                             DocumentNumber = ReadCompact(record, 47.0, 103.0),
                             AccountCode = ReadCompact(record, 103.0, 221.0),
                             Text = ReadText(record, 228.0, 321.0),
-                            DebitTurnover = ReadAmount(record, 386.0, 435.0),
-                            CreditTurnover = ReadAmount(record, 454.0, 503.0)
+                            DebitTurnover = ReadAmount(record, 434.7),
+                            CreditTurnover = ReadAmount(record, 502.2)
                         });
                 }
             }
@@ -293,32 +293,108 @@ namespace ExcelApiPoc.AccountingImport.Services.Ives
 
         private static decimal ReadAmount(
             BaselineRecord record,
-            double left,
-            double right)
+            double anchor)
         {
-            string value = string.Concat(
-                record.SourceTokens
-                    .Where(token =>
-                        token.Left >= left &&
-                        token.Left < right)
-                    .OrderBy(token => token.Left)
-                    .ThenBy(token => token.Right)
-                    .Select(token => Trim(token.Text))
-                    .Where(IsAmountToken))
-                .Replace("\u00A0", string.Empty)
-                .Replace(" ", string.Empty);
+            const double commaRightOffset = 8.30;
+            const double decimalAdvance = 4.104;
+            const double commaToUnitsRight = 2.052;
+            const double thousandsGap = 2.04;
+            const double slotTolerance = 0.50;
+            const int maximumIntegerDigits = 12;
 
-            if (string.IsNullOrWhiteSpace(value))
-                return 0m;
+            List<AmountGlyph> glyphs = record.SourceTokens
+                .Select(TryCreateAmountGlyph)
+                .Where(glyph => glyph != null)
+                .ToList();
 
-            MatchCollection amountMatches = Regex.Matches(
-                value,
-                @"-?\d+(?:,\d{2})?",
-                RegexOptions.CultureInvariant);
+            AmountGlyph comma = FindNearestGlyph(
+                glyphs,
+                anchor - commaRightOffset,
+                slotTolerance,
+                glyph => glyph.Character == ',');
 
-            string amountText = amountMatches.Count > 0
-                ? amountMatches[amountMatches.Count - 1].Value
-                : value;
+            if (comma == null)
+            {
+                throw new InvalidDataException(
+                    "IVES general-ledger PDF contains no amount decimal separator near " +
+                    anchor.ToString("F1", CultureInfo.InvariantCulture) + ".");
+            }
+
+            AmountGlyph decimal1 = FindNearestGlyph(
+                glyphs,
+                comma.Right + decimalAdvance,
+                slotTolerance,
+                glyph => char.IsDigit(glyph.Character));
+
+            AmountGlyph decimal2 = FindNearestGlyph(
+                glyphs,
+                comma.Right + (2.0 * decimalAdvance),
+                slotTolerance,
+                glyph => char.IsDigit(glyph.Character));
+
+            if (decimal1 == null || decimal2 == null)
+            {
+                throw new InvalidDataException(
+                    "IVES general-ledger PDF contains an incomplete decimal amount near " +
+                    anchor.ToString("F1", CultureInfo.InvariantCulture) + ".");
+            }
+
+            var integerDigits = new List<AmountGlyph>();
+
+            for (int digitIndex = 0;
+                 digitIndex < maximumIntegerDigits;
+                 digitIndex++)
+            {
+                double expectedRight =
+                    comma.Right -
+                    commaToUnitsRight -
+                    (decimalAdvance * digitIndex) -
+                    (thousandsGap * (digitIndex / 3));
+
+                AmountGlyph digit = FindNearestGlyph(
+                    glyphs,
+                    expectedRight,
+                    slotTolerance,
+                    glyph => char.IsDigit(glyph.Character));
+
+                if (digit == null)
+                    break;
+
+                integerDigits.Add(digit);
+            }
+
+            if (integerDigits.Count == 0)
+            {
+                throw new InvalidDataException(
+                    "IVES general-ledger PDF contains no integer digits near amount anchor " +
+                    anchor.ToString("F1", CultureInfo.InvariantCulture) + ".");
+            }
+
+            AmountGlyph mostSignificant =
+                integerDigits[integerDigits.Count - 1];
+
+            AmountGlyph sign = glyphs
+                .Where(glyph => glyph.Character == '-')
+                .Where(glyph =>
+                {
+                    double gap = mostSignificant.Left - glyph.Right;
+                    return gap >= -0.20 && gap <= 0.60;
+                })
+                .OrderBy(glyph =>
+                    Math.Abs(mostSignificant.Left - glyph.Right))
+                .FirstOrDefault();
+
+            integerDigits.Reverse();
+
+            string amountText =
+                (sign == null ? string.Empty : "-") +
+                new string(
+                    integerDigits
+                        .Select(glyph => glyph.Character)
+                        .ToArray()) +
+                "," +
+                decimal1.Character +
+                decimal2.Character;
 
             decimal parsed;
             if (decimal.TryParse(
@@ -332,26 +408,67 @@ namespace ExcelApiPoc.AccountingImport.Services.Ives
 
             throw new InvalidDataException(
                 "IVES general-ledger PDF contains invalid amount '" +
-                value + "'.");
+                amountText + "'.");
         }
 
-        private static bool IsAmountToken(string text)
+        private static AmountGlyph TryCreateAmountGlyph(
+            PdfTextToken token)
         {
-            if (string.IsNullOrWhiteSpace(text))
-                return false;
+            string text = Trim(token.Text);
 
-            foreach (char character in text)
+            if (text.Length != 1)
+                return null;
+
+            char character = text[0];
+
+            if (!char.IsDigit(character) &&
+                character != ',' &&
+                character != '-')
             {
-                if (!char.IsDigit(character) &&
-                    character != ',' &&
-                    character != '.' &&
-                    character != '-')
-                {
-                    return false;
-                }
+                return null;
             }
 
-            return true;
+            return new AmountGlyph(
+                character,
+                token.Left,
+                token.Right);
+        }
+
+        private static AmountGlyph FindNearestGlyph(
+            IEnumerable<AmountGlyph> glyphs,
+            double expectedRight,
+            double tolerance,
+            Func<AmountGlyph, bool> predicate)
+        {
+            return glyphs
+                .Where(predicate)
+                .Select(glyph => new
+                {
+                    Glyph = glyph,
+                    Distance = Math.Abs(glyph.Right - expectedRight)
+                })
+                .Where(item => item.Distance <= tolerance)
+                .OrderBy(item => item.Distance)
+                .ThenBy(item => item.Glyph.Left)
+                .Select(item => item.Glyph)
+                .FirstOrDefault();
+        }
+
+        private sealed class AmountGlyph
+        {
+            public AmountGlyph(
+                char character,
+                double left,
+                double right)
+            {
+                Character = character;
+                Left = left;
+                Right = right;
+            }
+
+            public char Character { get; private set; }
+            public double Left { get; private set; }
+            public double Right { get; private set; }
         }
 
         private static string ReadCompact(
