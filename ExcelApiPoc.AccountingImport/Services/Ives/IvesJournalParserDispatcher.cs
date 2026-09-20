@@ -10,6 +10,8 @@ namespace ExcelApiPoc.AccountingImport.Services.Ives
             new IIvesJournalSourceParser[]
             {
                 new IvesExcelJournalParser(),
+                new IvesXlsxJournalParser(),
+                new IvesCsvJournalParser(),
                 new IvesXmlJournalParser()
             };
 

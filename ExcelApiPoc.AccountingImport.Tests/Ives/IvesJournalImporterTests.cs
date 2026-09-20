@@ -7,7 +7,7 @@ namespace ExcelApiPoc.AccountingImport.Tests.Ives;
 public sealed class IvesJournalImporterTests
 {
     [Fact]
-    public void CanImport_RecognizesOnlyIvesJournalXlsFiles()
+    public void CanImport_RecognizesSupportedIvesJournalFormats()
     {
         var importer = new IvesJournalImporter();
         string fixture = GetFixturePath("U_DENNIK_00322881_2024.xls");
@@ -15,10 +15,10 @@ public sealed class IvesJournalImporterTests
         Assert.True(importer.CanImport(fixture, "IVES"));
         Assert.True(importer.CanImport(fixture, "ives"));
         Assert.False(importer.CanImport(fixture, "Urbis"));
-        Assert.False(importer.CanImport(
+        Assert.True(importer.CanImport(
             Path.ChangeExtension(fixture, ".xlsx"),
             "IVES"));
-        Assert.False(importer.CanImport(
+        Assert.True(importer.CanImport(
             Path.ChangeExtension(fixture, ".csv"),
             "IVES"));
         Assert.True(importer.CanImport(
