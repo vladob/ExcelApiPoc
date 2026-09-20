@@ -52,15 +52,15 @@ namespace ExcelApiPoc.AccountingImport.Services.Ives
                 result.PeriodEnd = new DateTime(metadata.FiscalYear, 12, 31);
             }
 
+            List<IvesCrystalTabularRow> sourceRows = rows.ToList();
             string contentIco = null;
             var footerAmounts = new List<decimal>();
             decimal? previousFooter = null;
-            int sourceRowCount = 0;
             int sequence = 0;
 
-            foreach (IvesCrystalTabularRow sourceRow in rows)
+            for (int rowIndex = 0; rowIndex < sourceRows.Count; rowIndex++)
             {
-                sourceRowCount++;
+                IvesCrystalTabularRow sourceRow = sourceRows[rowIndex];
 
                 if (contentIco == null)
                     contentIco = FindIco(sourceRow.Values);
@@ -70,8 +70,30 @@ namespace ExcelApiPoc.AccountingImport.Services.Ives
                         metadata?.FiscalYear,
                         ++sequence,
                         fileName,
-                        out IvesJournalSourceRow transaction))
+                        out IvesJournalSourceRow transaction,
+                        out int textColumnIndex))
                 {
+                    if (string.IsNullOrWhiteSpace(transaction.Module) &&
+                        rowIndex + 1 < sourceRows.Count)
+                    {
+                        IvesCrystalTabularRow followingRow =
+                            sourceRows[rowIndex + 1];
+
+                        string pairedModule = FindModule(
+                            followingRow.Values,
+                            textColumnIndex,
+                            followingRow.Values == null
+                                ? 0
+                                : followingRow.Values.Length);
+
+                        if (!string.IsNullOrWhiteSpace(pairedModule))
+                        {
+                            transaction.Module = pairedModule;
+                            transaction.RelatedSourceRowNumber =
+                                followingRow.SourceRecordNumber;
+                        }
+                    }
+
                     result.TransactionRows.Add(transaction);
                 }
                 else
@@ -90,7 +112,7 @@ namespace ExcelApiPoc.AccountingImport.Services.Ives
                 }
             }
 
-            result.SourceRowCount = sourceRowCount;
+            result.SourceRowCount = sourceRows.Count;
             result.Ico = contentIco ?? metadata?.Ico;
 
             if (result.TransactionRows.Count == 0)
@@ -130,9 +152,11 @@ namespace ExcelApiPoc.AccountingImport.Services.Ives
             int? expectedFiscalYear,
             int sequenceNumber,
             string sourceFileName,
-            out IvesJournalSourceRow transaction)
+            out IvesJournalSourceRow transaction,
+            out int textColumnIndex)
         {
             transaction = null;
+            textColumnIndex = -1;
             string[] values = sourceRow.Values ?? Array.Empty<string>();
 
             for (int index = 0; index + 6 < values.Length; index++)
@@ -169,6 +193,8 @@ namespace ExcelApiPoc.AccountingImport.Services.Ives
                 {
                     module = FindModule(values, index + 7, Math.Min(values.Length, index + 14));
                 }
+
+                textColumnIndex = index + 6;
 
                 transaction = new IvesJournalSourceRow
                 {

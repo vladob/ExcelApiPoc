@@ -45,6 +45,36 @@ public sealed class IvesCrystalTabularJournalTests
         }
     }
 
+
+    [Fact]
+    public void SharedDecoder_PairsModuleFromFollowingPhysicalRow()
+    {
+        string fileName = "U_DENNIK_00999999_2025.csv";
+        string path = Path.Combine(Path.GetTempPath(), fileName);
+
+        var rows = new[]
+        {
+            Row(
+                1,
+                fileName,
+                "2025-01-02", "TEST001", "518.100", "321.200",
+                "100.00", "€", "Synthetic first"),
+            Row(
+                2,
+                fileName,
+                "", "", "", "", "", "", "UCT")
+        };
+
+        IvesJournalParseResult parsed =
+            new IvesCrystalTabularJournalDecoder().Decode(path, rows);
+
+        IvesJournalSourceRow transaction =
+            Assert.Single(parsed.TransactionRows);
+
+        Assert.Equal("UCT", transaction.Module);
+        Assert.Equal(2, transaction.RelatedSourceRowNumber);
+    }
+
     [Fact]
     public void SharedDecoder_AcceptsRowsProducedBySpreadsheetReader()
     {
