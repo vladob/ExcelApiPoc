@@ -283,9 +283,18 @@ namespace ExcelApiPoc.AccountingImport.Services.Ives
             if (string.IsNullOrWhiteSpace(value))
                 return 0m;
 
+            Match amountMatch = Regex.Match(
+                value,
+                @"-?\d+(?:,\d{2})?$",
+                RegexOptions.CultureInvariant);
+
+            string amountText = amountMatch.Success
+                ? amountMatch.Value
+                : value;
+
             decimal parsed;
             if (decimal.TryParse(
-                    value,
+                    amountText,
                     NumberStyles.Number | NumberStyles.AllowLeadingSign,
                     CultureInfo.GetCultureInfo("sk-SK"),
                     out parsed))
