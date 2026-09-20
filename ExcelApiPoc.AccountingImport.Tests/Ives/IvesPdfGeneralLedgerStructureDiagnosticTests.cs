@@ -62,29 +62,33 @@ public sealed class IvesPdfGeneralLedgerStructureDiagnosticTests
         WriteGroups(
             "Synthetic SU samples",
             groups.Where(group =>
-                group.Text.IndexOf("SU", StringComparison.OrdinalIgnoreCase) >= 0 ||
-                group.Text.IndexOf("====", StringComparison.Ordinal) >= 0),
+            {
+                string compact = CompactText(group);
+                return compact.IndexOf("SU", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                    compact.IndexOf("====", StringComparison.Ordinal) >= 0;
+            }),
             16);
 
         WriteGroups(
             "Activity/title samples",
             groups.Where(group =>
-                group.Text.IndexOf(
-                    "Hlavná činnosť",
-                    StringComparison.OrdinalIgnoreCase) >= 0 ||
-                group.Text.IndexOf(
-                    "Stravovanie",
-                    StringComparison.OrdinalIgnoreCase) >= 0),
+            {
+                string compact = CompactText(group);
+                return compact.IndexOf(
+                           "Hlavnáčinnosť",
+                           StringComparison.OrdinalIgnoreCase) >= 0 ||
+                       compact.IndexOf(
+                           "Stravovanie",
+                           StringComparison.OrdinalIgnoreCase) >= 0;
+            }),
             16);
 
         WriteGroups(
             "Celkom samples",
             groups.Where(group =>
-                Regex.IsMatch(
-                    group.Text,
-                    @"C\s*e\s*l\s*k\s*o\s*m",
-                    RegexOptions.IgnoreCase |
-                    RegexOptions.CultureInvariant)),
+                CompactText(group).IndexOf(
+                    "Celkom",
+                    StringComparison.OrdinalIgnoreCase) >= 0),
             16);
 
         WritePageBoundarySamples(groups, document.Pages.Count);
@@ -97,21 +101,19 @@ public sealed class IvesPdfGeneralLedgerStructureDiagnosticTests
         Assert.Contains(groups, IsTransactionLike);
         Assert.Contains(
             groups,
-            group => group.Text.IndexOf(
-                "Hlavná činnosť",
+            group => CompactText(group).IndexOf(
+                "Hlavnáčinnosť",
                 StringComparison.OrdinalIgnoreCase) >= 0);
         Assert.Contains(
             groups,
-            group => group.Text.IndexOf(
+            group => CompactText(group).IndexOf(
                 "Stravovanie",
                 StringComparison.OrdinalIgnoreCase) >= 0);
         Assert.Contains(
             groups,
-            group => Regex.IsMatch(
-                group.Text,
-                @"C\s*e\s*l\s*k\s*o\s*m",
-                RegexOptions.IgnoreCase |
-                RegexOptions.CultureInvariant));
+            group => CompactText(group).IndexOf(
+                "Celkom",
+                StringComparison.OrdinalIgnoreCase) >= 0);
     }
 
     private void WritePageSummary(
@@ -210,20 +212,32 @@ public sealed class IvesPdfGeneralLedgerStructureDiagnosticTests
     private static bool IsTransactionLike(BaselineGroup group)
     {
         return Regex.IsMatch(
-            group.Text,
-            @"^\s*\d{2}\.\d{2}\.",
+            CompactText(group),
+            @"^\d{2}\.\d{2}\.",
             RegexOptions.CultureInvariant);
     }
 
     private static bool IsAnalyticalSummaryLike(
         BaselineGroup group)
     {
+        string compact = CompactText(group);
+
         return Regex.IsMatch(
-                   group.Text,
-                   @"^\s*-\s+\d{3}\.",
+                   compact,
+                   @"^--\d{3}\.",
                    RegexOptions.CultureInvariant) &&
-               group.Text.IndexOf(
+               compact.IndexOf(
                    "====",
                    StringComparison.Ordinal) < 0;
+    }
+
+    private static string CompactText(BaselineGroup group)
+    {
+        return string.Concat(
+            group.Tokens
+                .Select(token => token.Text ?? string.Empty)
+                .Where(text => !string.IsNullOrWhiteSpace(text)))
+            .Replace(" ", string.Empty)
+            .Replace("\u00A0", string.Empty);
     }
 }
