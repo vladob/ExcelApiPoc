@@ -134,7 +134,7 @@ namespace ExcelApiPoc.AccountingImport.Services.Ives
                 var total = new IvesJournalSourceRow
                 {
                     SequenceNumber = 1,
-                    SourceRowNumber = sourceRowCount + 1,
+                    SourceRowNumber = sourceRows.Count + 1,
                     Kind = IvesJournalRowKind.ReportTotal,
                     SourceLocation = fileName +
                         ", Crystal group footers (" +
