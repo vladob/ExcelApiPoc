@@ -303,19 +303,25 @@ namespace ExcelApiPoc.AccountingImport.Services.Ives
             if (normalized == null)
                 return false;
 
-            if (decimal.TryParse(
-                    normalized,
-                    NumberStyles.Number | NumberStyles.AllowLeadingSign,
-                    CultureInfo.InvariantCulture,
-                    out amount))
+            CultureInfo culture;
+
+            if (normalized.Contains(",") && !normalized.Contains("."))
             {
-                return true;
+                culture = CultureInfo.GetCultureInfo("sk-SK");
+            }
+            else if (normalized.Contains(".") && !normalized.Contains(","))
+            {
+                culture = CultureInfo.InvariantCulture;
+            }
+            else
+            {
+                culture = CultureInfo.InvariantCulture;
             }
 
             return decimal.TryParse(
                 normalized,
                 NumberStyles.Number | NumberStyles.AllowLeadingSign,
-                CultureInfo.GetCultureInfo("sk-SK"),
+                culture,
                 out amount);
         }
 
