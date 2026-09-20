@@ -133,7 +133,7 @@ public sealed class IvesCrystalTabularJournalTests
         return string.Join(
             ",",
             values.Select(value =>
-                """ + (value ?? string.Empty).Replace(""", """") + """));
+                "\"" + (value ?? string.Empty).Replace("\"", "\"\"") + "\""));
     }
 
     private static void DeleteSynthetic(string path)
