@@ -283,13 +283,13 @@ namespace ExcelApiPoc.AccountingImport.Services.Ives
             if (string.IsNullOrWhiteSpace(value))
                 return 0m;
 
-            Match amountMatch = Regex.Match(
+            MatchCollection amountMatches = Regex.Matches(
                 value,
-                @"-?\d+(?:,\d{2})?$",
+                @"-?\d+(?:,\d{2})?",
                 RegexOptions.CultureInvariant);
 
-            string amountText = amountMatch.Success
-                ? amountMatch.Value
+            string amountText = amountMatches.Count > 0
+                ? amountMatches[amountMatches.Count - 1].Value
                 : value;
 
             decimal parsed;
