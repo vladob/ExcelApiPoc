@@ -18,19 +18,17 @@ namespace ExcelApiPoc.AccountingImport.Services.Ives
                        "IVES",
                        StringComparison.OrdinalIgnoreCase) &&
                    !string.IsNullOrWhiteSpace(filePath) &&
-                   string.Equals(
-                       Path.GetExtension(filePath),
-                       ".xls",
-                       StringComparison.OrdinalIgnoreCase) &&
                    Path.GetFileName(filePath).StartsWith(
                        "U_DENNIK_",
-                       StringComparison.OrdinalIgnoreCase);
+                       StringComparison.OrdinalIgnoreCase) &&
+                   IvesJournalParserDispatcher.CanParse(filePath);
         }
 
         public JournalImport Import(string filePath)
         {
-            IvesJournalParseResult source =
-                new IvesExcelJournalParser().Parse(filePath);
+            IIvesJournalSourceParser parser =
+                IvesJournalParserDispatcher.Select(filePath);
+            IvesJournalParseResult source = parser.Parse(filePath);
             ImportReport report = new IvesJournalValidator().Validate(source);
 
             if (!report.IsValid)
@@ -67,7 +65,7 @@ namespace ExcelApiPoc.AccountingImport.Services.Ives
                 SourceFileName = source.SourceFileName,
                 SourceFilePath = source.SourceFilePath,
                 SourceFileHash = CalculateSha256(source.SourceFilePath),
-                TechnicalType = "Excel",
+                TechnicalType = parser.TechnicalType,
                 AccountingFormat = "IVES",
                 Ico = AccountingFileNameMetadataParser.ResolveIco(
                     source.SourceFileName,

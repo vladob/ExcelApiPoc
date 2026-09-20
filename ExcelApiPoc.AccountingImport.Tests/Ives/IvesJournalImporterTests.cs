@@ -19,6 +19,15 @@ public sealed class IvesJournalImporterTests
             Path.ChangeExtension(fixture, ".xlsx"),
             "IVES"));
         Assert.False(importer.CanImport(
+            Path.ChangeExtension(fixture, ".csv"),
+            "IVES"));
+        Assert.False(importer.CanImport(
+            Path.ChangeExtension(fixture, ".xml"),
+            "IVES"));
+        Assert.False(importer.CanImport(
+            Path.ChangeExtension(fixture, ".pdf"),
+            "IVES"));
+        Assert.False(importer.CanImport(
             Path.Combine(
                 Path.GetDirectoryName(fixture)!,
                 "HL_KNIHA_00322881_2024.xls"),

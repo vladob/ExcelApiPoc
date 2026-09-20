@@ -9,8 +9,19 @@ using System.Text.RegularExpressions;
 
 namespace ExcelApiPoc.AccountingImport.Services.Ives
 {
-    internal sealed class IvesExcelJournalParser
+    internal sealed class IvesExcelJournalParser : IIvesJournalSourceParser
     {
+        public string TechnicalType => "Excel";
+
+        public bool CanParse(string filePath)
+        {
+            return !string.IsNullOrWhiteSpace(filePath) &&
+                   string.Equals(
+                       Path.GetExtension(filePath),
+                       ".xls",
+                       StringComparison.OrdinalIgnoreCase);
+        }
+
         private static readonly Regex IcoPattern = new Regex(
             @"I\s*[ČC]\s*O\s*:\s*(?<ico>\d{8})",
             RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
