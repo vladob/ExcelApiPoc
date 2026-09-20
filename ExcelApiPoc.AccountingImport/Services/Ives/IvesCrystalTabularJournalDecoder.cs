@@ -225,22 +225,56 @@ namespace ExcelApiPoc.AccountingImport.Services.Ives
             int startIndex,
             int endExclusive)
         {
-            for (int index = startIndex; index < endExclusive; index++)
+            if (values == null || values.Length == 0)
+                return null;
+
+            int lastIndex = Math.Min(
+                values.Length,
+                endExclusive) - 1;
+
+            for (int index = lastIndex; index >= startIndex; index--)
             {
                 string value = Normalize(values[index]);
-                if (value == null)
-                    continue;
 
-                if (string.Equals(value, "UCT", StringComparison.OrdinalIgnoreCase) ||
-                    string.Equals(value, "FAK", StringComparison.OrdinalIgnoreCase) ||
-                    string.Equals(value, "POK", StringComparison.OrdinalIgnoreCase) ||
-                    string.Equals(value, "BAN", StringComparison.OrdinalIgnoreCase))
-                {
+                if (IsModuleCode(value))
                     return value;
-                }
             }
 
             return null;
+        }
+
+        private static bool IsModuleCode(string value)
+        {
+            if (string.IsNullOrWhiteSpace(value) ||
+                value.Length < 2 ||
+                value.Length > 8)
+            {
+                return false;
+            }
+
+            bool hasLetter = false;
+
+            foreach (char character in value)
+            {
+                if (char.IsLetter(character))
+                {
+                    hasLetter = true;
+
+                    if (char.ToUpperInvariant(character) != character)
+                        return false;
+
+                    continue;
+                }
+
+                if (!char.IsDigit(character) &&
+                    character != '_' &&
+                    character != '-')
+                {
+                    return false;
+                }
+            }
+
+            return hasLetter;
         }
 
         private static string FindIco(string[] values)

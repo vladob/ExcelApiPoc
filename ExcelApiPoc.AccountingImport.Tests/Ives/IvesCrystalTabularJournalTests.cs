@@ -30,7 +30,7 @@ public sealed class IvesCrystalTabularJournalTests
             Assert.Equal("518.100", first.DebitCompositeAccount);
             Assert.Equal("321.200", first.CreditCompositeAccount);
             Assert.Equal(100m, first.Amount);
-            Assert.Equal("UCT", first.Module);
+            Assert.Equal("DOD", first.Module);
 
             JournalImport imported =
                 new IvesJournalImporter().Import(path);
@@ -62,7 +62,7 @@ public sealed class IvesCrystalTabularJournalTests
             Row(
                 2,
                 fileName,
-                "", "", "", "", "", "", "UCT")
+                "", "", "", "", "", "", "DOD", "4", "/ 250001")
         };
 
         IvesJournalParseResult parsed =
@@ -71,7 +71,7 @@ public sealed class IvesCrystalTabularJournalTests
         IvesJournalSourceRow transaction =
             Assert.Single(parsed.TransactionRows);
 
-        Assert.Equal("UCT", transaction.Module);
+        Assert.Equal("DOD", transaction.Module);
         Assert.Equal(2, transaction.RelatedSourceRowNumber);
     }
 
@@ -89,7 +89,7 @@ public sealed class IvesCrystalTabularJournalTests
                 "Obec Test", "IČO:00999999", "Účtovný denník",
                 "Dátum", "Čís. dokladu", "Účet MD", "Účet D", "Suma", "Mena", "Text",
                 "2025-01-02", "TEST001", "518.100", "321.200", "100.00", "€", "Synthetic first",
-                "", "", "", "", "UCT", "", "",
+                "", "", "", "", "DOD", "4", "/ 250001",
                 "Spolu :", "150.00", "€"),
             Row(
                 2,
@@ -107,7 +107,7 @@ public sealed class IvesCrystalTabularJournalTests
         Assert.Equal(2, parsed.TransactionRows.Count);
         Assert.Equal("00999999", parsed.Ico);
         Assert.Equal(150m, parsed.ReportTotalRows.Single().ReportedAmounts.Single());
-        Assert.Equal("UCT", parsed.TransactionRows[1].Module);
+        Assert.Equal("DOD", parsed.TransactionRows[1].Module);
     }
 
     private static IvesCrystalTabularRow Row(
@@ -140,7 +140,7 @@ public sealed class IvesCrystalTabularJournalTests
                 "Obec Test", "IČO:00999999", "Účtovný denník",
                 "Dátum", "Čís. dokladu", "Účet MD", "Účet D", "Suma", "Mena", "Text",
                 "02.01.2025", "TEST001", "518.100", "321.200", "100,00", "€", "Synthetic first",
-                "", "", "", "", "UCT", "", "",
+                "", "", "", "", "DOD", "4", "/ 250001",
                 "Spolu :", "100,00", "€"),
             CsvRow(
                 "Obec Test", "IČO:00999999", "Účtovný denník",
