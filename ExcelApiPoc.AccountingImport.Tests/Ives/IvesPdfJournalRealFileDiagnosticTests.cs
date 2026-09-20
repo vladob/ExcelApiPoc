@@ -150,6 +150,20 @@ public sealed class IvesPdfJournalRealFileDiagnosticTests
                 record.Text);
         }
 
+        WriteSamples("Transaction-7-token", records, record =>
+            record.SourceTokens.Count == 7 &&
+            record.Left < 60 &&
+            Regex.IsMatch(
+                record.Text,
+                @"^\\d{2}\\.\\d{2}\\.\\d{4}\\s+"));
+
+        WriteSamples("Transaction-9-token", records, record =>
+            record.SourceTokens.Count == 9 &&
+            record.Left < 60 &&
+            Regex.IsMatch(
+                record.Text,
+                @"^\\d{2}\\.\\d{2}\\.\\d{4}\\s+"));
+
         WriteSamples("UCT", records, record =>
             record.Text.Contains("UCT", StringComparison.OrdinalIgnoreCase));
         WriteSamples("DOD", records, record =>
@@ -158,6 +172,30 @@ public sealed class IvesPdfJournalRealFileDiagnosticTests
             record.Text.Contains("MAJ", StringComparison.OrdinalIgnoreCase));
         WriteSamples("POK", records, record =>
             record.Text.Contains("POK", StringComparison.OrdinalIgnoreCase));
+
+        output.WriteLine("");
+        output.WriteLine("Last body records:");
+
+        foreach (var record in records.TakeLast(20))
+        {
+            output.WriteLine(
+                "  page {0}, baseline {1:F3}, left {2:F3}, right {3:F3}, tokens {4}: {5}",
+                record.StartPageNumber,
+                record.Groups[0].Baseline,
+                record.Left,
+                record.Right,
+                record.SourceTokens.Count,
+                record.Text);
+
+            foreach (var token in record.SourceTokens)
+            {
+                output.WriteLine(
+                    "    [{0:F3}-{1:F3}] {2}",
+                    token.Left,
+                    token.Right,
+                    token.Text);
+            }
+        }
 
         output.WriteLine("");
         output.WriteLine("First records on pages after page 1:");
