@@ -116,10 +116,10 @@ namespace ExcelApiPoc.AccountingImport.Services.Ives
                             SequenceNumber = ++totalSequence,
                             SourceRowNumber = index + 1,
                             Kind = IvesGeneralLedgerRowKind.ReportTotal,
-                            OpeningBalance = ReadAmount(record, 363.4),
-                            DebitTurnover = ReadAmount(record, 434.7),
-                            CreditTurnover = ReadAmount(record, 502.2),
-                            ClosingBalance = ReadAmount(record, 570.1)
+                            OpeningBalance = ReadAmount(record, 319.0, 364.0),
+                            DebitTurnover = ReadAmount(record, 386.0, 435.0),
+                            CreditTurnover = ReadAmount(record, 454.0, 503.0),
+                            ClosingBalance = ReadAmount(record, 526.0, 571.0)
                         });
                     continue;
                 }
@@ -133,10 +133,10 @@ namespace ExcelApiPoc.AccountingImport.Services.Ives
                             SourceRowNumber = index + 1,
                             Kind = IvesGeneralLedgerRowKind.SyntheticSubtotal,
                             AccountCode = ReadSyntheticCode(record),
-                            OpeningBalance = ReadAmount(record, 363.4),
-                            DebitTurnover = ReadAmount(record, 434.7),
-                            CreditTurnover = ReadAmount(record, 502.2),
-                            ClosingBalance = ReadAmount(record, 570.1)
+                            OpeningBalance = ReadAmount(record, 319.0, 364.0),
+                            DebitTurnover = ReadAmount(record, 386.0, 435.0),
+                            CreditTurnover = ReadAmount(record, 454.0, 503.0),
+                            ClosingBalance = ReadAmount(record, 526.0, 571.0)
                         });
                     continue;
                 }
@@ -151,10 +151,10 @@ namespace ExcelApiPoc.AccountingImport.Services.Ives
                             Kind = IvesGeneralLedgerRowKind.Account,
                             AccountCode = ReadCompact(record, 103.0, 221.0),
                             Text = ReadText(record, 228.0, 321.0),
-                            OpeningBalance = ReadAmount(record, 363.4),
-                            DebitTurnover = ReadAmount(record, 434.7),
-                            CreditTurnover = ReadAmount(record, 502.2),
-                            ClosingBalance = ReadAmount(record, 570.1)
+                            OpeningBalance = ReadAmount(record, 319.0, 364.0),
+                            DebitTurnover = ReadAmount(record, 386.0, 435.0),
+                            CreditTurnover = ReadAmount(record, 454.0, 503.0),
+                            ClosingBalance = ReadAmount(record, 526.0, 571.0)
                         });
                     continue;
                 }
@@ -174,8 +174,8 @@ namespace ExcelApiPoc.AccountingImport.Services.Ives
                             DocumentNumber = ReadCompact(record, 47.0, 103.0),
                             AccountCode = ReadCompact(record, 103.0, 221.0),
                             Text = ReadText(record, 228.0, 321.0),
-                            DebitTurnover = ReadAmount(record, 434.7),
-                            CreditTurnover = ReadAmount(record, 502.2)
+                            DebitTurnover = ReadAmount(record, 386.0, 435.0),
+                            CreditTurnover = ReadAmount(record, 454.0, 503.0)
                         });
                 }
             }
@@ -265,63 +265,23 @@ namespace ExcelApiPoc.AccountingImport.Services.Ives
 
         private static decimal ReadAmount(
             BaselineRecord record,
-            double targetRight)
+            double left,
+            double right)
         {
-            PdfTextToken[] ordered = record.SourceTokens
-                .Where(token =>
-                    token.Left >= targetRight - 85.0 &&
-                    token.Right <= targetRight + 2.5)
-                .OrderBy(token => token.Left)
-                .ThenBy(token => token.Right)
-                .ToArray();
-
-            int end = -1;
-            double bestDistance = double.MaxValue;
-
-            for (int index = 0; index < ordered.Length; index++)
-            {
-                string text = Trim(ordered[index].Text);
-                if (!IsAmountToken(text))
-                    continue;
-
-                double distance = Math.Abs(
-                    ordered[index].Right - targetRight);
-
-                if (distance <= 2.5 && distance < bestDistance)
-                {
-                    bestDistance = distance;
-                    end = index;
-                }
-            }
-
-            if (end < 0)
-                return 0m;
-
-            var pieces = new List<string>();
-            PdfTextToken current = ordered[end];
-            pieces.Add(Trim(current.Text));
-
-            for (int index = end - 1; index >= 0; index--)
-            {
-                PdfTextToken previous = ordered[index];
-                string text = Trim(previous.Text);
-
-                if (!IsAmountToken(text))
-                    break;
-
-                double gap = current.Left - previous.Right;
-                if (gap > 4.0)
-                    break;
-
-                pieces.Add(text);
-                current = previous;
-            }
-
-            pieces.Reverse();
-
-            string value = string.Concat(pieces)
+            string value = string.Concat(
+                record.SourceTokens
+                    .Where(token =>
+                        token.Left >= left &&
+                        token.Left < right)
+                    .OrderBy(token => token.Left)
+                    .ThenBy(token => token.Right)
+                    .Select(token => Trim(token.Text))
+                    .Where(IsAmountToken))
                 .Replace("\u00A0", string.Empty)
                 .Replace(" ", string.Empty);
+
+            if (string.IsNullOrWhiteSpace(value))
+                return 0m;
 
             decimal parsed;
             if (decimal.TryParse(
