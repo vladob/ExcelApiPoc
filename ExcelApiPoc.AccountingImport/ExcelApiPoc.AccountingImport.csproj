@@ -19,6 +19,10 @@
       <Link>PdfLayouts\SoftipMop\general-ledger.v1.json</Link>
       <LogicalName>ExcelApiPoc.AccountingImport.PdfLayouts.SoftipMop.general-ledger.v1.json</LogicalName>
     </EmbeddedResource>
+    <EmbeddedResource Include="..\PdfLayouts\Ives\journal.v1.json">
+      <Link>PdfLayouts\Ives\journal.v1.json</Link>
+      <LogicalName>ExcelApiPoc.AccountingImport.PdfLayouts.Ives.journal.v1.json</LogicalName>
+    </EmbeddedResource>
   </ItemGroup>
 
 </Project>

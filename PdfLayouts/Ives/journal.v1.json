@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "id": "ives-accounting-journal",
+  "name": "IVES Accounting Journal",
+  "defaults": {
+    "horizontalTolerance": 5,
+    "baselineTolerance": 4
+  },
+  "sections": [
+    {
+      "id": "page-body",
+      "startRuleId": "header-module",
+      "scope": "PerPage",
+      "mayContinueOnNextPage": true
+    }
+  ],
+  "rules": [
+    {
+      "id": "header-module",
+      "text": "^\\s*Modul\\s*$",
+      "textMatch": "RegularExpression",
+      "horizontal": {
+        "anchor": "Left",
+        "position": 474,
+        "tolerance": 5
+      },
+      "pageScope": "Repeated"
+    }
+  ],
+  "recordContinuations": [],
+  "recordRules": [],
+  "recordFields": []
+}
