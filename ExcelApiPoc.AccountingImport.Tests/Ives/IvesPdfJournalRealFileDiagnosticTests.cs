@@ -56,14 +56,7 @@ public sealed class IvesPdfJournalRealFileDiagnosticTests
         LayoutRecognitionResult result =
             new ITextLayoutRecognizer().Recognize(path, layout);
 
-        string[] icos = result.Document.Tokens
-            .Select(token => IcoPattern.Match(token.Text))
-            .Where(match => match.Success)
-            .Select(match => match.Groups["ico"].Value)
-            .Distinct(StringComparer.Ordinal)
-            .ToArray();
-
-        string[] periods = result.Document.Pages
+        string[] pageTexts = result.Document.Pages
             .Select(page => string.Join(
                 " ",
                 page.Tokens
@@ -71,6 +64,16 @@ public sealed class IvesPdfJournalRealFileDiagnosticTests
                     .ThenBy(token => token.Left)
                     .Select(token => token.Text.Trim())
                     .Where(text => text.Length > 0)))
+            .ToArray();
+
+        string[] icos = pageTexts
+            .Select(text => IcoPattern.Match(text))
+            .Where(match => match.Success)
+            .Select(match => match.Groups["ico"].Value)
+            .Distinct(StringComparer.Ordinal)
+            .ToArray();
+
+        string[] periods = pageTexts
             .Select(text => PeriodPattern.Match(text))
             .Where(match => match.Success)
             .Select(match =>
@@ -147,6 +150,34 @@ public sealed class IvesPdfJournalRealFileDiagnosticTests
                 record.Text);
         }
 
+        WriteSamples("UCT", records, record =>
+            record.Text.Contains("UCT", StringComparison.OrdinalIgnoreCase));
+        WriteSamples("DOD", records, record =>
+            record.Text.Contains("DOD", StringComparison.OrdinalIgnoreCase));
+        WriteSamples("MAJ", records, record =>
+            record.Text.Contains("MAJ", StringComparison.OrdinalIgnoreCase));
+        WriteSamples("POK", records, record =>
+            record.Text.Contains("POK", StringComparison.OrdinalIgnoreCase));
+
+        output.WriteLine("");
+        output.WriteLine("First records on pages after page 1:");
+
+        foreach (var record in records
+                     .Where(record =>
+                         record.StartPageNumber > 1 &&
+                         record.Groups[0].Baseline > 690)
+                     .Take(12))
+        {
+            output.WriteLine(
+                "  page {0}, baseline {1:F3}, left {2:F3}, right {3:F3}, tokens {4}: {5}",
+                record.StartPageNumber,
+                record.Groups[0].Baseline,
+                record.Left,
+                record.Right,
+                record.SourceTokens.Count,
+                record.Text);
+        }
+
         Assert.Equal(219, result.Document.Pages.Count);
         Assert.Equal(219, sectionCount);
         Assert.Single(icos);
@@ -155,6 +186,36 @@ public sealed class IvesPdfJournalRealFileDiagnosticTests
         Assert.Equal(
             "01.01.2025 .. 31.12.2025",
             periods[0]);
+    }
+
+    private void WriteSamples(
+        string label,
+        IEnumerable<PdfLayoutEngine.Records.BaselineRecord> records,
+        Func<PdfLayoutEngine.Records.BaselineRecord, bool> predicate)
+    {
+        output.WriteLine("");
+        output.WriteLine(label + " samples:");
+
+        foreach (var record in records.Where(predicate).Take(6))
+        {
+            output.WriteLine(
+                "  page {0}, baseline {1:F3}, left {2:F3}, right {3:F3}, tokens {4}: {5}",
+                record.StartPageNumber,
+                record.Groups[0].Baseline,
+                record.Left,
+                record.Right,
+                record.SourceTokens.Count,
+                record.Text);
+
+            foreach (var token in record.SourceTokens)
+            {
+                output.WriteLine(
+                    "    [{0:F3}-{1:F3}] {2}",
+                    token.Left,
+                    token.Right,
+                    token.Text);
+            }
+        }
     }
 
     private static LayoutDefinition LoadLayout()
