@@ -9,7 +9,8 @@ namespace ExcelApiPoc.AccountingImport.Services.Ives
         private static readonly IReadOnlyList<IIvesJournalSourceParser> Parsers =
             new IIvesJournalSourceParser[]
             {
-                new IvesExcelJournalParser()
+                new IvesExcelJournalParser(),
+                new IvesXmlJournalParser()
             };
 
         public static bool CanParse(string filePath)
