@@ -14,10 +14,24 @@ using System.Text;
 
 namespace ExcelApiPoc.AccountingImport.Services.Ives
 {
-    internal sealed class IvesPdfAccountingFrameworkParser
+    internal sealed class IvesPdfAccountingFrameworkParser : IIvesAccountingFrameworkSourceParser
     {
         private const string LayoutResourceName =
             "ExcelApiPoc.AccountingImport.PdfLayouts.Ives.accounting-framework.v1.json";
+
+        public string TechnicalType => "PDF";
+
+        public bool CanParse(string filePath)
+        {
+            return !string.IsNullOrWhiteSpace(filePath) &&
+                   string.Equals(
+                       Path.GetExtension(filePath),
+                       ".pdf",
+                       StringComparison.OrdinalIgnoreCase) &&
+                   Path.GetFileName(filePath).StartsWith(
+                       "UCT_ROZVRH_",
+                       StringComparison.OrdinalIgnoreCase);
+        }
 
         public IvesAccountingFrameworkParseResult Parse(string filePath)
         {

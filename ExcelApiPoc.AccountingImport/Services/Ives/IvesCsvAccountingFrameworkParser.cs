@@ -7,9 +7,23 @@ using System.Text;
 
 namespace ExcelApiPoc.AccountingImport.Services.Ives
 {
-    internal sealed class IvesCsvAccountingFrameworkParser
+    internal sealed class IvesCsvAccountingFrameworkParser : IIvesAccountingFrameworkSourceParser
     {
         private const int MinimumFieldCount = 29;
+
+        public string TechnicalType => "CSV";
+
+        public bool CanParse(string filePath)
+        {
+            return !string.IsNullOrWhiteSpace(filePath) &&
+                   string.Equals(
+                       Path.GetExtension(filePath),
+                       ".csv",
+                       StringComparison.OrdinalIgnoreCase) &&
+                   Path.GetFileName(filePath).StartsWith(
+                       "UCT_ROZVRH_",
+                       StringComparison.OrdinalIgnoreCase);
+        }
 
         public IvesAccountingFrameworkParseResult Parse(string filePath)
         {

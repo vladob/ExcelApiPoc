@@ -8,10 +8,24 @@ using System.Xml.Linq;
 
 namespace ExcelApiPoc.AccountingImport.Services.Ives
 {
-    internal sealed class IvesXmlAccountingFrameworkParser
+    internal sealed class IvesXmlAccountingFrameworkParser : IIvesAccountingFrameworkSourceParser
     {
         private static readonly XNamespace CrystalNamespace =
             "urn:crystal-reports:schemas:report-detail";
+
+        public string TechnicalType => "XML";
+
+        public bool CanParse(string filePath)
+        {
+            return !string.IsNullOrWhiteSpace(filePath) &&
+                   string.Equals(
+                       Path.GetExtension(filePath),
+                       ".xml",
+                       StringComparison.OrdinalIgnoreCase) &&
+                   Path.GetFileName(filePath).StartsWith(
+                       "UCT_ROZVRH_",
+                       StringComparison.OrdinalIgnoreCase);
+        }
 
         public IvesAccountingFrameworkParseResult Parse(string filePath)
         {

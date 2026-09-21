@@ -6,8 +6,22 @@ using System.IO;
 
 namespace ExcelApiPoc.AccountingImport.Services.Ives
 {
-    internal sealed class IvesXlsxAccountingFrameworkParser
+    internal sealed class IvesXlsxAccountingFrameworkParser : IIvesAccountingFrameworkSourceParser
     {
+        public string TechnicalType => "Excel";
+
+        public bool CanParse(string filePath)
+        {
+            return !string.IsNullOrWhiteSpace(filePath) &&
+                   string.Equals(
+                       Path.GetExtension(filePath),
+                       ".xlsx",
+                       StringComparison.OrdinalIgnoreCase) &&
+                   Path.GetFileName(filePath).StartsWith(
+                       "UCT_ROZVRH_",
+                       StringComparison.OrdinalIgnoreCase);
+        }
+
         public IvesAccountingFrameworkParseResult Parse(string filePath)
         {
             ValidateSourceFile(filePath);
