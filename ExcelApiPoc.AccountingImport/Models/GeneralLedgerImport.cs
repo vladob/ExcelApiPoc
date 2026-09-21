@@ -39,6 +39,8 @@ namespace ExcelApiPoc.AccountingImport.Models
         public string CostCenter { get; set; }
         public string Order { get; set; }
         public string AccountName { get; set; }
+        public string ActivityName { get; set; }
+        public string ActivityCurrency { get; set; }
         public decimal OpeningDebit { get; set; }
         public decimal OpeningCredit { get; set; }
         public decimal AnnualDebitTurnover { get; set; }

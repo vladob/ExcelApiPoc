@@ -83,7 +83,7 @@ namespace ExcelApiPoc.AccountingImport.Services.Ives
             foreach (IvesGeneralLedgerActivity activity in source.Activities)
             {
                 foreach (IvesGeneralLedgerSourceRow sourceRow in activity.AccountRows)
-                    AddCanonicalRow(result, sourceRow);
+                    AddCanonicalRow(result, activity, sourceRow);
             }
 
             if (result.Rows.Count == 0)
@@ -97,6 +97,7 @@ namespace ExcelApiPoc.AccountingImport.Services.Ives
 
         private static void AddCanonicalRow(
             GeneralLedgerImport result,
+            IvesGeneralLedgerActivity activity,
             IvesGeneralLedgerSourceRow sourceRow)
         {
             string accountCode =
@@ -132,6 +133,8 @@ namespace ExcelApiPoc.AccountingImport.Services.Ives
                 AnalyticalCode = accountCode.Substring(3),
                 AccountCode = accountCode,
                 AccountName = sourceRow.Text ?? string.Empty,
+                ActivityName = activity.Name,
+                ActivityCurrency = activity.Currency,
                 OpeningDebit = openingBalance > 0m
                     ? openingBalance
                     : 0m,

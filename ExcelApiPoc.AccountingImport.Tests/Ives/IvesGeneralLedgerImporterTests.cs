@@ -32,6 +32,24 @@ public sealed class IvesGeneralLedgerImporterTests
     }
 
     [Fact]
+    public void Import_XlsFixture_PreservesActivityIdentity()
+    {
+        string fixture = Path.Combine(
+            AppContext.BaseDirectory,
+            "TestData",
+            "Ives",
+            "HL_KNIHA_00322881_2024.xls");
+
+        GeneralLedgerImport result =
+            new IvesGeneralLedgerImporter().Import(fixture);
+
+        Assert.All(
+            result.Rows,
+            row => Assert.False(
+                string.IsNullOrWhiteSpace(row.ActivityName)));
+    }
+
+    [Fact]
     public void Import_XlsFixture_PreservesEstablishedCanonicalMapping()
     {
         string fixture = Path.Combine(
