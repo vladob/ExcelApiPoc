@@ -76,25 +76,19 @@ namespace ExcelApiPoc.AccountingImport.Services
         {
             result = null;
 
-            if (!string.Equals(
-                    Path.GetExtension(filePath),
-                    ".xls",
-                    StringComparison.OrdinalIgnoreCase) ||
-                !Path.GetFileName(filePath).StartsWith(
-                    "U_DENNIK_",
-                    StringComparison.OrdinalIgnoreCase))
-            {
+            if (!IvesJournalParserDispatcher.CanParse(filePath))
                 return false;
-            }
 
             try
             {
+                IIvesJournalSourceParser parser =
+                    IvesJournalParserDispatcher.Select(filePath);
                 IvesJournalParseResult source =
-                    new IvesExcelJournalParser().Parse(filePath);
+                    parser.Parse(filePath);
 
                 result = new JournalDetectionResult
                 {
-                    TechnicalType = "Excel",
+                    TechnicalType = parser.TechnicalType,
                     AccountingFormat = "IVES",
                     Ico = source.Ico,
                     FiscalYear = source.FiscalYear
