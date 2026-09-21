@@ -1,5 +1,6 @@
 using ExcelApiPoc.AccountingImport.Models;
 using ExcelApiPoc.AccountingImport.Services;
+using ExcelApiPoc.AccountingImport.Services.Ives;
 using ExcelApiPoc.AddIn.Models;
 using ExcelApiPoc.AddIn.Services;
 using Microsoft.Office.Interop.Excel;
@@ -537,16 +538,32 @@ namespace ExcelApiPoc.AddIn.Forms
 
                 if (!string.IsNullOrWhiteSpace(accountsPath))
                 {
-                    if (!string.Equals(importPackage.AccountingFormat, "IfoSoft", StringComparison.OrdinalIgnoreCase))
+                    if (string.Equals(
+                            importPackage.AccountingFormat,
+                            "IfoSoft",
+                            StringComparison.OrdinalIgnoreCase))
+                    {
+                        accountingFrameworkImport =
+                            new IfoSoftCsvAccountingFrameworkImporter()
+                                .Import(accountsPath);
+                    }
+                    else if (string.Equals(
+                                 importPackage.AccountingFormat,
+                                 "IVES",
+                                 StringComparison.OrdinalIgnoreCase))
+                    {
+                        accountingFrameworkImport =
+                            new IvesAccountingFrameworkImporter()
+                                .Import(accountsPath);
+                    }
+                    else
                     {
                         throw new InvalidOperationException(
                             "An entity-specific accounting-framework export " +
-                            "is currently supported only for IfoSoft. " +
+                            "is currently supported for IfoSoft and IVES. " +
                             "Leave the Accounting framework field empty for " +
-                            "the current IVES, Urbis, and Softip-MOP imports.");
+                            "the current Urbis and Softip-MOP imports.");
                     }
-
-                    accountingFrameworkImport = new IfoSoftCsvAccountingFrameworkImporter() .Import(accountsPath);
 
                     if (!string.Equals(accountingFrameworkImport.Ico, journalImport.Ico, StringComparison.Ordinal))
                     {
