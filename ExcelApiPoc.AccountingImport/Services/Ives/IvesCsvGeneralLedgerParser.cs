@@ -7,8 +7,22 @@ using System.Text;
 
 namespace ExcelApiPoc.AccountingImport.Services.Ives
 {
-    internal sealed class IvesCsvGeneralLedgerParser
+    internal sealed class IvesCsvGeneralLedgerParser : IIvesGeneralLedgerSourceParser
     {
+        public string TechnicalType => "CSV";
+
+        public bool CanParse(string filePath)
+        {
+            return !string.IsNullOrWhiteSpace(filePath) &&
+                   string.Equals(
+                       Path.GetExtension(filePath),
+                       ".csv",
+                       StringComparison.OrdinalIgnoreCase) &&
+                   Path.GetFileName(filePath).StartsWith(
+                       "HL_KNIHA_",
+                       StringComparison.OrdinalIgnoreCase);
+        }
+
         public IvesGeneralLedgerParseResult Parse(string filePath)
         {
             ValidateSourceFile(filePath);

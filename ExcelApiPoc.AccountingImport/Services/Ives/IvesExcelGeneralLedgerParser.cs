@@ -9,11 +9,25 @@ using System.Text.RegularExpressions;
 
 namespace ExcelApiPoc.AccountingImport.Services.Ives
 {
-    internal sealed class IvesExcelGeneralLedgerParser
+    internal sealed class IvesExcelGeneralLedgerParser : IIvesGeneralLedgerSourceParser
     {
         private static readonly Regex IcoPattern = new Regex(@"I\s*[ČC]\s*O\s*:\s*(?<ico>\d{8})", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
 
         private static readonly Regex PeriodPattern = new Regex(@"Dátum\s+od\s*:\s*(?<from>\d{1,2}\.\d{1,2}\.\d{4})\s*,\s*" + @"Dátum\s+do\s*:\s*(?<to>\d{1,2}\.\d{1,2}\.\d{4})", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
+
+        public string TechnicalType => "Excel";
+
+        public bool CanParse(string filePath)
+        {
+            return !string.IsNullOrWhiteSpace(filePath) &&
+                   string.Equals(
+                       Path.GetExtension(filePath),
+                       ".xls",
+                       StringComparison.OrdinalIgnoreCase) &&
+                   Path.GetFileName(filePath).StartsWith(
+                       "HL_KNIHA_",
+                       StringComparison.OrdinalIgnoreCase);
+        }
 
         public IvesGeneralLedgerParseResult Parse(string filePath)
         {

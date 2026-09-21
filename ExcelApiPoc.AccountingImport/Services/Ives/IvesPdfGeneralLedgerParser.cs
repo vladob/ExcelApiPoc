@@ -15,7 +15,7 @@ using System.Text.RegularExpressions;
 
 namespace ExcelApiPoc.AccountingImport.Services.Ives
 {
-    internal sealed class IvesPdfGeneralLedgerParser
+    internal sealed class IvesPdfGeneralLedgerParser : IIvesGeneralLedgerSourceParser
     {
         private const string LayoutResourceName =
             "ExcelApiPoc.AccountingImport.PdfLayouts.Ives.general-ledger.v1.json";
@@ -23,6 +23,20 @@ namespace ExcelApiPoc.AccountingImport.Services.Ives
         private static readonly Regex DocumentDatePattern = new Regex(
             @"^\d{2}\.\d{2}\.",
             RegexOptions.Compiled | RegexOptions.CultureInvariant);
+
+        public string TechnicalType => "PDF";
+
+        public bool CanParse(string filePath)
+        {
+            return !string.IsNullOrWhiteSpace(filePath) &&
+                   string.Equals(
+                       Path.GetExtension(filePath),
+                       ".pdf",
+                       StringComparison.OrdinalIgnoreCase) &&
+                   Path.GetFileName(filePath).StartsWith(
+                       "HL_KNIHA_",
+                       StringComparison.OrdinalIgnoreCase);
+        }
 
         public IvesGeneralLedgerParseResult Parse(string filePath)
         {

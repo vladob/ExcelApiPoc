@@ -6,8 +6,22 @@ using System.IO;
 
 namespace ExcelApiPoc.AccountingImport.Services.Ives
 {
-    internal sealed class IvesXlsxGeneralLedgerParser
+    internal sealed class IvesXlsxGeneralLedgerParser : IIvesGeneralLedgerSourceParser
     {
+        public string TechnicalType => "Excel";
+
+        public bool CanParse(string filePath)
+        {
+            return !string.IsNullOrWhiteSpace(filePath) &&
+                   string.Equals(
+                       Path.GetExtension(filePath),
+                       ".xlsx",
+                       StringComparison.OrdinalIgnoreCase) &&
+                   Path.GetFileName(filePath).StartsWith(
+                       "HL_KNIHA_",
+                       StringComparison.OrdinalIgnoreCase);
+        }
+
         public IvesGeneralLedgerParseResult Parse(string filePath)
         {
             ValidateSourceFile(filePath);
