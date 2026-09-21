@@ -214,24 +214,25 @@ namespace ExcelApiPoc.AddIn.Forms
                 }
 
                 string[] selectedPaths = dialog.FileNames;
-                if (selectedPaths.Length > 1 &&
-                    !AreSoftipMopJournalFiles(selectedPaths))
-                {
-                    MessageBox.Show(
-                        UiText.Get("Create.MultipleJournalFiles", _uiLanguage),
-                        UiText.Get("Create.SelectJournal", _uiLanguage),
-                        MessageBoxButtons.OK,
-                        MessageBoxIcon.Warning);
-                    return;
-                }
-
-                _journalFilePaths.Clear();
-                _journalFilePaths.AddRange(selectedPaths);
-                UpdateJournalPathDisplay();
 
                 SetBusy(true);
                 try
                 {
+                    if (selectedPaths.Length > 1 &&
+                        !AreSoftipMopJournalFiles(selectedPaths))
+                    {
+                        SetBusy(false);
+                        MessageBox.Show(
+                            UiText.Get("Create.MultipleJournalFiles", _uiLanguage),
+                            UiText.Get("Create.SelectJournal", _uiLanguage),
+                            MessageBoxButtons.OK,
+                            MessageBoxIcon.Warning);
+                        return;
+                    }
+
+                    _journalFilePaths.Clear();
+                    _journalFilePaths.AddRange(selectedPaths);
+                    UpdateJournalPathDisplay();
                     ProcessJournalFiles(_journalFilePaths);
                 }
                 finally
