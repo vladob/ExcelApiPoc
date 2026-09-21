@@ -28,7 +28,7 @@ public sealed class IvesXmlAccountingFrameworkParserTests
                 "021.1    .      .    .       .   .š.",
                 first.SourceAccountCode);
             Assert.Equal(
-                "021.1....š.",
+                "021.1.....š.",
                 first.AccountCode);
             Assert.Equal("Budovy", first.AccountName);
             Assert.Equal("H", first.ActivityCode);
