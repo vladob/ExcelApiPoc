@@ -14,7 +14,9 @@ namespace ExcelApiPoc.AddIn.Services
         {
             "SequenceNumber", "SourceRecordNumber", "RowKind", "SourceSyntheticCode",
             "SourceAnalyticalCode", "SyntheticCode", "AnalyticalCode", "AccountCode",
-            "AccountName", "Type", "SubsidiaryFlag", "TaxFlag", "BalanceFlag", "VatFlag"
+            "AccountName", "Type", "SubsidiaryFlag", "TaxFlag", "BalanceFlag", "VatFlag",
+            "ActivityCode", "PsFlag", "BuFlag", "PlFlag", "RuFlag", "Currency",
+            "ValidFrom", "ValidTo"
         };
 
         public static Excel.Worksheet AddWorksheet(Excel.Workbook workbook, AccountingFrameworkImport import)
@@ -28,7 +30,10 @@ namespace ExcelApiPoc.AddIn.Services
             int lastRow = HeaderRow + import.Rows.Count;
             Excel.Range range = sheet.Range[sheet.Cells[HeaderRow, 1], sheet.Cells[lastRow, Headers.Length]];
             Excel.Range data = sheet.Range[sheet.Cells[HeaderRow + 1, 1], sheet.Cells[lastRow, Headers.Length]];
-            for (int column = 3; column <= Headers.Length; column++) ((Excel.Range)data.Columns[column]).NumberFormat = "@";
+            for (int column = 3; column <= 20; column++)
+                ((Excel.Range)data.Columns[column]).NumberFormat = "@";
+            ((Excel.Range)data.Columns[21]).NumberFormat = "yyyy-mm-dd";
+            ((Excel.Range)data.Columns[22]).NumberFormat = "yyyy-mm-dd";
             range.Value2 = CreateValues(import);
             Excel.ListObject table = sheet.ListObjects.Add(Excel.XlListObjectSourceType.xlSrcRange, range, Type.Missing, Excel.XlYesNoGuess.xlYes, Type.Missing);
             table.Name = TableName;
@@ -68,6 +73,15 @@ namespace ExcelApiPoc.AddIn.Services
                 values[x, 8] = row.AccountName; values[x, 9] = row.Type;
                 values[x, 10] = row.SubsidiaryFlag; values[x, 11] = row.TaxFlag;
                 values[x, 12] = row.BalanceFlag; values[x, 13] = row.VatFlag;
+                values[x, 14] = row.ActivityCode; values[x, 15] = row.PsFlag;
+                values[x, 16] = row.BuFlag; values[x, 17] = row.PlFlag;
+                values[x, 18] = row.RuFlag; values[x, 19] = row.Currency;
+                values[x, 20] = row.ValidFrom.HasValue
+                    ? (object)row.ValidFrom.Value
+                    : null;
+                values[x, 21] = row.ValidTo.HasValue
+                    ? (object)row.ValidTo.Value
+                    : null;
             }
             return values;
         }

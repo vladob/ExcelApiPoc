@@ -15,7 +15,8 @@ namespace ExcelApiPoc.AddIn.Services
             "SequenceNumber", "SourceRecordNumber", "SyntheticCode", "AnalyticalCode", "AccountCode",
             "Type", "P", "Section", "Item", "FundingSource", "Program", "CostCenter", "Order", "AccountName",
             "OpeningDebit", "OpeningCredit", "AnnualDebitTurnover", "AnnualCreditTurnover",
-            "PeriodDebitTurnover", "PeriodCreditTurnover", "ClosingDebit", "ClosingCredit", "Plan"
+            "PeriodDebitTurnover", "PeriodCreditTurnover", "ClosingDebit", "ClosingCredit", "Plan",
+            "ActivityName", "ActivityCurrency"
         };
 
         public static Excel.Worksheet AddWorksheet(Excel.Workbook workbook, GeneralLedgerImport import)
@@ -34,6 +35,8 @@ namespace ExcelApiPoc.AddIn.Services
             Excel.Range data = sheet.Range[firstData, last];
             for (int c = 3; c <= 14; c++) ((Excel.Range)data.Columns[c]).NumberFormat = "@";
             for (int c = 15; c <= 23; c++) ((Excel.Range)data.Columns[c]).NumberFormat = "#,##0.00;[Red]-#,##0.00";
+            ((Excel.Range)data.Columns[24]).NumberFormat = "@";
+            ((Excel.Range)data.Columns[25]).NumberFormat = "@";
             range.Value2 = CreateValues(import);
             Excel.ListObject table = sheet.ListObjects.Add(Excel.XlListObjectSourceType.xlSrcRange, range, Type.Missing, Excel.XlYesNoGuess.xlYes, Type.Missing);
             table.Name = TableName; table.TableStyle = "TableStyleMedium2";
@@ -64,6 +67,7 @@ namespace ExcelApiPoc.AddIn.Services
                 v[x,14]=(double)r.OpeningDebit; v[x,15]=(double)r.OpeningCredit; v[x,16]=(double)r.AnnualDebitTurnover;
                 v[x,17]=(double)r.AnnualCreditTurnover; v[x,18]=(double)r.PeriodDebitTurnover; v[x,19]=(double)r.PeriodCreditTurnover;
                 v[x,20]=(double)r.ClosingDebit; v[x,21]=(double)r.ClosingCredit; v[x,22]=(double)r.Plan;
+                v[x,23]=r.ActivityName; v[x,24]=r.ActivityCurrency;
             }
             return v;
         }
@@ -71,7 +75,7 @@ namespace ExcelApiPoc.AddIn.Services
         private static void AddSubtotals(Excel.Worksheet sheet)
         {
             SetSubtotal(sheet, 1, "=SUBTOTAL(3,GeneralLedgerRows[SequenceNumber])", "0");
-            for (int c = 15; c <= Headers.Length; c++)
+            for (int c = 15; c <= 23; c++)
                 SetSubtotal(sheet, c, "=SUBTOTAL(109,GeneralLedgerRows[" + Headers[c - 1] + "])", "#,##0.00;[Red]-#,##0.00");
         }
 

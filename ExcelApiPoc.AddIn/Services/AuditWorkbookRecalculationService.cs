@@ -358,6 +358,12 @@ namespace ExcelApiPoc.AddIn.Services
                     CostCenter = AuditWorkbookTableReader.GetString(source, "CostCenter"),
                     Order = AuditWorkbookTableReader.GetString(source, "Order"),
                     AccountName = AuditWorkbookTableReader.GetString(source, "AccountName"),
+                    ActivityName = source.ContainsKey("ActivityName")
+                        ? AuditWorkbookTableReader.GetString(source, "ActivityName")
+                        : string.Empty,
+                    ActivityCurrency = source.ContainsKey("ActivityCurrency")
+                        ? AuditWorkbookTableReader.GetString(source, "ActivityCurrency")
+                        : string.Empty,
                     OpeningDebit = AuditWorkbookTableReader.GetDecimal(source, "OpeningDebit"),
                     OpeningCredit = AuditWorkbookTableReader.GetDecimal(source, "OpeningCredit"),
                     AnnualDebitTurnover = AuditWorkbookTableReader.GetDecimal(source, "AnnualDebitTurnover"),
