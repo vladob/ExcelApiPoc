@@ -34,6 +34,42 @@ public sealed class IfoSoftCsvGeneralLedgerImporterTests
         Assert.Equal(4, row.SourceRecordNumber);
     }
 
+
+    [Fact]
+    public void Import_RecoversMalformedTrailingQuoteInAccountName()
+    {
+        string header = Csv(
+            "Syn", "Ana", "Typ", "P", "Odd", "Polozka", "KZdroja",
+            "Program", "Stred", "Zakaz", "Nazov uctu", "Poc_M", "Poc_D",
+            "Roc_M", "Roc_D", "12/2025", "12/2025", "Kon_M", "Kon_D",
+            "Plan");
+
+        string malformedRow =
+            "\"021\";\"915\";\"M\";\"N\";\"\";\"\";\"\";\"\";\"\";\"\";" +
+            "\"Zníženie energ.náročnosti Telocvičňa ZŚ\"\";" +
+            "62087,00;;;;;;62087,00;;";
+
+        using var file = new TemporaryCsvFile(
+        [
+            ";;\"00325937 Obec Úbrež\";",
+            ";;\"Hlavna kniha k 12/2025\";",
+            header,
+            malformedRow
+        ]);
+
+        GeneralLedgerImport result =
+            new IfoSoftCsvGeneralLedgerImporter().Import(file.Path);
+
+        GeneralLedgerRow row = Assert.Single(result.Rows);
+
+        Assert.Equal("021915", row.AccountCode);
+        Assert.Equal(
+            "Zníženie energ.náročnosti Telocvičňa ZŚ\"",
+            row.AccountName);
+        Assert.Equal(62087m, row.OpeningDebit);
+        Assert.Equal(62087m, row.ClosingDebit);
+    }
+
     [Fact]
     public void Import_ReportsInconsistentPeriodColumns()
     {

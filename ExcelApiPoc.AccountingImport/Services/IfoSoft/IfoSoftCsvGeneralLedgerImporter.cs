@@ -175,25 +175,152 @@ namespace ExcelApiPoc.AccountingImport.Services.IfoSoft
 
         private static IEnumerable<CsvRecord> ReadCsvRecords(string path)
         {
-            using (var reader = new StreamReader(path, Encoding.GetEncoding(1250), true))
+            using (var reader = new StreamReader(
+                       path,
+                       Encoding.GetEncoding(1250),
+                       true))
             {
                 int line = 0;
-                while (!reader.EndOfStream) { line++; yield return new CsvRecord { Fields = ParseFields(reader.ReadLine()), StartLineNumber = line }; }
+
+                while (!reader.EndOfStream)
+                {
+                    line++;
+                    string rawRecord = reader.ReadLine();
+
+                    string[] fields;
+                    try
+                    {
+                        fields = ParseFields(rawRecord);
+                    }
+                    catch (InvalidDataException)
+                    {
+                        if (!TryRecoverMalformedLedgerRecord(
+                                rawRecord,
+                                out fields))
+                        {
+                            throw new InvalidDataException(
+                                "Line " + line +
+                                ": malformed quoted field could not be " +
+                                "resolved to the 20-column IfoSoft " +
+                                "general-ledger schema.");
+                        }
+                    }
+
+                    yield return new CsvRecord
+                    {
+                        Fields = fields,
+                        StartLineNumber = line
+                    };
+                }
             }
         }
 
         private static string[] ParseFields(string record)
         {
-            var fields = new List<string>(); var field = new StringBuilder(); bool quoted = false;
+            var fields = new List<string>();
+            var field = new StringBuilder();
+            bool quoted = false;
+
             for (int i = 0; i < record.Length; i++)
             {
                 char c = record[i];
-                if (c == '"') { if (quoted && i + 1 < record.Length && record[i + 1] == '"') { field.Append('"'); i++; } else quoted = !quoted; }
-                else if (c == ';' && !quoted) { fields.Add(field.ToString()); field.Clear(); }
-                else field.Append(c);
+
+                if (c == '"')
+                {
+                    if (quoted &&
+                        i + 1 < record.Length &&
+                        record[i + 1] == '"')
+                    {
+                        field.Append('"');
+                        i++;
+                    }
+                    else
+                    {
+                        quoted = !quoted;
+                    }
+                }
+                else if (c == ';' && !quoted)
+                {
+                    fields.Add(field.ToString());
+                    field.Clear();
+                }
+                else
+                {
+                    field.Append(c);
+                }
             }
-            if (quoted) throw new InvalidDataException("Line contains an unterminated quoted field.");
-            fields.Add(field.ToString()); return fields.ToArray();
+
+            if (quoted)
+            {
+                throw new InvalidDataException(
+                    "Line contains an unterminated quoted field.");
+            }
+
+            fields.Add(field.ToString());
+            return fields.ToArray();
+        }
+
+        private static bool TryRecoverMalformedLedgerRecord(
+            string record,
+            out string[] fields)
+        {
+            fields = null;
+
+            if (string.IsNullOrEmpty(record))
+                return false;
+
+            string[] parts = record.Split(';');
+
+            // MkSoft-like recovery is deliberately not used here.
+            // IfoSoft GL has a fixed 20-column schema. Columns 1-10
+            // and 12-20 are structural; column 11 (Nazov uctu) is
+            // free text and may contain malformed quote escaping.
+            if (parts.Length < 20)
+                return false;
+
+            var recovered = new string[20];
+
+            for (int i = 0; i < 10; i++)
+            {
+                recovered[i] =
+                    NormalizeMalformedField(parts[i]);
+            }
+
+            int trailingStart = parts.Length - 9;
+
+            recovered[10] =
+                NormalizeMalformedField(
+                    string.Join(
+                        ";",
+                        parts.Skip(10)
+                            .Take(trailingStart - 10)));
+
+            for (int i = 0; i < 9; i++)
+            {
+                recovered[11 + i] =
+                    NormalizeMalformedField(
+                        parts[trailingStart + i]);
+            }
+
+            fields = recovered;
+            return true;
+        }
+
+        private static string NormalizeMalformedField(string value)
+        {
+            string normalized =
+                (value ?? string.Empty).Trim();
+
+            if (normalized.Length >= 2 &&
+                normalized[0] == '"' &&
+                normalized[normalized.Length - 1] == '"')
+            {
+                normalized = normalized.Substring(
+                    1,
+                    normalized.Length - 2);
+            }
+
+            return normalized.Replace("""", """);
         }
 
         private sealed class CsvRecord
