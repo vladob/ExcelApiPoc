@@ -3,6 +3,7 @@ using ExcelApiPoc.AccountingImport.Models.Reporting;
 using ExcelApiPoc.AccountingImport.Services.Common;
 using ExcelApiPoc.AccountingImport.Services.IfoSoft;
 using ExcelApiPoc.AccountingImport.Services.Ives;
+using ExcelApiPoc.AccountingImport.Services.MkSoft;
 using ExcelApiPoc.AccountingImport.Services.SoftipMop;
 using ExcelApiPoc.AccountingImport.Services.Urbis;
 using System;
@@ -45,6 +46,7 @@ namespace ExcelApiPoc.AccountingImport.Services
                 {
                     new IfoSoftCsvJournalImporter(),
                     new IvesJournalImporter(),
+                    new MkSoftExcelJournalImporter(),
                     new SoftipMopExcelJournalImporter(),
                     new UrbisExcelJournalImporter()
                 },
@@ -52,6 +54,7 @@ namespace ExcelApiPoc.AccountingImport.Services
                 {
                     new IfoSoftCsvGeneralLedgerImporter(),
                     new IvesGeneralLedgerImporter(),
+                    new MkSoftExcelGeneralLedgerImporter(),
                     new SoftipMopPdfGeneralLedgerImporter(),
                     new UrbisExcelGeneralLedgerImporter()
                 });
