@@ -80,21 +80,21 @@ public sealed class MkSoftExcelGeneralLedgerImporterTests
             row => row.AccountCode == "04218");
 
         Assert.Equal(
-            construction.ClosingDebit,
-            0m);
+            0m,
+            construction.ClosingDebit);
         Assert.Equal(
-            construction.ClosingCredit,
-            0m);
+            0m,
+            construction.ClosingCredit);
 
         Assert.Equal(
+            33915024.09m,
             result.Rows.Sum(row => row.OpeningDebit) +
-            result.Rows.Sum(row => row.AnnualDebitTurnover),
-            33915024.09m);
+            result.Rows.Sum(row => row.AnnualDebitTurnover));
 
         Assert.Equal(
+            33915024.09m,
             result.Rows.Sum(row => row.OpeningCredit) +
-            result.Rows.Sum(row => row.AnnualCreditTurnover),
-            33915024.09m);
+            result.Rows.Sum(row => row.AnnualCreditTurnover));
     }
 
     [Fact]
