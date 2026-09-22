@@ -217,7 +217,7 @@ namespace ExcelApiPoc.AccountingImport.Services.IfoSoft
             }
 
             return normalized
-                .Replace("""", """)
+                .Replace("\"\"", "\"")
                 .Trim();
         }
     }
