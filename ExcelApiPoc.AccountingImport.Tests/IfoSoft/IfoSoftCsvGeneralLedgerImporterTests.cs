@@ -1,6 +1,7 @@
 using ExcelApiPoc.AccountingImport.Models;
 using ExcelApiPoc.AccountingImport.Services.IfoSoft;
 using ExcelApiPoc.AccountingImport.Tests.Common;
+using System.Text;
 
 namespace ExcelApiPoc.AccountingImport.Tests.IfoSoft;
 
@@ -109,40 +110,69 @@ public sealed class IfoSoftCsvGeneralLedgerImporterTests
 
 
     [Fact]
-    public void Import_AcceptsFooterMetadataAndShortPeriodVariant()
+    public void Import_AcceptsMedzilaborceCompactLedgerVariant()
     {
-        string header = string.Join(
-            ";",
-            new[]
-            {
-                "Syn", "Ana", "Typ", "P", "Odd", "Polozka",
-                "KZdroja", "Program", "Stred", "Zakaz", "Nazov uctu",
-                "Poc_M", "Poc_D", "Roc_M", "Roc_D",
-                "12.25", "12.25", "Kon_M", "Kon_D", "Plan"
-            });
+        string directory = Path.Combine(
+            Path.GetTempPath(),
+            "IfoSoftCompactLedgerTests",
+            Guid.NewGuid().ToString("N"));
 
-        using var file = new TemporaryCsvFile(
-        [
-            "602;205;D;N;;;;;900/2;;Tržby Stravné-RN-ŠJ;;;;5229,6;;432;;5229,6;",
-            "799;817;;A;;;;;;;PODSÚVAHOVÉ ÚČTY-KD Borov-proj.;;2254,45;;;;;;2254,45;",
-            header,
-            ";;00323233 Mesto Medzilaborce;;;;;;;;;;;;;;;;;",
-            ";;Hlavna kniha k 12/2025;;;;;;;;;;;;;;;;;"
-        ]);
+        Directory.CreateDirectory(directory);
 
-        GeneralLedgerImport result =
-            new IfoSoftCsvGeneralLedgerImporter().Import(file.Path);
+        string path = Path.Combine(
+            directory,
+            "HL_KNIHA_00323233_202512.csv");
 
-        Assert.Equal("00323233", result.Ico);
-        Assert.Equal("Mesto Medzilaborce", result.CompanyName);
-        Assert.Equal(2025, result.FiscalYear);
-        Assert.Equal(12, result.ThroughMonth);
-        Assert.Equal("12/2025", result.PeriodHeader);
-        Assert.Equal(2, result.Rows.Count);
+        try
+        {
+            File.WriteAllLines(
+                path,
+                new[]
+                {
+                    "Mesto Medzilaborce – Hlavná kniha 2025;;;;;;;;",
+                    "Zdroj: HK2025.pdf • obdobie 00/2025 – 12/2025 • všetkých 16 strán v pôvodnom poradí;;;;;;;;",
+                    "\"Zachované sú aj medzisúčty a kontrolný súčet z PDF; nesčítavajte ich spolu s analytickými účtami.\";;;;;;;;",
+                    ";;;;;;;;",
+                    "Účet;Názov účtu;Počiatočný stav (MD ? DAL);Obrat od začiatku roka – MD;Obrat od začiatku roka – DAL;Obrat za posledný mesiac – MD;Obrat za posledný mesiac – DAL;Zostatok účtu (MD ? DAL);Strana PDF",
+                    "021101;Stavby - MsÚ;15 640 744,63;214 292,68;5 405,46;;;15 849 631,85;1",
+                    "021;Stavby;15 640 744,63;214 292,68;5 405,46;;;15 849 631,85;1",
+                    "6**;MEDZISÚČET ZA TRIEDU;;250,00;6 155 070,73;;557 316,73;-6 154 820,73;16",
+                    "***;KONTROLNÝ SÚČET;;41 469 921,86;41 469 921,86;5 672 760,86;5 672 760,86;;16"
+                },
+                Encoding.GetEncoding(1250));
 
-        Assert.Equal("602205", result.Rows[0].AccountCode);
-        Assert.Equal(5229.6m, result.Rows[0].AnnualDebitTurnover);
-        Assert.Equal(432m, result.Rows[0].PeriodCreditTurnover);
+            GeneralLedgerImport result =
+                new IfoSoftCsvGeneralLedgerImporter().Import(path);
+
+            Assert.Equal("00323233", result.Ico);
+            Assert.Equal("Mesto Medzilaborce", result.CompanyName);
+            Assert.Equal(2025, result.FiscalYear);
+            Assert.Equal(12, result.ExportStage);
+            Assert.Equal(12, result.ThroughMonth);
+            Assert.Equal("12/2025", result.PeriodHeader);
+
+            GeneralLedgerRow row = Assert.Single(result.Rows);
+
+            Assert.Equal("021", row.SyntheticCode);
+            Assert.Equal("101", row.AnalyticalCode);
+            Assert.Equal("021101", row.AccountCode);
+            Assert.Equal("Stavby - MsÚ", row.AccountName);
+            Assert.Equal(15640744.63m, row.OpeningDebit);
+            Assert.Equal(0m, row.OpeningCredit);
+            Assert.Equal(214292.68m, row.AnnualDebitTurnover);
+            Assert.Equal(5405.46m, row.AnnualCreditTurnover);
+            Assert.Equal(15849631.85m, row.ClosingDebit);
+            Assert.Equal(0m, row.ClosingCredit);
+            Assert.Equal(6, row.SourceRecordNumber);
+        }
+        finally
+        {
+            if (File.Exists(path))
+                File.Delete(path);
+
+            if (Directory.Exists(directory))
+                Directory.Delete(directory);
+        }
     }
 
     [Fact]

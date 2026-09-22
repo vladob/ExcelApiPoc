@@ -13,10 +13,25 @@ namespace ExcelApiPoc.AccountingImport.Services.IfoSoft
 {
     public sealed class IfoSoftCsvGeneralLedgerImporter : IGeneralLedgerImporter
     {
+        private const decimal AmountTolerance = 0.01m;
+
         private static readonly string[] FixedHeaders =
         {
             "Syn", "Ana", "Typ", "P", "Odd", "Polozka", "KZdroja", "Program",
             "Stred", "Zakaz", "Nazov uctu", "Poc_M", "Poc_D", "Roc_M", "Roc_D"
+        };
+
+        private static readonly string[] CompactHeaders =
+        {
+            "Účet",
+            "Názov účtu",
+            "Počiatočný stav (MD ? DAL)",
+            "Obrat od začiatku roka – MD",
+            "Obrat od začiatku roka – DAL",
+            "Obrat za posledný mesiac – MD",
+            "Obrat za posledný mesiac – DAL",
+            "Zostatok účtu (MD ? DAL)",
+            "Strana PDF"
         };
 
         public bool CanImport(
@@ -59,7 +74,21 @@ namespace ExcelApiPoc.AccountingImport.Services.IfoSoft
                     .Where(record => !IsBlankRecord(record))
                     .ToList();
 
-            ResolveLayout(
+            if (TryImportCompactLedger(
+                    filePath,
+                    records,
+                    result))
+            {
+                if (result.Rows.Count == 0)
+                {
+                    throw new InvalidDataException(
+                        "The general ledger does not contain any analytical rows.");
+                }
+
+                return result;
+            }
+
+            ResolveStandardLayout(
                 records,
                 result,
                 out IReadOnlyList<CsvRecord> dataRecords);
@@ -122,7 +151,7 @@ namespace ExcelApiPoc.AccountingImport.Services.IfoSoft
             return result;
         }
 
-        private static void ResolveLayout(
+        private static void ResolveStandardLayout(
             IReadOnlyList<CsvRecord> records,
             GeneralLedgerImport result,
             out IReadOnlyList<CsvRecord> dataRecords)
@@ -133,30 +162,17 @@ namespace ExcelApiPoc.AccountingImport.Services.IfoSoft
                     "The IfoSoft general ledger does not contain enough records.");
             }
 
-            if (LooksLikeHeader(records[2]))
+            if (!LooksLikeHeader(records[2]))
             {
-                ParseEntity(records[0], result);
-                ParseTitle(records[1], result);
-                ValidateHeader(records[2], result);
-                dataRecords = records.Skip(3).ToList();
-                return;
+                throw new InvalidDataException(
+                    "The IfoSoft general-ledger metadata/header layout " +
+                    "was not recognized.");
             }
 
-            int last = records.Count - 1;
-
-            if (last >= 2 &&
-                LooksLikeHeader(records[last - 2]))
-            {
-                ValidateHeader(records[last - 2], result);
-                ParseEntity(records[last - 1], result);
-                ParseTitle(records[last], result);
-                dataRecords = records.Take(last - 2).ToList();
-                return;
-            }
-
-            throw new InvalidDataException(
-                "The IfoSoft general-ledger metadata/header layout " +
-                "was not recognized.");
+            ParseEntity(records[0], result);
+            ParseTitle(records[1], result);
+            ValidateHeader(records[2], result);
+            dataRecords = records.Skip(3).ToList();
         }
 
         private static bool LooksLikeHeader(CsvRecord record)
@@ -191,6 +207,354 @@ namespace ExcelApiPoc.AccountingImport.Services.IfoSoft
                 record.Fields.All(string.IsNullOrWhiteSpace);
         }
 
+        private static bool TryImportCompactLedger(
+            string filePath,
+            IReadOnlyList<CsvRecord> records,
+            GeneralLedgerImport result)
+        {
+            int headerIndex = FindCompactHeaderIndex(records);
+
+            if (headerIndex < 0)
+                return false;
+
+            if (!AccountingFileNameMetadataParser.TryParse(
+                    filePath,
+                    out AccountingFileNameMetadata metadata) ||
+                metadata.DocumentKind !=
+                    AccountingSourceDocumentKind.GeneralLedger)
+            {
+                throw new InvalidDataException(
+                    "The compact IfoSoft general-ledger CSV requires " +
+                    "a filename in the form " +
+                    "'HL_KNIHA_<IČO>_<YYYY>[<stage>].csv'.");
+            }
+
+            result.Ico = metadata.Ico;
+            result.FiscalYear = metadata.FiscalYear;
+            result.ExportStage = metadata.ExportStage;
+
+            ApplyCompactPreamble(
+                records.Take(headerIndex).ToList(),
+                result);
+
+            int throughMonth =
+                result.ThroughMonth > 0
+                    ? result.ThroughMonth
+                    : metadata.ExportStage ?? 12;
+
+            if (throughMonth < 1 || throughMonth > 12)
+            {
+                throw new InvalidDataException(
+                    "The compact IfoSoft general ledger contains " +
+                    "an invalid accounting period.");
+            }
+
+            result.ThroughMonth = throughMonth;
+            result.PeriodHeader =
+                throughMonth.ToString(
+                    CultureInfo.InvariantCulture) +
+                "/" +
+                result.FiscalYear.ToString(
+                    CultureInfo.InvariantCulture);
+
+            int sequence = 0;
+
+            for (int index = headerIndex + 1;
+                 index < records.Count;
+                 index++)
+            {
+                CsvRecord source = records[index];
+
+                if (source.Fields.Length != CompactHeaders.Length)
+                {
+                    throw new InvalidDataException(
+                        source.Location +
+                        ": expected " +
+                        CompactHeaders.Length +
+                        " fields in the compact IfoSoft general ledger, " +
+                        "but found " +
+                        source.Fields.Length + ".");
+                }
+
+                string accountCode =
+                    AccountCodeNormalizer.Normalize(
+                        source.Fields[0]);
+
+                if (!IsCompactAnalyticalAccount(accountCode))
+                    continue;
+
+                decimal openingNet =
+                    ParseCompactAmount(
+                        source.Fields[2],
+                        source.Location);
+
+                decimal annualDebit =
+                    ParseCompactAmount(
+                        source.Fields[3],
+                        source.Location);
+
+                decimal annualCredit =
+                    ParseCompactAmount(
+                        source.Fields[4],
+                        source.Location);
+
+                decimal periodDebit =
+                    ParseCompactAmount(
+                        source.Fields[5],
+                        source.Location);
+
+                decimal periodCredit =
+                    ParseCompactAmount(
+                        source.Fields[6],
+                        source.Location);
+
+                decimal closingNet =
+                    ParseCompactAmount(
+                        source.Fields[7],
+                        source.Location);
+
+                decimal calculatedClosing =
+                    openingNet +
+                    annualDebit -
+                    annualCredit;
+
+                if (Math.Abs(
+                        calculatedClosing -
+                        closingNet) >
+                    AmountTolerance)
+                {
+                    throw new InvalidDataException(
+                        source.Location +
+                        ": account '" +
+                        accountCode +
+                        "' has inconsistent opening, turnover, " +
+                        "and closing values.");
+                }
+
+                string accountName =
+                    Normalize(
+                        source.Fields[1],
+                        result);
+
+                sequence++;
+
+                result.Rows.Add(
+                    new GeneralLedgerRow
+                    {
+                        SequenceNumber = sequence,
+                        SourceRecordNumber =
+                            source.StartLineNumber,
+                        SyntheticCode =
+                            accountCode.Substring(0, 3),
+                        AnalyticalCode =
+                            accountCode.Substring(3),
+                        AccountCode = accountCode,
+                        AccountName = accountName,
+                        OpeningDebit =
+                            openingNet > 0m
+                                ? openingNet
+                                : 0m,
+                        OpeningCredit =
+                            openingNet < 0m
+                                ? -openingNet
+                                : 0m,
+                        AnnualDebitTurnover =
+                            annualDebit,
+                        AnnualCreditTurnover =
+                            annualCredit,
+                        PeriodDebitTurnover =
+                            periodDebit,
+                        PeriodCreditTurnover =
+                            periodCredit,
+                        ClosingDebit =
+                            closingNet > 0m
+                                ? closingNet
+                                : 0m,
+                        ClosingCredit =
+                            closingNet < 0m
+                                ? -closingNet
+                                : 0m,
+                        Plan = 0m
+                    });
+            }
+
+            return true;
+        }
+
+        private static int FindCompactHeaderIndex(
+            IReadOnlyList<CsvRecord> records)
+        {
+            if (records == null)
+                return -1;
+
+            for (int index = 0;
+                 index < records.Count;
+                 index++)
+            {
+                CsvRecord record = records[index];
+
+                if (record?.Fields == null ||
+                    record.Fields.Length !=
+                        CompactHeaders.Length)
+                {
+                    continue;
+                }
+
+                bool matches = true;
+
+                for (int column = 0;
+                     column < CompactHeaders.Length;
+                     column++)
+                {
+                    if (!string.Equals(
+                            record.Fields[column].Trim(),
+                            CompactHeaders[column],
+                            StringComparison.OrdinalIgnoreCase))
+                    {
+                        matches = false;
+                        break;
+                    }
+                }
+
+                if (matches)
+                    return index;
+            }
+
+            return -1;
+        }
+
+        private static void ApplyCompactPreamble(
+            IReadOnlyList<CsvRecord> preamble,
+            GeneralLedgerImport result)
+        {
+            foreach (CsvRecord record in preamble)
+            {
+                string value =
+                    string.Join(
+                        " ",
+                        record.Fields
+                            .Where(
+                                field =>
+                                    !string.IsNullOrWhiteSpace(field))
+                            .Select(field => field.Trim()));
+
+                if (value.Length == 0)
+                    continue;
+
+                Match titleMatch = Regex.Match(
+                    value,
+                    @"^(?<name>.+?)\s+[–-]\s+" +
+                    @"(?:Hlavná|Hlavna)\s+kniha\s+" +
+                    @"(?<year>\d{4})$",
+                    RegexOptions.IgnoreCase);
+
+                if (titleMatch.Success)
+                {
+                    int year = int.Parse(
+                        titleMatch.Groups["year"].Value,
+                        CultureInfo.InvariantCulture);
+
+                    if (year != result.FiscalYear)
+                    {
+                        throw new InvalidDataException(
+                            record.Location +
+                            ": fiscal year in the compact ledger title " +
+                            "does not match the filename.");
+                    }
+
+                    result.CompanyName =
+                        titleMatch.Groups["name"].Value.Trim();
+
+                    continue;
+                }
+
+                Match periodMatch = Regex.Match(
+                    value,
+                    @"obdobie\s+\d{1,2}/(?<fromYear>\d{4})" +
+                    @".*?–\s*(?<month>\d{1,2})/" +
+                    @"(?<year>\d{4})",
+                    RegexOptions.IgnoreCase);
+
+                if (!periodMatch.Success)
+                    continue;
+
+                int periodYear = int.Parse(
+                    periodMatch.Groups["year"].Value,
+                    CultureInfo.InvariantCulture);
+
+                int fromYear = int.Parse(
+                    periodMatch.Groups["fromYear"].Value,
+                    CultureInfo.InvariantCulture);
+
+                int month = int.Parse(
+                    periodMatch.Groups["month"].Value,
+                    CultureInfo.InvariantCulture);
+
+                if (periodYear != result.FiscalYear ||
+                    fromYear != result.FiscalYear ||
+                    month < 1 ||
+                    month > 12)
+                {
+                    throw new InvalidDataException(
+                        record.Location +
+                        ": accounting period in the compact ledger " +
+                        "does not match the filename.");
+                }
+
+                result.ThroughMonth = month;
+            }
+        }
+
+        private static bool IsCompactAnalyticalAccount(
+            string accountCode)
+        {
+            if (string.IsNullOrWhiteSpace(accountCode) ||
+                accountCode.Length <= 3)
+            {
+                return false;
+            }
+
+            for (int index = 0;
+                 index < accountCode.Length;
+                 index++)
+            {
+                if (!char.IsDigit(accountCode[index]))
+                    return false;
+            }
+
+            return true;
+        }
+
+        private static decimal ParseCompactAmount(
+            string value,
+            string location)
+        {
+            string normalized =
+                (value ?? string.Empty)
+                    .Trim()
+                    .Replace("\u00A0", string.Empty)
+                    .Replace(" ", string.Empty);
+
+            if (normalized.Length == 0)
+                return 0m;
+
+            if (!decimal.TryParse(
+                    normalized,
+                    NumberStyles.Number |
+                    NumberStyles.AllowLeadingSign,
+                    CultureInfo.GetCultureInfo("sk-SK"),
+                    out decimal amount))
+            {
+                throw new InvalidDataException(
+                    location +
+                    ": '" +
+                    normalized +
+                    "' is not a valid amount.");
+            }
+
+            return amount;
+        }
+
         private static void ParseEntity(CsvRecord record, GeneralLedgerImport result)
         {
             string value = FindSingleValue(record);
@@ -217,21 +581,25 @@ namespace ExcelApiPoc.AccountingImport.Services.IfoSoft
             for (int i = 0; i < FixedHeaders.Length; i++)
                 if (!string.Equals(record.Fields[i].Trim(), FixedHeaders[i], StringComparison.OrdinalIgnoreCase))
                     throw new InvalidDataException(record.Location + ": expected column '" + FixedHeaders[i] + "' at position " + (i + 1) + ".");
-            string debitPeriod = record.Fields[15].Trim();
-            string creditPeriod = record.Fields[16].Trim();
+            string period = record.Fields[15].Trim();
 
-            if (!TryParsePeriod(
-                    debitPeriod,
-                    out int debitMonth,
-                    out int debitYear) ||
-                !TryParsePeriod(
-                    creditPeriod,
-                    out int creditMonth,
-                    out int creditYear) ||
-                debitMonth != result.ThroughMonth ||
-                creditMonth != result.ThroughMonth ||
-                debitYear != result.FiscalYear ||
-                creditYear != result.FiscalYear ||
+            Match periodMatch = Regex.Match(
+                period,
+                @"^(?<month>\d{1,2})/(?<year>\d{4})$");
+
+            if (!periodMatch.Success ||
+                int.Parse(
+                    periodMatch.Groups["month"].Value,
+                    CultureInfo.InvariantCulture) !=
+                    result.ThroughMonth ||
+                int.Parse(
+                    periodMatch.Groups["year"].Value,
+                    CultureInfo.InvariantCulture) !=
+                    result.FiscalYear ||
+                !string.Equals(
+                    record.Fields[16].Trim(),
+                    period,
+                    StringComparison.OrdinalIgnoreCase) ||
                 !string.Equals(
                     record.Fields[17].Trim(),
                     "Kon_M",
@@ -250,56 +618,7 @@ namespace ExcelApiPoc.AccountingImport.Services.IfoSoft
                     ": invalid period or closing-balance columns.");
             }
 
-            result.PeriodHeader =
-                result.ThroughMonth.ToString(
-                    CultureInfo.InvariantCulture) +
-                "/" +
-                result.FiscalYear.ToString(
-                    CultureInfo.InvariantCulture);
-        }
-
-        private static bool TryParsePeriod(
-            string value,
-            out int month,
-            out int year)
-        {
-            month = 0;
-            year = 0;
-
-            string normalized =
-                (value ?? string.Empty).Trim();
-
-            Match fullYear = Regex.Match(
-                normalized,
-                @"^(?<month>\d{1,2})/(?<year>\d{4})$");
-
-            if (fullYear.Success)
-            {
-                month = int.Parse(
-                    fullYear.Groups["month"].Value,
-                    CultureInfo.InvariantCulture);
-                year = int.Parse(
-                    fullYear.Groups["year"].Value,
-                    CultureInfo.InvariantCulture);
-                return month >= 1 && month <= 12;
-            }
-
-            Match shortYear = Regex.Match(
-                normalized,
-                @"^(?<month>\d{1,2})\.(?<year>\d{2})$");
-
-            if (!shortYear.Success)
-                return false;
-
-            month = int.Parse(
-                shortYear.Groups["month"].Value,
-                CultureInfo.InvariantCulture);
-
-            year = 2000 + int.Parse(
-                shortYear.Groups["year"].Value,
-                CultureInfo.InvariantCulture);
-
-            return month >= 1 && month <= 12;
+            result.PeriodHeader = period;
         }
 
         private static decimal ParseAmount(string value, string location)
