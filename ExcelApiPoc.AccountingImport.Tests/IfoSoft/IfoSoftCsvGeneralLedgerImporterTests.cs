@@ -70,6 +70,43 @@ public sealed class IfoSoftCsvGeneralLedgerImporterTests
         Assert.Equal(62087m, row.ClosingDebit);
     }
 
+
+    [Fact]
+    public void Import_ReportsFileNameAndLineForUnrecoverableMalformedQuote()
+    {
+        using var file = new TemporaryCsvFile(
+        [
+            Quote("00325791 Mesto Sobrance"),
+            Quote("Hlavná kniha k 12/2024"),
+            Csv(
+                "Syn", "Ana", "Typ", "P", "Odd", "Polozka", "KZdroja",
+                "Program", "Stred", "Zakaz", "Nazov uctu", "Poc_M",
+                "Poc_D", "Roc_M", "Roc_D", "12/2024", "12/2024",
+                "Kon_M", "Kon_D", "Plan"),
+            "\"221\";\"01\";\"B\";\"broken"
+        ]);
+
+        InvalidDataException exception =
+            Assert.Throws<InvalidDataException>(
+                () =>
+                    new IfoSoftCsvGeneralLedgerImporter()
+                        .Import(file.Path));
+
+        Assert.Contains(
+            Path.GetFileName(file.Path),
+            exception.Message);
+
+        Assert.Contains(
+            "line 4",
+            exception.Message,
+            StringComparison.OrdinalIgnoreCase);
+
+        Assert.Contains(
+            "malformed quoted field",
+            exception.Message,
+            StringComparison.OrdinalIgnoreCase);
+    }
+
     [Fact]
     public void Import_ReportsInconsistentPeriodColumns()
     {

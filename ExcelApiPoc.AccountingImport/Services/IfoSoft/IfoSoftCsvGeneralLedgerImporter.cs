@@ -199,7 +199,8 @@ namespace ExcelApiPoc.AccountingImport.Services.IfoSoft
                                 out fields))
                         {
                             throw new InvalidDataException(
-                                "Line " + line +
+                                "File '" + Path.GetFileName(path) +
+                                "', line " + line +
                                 ": malformed quoted field could not be " +
                                 "resolved to the 20-column IfoSoft " +
                                 "general-ledger schema.");
@@ -320,7 +321,7 @@ namespace ExcelApiPoc.AccountingImport.Services.IfoSoft
                     normalized.Length - 2);
             }
 
-            return normalized.Replace("""", """);
+            return normalized.Replace("\"\"", "\"");
         }
 
         private sealed class CsvRecord
