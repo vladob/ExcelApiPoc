@@ -31,6 +31,45 @@ public sealed class AccountingJournalDetectionServiceTests
         Assert.Null(result);
     }
 
+
+    [Fact]
+    public void TryDetect_DetectsMkSoftJournalWhenConfigured()
+    {
+        string? path = Environment.GetEnvironmentVariable(
+            "MKSOFT_AJ_TEST_FILE");
+
+        if (string.IsNullOrWhiteSpace(path))
+            return;
+
+        bool detected = AccountingJournalDetectionService.TryDetect(
+            path,
+            out JournalDetectionResult result);
+
+        Assert.True(detected);
+        Assert.NotNull(result);
+        Assert.Equal("Excel", result.TechnicalType);
+        Assert.Equal("MkSoft", result.AccountingFormat);
+        Assert.Equal("35581638", result.Ico);
+        Assert.Equal(2024, result.FiscalYear);
+    }
+
+    [Fact]
+    public void TryDetect_DoesNotTreatMkSoftLedgerAsJournalWhenConfigured()
+    {
+        string? path = Environment.GetEnvironmentVariable(
+            "MKSOFT_GL_TEST_FILE");
+
+        if (string.IsNullOrWhiteSpace(path))
+            return;
+
+        bool detected = AccountingJournalDetectionService.TryDetect(
+            path,
+            out JournalDetectionResult result);
+
+        Assert.False(detected);
+        Assert.Null(result);
+    }
+
     [Fact]
     public void TryDetect_DetectsUrbisJournal()
     {

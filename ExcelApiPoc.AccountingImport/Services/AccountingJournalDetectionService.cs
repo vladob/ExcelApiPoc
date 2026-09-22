@@ -1,6 +1,7 @@
 ﻿using ExcelApiPoc.AccountingImport.Models;
 using ExcelApiPoc.AccountingImport.Services.IfoSoft;
 using ExcelApiPoc.AccountingImport.Services.Ives;
+using ExcelApiPoc.AccountingImport.Services.MkSoft;
 using ExcelApiPoc.AccountingImport.Services.SoftipMop;
 using ExcelApiPoc.AccountingImport.Services.Urbis;
 using System;
@@ -29,6 +30,11 @@ namespace ExcelApiPoc.AccountingImport.Services
                 return true;
             }
 
+            if (TryDetectMkSoft(filePath, out result))
+            {
+                return true;
+            }
+
             if (SoftipMopExcelJournalImporter.TryDetect(
                     filePath,
                     out int softipMopFiscalYear))
@@ -50,6 +56,50 @@ namespace ExcelApiPoc.AccountingImport.Services
                 {
                     TechnicalType = "Excel",
                     AccountingFormat = "Urbis",
+                    Ico = sourceFile.Ico,
+                    FiscalYear = sourceFile.FiscalYear
+                };
+
+                return true;
+            }
+            catch (ArgumentException)
+            {
+                return false;
+            }
+            catch (InvalidDataException)
+            {
+                return false;
+            }
+            catch (IOException)
+            {
+                return false;
+            }
+        }
+
+        private static bool TryDetectMkSoft(
+            string filePath,
+            out JournalDetectionResult result)
+        {
+            result = null;
+
+            try
+            {
+                MkSoftSourceFile sourceFile =
+                    MkSoftSourceFile.ParseAccountingJournal(filePath);
+
+                MkSoftWorkbookInspection inspection =
+                    MkSoftWorkbookInspector.Inspect(filePath);
+
+                if (inspection.Kind !=
+                    MkSoftWorkbookKind.AccountingJournal)
+                {
+                    return false;
+                }
+
+                result = new JournalDetectionResult
+                {
+                    TechnicalType = "Excel",
+                    AccountingFormat = "MkSoft",
                     Ico = sourceFile.Ico,
                     FiscalYear = sourceFile.FiscalYear
                 };
