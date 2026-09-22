@@ -248,10 +248,27 @@ namespace ExcelApiPoc.AccountingImport.Services.IfoSoft
         private static DateTime ParseDate(string value, string sourceLocation)
         {
             string normalized = (value ?? string.Empty).Trim();
-            if (!DateTime.TryParseExact(normalized, "dd.MM.yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime result))
+
+            string[] supportedFormats =
             {
-                throw new InvalidDataException($"{sourceLocation}: '{normalized}' is not " + "a valid IfoSoft posting date.");
+                "d.M.yyyy",
+                "dd.MM.yyyy",
+                "d.MM.yyyy",
+                "dd.M.yyyy"
+            };
+
+            if (!DateTime.TryParseExact(
+                    normalized,
+                    supportedFormats,
+                    CultureInfo.InvariantCulture,
+                    DateTimeStyles.None,
+                    out DateTime result))
+            {
+                throw new InvalidDataException(
+                    sourceLocation + ": '" + normalized +
+                    "' is not a valid IfoSoft posting date.");
             }
+
             return result;
         }
 
@@ -270,37 +287,54 @@ namespace ExcelApiPoc.AccountingImport.Services.IfoSoft
             return result;
         }
 
-        private static void ValidateEntityRecord(CsvRecord record, JournalImport journalImport)
+        private static void ValidateEntityRecord(
+            CsvRecord record,
+            JournalImport journalImport)
         {
-            if (record.Fields.Length != 1)
-            {
-                throw new InvalidDataException($"{record.Location}: invalid IfoSoft " + "entity-information record.");
-            }
-            string value = record.Fields[0].Trim();
-            Match match = Regex.Match(value, @"^(?<ico>\d{8})(?:\s+(?<name>.*))?$");
+            string value = FindSingleValue(
+                record,
+                "entity-information record");
+
+            Match match = Regex.Match(
+                value,
+                @"^(?<ico>\d{8})(?:\s+(?<name>.*))?$");
 
             if (!match.Success)
             {
-                throw new InvalidDataException($"{record.Location}: IČO was not found in " + "the IfoSoft entity-information record.");
+                throw new InvalidDataException(
+                    record.Location +
+                    ": IČO was not found in the IfoSoft " +
+                    "entity-information record.");
             }
+
             journalImport.Ico = match.Groups["ico"].Value;
 
             if (match.Groups["name"].Success)
             {
-                journalImport.CompanyName = match.Groups["name"].Value.Trim();
+                journalImport.CompanyName =
+                    match.Groups["name"].Value.Trim();
             }
         }
 
         private static void ValidateTitleRecord(CsvRecord record)
         {
-            if (record.Fields.Length != 1)
+            string title = FindSingleValue(
+                record,
+                "journal-title record");
+
+            if (!string.Equals(
+                    title,
+                    "Uctovny dennik",
+                    StringComparison.OrdinalIgnoreCase) &&
+                !string.Equals(
+                    title,
+                    "Účtovný denník",
+                    StringComparison.OrdinalIgnoreCase))
             {
-                throw new InvalidDataException($"{record.Location}: invalid IfoSoft " + "journal-title record.");
-            }
-            string title = record.Fields[0].Trim();
-            if (!string.Equals(title, "Uctovny dennik", StringComparison.OrdinalIgnoreCase) && !string.Equals(title, "Účtovný denník", StringComparison.OrdinalIgnoreCase))
-            {
-                throw new InvalidDataException($"{record.Location}: expected the IfoSoft " + "journal title, but found '" + title + "'.");
+                throw new InvalidDataException(
+                    record.Location +
+                    ": expected the IfoSoft journal title, but found '" +
+                    title + "'.");
             }
         }
 
