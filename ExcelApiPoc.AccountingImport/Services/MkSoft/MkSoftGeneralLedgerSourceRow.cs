@@ -1,14 +1,20 @@
+using System;
+
 namespace ExcelApiPoc.AccountingImport.Services.MkSoft
 {
     public sealed class MkSoftGeneralLedgerSourceRow
     {
         public int SourceRowNumber { get; set; }
+        public string Id { get; set; }
+        public DateTime? PeriodFrom { get; set; }
+        public DateTime? PeriodTo { get; set; }
         public string Account { get; set; }
         public string AccountName { get; set; }
         public string SyntheticAccount { get; set; }
         public string SyntheticAccountName { get; set; }
         public string AccountClass { get; set; }
         public string AccountClassName { get; set; }
+        public string Currency { get; set; }
         public string CostCenter { get; set; }
         public string Order { get; set; }
         public string TurnoverCode { get; set; }
