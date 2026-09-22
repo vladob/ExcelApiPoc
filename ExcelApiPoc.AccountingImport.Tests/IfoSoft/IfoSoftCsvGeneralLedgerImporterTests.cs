@@ -118,6 +118,8 @@ public sealed class IfoSoftCsvGeneralLedgerImporterTests
             Guid.NewGuid().ToString("N"));
 
         Directory.CreateDirectory(directory);
+        Encoding.RegisterProvider(
+            CodePagesEncodingProvider.Instance);
 
         string path = Path.Combine(
             directory,
