@@ -92,6 +92,78 @@ public sealed class AccountingImportCoordinatorTests
         Assert.Equal(0m, reconciliation.ClosingBalanceDifference);
     }
 
+
+    [Fact]
+    public void Import_LoadsAndReconcilesMatchingMkSoftJournalAndLedgerWhenConfigured()
+    {
+        string? journalPath = Environment.GetEnvironmentVariable(
+            "MKSOFT_AJ_TEST_FILE");
+        string? ledgerPath = Environment.GetEnvironmentVariable(
+            "MKSOFT_GL_TEST_FILE");
+
+        if (string.IsNullOrWhiteSpace(journalPath) ||
+            string.IsNullOrWhiteSpace(ledgerPath))
+        {
+            return;
+        }
+
+        AccountingImportPackage result =
+            AccountingImportCoordinator
+                .CreateDefault()
+                .Import(
+                    new AccountingImportRequest
+                    {
+                        AccountingFormat = "MkSoft",
+                        JournalFilePath = journalPath,
+                        GeneralLedgerFilePath = ledgerPath,
+                        ExpectedIco = "35581638",
+                        ExpectedFiscalYear = 2024
+                    });
+
+        Assert.Equal("MkSoft", result.AccountingFormat);
+        Assert.Equal("35581638", result.Ico);
+        Assert.Equal(2024, result.FiscalYear);
+        Assert.Null(result.ExportStage);
+
+        Assert.Equal(5654, result.Journal.Rows.Count);
+        Assert.Equal(191, result.GeneralLedger.Rows.Count);
+        Assert.True(result.HasGeneralLedger);
+
+        JournalLedgerReconciliationResult reconciliation =
+            Assert.IsType<JournalLedgerReconciliationResult>(
+                result.JournalLedgerReconciliation);
+
+        Assert.True(reconciliation.JournalContainsOpeningRecords);
+        Assert.True(reconciliation.JournalContainsClosingRecords);
+        Assert.Equal(
+            OpeningBalanceSource.Journal,
+            reconciliation.OpeningBalanceSource);
+
+        Assert.Equal(193, reconciliation.JournalAccountCount);
+        Assert.Equal(191, reconciliation.LedgerAccountCount);
+        Assert.Equal(2, reconciliation.JournalOnlyAccountCount);
+        Assert.Equal(0, reconciliation.LedgerOnlyAccountCount);
+        Assert.Equal(191, reconciliation.ReconciledAccountCount);
+        Assert.Equal(2, reconciliation.DifferentAccountCount);
+        Assert.Equal(0m, reconciliation.ClosingBalanceDifference);
+
+        Assert.Contains(
+            reconciliation.Accounts,
+            account =>
+                account.AccountCode == "501731" &&
+                account.HasJournalActivity &&
+                !account.HasGeneralLedgerAccount &&
+                account.ClosingBalanceDifference == 0m);
+
+        Assert.Contains(
+            reconciliation.Accounts,
+            account =>
+                account.AccountCode == "518701" &&
+                account.HasJournalActivity &&
+                !account.HasGeneralLedgerAccount &&
+                account.ClosingBalanceDifference == 0m);
+    }
+
     [Fact]
     public void Import_LoadsMatchingUrbisJournalAndLedger()
     {
