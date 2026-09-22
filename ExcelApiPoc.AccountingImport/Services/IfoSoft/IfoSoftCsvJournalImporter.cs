@@ -304,6 +304,41 @@ namespace ExcelApiPoc.AccountingImport.Services.IfoSoft
             }
         }
 
+        private static string FindSingleValue(
+            CsvRecord record,
+            string description)
+        {
+            string found = null;
+
+            foreach (string field in record.Fields)
+            {
+                if (string.IsNullOrWhiteSpace(field))
+                    continue;
+
+                if (found != null)
+                {
+                    throw new InvalidDataException(
+                        record.Location +
+                        ": invalid IfoSoft " +
+                        description +
+                        "; expected one non-empty value.");
+                }
+
+                found = field.Trim();
+            }
+
+            if (found == null)
+            {
+                throw new InvalidDataException(
+                    record.Location +
+                    ": invalid IfoSoft " +
+                    description +
+                    "; no value was found.");
+            }
+
+            return found;
+        }
+
         private static void ValidateHeaderRecord(CsvRecord record)
         {
             if (record.Fields.Length != ExpectedHeaders.Length)

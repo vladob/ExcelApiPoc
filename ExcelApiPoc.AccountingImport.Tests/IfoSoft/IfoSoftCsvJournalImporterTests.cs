@@ -57,6 +57,33 @@ public sealed class IfoSoftCsvJournalImporterTests
         Assert.Equal(2025, result.FiscalYear);
     }
 
+
+    [Fact]
+    public void Import_AcceptsMedzilaborcePaddedMetadataVariant()
+    {
+        using var file = new TemporaryCsvFile(
+        [
+            "00323233 Mesto Medzilaborce;;;;;;;;;;;;;;;;",
+            "Uctovny dennik;;;;;;;;;;;;;;;;",
+            string.Join(";", Headers),
+            "CO;9000;31.1.2025;príspevok zamestnávateľa na stravu RN-MŠ GS;527104;;;900/1;;244,8;395204;;637014;111;900/1;9111;244,8"
+        ]);
+
+        JournalImport result =
+            new IfoSoftCsvJournalImporter().Import(file.Path);
+
+        Assert.Equal("00323233", result.Ico);
+        Assert.Equal("Mesto Medzilaborce", result.CompanyName);
+        Assert.Equal(2025, result.FiscalYear);
+
+        JournalRow row = Assert.Single(result.Rows);
+        Assert.Equal(new DateTime(2025, 1, 31), row.PostingDate);
+        Assert.Equal("527104", row.DebitAccount);
+        Assert.Equal(244.8m, row.DebitAmount);
+        Assert.Equal("395204", row.CreditAccount);
+        Assert.Equal(244.8m, row.CreditAmount);
+    }
+
     [Fact]
     public void Import_MapsRowsAndPreservesRecordSemantics()
     {

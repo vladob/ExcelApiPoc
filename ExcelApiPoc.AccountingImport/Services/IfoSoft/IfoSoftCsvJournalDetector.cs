@@ -94,7 +94,7 @@ namespace ExcelApiPoc.AccountingImport.Services.IfoSoft
             }
 
             string normalizedTitle =
-                NormalizeField(titleLine);
+                FindSingleValue(titleLine);
 
             if (!string.Equals(
                     normalizedTitle,
@@ -142,7 +142,7 @@ namespace ExcelApiPoc.AccountingImport.Services.IfoSoft
             }
 
             string normalized =
-                NormalizeField(entityLine).Trim();
+                FindSingleValue(entityLine).Trim();
 
             Match match = Regex.Match(
                 normalized,
@@ -200,6 +200,29 @@ namespace ExcelApiPoc.AccountingImport.Services.IfoSoft
                     return;
                 }
             }
+        }
+
+        private static string FindSingleValue(string line)
+        {
+            if (string.IsNullOrWhiteSpace(line))
+                return string.Empty;
+
+            string found = null;
+
+            foreach (string rawField in line.Split(';'))
+            {
+                string field = NormalizeField(rawField);
+
+                if (string.IsNullOrWhiteSpace(field))
+                    continue;
+
+                if (found != null)
+                    return string.Empty;
+
+                found = field;
+            }
+
+            return found ?? string.Empty;
         }
 
         private static string NormalizeField(string value)
