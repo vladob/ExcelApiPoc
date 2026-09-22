@@ -563,7 +563,7 @@ namespace ExcelApiPoc.AddIn.Forms
                             "An entity-specific accounting-framework export " +
                             "is currently supported for IfoSoft and IVES. " +
                             "Leave the Accounting framework field empty for " +
-                            "the current Urbis and Softip-MOP imports.");
+                            "other accounting formats.");
                     }
 
                     if (!string.Equals(accountingFrameworkImport.Ico, journalImport.Ico, StringComparison.Ordinal))
