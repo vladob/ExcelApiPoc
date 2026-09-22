@@ -107,6 +107,44 @@ public sealed class IfoSoftCsvGeneralLedgerImporterTests
             StringComparison.OrdinalIgnoreCase);
     }
 
+
+    [Fact]
+    public void Import_AcceptsFooterMetadataAndShortPeriodVariant()
+    {
+        string header = string.Join(
+            ";",
+            new[]
+            {
+                "Syn", "Ana", "Typ", "P", "Odd", "Polozka",
+                "KZdroja", "Program", "Stred", "Zakaz", "Nazov uctu",
+                "Poc_M", "Poc_D", "Roc_M", "Roc_D",
+                "12.25", "12.25", "Kon_M", "Kon_D", "Plan"
+            });
+
+        using var file = new TemporaryCsvFile(
+        [
+            "602;205;D;N;;;;;900/2;;Tržby Stravné-RN-ŠJ;;;;5229,6;;432;;5229,6;",
+            "799;817;;A;;;;;;;PODSÚVAHOVÉ ÚČTY-KD Borov-proj.;;2254,45;;;;;;2254,45;",
+            header,
+            ";;00323233 Mesto Medzilaborce;;;;;;;;;;;;;;;;;",
+            ";;Hlavna kniha k 12/2025;;;;;;;;;;;;;;;;;"
+        ]);
+
+        GeneralLedgerImport result =
+            new IfoSoftCsvGeneralLedgerImporter().Import(file.Path);
+
+        Assert.Equal("00323233", result.Ico);
+        Assert.Equal("Mesto Medzilaborce", result.CompanyName);
+        Assert.Equal(2025, result.FiscalYear);
+        Assert.Equal(12, result.ThroughMonth);
+        Assert.Equal("12/2025", result.PeriodHeader);
+        Assert.Equal(2, result.Rows.Count);
+
+        Assert.Equal("602205", result.Rows[0].AccountCode);
+        Assert.Equal(5229.6m, result.Rows[0].AnnualDebitTurnover);
+        Assert.Equal(432m, result.Rows[0].PeriodCreditTurnover);
+    }
+
     [Fact]
     public void Import_ReportsInconsistentPeriodColumns()
     {

@@ -54,45 +54,141 @@ namespace ExcelApiPoc.AccountingImport.Services.IfoSoft
                 ImportedAtUtc = DateTime.UtcNow
             };
 
-            using (IEnumerator<CsvRecord> records = ReadCsvRecords(filePath).GetEnumerator())
+            List<CsvRecord> records =
+                ReadCsvRecords(filePath)
+                    .Where(record => !IsBlankRecord(record))
+                    .ToList();
+
+            ResolveLayout(
+                records,
+                result,
+                out IReadOnlyList<CsvRecord> dataRecords);
+
+            int sequence = 0;
+
+            foreach (CsvRecord source in dataRecords)
             {
-                ParseEntity(ReadRequired(records, "entity-information record"), result);
-                ParseTitle(ReadRequired(records, "general-ledger title"), result);
-                ValidateHeader(ReadRequired(records, "general-ledger header"), result);
-                int sequence = 0;
-                while (records.MoveNext())
+                if (source.Fields.Length != 20)
                 {
-                    CsvRecord source = records.Current;
-                    if (source.Fields.Length == 1 && string.IsNullOrWhiteSpace(source.Fields[0])) continue;
-                    if (source.Fields.Length != 20)
-                        throw new InvalidDataException(source.Location + ": expected 20 fields, but found " + source.Fields.Length + ".");
-                    sequence++;
-                    string synthetic = Normalize(source.Fields[0], result);
-                    string analytical = Normalize(source.Fields[1], result);
-                    result.Rows.Add(new GeneralLedgerRow
-                    {
-                        SequenceNumber = sequence, SourceRecordNumber = source.StartLineNumber,
-                        SyntheticCode = synthetic, AnalyticalCode = analytical,
-                        AccountCode = AccountCodeNormalizer.Normalize(synthetic + analytical),
-                        Type = Normalize(source.Fields[2], result), P = Normalize(source.Fields[3], result),
-                        Section = Normalize(source.Fields[4], result), Item = Normalize(source.Fields[5], result),
-                        FundingSource = Normalize(source.Fields[6], result), Program = Normalize(source.Fields[7], result),
-                        CostCenter = Normalize(source.Fields[8], result), Order = Normalize(source.Fields[9], result),
-                        AccountName = Normalize(source.Fields[10], result),
-                        OpeningDebit = ParseAmount(source.Fields[11], source.Location),
-                        OpeningCredit = ParseAmount(source.Fields[12], source.Location),
-                        AnnualDebitTurnover = ParseAmount(source.Fields[13], source.Location),
-                        AnnualCreditTurnover = ParseAmount(source.Fields[14], source.Location),
-                        PeriodDebitTurnover = ParseAmount(source.Fields[15], source.Location),
-                        PeriodCreditTurnover = ParseAmount(source.Fields[16], source.Location),
-                        ClosingDebit = ParseAmount(source.Fields[17], source.Location),
-                        ClosingCredit = ParseAmount(source.Fields[18], source.Location),
-                        Plan = ParseAmount(source.Fields[19], source.Location)
-                    });
+                    throw new InvalidDataException(
+                        source.Location +
+                        ": expected 20 fields, but found " +
+                        source.Fields.Length + ".");
                 }
+
+                sequence++;
+                string synthetic = Normalize(source.Fields[0], result);
+                string analytical = Normalize(source.Fields[1], result);
+
+                result.Rows.Add(new GeneralLedgerRow
+                {
+                    SequenceNumber = sequence,
+                    SourceRecordNumber = source.StartLineNumber,
+                    SyntheticCode = synthetic,
+                    AnalyticalCode = analytical,
+                    AccountCode =
+                        AccountCodeNormalizer.Normalize(
+                            synthetic + analytical),
+                    Type = Normalize(source.Fields[2], result),
+                    P = Normalize(source.Fields[3], result),
+                    Section = Normalize(source.Fields[4], result),
+                    Item = Normalize(source.Fields[5], result),
+                    FundingSource = Normalize(source.Fields[6], result),
+                    Program = Normalize(source.Fields[7], result),
+                    CostCenter = Normalize(source.Fields[8], result),
+                    Order = Normalize(source.Fields[9], result),
+                    AccountName = Normalize(source.Fields[10], result),
+                    OpeningDebit =
+                        ParseAmount(source.Fields[11], source.Location),
+                    OpeningCredit =
+                        ParseAmount(source.Fields[12], source.Location),
+                    AnnualDebitTurnover =
+                        ParseAmount(source.Fields[13], source.Location),
+                    AnnualCreditTurnover =
+                        ParseAmount(source.Fields[14], source.Location),
+                    PeriodDebitTurnover =
+                        ParseAmount(source.Fields[15], source.Location),
+                    PeriodCreditTurnover =
+                        ParseAmount(source.Fields[16], source.Location),
+                    ClosingDebit =
+                        ParseAmount(source.Fields[17], source.Location),
+                    ClosingCredit =
+                        ParseAmount(source.Fields[18], source.Location),
+                    Plan =
+                        ParseAmount(source.Fields[19], source.Location)
+                });
             }
             if (result.Rows.Count == 0) throw new InvalidDataException("The general ledger does not contain any rows.");
             return result;
+        }
+
+        private static void ResolveLayout(
+            IReadOnlyList<CsvRecord> records,
+            GeneralLedgerImport result,
+            out IReadOnlyList<CsvRecord> dataRecords)
+        {
+            if (records == null || records.Count < 4)
+            {
+                throw new InvalidDataException(
+                    "The IfoSoft general ledger does not contain enough records.");
+            }
+
+            if (LooksLikeHeader(records[2]))
+            {
+                ParseEntity(records[0], result);
+                ParseTitle(records[1], result);
+                ValidateHeader(records[2], result);
+                dataRecords = records.Skip(3).ToList();
+                return;
+            }
+
+            int last = records.Count - 1;
+
+            if (last >= 2 &&
+                LooksLikeHeader(records[last - 2]))
+            {
+                ValidateHeader(records[last - 2], result);
+                ParseEntity(records[last - 1], result);
+                ParseTitle(records[last], result);
+                dataRecords = records.Take(last - 2).ToList();
+                return;
+            }
+
+            throw new InvalidDataException(
+                "The IfoSoft general-ledger metadata/header layout " +
+                "was not recognized.");
+        }
+
+        private static bool LooksLikeHeader(CsvRecord record)
+        {
+            if (record == null ||
+                record.Fields == null ||
+                record.Fields.Length != 20)
+            {
+                return false;
+            }
+
+            return
+                string.Equals(
+                    record.Fields[0].Trim(),
+                    "Syn",
+                    StringComparison.OrdinalIgnoreCase) &&
+                string.Equals(
+                    record.Fields[1].Trim(),
+                    "Ana",
+                    StringComparison.OrdinalIgnoreCase) &&
+                string.Equals(
+                    record.Fields[10].Trim(),
+                    "Nazov uctu",
+                    StringComparison.OrdinalIgnoreCase);
+        }
+
+        private static bool IsBlankRecord(CsvRecord record)
+        {
+            return
+                record == null ||
+                record.Fields == null ||
+                record.Fields.All(string.IsNullOrWhiteSpace);
         }
 
         private static void ParseEntity(CsvRecord record, GeneralLedgerImport result)
@@ -121,17 +217,89 @@ namespace ExcelApiPoc.AccountingImport.Services.IfoSoft
             for (int i = 0; i < FixedHeaders.Length; i++)
                 if (!string.Equals(record.Fields[i].Trim(), FixedHeaders[i], StringComparison.OrdinalIgnoreCase))
                     throw new InvalidDataException(record.Location + ": expected column '" + FixedHeaders[i] + "' at position " + (i + 1) + ".");
-            string period = record.Fields[15].Trim();
-            Match periodMatch = Regex.Match(period, @"^(?<month>\d{1,2})/(?<year>\d{4})$");
-            if (!periodMatch.Success ||
-                int.Parse(periodMatch.Groups["month"].Value, CultureInfo.InvariantCulture) != result.ThroughMonth ||
-                int.Parse(periodMatch.Groups["year"].Value, CultureInfo.InvariantCulture) != result.FiscalYear ||
-                !string.Equals(record.Fields[16].Trim(), period, StringComparison.OrdinalIgnoreCase) ||
-                !string.Equals(record.Fields[17].Trim(), "Kon_M", StringComparison.OrdinalIgnoreCase) ||
-                !string.Equals(record.Fields[18].Trim(), "Kon_D", StringComparison.OrdinalIgnoreCase) ||
-                !string.Equals(record.Fields[19].Trim(), "Plan", StringComparison.OrdinalIgnoreCase))
-                throw new InvalidDataException(record.Location + ": invalid period or closing-balance columns.");
-            result.PeriodHeader = period;
+            string debitPeriod = record.Fields[15].Trim();
+            string creditPeriod = record.Fields[16].Trim();
+
+            if (!TryParsePeriod(
+                    debitPeriod,
+                    out int debitMonth,
+                    out int debitYear) ||
+                !TryParsePeriod(
+                    creditPeriod,
+                    out int creditMonth,
+                    out int creditYear) ||
+                debitMonth != result.ThroughMonth ||
+                creditMonth != result.ThroughMonth ||
+                debitYear != result.FiscalYear ||
+                creditYear != result.FiscalYear ||
+                !string.Equals(
+                    record.Fields[17].Trim(),
+                    "Kon_M",
+                    StringComparison.OrdinalIgnoreCase) ||
+                !string.Equals(
+                    record.Fields[18].Trim(),
+                    "Kon_D",
+                    StringComparison.OrdinalIgnoreCase) ||
+                !string.Equals(
+                    record.Fields[19].Trim(),
+                    "Plan",
+                    StringComparison.OrdinalIgnoreCase))
+            {
+                throw new InvalidDataException(
+                    record.Location +
+                    ": invalid period or closing-balance columns.");
+            }
+
+            result.PeriodHeader =
+                result.ThroughMonth.ToString(
+                    CultureInfo.InvariantCulture) +
+                "/" +
+                result.FiscalYear.ToString(
+                    CultureInfo.InvariantCulture);
+        }
+
+        private static bool TryParsePeriod(
+            string value,
+            out int month,
+            out int year)
+        {
+            month = 0;
+            year = 0;
+
+            string normalized =
+                (value ?? string.Empty).Trim();
+
+            Match fullYear = Regex.Match(
+                normalized,
+                @"^(?<month>\d{1,2})/(?<year>\d{4})$");
+
+            if (fullYear.Success)
+            {
+                month = int.Parse(
+                    fullYear.Groups["month"].Value,
+                    CultureInfo.InvariantCulture);
+                year = int.Parse(
+                    fullYear.Groups["year"].Value,
+                    CultureInfo.InvariantCulture);
+                return month >= 1 && month <= 12;
+            }
+
+            Match shortYear = Regex.Match(
+                normalized,
+                @"^(?<month>\d{1,2})\.(?<year>\d{2})$");
+
+            if (!shortYear.Success)
+                return false;
+
+            month = int.Parse(
+                shortYear.Groups["month"].Value,
+                CultureInfo.InvariantCulture);
+
+            year = 2000 + int.Parse(
+                shortYear.Groups["year"].Value,
+                CultureInfo.InvariantCulture);
+
+            return month >= 1 && month <= 12;
         }
 
         private static decimal ParseAmount(string value, string location)
