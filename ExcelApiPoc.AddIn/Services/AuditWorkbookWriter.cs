@@ -92,7 +92,7 @@ namespace ExcelApiPoc.AddIn.Services
                 AuditWorkbookWorksheetLayout.Apply(workbook);
                 AuditWorkbookIdentity.Stamp(workbook);
                 AccountDetailSnapshot.Create(workbook);
-                AuditNavigationWorksheet.Create(workbook, journalImport, generalLedgerImport);
+                AuditNavigationWorksheet.Create(workbook, journalImport, generalLedgerImport, accountingFrameworkImport);
             }
 
             // The residue heuristic needs the RegisterUZ reference tables, so run it
@@ -170,7 +170,7 @@ namespace ExcelApiPoc.AddIn.Services
                 AuditWorkbookWorksheetLayout.Apply(workbook);
                 AuditWorkbookIdentity.Stamp(workbook);
                 AccountDetailSnapshot.Create(workbook);
-                AuditNavigationWorksheet.Create(workbook, journalImport, generalLedgerImport);
+                AuditNavigationWorksheet.Create(workbook, journalImport, generalLedgerImport, accountingFrameworkImport);
             }
 
             JournalDateExceptionWarning.Show(journalImport);

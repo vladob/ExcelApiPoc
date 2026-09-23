@@ -10,7 +10,8 @@ namespace ExcelApiPoc.AddIn.Services
     {
         private const string Name = "Navigation";
 
-        public static void Create(Excel.Workbook workbook, JournalImport journal, GeneralLedgerImport ledger)
+        public static void Create(Excel.Workbook workbook, JournalImport journal, GeneralLedgerImport ledger,
+            AccountingFrameworkImport framework)
         {
             Excel.Worksheet sheet = (Excel.Worksheet)workbook.Worksheets.Add(Before: workbook.Worksheets[1]);
             sheet.Name = Name;
@@ -27,6 +28,13 @@ namespace ExcelApiPoc.AddIn.Services
                 ((Excel.Range)sheet.Cells[10, 1]).Value2 = "General ledger: " + System.IO.Path.GetFileName(ledger.SourceFileName);
             else
                 ((Excel.Range)sheet.Cells[10, 1]).Value2 = "General ledger calculated from " + journal.Rows.Count + " journal records.";
+            int lastSourceRow = 10;
+            if (framework != null)
+            {
+                lastSourceRow++;
+                ((Excel.Range)sheet.Cells[lastSourceRow, 1]).Value2 =
+                    "Accounting framework: " + System.IO.Path.GetFileName(framework.SourceFileName);
+            }
             int outsideYear = journal.Rows.Count(x => x.PostingDate.Year != journal.FiscalYear);
             if (outsideYear > 0)
             {
@@ -36,16 +44,19 @@ namespace ExcelApiPoc.AddIn.Services
                 source.WrapText = true;
                 source.EntireRow.RowHeight = 30;
             }
-            ((Excel.Range)sheet.Range["A9:A10"]).Font.Size = 9;
-            ((Excel.Range)sheet.Cells[13, 1]).Value2 = "Worksheets";
-            Excel.Range notice = (Excel.Range)sheet.Cells[12, 1];
+            ((Excel.Range)sheet.Range[sheet.Cells[9, 1], sheet.Cells[lastSourceRow, 1]]).Font.Size = 9;
+            int significanceRow = lastSourceRow + 1;
+            int noticeRow = significanceRow + 1;
+            int headingRow = noticeRow + 1;
+            ((Excel.Range)sheet.Cells[headingRow, 1]).Value2 = "Worksheets";
+            Excel.Range notice = (Excel.Range)sheet.Cells[noticeRow, 1];
             notice.Value2 = "Without the active add-in, this is a standard Excel workbook." + Environment.NewLine +
                 "Workbook controls and navigation updates are the user's responsibility.";
             notice.WrapText = true;
             notice.Font.Size = 9;
             notice.EntireRow.RowHeight = 30;
             ((Excel.Range)sheet.Cells[4, 1]).Font.Bold = true;
-            ((Excel.Range)sheet.Cells[13, 1]).Font.Bold = true;
+            ((Excel.Range)sheet.Cells[headingRow, 1]).Font.Bold = true;
             sheet.Columns[1].ColumnWidth = 68;
             EnsureWorkbookSignificance(workbook);
             AddReturnLinks(workbook);
@@ -70,8 +81,9 @@ namespace ExcelApiPoc.AddIn.Services
 
             Excel.Range oldCaption = (Excel.Range)navigation.Cells[5, 4];
             Excel.Range oldValue = (Excel.Range)navigation.Cells[5, 5];
-            Excel.Range caption = (Excel.Range)navigation.Cells[11, 1];
-            Excel.Range value = (Excel.Range)navigation.Cells[11, 2];
+            int row = SignificanceRow(navigation);
+            Excel.Range caption = (Excel.Range)navigation.Cells[row, 1];
+            Excel.Range value = (Excel.Range)navigation.Cells[row, 2];
             if (value.Value2 == null && string.Equals(Convert.ToString(oldCaption.Value2),
                 "Workbook implementation significance:", StringComparison.Ordinal))
             {
@@ -90,10 +102,25 @@ namespace ExcelApiPoc.AddIn.Services
             foreach (Excel.Name existing in workbook.Names)
                 if (string.Equals(existing.Name, "_WB_significance", StringComparison.OrdinalIgnoreCase))
                 {
-                    existing.RefersTo = "='" + Name + "'!$B$11";
+                    existing.RefersTo = "='" + Name + "'!$B$" + row;
                     return;
                 }
-            workbook.Names.Add(Name: "_WB_significance", RefersTo: "='" + Name + "'!$B$11");
+            workbook.Names.Add(Name: "_WB_significance", RefersTo: "='" + Name + "'!$B$" + row);
+        }
+
+        private static int SignificanceRow(Excel.Worksheet navigation)
+        {
+            int row = 9;
+            while (row <= 20)
+            {
+                string text = Convert.ToString(((Excel.Range)navigation.Cells[row, 1]).Value2) ?? "";
+                if (!text.StartsWith("Accounting journal:", StringComparison.Ordinal) &&
+                    !text.StartsWith("General ledger:", StringComparison.Ordinal) &&
+                    !text.StartsWith("General ledger calculated", StringComparison.Ordinal) &&
+                    !text.StartsWith("Accounting framework:", StringComparison.Ordinal)) break;
+                row++;
+            }
+            return row;
         }
 
         public static void AddReturnLinks(Excel.Workbook workbook)
@@ -122,9 +149,10 @@ namespace ExcelApiPoc.AddIn.Services
             if (navigation == null) return;
 
             UpdateWorkbookFileName(workbook);
-            navigation.Range["A14:A1000"].Hyperlinks.Delete();
-            navigation.Range["A14:A1000"].ClearContents();
-            int row = 14;
+            int row = WorksheetsFirstRow(navigation);
+            Excel.Range list = navigation.Range[navigation.Cells[row, 1], navigation.Cells[1000, 1]];
+            list.Hyperlinks.Delete();
+            list.ClearContents();
             foreach (Excel.Worksheet sheet in workbook.Worksheets)
             {
                 if (sheet.Name == Name || sheet.Visible != Excel.XlSheetVisibility.xlSheetVisible) continue;
@@ -140,20 +168,29 @@ namespace ExcelApiPoc.AddIn.Services
                 if (sheet.Name == Name) navigation = sheet;
             if (navigation == null) return;
             UpdateWorkbookFileName(workbook);
+            int firstRow = WorksheetsFirstRow(navigation);
 
             var names = new List<string>();
             foreach (Excel.Worksheet sheet in workbook.Worksheets)
                 if (sheet.Name != Name && sheet.Visible == Excel.XlSheetVisibility.xlSheetVisible)
                     names.Add(NavigationCaption(sheet));
             for (int i = 0; i < names.Count; i++)
-                if (!string.Equals(Convert.ToString(((Excel.Range)navigation.Cells[14 + i, 1]).Value2),
+                if (!string.Equals(Convert.ToString(((Excel.Range)navigation.Cells[firstRow + i, 1]).Value2),
                     names[i], StringComparison.Ordinal))
                 {
                     Refresh(workbook);
                     return;
                 }
-            if (((Excel.Range)navigation.Cells[14 + names.Count, 1]).Value2 != null)
+            if (((Excel.Range)navigation.Cells[firstRow + names.Count, 1]).Value2 != null)
                 Refresh(workbook);
+        }
+
+        private static int WorksheetsFirstRow(Excel.Worksheet navigation)
+        {
+            for (int row = 13; row <= 30; row++)
+                if (string.Equals(Convert.ToString(((Excel.Range)navigation.Cells[row, 1]).Value2),
+                    "Worksheets", StringComparison.Ordinal)) return row + 1;
+            throw new InvalidOperationException("Navigation is missing its Worksheets heading.");
         }
 
         private static string NavigationCaption(Excel.Worksheet sheet)
