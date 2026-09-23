@@ -85,7 +85,8 @@ namespace ExcelApiPoc.AddIn.Services
             foreach (Excel.Worksheet sheet in workbook.Worksheets)
             {
                 if (sheet.Name == Name || sheet.Visible != Excel.XlSheetVisibility.xlSheetVisible) continue;
-                navigation.Hyperlinks.Add(navigation.Cells[row++, 1], "", "'" + sheet.Name.Replace("'", "''") + "'!A1", Type.Missing, sheet.Name);
+                navigation.Hyperlinks.Add(navigation.Cells[row++, 1], "", "'" + sheet.Name.Replace("'", "''") + "'!A1",
+                    Type.Missing, NavigationCaption(sheet.Name));
             }
         }
 
@@ -100,7 +101,7 @@ namespace ExcelApiPoc.AddIn.Services
             var names = new List<string>();
             foreach (Excel.Worksheet sheet in workbook.Worksheets)
                 if (sheet.Name != Name && sheet.Visible == Excel.XlSheetVisibility.xlSheetVisible)
-                    names.Add(sheet.Name);
+                    names.Add(NavigationCaption(sheet.Name));
             for (int i = 0; i < names.Count; i++)
                 if (!string.Equals(Convert.ToString(((Excel.Range)navigation.Cells[14 + i, 1]).Value2),
                     names[i], StringComparison.Ordinal))
@@ -110,6 +111,13 @@ namespace ExcelApiPoc.AddIn.Services
                 }
             if (((Excel.Range)navigation.Cells[14 + names.Count, 1]).Value2 != null)
                 Refresh(workbook);
+        }
+
+        private static string NavigationCaption(string sheetName)
+        {
+            return sheetName.Length == 3 && sheetName.All(char.IsDigit)
+                ? "Details for account: " + sheetName
+                : sheetName;
         }
 
         public static void UpdateWorkbookFileName(Excel.Workbook workbook)
