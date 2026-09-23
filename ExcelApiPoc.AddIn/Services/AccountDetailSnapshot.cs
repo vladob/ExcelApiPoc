@@ -2,6 +2,8 @@ using ExcelApiPoc.AddIn.Models;
 using Newtonsoft.Json;
 using System;
 using System.Linq;
+using System.Security.Cryptography;
+using System.Text;
 using Excel = Microsoft.Office.Interop.Excel;
 
 namespace ExcelApiPoc.AddIn.Services
@@ -27,6 +29,7 @@ namespace ExcelApiPoc.AddIn.Services
                 texts.Defaults.Select(x => new object[] { x.Account, x.CategoryCode, x.TextId }).ToArray());
             ((Excel.Range)sheet.Cells[1, 16]).Value2 = layout.VersionNo;
             ((Excel.Range)sheet.Cells[2, 16]).Value2 = layout.Definition.ToString(Formatting.None);
+            ((Excel.Range)sheet.Cells[3, 16]).Value2 = KeyFingerprint(SettingsService.Load().ApiKey);
             sheet.Visible = Excel.XlSheetVisibility.xlSheetVeryHidden;
         }
 
@@ -99,6 +102,19 @@ namespace ExcelApiPoc.AddIn.Services
             foreach (Excel.Worksheet sheet in workbook.Worksheets)
                 if (sheet.Name == SheetName) return sheet;
             throw new InvalidOperationException("This workbook has no account detail settings snapshot.");
+        }
+
+        public static void EnsureCurrentAuditor(Excel.Workbook workbook)
+        {
+            string saved = Convert.ToString(((Excel.Range)Find(workbook).Cells[3, 16]).Value2);
+            if (!string.Equals(saved, KeyFingerprint(SettingsService.Load().ApiKey), StringComparison.Ordinal))
+                throw new InvalidOperationException("The current API key belongs to a different auditor than this workbook's predefined texts.");
+        }
+
+        private static string KeyFingerprint(string key)
+        {
+            using (var sha = SHA256.Create())
+                return BitConverter.ToString(sha.ComputeHash(Encoding.UTF8.GetBytes((key ?? "").Trim().ToUpperInvariant()))).Replace("-", "");
         }
 
         private static void WriteTable(Excel.Worksheet sheet, int column, string name, string[] headers, object[][] rows)

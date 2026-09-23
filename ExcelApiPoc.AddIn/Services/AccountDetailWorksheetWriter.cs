@@ -33,24 +33,31 @@ namespace ExcelApiPoc.AddIn.Services
                 AddSide(groups, row, "CreditAccount", "CreditAmount", false);
             }
             int created = 0;
-            foreach (KeyValuePair<string, List<object[]>> group in groups)
+            try
             {
-                if (Find(workbook, group.Key) != null) continue;
-                Excel.Worksheet sheet = (Excel.Worksheet)workbook.Worksheets.Add(After: workbook.Worksheets[workbook.Worksheets.Count]);
-                sheet.Name = group.Key;
-                try
+                foreach (KeyValuePair<string, List<object[]>> group in groups)
                 {
-                    Render(workbook, sheet, group.Key, group.Value, definition, texts, columns, titleRow, headerRow, gapRows);
-                    AuditNavigationWorksheet.AddReturnLink(sheet);
-                    created++;
-                }
-                catch
-                {
-                    sheet.Delete();
-                    throw;
+                    if (Find(workbook, group.Key) != null) continue;
+                    if ((long)headerRow + group.Value.Count + gapRows + texts.Categories.Count + 2 > 1048576)
+                        throw new InvalidOperationException("Account " + group.Key + " exceeds the Excel worksheet row limit.");
+                    Excel.Worksheet sheet = (Excel.Worksheet)workbook.Worksheets.Add(After: workbook.Worksheets[workbook.Worksheets.Count]);
+                    sheet.Name = group.Key;
+                    try
+                    {
+                        Render(workbook, sheet, group.Key, group.Value, definition, texts, columns, titleRow, headerRow, gapRows);
+                        AuditNavigationWorksheet.AddReturnLink(sheet);
+                        created++;
+                    }
+                    catch
+                    {
+                        bool alerts = workbook.Application.DisplayAlerts;
+                        try { workbook.Application.DisplayAlerts = false; sheet.Delete(); }
+                        finally { workbook.Application.DisplayAlerts = alerts; }
+                        throw;
+                    }
                 }
             }
-            AuditNavigationWorksheet.Refresh(workbook);
+            finally { AuditNavigationWorksheet.Refresh(workbook); }
             return created;
         }
 

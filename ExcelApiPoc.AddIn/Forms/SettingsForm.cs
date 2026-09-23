@@ -88,6 +88,12 @@ namespace ExcelApiPoc.AddIn.Forms
                         "Predefined texts", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     return;
                 }
+                try { AccountDetailSnapshot.EnsureCurrentAuditor(workbook); }
+                catch (Exception exception)
+                {
+                    MessageBox.Show(this, exception.Message, "Predefined texts", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
                 using (var editor = new AccountDetailTextsForm(workbook)) editor.ShowDialog(this);
             };
 
