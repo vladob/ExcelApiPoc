@@ -29,8 +29,14 @@ namespace ExcelApiPoc.AddIn.Services
                 ((Excel.Range)sheet.Cells[10, 1]).Value2 = "General ledger calculated from " + journal.Rows.Count + " journal records.";
             int outsideYear = journal.Rows.Count(x => x.PostingDate.Year != journal.FiscalYear);
             if (outsideYear > 0)
-                ((Excel.Range)sheet.Cells[11, 1]).Value2 = outsideYear + " journal records have dates outside the fiscal year; review their resolutions.";
-            ((Excel.Range)sheet.Range["A9:A11"]).Font.Size = 9;
+            {
+                Excel.Range source = (Excel.Range)sheet.Cells[10, 1];
+                source.Value2 = Convert.ToString(source.Value2) + Environment.NewLine + outsideYear +
+                    " journal records have dates outside the fiscal year; review their resolutions.";
+                source.WrapText = true;
+                source.EntireRow.RowHeight = 30;
+            }
+            ((Excel.Range)sheet.Range["A9:A10"]).Font.Size = 9;
             ((Excel.Range)sheet.Cells[13, 1]).Value2 = "Worksheets";
             Excel.Range notice = (Excel.Range)sheet.Cells[12, 1];
             notice.Value2 = "Without the active add-in, this is a standard Excel workbook." + Environment.NewLine +
@@ -62,16 +68,32 @@ namespace ExcelApiPoc.AddIn.Services
             if (navigation == null)
                 throw new InvalidOperationException("The audit workbook has no Navigation worksheet.");
 
-            ((Excel.Range)navigation.Cells[5, 4]).Value2 = "Workbook implementation significance:";
-            ((Excel.Range)navigation.Cells[5, 4]).HorizontalAlignment = Excel.XlHAlign.xlHAlignRight;
-            Excel.Range value = (Excel.Range)navigation.Cells[5, 5];
+            Excel.Range oldCaption = (Excel.Range)navigation.Cells[5, 4];
+            Excel.Range oldValue = (Excel.Range)navigation.Cells[5, 5];
+            Excel.Range caption = (Excel.Range)navigation.Cells[11, 1];
+            Excel.Range value = (Excel.Range)navigation.Cells[11, 2];
+            if (value.Value2 == null && string.Equals(Convert.ToString(oldCaption.Value2),
+                "Workbook implementation significance:", StringComparison.Ordinal))
+            {
+                value.Value2 = oldValue.Value2;
+                oldCaption.ClearContents();
+                oldValue.ClearContents();
+            }
+            caption.Value2 = "Workbook implementation significance:";
+            caption.HorizontalAlignment = Excel.XlHAlign.xlHAlignLeft;
+            caption.Font.Bold = true;
             if (value.Value2 == null) value.Value2 = 0;
             value.NumberFormat = "#,##0.00 \"€\"";
-            navigation.Columns[4].ColumnWidth = 38;
-            navigation.Columns[5].ColumnWidth = 18;
+            value.HorizontalAlignment = Excel.XlHAlign.xlHAlignRight;
+            value.Font.Bold = true;
+            navigation.Columns[2].ColumnWidth = 18;
             foreach (Excel.Name existing in workbook.Names)
-                if (string.Equals(existing.Name, "_WB_significance", StringComparison.OrdinalIgnoreCase)) return;
-            workbook.Names.Add(Name: "_WB_significance", RefersTo: "='" + Name + "'!$E$5");
+                if (string.Equals(existing.Name, "_WB_significance", StringComparison.OrdinalIgnoreCase))
+                {
+                    existing.RefersTo = "='" + Name + "'!$B$11";
+                    return;
+                }
+            workbook.Names.Add(Name: "_WB_significance", RefersTo: "='" + Name + "'!$B$11");
         }
 
         public static void AddReturnLinks(Excel.Workbook workbook)

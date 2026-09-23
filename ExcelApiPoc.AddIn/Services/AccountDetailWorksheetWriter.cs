@@ -142,7 +142,7 @@ namespace ExcelApiPoc.AddIn.Services
                 Excel.Window window = workbook.Application.ActiveWindow;
                 window.FreezePanes = false;
                 window.SplitColumn = 0;
-                window.SplitRow = titleRow;
+                window.SplitRow = headerRow;
                 window.FreezePanes = true;
 
                 step = "adding the amount conditional formatting";
