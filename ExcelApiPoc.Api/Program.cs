@@ -1,3 +1,4 @@
+using ExcelApiPoc.Api;
 using ExcelApiPoc.Api.Data;
 using ExcelApiPoc.Api.Models;
 using ExcelApiPoc.Api.Models.AccountingEntities;
@@ -16,6 +17,7 @@ builder.Services.AddScoped<AccountingEntityPackageService>();
 builder.Services.AddScoped<CalculationReportCandidateRepository>();
 builder.Services.AddScoped<AuditCalculationPackageService>();
 builder.Services.AddScoped<RegisterUzOnDemandLoadService>();
+builder.Services.AddScoped<AccountDetailSettingsRepository>();
 
 var app = builder.Build();
 
@@ -26,6 +28,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.MapAccountDetailSettings();
 
 app.MapGet("/api/health", () =>
 {
