@@ -217,6 +217,9 @@
     <Compile Include="Forms\SettingsForm.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="Forms\AccountDetailTextsForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="Models\AccountingEntityPackageDto.cs" />
     <Compile Include="Models\AccountingEntityPackageEnvelope.cs" />
 
@@ -262,6 +265,11 @@
     <Compile Include="Services\AuditWorkbookRecalculationService.cs" />
     <Compile Include="Services\AuditWorkbookTableReader.cs" />
     <Compile Include="Services\AuditWorkbookWriter.cs" />
+    <Compile Include="Services\AccountDetailSettingsApiClient.cs" />
+    <Compile Include="Services\AccountDetailSnapshot.cs" />
+    <Compile Include="Services\AccountDetailWorksheetWriter.cs" />
+    <Compile Include="Services\AuditNavigationWorksheet.cs" />
+    <Compile Include="Models\AccountDetailSettings.cs" />
     <Compile Include="Services\AuditWorkbookWorksheetLayout.cs" />
     <Compile Include="Services\CanonicalReconciliationAccountSummaryAdapter.cs" />
     <Compile Include="Services\CalculatedGeneralLedgerComparisonWorksheetWriter.cs" />

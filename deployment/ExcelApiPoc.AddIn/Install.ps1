@@ -1,5 +1,5 @@
 param(
-    [string]$Version = "1.0.0",
+    [string]$Version = "1.1.4",
     [string]$ApiBaseUrl = "http://10.0.0.249:5080"
 )
 

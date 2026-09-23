@@ -569,6 +569,8 @@ namespace ExcelApiPoc.AddIn.Services
                 }
 
                 sheet.Visible = Excel.XlSheetVisibility.xlSheetVisible;
+                if (AuditNavigationWorksheet.Exists(workbook))
+                    AuditNavigationWorksheet.AddReturnLink(sheet);
                 sheet.Activate();
 
                 Excel.Window window = workbook.Application.ActiveWindow;

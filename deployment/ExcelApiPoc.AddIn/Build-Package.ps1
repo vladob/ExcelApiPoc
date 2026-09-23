@@ -1,5 +1,5 @@
 param(
-    [string]$Version = "1.0.0",
+    [string]$Version = "1.1.4",
     [string]$RepositoryRoot = (Resolve-Path (Join-Path $PSScriptRoot "..\..")),
     [string]$OutputDirectory = (Join-Path $PSScriptRoot "artifacts")
 )
@@ -13,6 +13,22 @@ if ($Version -notmatch '^\d+\.\d+\.\d+([-.][A-Za-z0-9.]+)?$') {
 
 $projectPath = Join-Path $RepositoryRoot "ExcelApiPoc.AddIn\ExcelApiPoc.AddIn.csproj"
 $solutionPath = Join-Path $RepositoryRoot "ExcelApiPoc.sln"
+$assemblyInfoPath = Join-Path $RepositoryRoot "ExcelApiPoc.AddIn\Properties\AssemblyInfo.cs"
+$assemblyInfo = Get-Content -LiteralPath $assemblyInfoPath -Raw
+if ($assemblyInfo -notmatch '\[assembly: AssemblyFileVersion\("(\d+\.\d+\.\d+)\.\d+"\)\]' -or
+    $Matches[1] -ne $Version) {
+    throw "Package version '$Version' must match the add-in AssemblyFileVersion in '$assemblyInfoPath'."
+}
+
+$sourceCommit = (& git -C $RepositoryRoot rev-parse HEAD).Trim()
+if ($LASTEXITCODE -ne 0 -or [string]::IsNullOrWhiteSpace($sourceCommit)) {
+    throw "Unable to determine the source Git commit."
+}
+$workingTreeChanges = @(& git -C $RepositoryRoot status --porcelain)
+if ($LASTEXITCODE -ne 0 -or $workingTreeChanges.Count -gt 0) {
+    throw "The source Git working tree must be clean before packaging."
+}
+
 $vswherePath = Join-Path ${env:ProgramFiles(x86)} "Microsoft Visual Studio\Installer\vswhere.exe"
 if (-not (Test-Path -LiteralPath $vswherePath)) {
     throw "Visual Studio Installer's vswhere.exe was not found."
@@ -51,6 +67,7 @@ $packedXll = Get-ChildItem -LiteralPath $releaseRoot `
     -Filter "ExcelApiPoc.AddIn-AddIn64-packed.xll" `
     -File `
     -Recurse |
+    Sort-Object LastWriteTimeUtc -Descending |
     Select-Object -First 1
 if ($null -eq $packedXll) {
     throw "The 64-bit packed XLL was not found beneath '$releaseRoot'."
@@ -94,7 +111,7 @@ $xllHash = (Get-FileHash -LiteralPath $deployedXll -Algorithm SHA256).Hash
     Version = $Version
     Architecture = "x64"
     ApiBaseUrl = "http://10.0.0.249:5080"
-    SourceCommit = (& git -C $RepositoryRoot rev-parse HEAD).Trim()
+    SourceCommit = $sourceCommit
     BuiltAtUtc = [DateTime]::UtcNow.ToString("o")
     XllSha256 = $xllHash
 } |

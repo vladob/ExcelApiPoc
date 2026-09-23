@@ -67,6 +67,9 @@ namespace ExcelApiPoc.AddIn.Services
                     reportTable,
                     templateTable);
 
+            AuditNavigationWorksheet.AddReturnLink(worksheet);
+            AuditNavigationWorksheet.Refresh(workbook);
+
             selection.ActionCell.Value2 = "Open";
             worksheet.Activate();
             return worksheet;

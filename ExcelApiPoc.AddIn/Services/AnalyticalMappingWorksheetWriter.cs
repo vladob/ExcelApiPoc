@@ -119,6 +119,8 @@ namespace ExcelApiPoc.AddIn.Services
             ApplyStatusFormula(table);
             AddSubtotalFormulas(worksheet);
             ApplyWorksheetLayout(worksheet, table);
+            if (AuditNavigationWorksheet.Exists(workbook))
+                AuditNavigationWorksheet.AddReturnLink(worksheet);
 
             worksheet.Activate();
             Excel.Window window = application.ActiveWindow;

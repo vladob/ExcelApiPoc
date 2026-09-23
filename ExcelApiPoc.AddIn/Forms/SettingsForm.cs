@@ -3,6 +3,8 @@ using ExcelApiPoc.AddIn.Services;
 using System;
 using System.Net.Http;
 using System.Windows.Forms;
+using ExcelDna.Integration;
+using Excel = Microsoft.Office.Interop.Excel;
 
 namespace ExcelApiPoc.AddIn.Forms
 {
@@ -12,11 +14,14 @@ namespace ExcelApiPoc.AddIn.Forms
         private readonly Label _uiLanguageLabel;
         private readonly Label _settingsPathLabel;
         private readonly TextBox _apiBaseUrlTextBox;
+        private readonly TextBox _apiKeyTextBox;
+        private readonly Label _apiKeyLabel;
         private readonly ComboBox _uiLanguageComboBox;
         private readonly CheckBox _roundWholeEurosCheckBox;
         private readonly Button _testConnectionButton;
         private readonly Button _saveButton;
         private readonly Button _cancelButton;
+        private readonly Button _editTextsButton;
         private readonly AddInSettings _settings;
 
         public SettingsForm()
@@ -30,22 +35,26 @@ namespace ExcelApiPoc.AddIn.Forms
             MinimizeBox = false;
             ShowInTaskbar = false;
             Width = 590;
-            Height = 280;
+            Height = 335;
 
             _apiUrlLabel = new Label();
             _apiUrlLabel.SetBounds(15, 20, 120, 23);
 
             _apiBaseUrlTextBox = new TextBox();
             _apiBaseUrlTextBox.SetBounds(145, 17, 415, 23);
+            _apiKeyLabel = new Label();
+            _apiKeyLabel.SetBounds(15, 55, 120, 23);
+            _apiKeyTextBox = new TextBox { UseSystemPasswordChar = true };
+            _apiKeyTextBox.SetBounds(145, 52, 415, 23);
 
             _uiLanguageLabel = new Label();
-            _uiLanguageLabel.SetBounds(15, 58, 120, 23);
+            _uiLanguageLabel.SetBounds(15, 93, 120, 23);
 
             _uiLanguageComboBox = new ComboBox
             {
                 DropDownStyle = ComboBoxStyle.DropDownList
             };
-            _uiLanguageComboBox.SetBounds(145, 55, 210, 25);
+            _uiLanguageComboBox.SetBounds(145, 90, 210, 25);
             _uiLanguageComboBox.Items.Add(new UiLanguageItem("English", SettingsService.DefaultUiLanguage));
             _uiLanguageComboBox.Items.Add(new UiLanguageItem("Slovenčina", SettingsService.SlovakUiLanguage));
             _uiLanguageComboBox.SelectedIndexChanged += UiLanguageComboBox_SelectedIndexChanged;
@@ -55,35 +64,59 @@ namespace ExcelApiPoc.AddIn.Forms
                 AutoSize = true,
                 Checked = _settings.RoundCalculatedAmountsToWholeEuros
             };
-            _roundWholeEurosCheckBox.SetBounds(145, 92, 400, 23);
+            _roundWholeEurosCheckBox.SetBounds(145, 127, 400, 23);
 
             _settingsPathLabel = new Label
             {
                 AutoEllipsis = true
             };
-            _settingsPathLabel.SetBounds(15, 125, 545, 23);
+            _settingsPathLabel.SetBounds(15, 160, 545, 23);
 
             _testConnectionButton = new Button();
-            _testConnectionButton.SetBounds(15, 170, 145, 30);
+            _testConnectionButton.SetBounds(15, 205, 145, 30);
             _testConnectionButton.Click += TestConnectionButton_Click;
 
+            _editTextsButton = new Button();
+            _editTextsButton.SetBounds(165, 205, 200, 30);
+            _editTextsButton.Click += (sender, args) =>
+            {
+                Excel.Application application = (Excel.Application)ExcelDnaUtil.Application;
+                Excel.Workbook workbook = application.ActiveWorkbook;
+                if (workbook == null || !AccountDetailSnapshot.Exists(workbook))
+                {
+                    MessageBox.Show(this, "Open an audit workbook with account detail settings first.",
+                        "Predefined texts", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    return;
+                }
+                try { AccountDetailSnapshot.EnsureCurrentAuditor(workbook); }
+                catch (Exception exception)
+                {
+                    MessageBox.Show(this, exception.Message, "Predefined texts", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+                using (var editor = new AccountDetailTextsForm(workbook)) editor.ShowDialog(this);
+            };
+
             _saveButton = new Button();
-            _saveButton.SetBounds(380, 170, 85, 30);
+            _saveButton.SetBounds(380, 205, 85, 30);
             _saveButton.Click += SaveButton_Click;
 
             _cancelButton = new Button
             {
                 DialogResult = DialogResult.Cancel
             };
-            _cancelButton.SetBounds(475, 170, 85, 30);
+            _cancelButton.SetBounds(475, 205, 85, 30);
 
             Controls.Add(_apiUrlLabel);
             Controls.Add(_apiBaseUrlTextBox);
+            Controls.Add(_apiKeyLabel);
+            Controls.Add(_apiKeyTextBox);
             Controls.Add(_uiLanguageLabel);
             Controls.Add(_uiLanguageComboBox);
             Controls.Add(_roundWholeEurosCheckBox);
             Controls.Add(_settingsPathLabel);
             Controls.Add(_testConnectionButton);
+            Controls.Add(_editTextsButton);
             Controls.Add(_saveButton);
             Controls.Add(_cancelButton);
 
@@ -91,6 +124,7 @@ namespace ExcelApiPoc.AddIn.Forms
             CancelButton = _cancelButton;
 
             _apiBaseUrlTextBox.Text = _settings.ApiBaseUrl;
+            _apiKeyTextBox.Text = _settings.ApiKey;
             SelectLanguage(_settings.UiLanguage);
             ApplyLanguage(language);
         }
@@ -128,10 +162,12 @@ namespace ExcelApiPoc.AddIn.Forms
         {
             Text = UiText.Get("Settings.Title", language);
             _apiUrlLabel.Text = UiText.Get("Settings.ApiBaseUrl", language);
+            _apiKeyLabel.Text = language == SettingsService.SlovakUiLanguage ? "API kľúč:" : "API key:";
             _uiLanguageLabel.Text = UiText.Get("Settings.UiLanguage", language);
             _roundWholeEurosCheckBox.Text = UiText.Get("Settings.RoundWholeEuros", language);
             _settingsPathLabel.Text = UiText.Format("Settings.SettingsFile", language, SettingsService.SettingsPath);
             _testConnectionButton.Text = UiText.Get("Settings.TestConnection", language);
+            _editTextsButton.Text = language == SettingsService.SlovakUiLanguage ? "Upraviť preddefinované texty" : "Edit predefined texts";
             _saveButton.Text = UiText.Get("Common.Save", language);
             _cancelButton.Text = UiText.Get("Common.Cancel", language);
         }
@@ -147,6 +183,17 @@ namespace ExcelApiPoc.AddIn.Forms
                 {
                     client.Timeout = TimeSpan.FromSeconds(10);
                     string response = client.GetStringAsync(healthUri).GetAwaiter().GetResult();
+                    string enteredKey = _apiKeyTextBox.Text.Trim();
+                    if (!string.IsNullOrEmpty(enteredKey))
+                    {
+                        using (var request = new HttpRequestMessage(HttpMethod.Get,
+                            new Uri(baseUrl + "/api/v1/account-detail/texts")))
+                        {
+                            request.Headers.Add("X-Api-Key", enteredKey);
+                            using (HttpResponseMessage authenticated = client.SendAsync(request).GetAwaiter().GetResult())
+                                authenticated.EnsureSuccessStatusCode();
+                        }
+                    }
 
                     MessageBox.Show(
                         this,
@@ -184,6 +231,7 @@ namespace ExcelApiPoc.AddIn.Forms
                 SettingsService.Save(new AddInSettings
                     {
                         ApiBaseUrl = baseUrl,
+                        ApiKey = _apiKeyTextBox.Text.Trim(),
                         UiLanguage = language,
                         RoundCalculatedAmountsToWholeEuros =
                             _roundWholeEurosCheckBox.Checked
