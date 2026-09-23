@@ -33,6 +33,8 @@ namespace ExcelApiPoc.AddIn
         <group id='groupAuditWorkbook' label='Audit Workbook'>
             <button id='buttonCreateAuditWorkbook' label='Create Audit Workbook' size='large' imageMso='FileNew' onAction='OnCreateAuditWorkbook'/>
             <button id='buttonSettings' label='Settings' size='large' imageMso='ApplicationOptionsDialog' onAction='OnSettings'/>
+            <button id='buttonCreateAccountDetails' label='Create missing account sheets' size='large' imageMso='TableInsert' onAction='OnCreateAccountDetails' getEnabled='GetRecalculateGeneralLedgerEnabled'/>
+            <button id='buttonRefreshNavigation' label='Refresh navigation' size='large' imageMso='RefreshAll' onAction='OnRefreshNavigation' getEnabled='GetRecalculateGeneralLedgerEnabled'/>
         </group>
         <group id='groupAnalysis' label='Analysis'>
             <button id='buttonRecalculateGeneralLedger'
@@ -134,12 +136,30 @@ namespace ExcelApiPoc.AddIn
 
         private void OnSheetActivate(object sheet)
         {
-            _ = sheet; InvalidateAuditControls();
+            _ = sheet;
+            InvalidateAuditControls();
+            RefreshNavigationIfNeeded();
         }
 
         private void OnWorkbookActivate(Excel.Workbook workbook)
         {
-            _ = workbook; InvalidateAuditControls();
+            _ = workbook;
+            InvalidateAuditControls();
+            RefreshNavigationIfNeeded();
+        }
+
+        private static void RefreshNavigationIfNeeded()
+        {
+            try
+            {
+                Excel.Application application = (Excel.Application)ExcelDnaUtil.Application;
+                if (application.ActiveWorkbook != null && AuditWorkbookIdentity.IsAuditWorkbook(application.ActiveWorkbook))
+                    AuditNavigationWorksheet.RefreshIfChanged(application.ActiveWorkbook);
+            }
+            catch
+            {
+                // Navigation remains available through the explicit Refresh navigation action.
+            }
         }
 
         private void InvalidateAuditControls()
@@ -166,6 +186,32 @@ namespace ExcelApiPoc.AddIn
                 if (dialog.ShowDialog() != DialogResult.OK)
                     auditWorkbook.Close(SaveChanges: false);
             }
+        }
+
+        public void OnCreateAccountDetails(IRibbonControl control)
+        {
+            _ = control;
+            try
+            {
+                Excel.Application application = (Excel.Application)ExcelDnaUtil.Application;
+                Excel.Workbook workbook = application.ActiveWorkbook;
+                if (workbook == null || !AuditWorkbookIdentity.IsAuditWorkbook(workbook))
+                    throw new InvalidOperationException("Open an audit workbook first.");
+                int count = AccountDetailWorksheetWriter.CreateMissing(workbook);
+                MessageBox.Show(count + " account sheet(s) created.", "Account details", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            catch (Exception exception)
+            {
+                MessageBox.Show(exception.Message, "Account details", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        public void OnRefreshNavigation(IRibbonControl control)
+        {
+            _ = control;
+            Excel.Application application = (Excel.Application)ExcelDnaUtil.Application;
+            if (application.ActiveWorkbook != null && AuditWorkbookIdentity.IsAuditWorkbook(application.ActiveWorkbook))
+                AuditNavigationWorksheet.Refresh(application.ActiveWorkbook);
         }
 
         public void OnRecalculateGeneralLedger(IRibbonControl control)
