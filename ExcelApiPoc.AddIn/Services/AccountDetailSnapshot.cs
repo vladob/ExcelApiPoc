@@ -28,7 +28,7 @@ namespace ExcelApiPoc.AddIn.Services
             WriteTable(sheet, 11, "AccountDetailDefaults", new[] { "Account", "CategoryCode", "TextId" },
                 texts.Defaults.Select(x => new object[] { x.Account, x.CategoryCode, x.TextId }).ToArray());
             ((Excel.Range)sheet.Cells[1, 16]).Value2 = layout.VersionNo;
-            ((Excel.Range)sheet.Cells[2, 16]).Value2 = layout.Definition.ToString(Formatting.None);
+            ((Excel.Range)sheet.Cells[2, 16]).Value2 = layout.Definition.ToString();
             ((Excel.Range)sheet.Cells[3, 16]).Value2 = KeyFingerprint(SettingsService.Load().ApiKey);
             sheet.Visible = Excel.XlSheetVisibility.xlSheetVeryHidden;
         }
