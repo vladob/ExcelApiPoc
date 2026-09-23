@@ -24,7 +24,11 @@ namespace ExcelApiPoc.AddIn.Services
             JArray columns = (JArray)definition["detailTable"]["columns"];
             if (titleRow < 4 || headerRow <= titleRow || columns.Count != 8)
                 throw new InvalidOperationException("The account detail layout has unsupported row or column positions.");
-            AuditNavigationWorksheet.EnsureWorkbookSignificance(workbook);
+            try { AuditNavigationWorksheet.EnsureWorkbookSignificance(workbook); }
+            catch (Exception exception)
+            {
+                throw new InvalidOperationException("Could not initialize the workbook significance on Navigation: " + exception.Message, exception);
+            }
 
             var journal = AuditWorkbookTableReader.ReadRows(workbook, "JournalRows");
             var groups = new SortedDictionary<string, List<object[]>>(StringComparer.Ordinal);
@@ -50,12 +54,16 @@ namespace ExcelApiPoc.AddIn.Services
                         AuditNavigationWorksheet.AddReturnLink(sheet);
                         created++;
                     }
-                    catch
+                    catch (Exception exception)
                     {
-                        bool alerts = workbook.Application.DisplayAlerts;
-                        try { workbook.Application.DisplayAlerts = false; sheet.Delete(); }
-                        finally { workbook.Application.DisplayAlerts = alerts; }
-                        throw;
+                        try
+                        {
+                            bool alerts = workbook.Application.DisplayAlerts;
+                            try { workbook.Application.DisplayAlerts = false; sheet.Delete(); }
+                            finally { workbook.Application.DisplayAlerts = alerts; }
+                        }
+                        catch { /* Keep the original rendering error. */ }
+                        throw new InvalidOperationException("Account " + group.Key + ": " + exception.Message, exception);
                     }
                 }
             }
@@ -88,87 +96,100 @@ namespace ExcelApiPoc.AddIn.Services
             List<object[]> entries, JObject definition, AccountDetailTextSettings texts,
             JArray columns, int titleRow, int headerRow, int gapRows)
         {
-            ((Excel.Range)sheet.Cells[titleRow, 1]).Value2 = "Účet " + account;
-            ((Excel.Range)sheet.Cells[titleRow, 1]).Font.Bold = true;
-            ((Excel.Range)sheet.Cells[(int)definition["countRow"], 1]).Value2 = entries.Count;
-            for (int c = 0; c < columns.Count; c++)
+            string step = "writing the account detail table";
+            try
             {
-                ((Excel.Range)sheet.Cells[headerRow, c + 1]).Value2 = (string)columns[c]["captionSk"];
-                ((Excel.Range)sheet.Columns[c + 1]).ColumnWidth = (double)columns[c]["width"];
-            }
-            if (entries.Count > 0)
-            {
-                Excel.Range dataRange = sheet.Range[sheet.Cells[headerRow + 1, 1],
-                    sheet.Cells[headerRow + entries.Count, columns.Count]];
-                foreach (int column in new[] { 1, 2, 3 })
-                    ((Excel.Range)dataRange.Columns[column]).NumberFormat = "@";
-                ((Excel.Range)dataRange.Columns[5]).NumberFormat = "#,##0.00";
-                ((Excel.Range)dataRange.Columns[6]).NumberFormat = "#,##0.00";
-                ((Excel.Range)dataRange.Columns[7]).NumberFormat = "yyyy-mm-dd";
-                var data = new object[entries.Count, columns.Count];
-                for (int r = 0; r < entries.Count; r++)
-                    for (int c = 0; c < columns.Count; c++) data[r, c] = entries[r][c];
-                dataRange.Value2 = data;
-            }
-            Excel.Range range = sheet.Range[sheet.Cells[headerRow, 1], sheet.Cells[headerRow + entries.Count, columns.Count]];
-            Excel.ListObject table = sheet.ListObjects.Add(Excel.XlListObjectSourceType.xlSrcRange,
-                range, Type.Missing, Excel.XlYesNoGuess.xlYes, Type.Missing);
-            table.Name = "AccountDetail_" + account;
-            table.TableStyle = (string)definition["detailTable"]["style"];
-
-            ((Excel.Range)sheet.Cells[1, 4]).Value2 = "Worksheet implementation significance:";
-            ((Excel.Range)sheet.Cells[1, 4]).HorizontalAlignment = Excel.XlHAlign.xlHAlignRight;
-            Excel.Range significance = (Excel.Range)sheet.Cells[1, 5];
-            significance.Value2 = 0;
-            significance.NumberFormat = "#,##0.00 \"€\"";
-            sheet.Names.Add(Name: "_WS_significance", RefersTo: "='" + sheet.Name.Replace("'", "''") + "'!$E$1");
-            if (entries.Count > 0)
-            {
-                Excel.Range amounts = sheet.Range[sheet.Cells[headerRow + 1, 5],
-                    sheet.Cells[headerRow + entries.Count, 6]];
-                string first = "E" + (headerRow + 1);
-                string threshold = "IF(_WS_significance=0,_WB_significance,_WS_significance)";
-                Excel.FormatCondition rule = (Excel.FormatCondition)amounts.FormatConditions.Add(
-                    Excel.XlFormatConditionType.xlExpression, Type.Missing,
-                    "=AND(ISNUMBER(" + first + ")," + threshold + ">0," + first + ">=" + threshold + ")");
-                rule.Font.Bold = true;
-                rule.Interior.Color = System.Drawing.ColorTranslator.ToOle(System.Drawing.Color.FromArgb(255, 211, 217));
-            }
-
-            sheet.Activate();
-            Excel.Window window = workbook.Application.ActiveWindow;
-            window.FreezePanes = false;
-            window.SplitColumn = 0;
-            window.SplitRow = titleRow;
-            window.FreezePanes = true;
-
-            int textRow = headerRow + entries.Count + gapRows + 1;
-            foreach (JToken categoryToken in (JArray)definition["textSection"]["categoryOrder"])
-            {
-                string code = (string)categoryToken;
-                AccountDetailCategory category = texts.Categories.FirstOrDefault(x => x.Code == code);
-                if (category == null) continue;
-                ((Excel.Range)sheet.Cells[textRow, 1]).Value2 = category.DisplayNameSk;
-                ((Excel.Range)sheet.Cells[textRow, 1]).Font.Bold = true;
-                Excel.Range cell = (Excel.Range)sheet.Cells[textRow, 4];
-                AccountDetailDefault selection = texts.Defaults.FirstOrDefault(x => x.Account == account && x.CategoryCode == code);
-                AccountDetailText initial = texts.Texts.FirstOrDefault(x => x.CategoryCode == code && x.TextId == selection?.TextId);
-                if (initial != null) cell.Value2 = initial.TextSk;
-                // Excel accepts typed values outside the suggestion list when ShowError is false.
-                string listName = EnsureChoiceRange(workbook, texts, code);
-                if (listName != null)
+                ((Excel.Range)sheet.Cells[titleRow, 1]).Value2 = "Účet " + account;
+                ((Excel.Range)sheet.Cells[titleRow, 1]).Font.Bold = true;
+                ((Excel.Range)sheet.Cells[(int)definition["countRow"], 1]).Value2 = entries.Count;
+                for (int c = 0; c < columns.Count; c++)
                 {
-                    cell.Validation.Add(Excel.XlDVType.xlValidateList, Excel.XlDVAlertStyle.xlValidAlertInformation,
-                        Excel.XlFormatConditionOperator.xlBetween, "=" + listName, Type.Missing);
-                    cell.Validation.InCellDropdown = true;
-                    cell.Validation.ShowError = false;
+                    ((Excel.Range)sheet.Cells[headerRow, c + 1]).Value2 = (string)columns[c]["captionSk"];
+                    ((Excel.Range)sheet.Columns[c + 1]).ColumnWidth = (double)columns[c]["width"];
                 }
-                textRow++;
+                if (entries.Count > 0)
+                {
+                    Excel.Range dataRange = sheet.Range[sheet.Cells[headerRow + 1, 1],
+                        sheet.Cells[headerRow + entries.Count, columns.Count]];
+                    foreach (int column in new[] { 1, 2, 3 })
+                        ((Excel.Range)dataRange.Columns[column]).NumberFormat = "@";
+                    ((Excel.Range)dataRange.Columns[5]).NumberFormat = "#,##0.00";
+                    ((Excel.Range)dataRange.Columns[6]).NumberFormat = "#,##0.00";
+                    ((Excel.Range)dataRange.Columns[7]).NumberFormat = "yyyy-mm-dd";
+                    var data = new object[entries.Count, columns.Count];
+                    for (int r = 0; r < entries.Count; r++)
+                        for (int c = 0; c < columns.Count; c++) data[r, c] = entries[r][c];
+                    dataRange.Value2 = data;
+                }
+                Excel.Range range = sheet.Range[sheet.Cells[headerRow, 1], sheet.Cells[headerRow + entries.Count, columns.Count]];
+                Excel.ListObject table = sheet.ListObjects.Add(Excel.XlListObjectSourceType.xlSrcRange,
+                    range, Type.Missing, Excel.XlYesNoGuess.xlYes, Type.Missing);
+                table.Name = "AccountDetail_" + account;
+                table.TableStyle = (string)definition["detailTable"]["style"];
+
+                step = "creating the worksheet significance name";
+                ((Excel.Range)sheet.Cells[1, 4]).Value2 = "Worksheet implementation significance:";
+                ((Excel.Range)sheet.Cells[1, 4]).HorizontalAlignment = Excel.XlHAlign.xlHAlignRight;
+                Excel.Range significance = (Excel.Range)sheet.Cells[1, 5];
+                significance.Value2 = 0;
+                significance.NumberFormat = "#,##0.00 \"€\"";
+                sheet.Names.Add(Name: "_WS_significance", RefersTo: "='" + sheet.Name.Replace("'", "''") + "'!$E$1");
+                step = "freezing the account header";
+                sheet.Activate();
+                Excel.Window window = workbook.Application.ActiveWindow;
+                window.FreezePanes = false;
+                window.SplitColumn = 0;
+                window.SplitRow = titleRow;
+                window.FreezePanes = true;
+
+                step = "adding the amount conditional formatting";
+                if (entries.Count > 0)
+                {
+                    Excel.Range amounts = sheet.Range[sheet.Cells[headerRow + 1, 5],
+                        sheet.Cells[headerRow + entries.Count, 6]];
+                    string first = "E" + (headerRow + 1);
+                    string threshold = "IF(_WS_significance=0,_WB_significance,_WS_significance)";
+                    Excel.FormatCondition rule = (Excel.FormatCondition)amounts.FormatConditions.Add(
+                        Excel.XlFormatConditionType.xlExpression,
+                        Formula1: "=AND(ISNUMBER(" + first + ")," + threshold + ">0," + first + ">=" + threshold + ")");
+                    rule.Font.Bold = true;
+                    rule.Interior.Color = System.Drawing.ColorTranslator.ToOle(System.Drawing.Color.FromArgb(255, 211, 217));
+                }
+
+                step = "adding predefined text choices";
+                int textRow = headerRow + entries.Count + gapRows + 1;
+                foreach (JToken categoryToken in (JArray)definition["textSection"]["categoryOrder"])
+                {
+                    string code = (string)categoryToken;
+                    AccountDetailCategory category = texts.Categories.FirstOrDefault(x => x.Code == code);
+                    if (category == null) continue;
+                    ((Excel.Range)sheet.Cells[textRow, 1]).Value2 = category.DisplayNameSk;
+                    ((Excel.Range)sheet.Cells[textRow, 1]).Font.Bold = true;
+                    Excel.Range cell = (Excel.Range)sheet.Cells[textRow, 4];
+                    AccountDetailDefault selection = texts.Defaults.FirstOrDefault(x => x.Account == account && x.CategoryCode == code);
+                    AccountDetailText initial = texts.Texts.FirstOrDefault(x => x.CategoryCode == code && x.TextId == selection?.TextId);
+                    if (initial != null) cell.Value2 = initial.TextSk;
+                    // Excel accepts typed values outside the suggestion list when ShowError is false.
+                    string listName = EnsureChoiceRange(workbook, texts, code);
+                    if (listName != null)
+                    {
+                        cell.Validation.Add(Excel.XlDVType.xlValidateList, Excel.XlDVAlertStyle.xlValidAlertInformation,
+                            Excel.XlFormatConditionOperator.xlBetween, "=" + listName, Type.Missing);
+                        cell.Validation.InCellDropdown = true;
+                        cell.Validation.ShowError = false;
+                    }
+                    textRow++;
+                }
+                ((Excel.Range)sheet.Columns[4]).ColumnWidth = 75;
+                step = "setting the print area";
+                sheet.PageSetup.Orientation = Excel.XlPageOrientation.xlLandscape;
+                sheet.PageSetup.PrintArea = sheet.Range[sheet.Cells[(int)definition["print"]["startRow"], 1],
+                    sheet.Cells[textRow, 8]].Address;
             }
-            ((Excel.Range)sheet.Columns[4]).ColumnWidth = 75;
-            sheet.PageSetup.Orientation = Excel.XlPageOrientation.xlLandscape;
-            sheet.PageSetup.PrintArea = sheet.Range[sheet.Cells[(int)definition["print"]["startRow"], 1],
-                sheet.Cells[textRow, 8]].Address;
+            catch (Exception exception)
+            {
+                throw new InvalidOperationException("Failed while " + step + ": " + exception.Message, exception);
+            }
         }
 
         private static string EnsureChoiceRange(Excel.Workbook workbook, AccountDetailTextSettings texts, string code)
