@@ -3,12 +3,23 @@ using ExcelApiPoc.Api.Data;
 using ExcelApiPoc.Api.Models;
 using ExcelApiPoc.Api.Models.AccountingEntities;
 using Microsoft.Data.SqlClient;
+using Microsoft.OpenApi.Models;
 using RegisterUz.Sync;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(options =>
+{
+    options.AddSecurityDefinition("AccountDetailApiKey", new OpenApiSecurityScheme
+    {
+        Type = SecuritySchemeType.ApiKey,
+        In = ParameterLocation.Header,
+        Name = "X-Api-Key",
+        Description = "Auditor API key for account-detail settings endpoints."
+    });
+    options.OperationFilter<AccountDetailApiKeyOperationFilter>();
+});
 builder.Services.AddScoped<AuditTemplateRepository>();
 builder.Services.AddScoped<AuditTemplatePackageRepository>();
 builder.Services.AddScoped<AccountFrameworkRepository>();
