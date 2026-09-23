@@ -134,8 +134,9 @@ namespace ExcelApiPoc.AddIn.Services
                 significance.Value2 = 0;
                 significance.NumberFormat = "#,##0.00 \"€\"";
                 sheet.Names.Add(Name: "_WS_significance", RefersTo: "='" + sheet.Name.Replace("'", "''") + "'!$E$1");
-                sheet.Names.Add(Name: "_WS_effective_significance",
-                    RefersTo: "=IF(_WS_significance=0,_WB_significance,_WS_significance)");
+                step = "calculating the effective significance";
+                ((Excel.Range)sheet.Cells[1, 9]).Formula = "=IF(E1=0,_WB_significance,E1)";
+                ((Excel.Range)sheet.Columns[9]).Hidden = true;
                 step = "freezing the account header";
                 sheet.Activate();
                 Excel.Window window = workbook.Application.ActiveWindow;
@@ -149,7 +150,7 @@ namespace ExcelApiPoc.AddIn.Services
                 {
                     Excel.Range amounts = sheet.Range[sheet.Cells[headerRow + 1, 5],
                         sheet.Cells[headerRow + entries.Count, 6]];
-                    string threshold = "=_WS_effective_significance";
+                    string threshold = "=$I$1";
                     Excel.FormatCondition rule = (Excel.FormatCondition)amounts.FormatConditions.Add(
                         Excel.XlFormatConditionType.xlCellValue,
                         Excel.XlFormatConditionOperator.xlGreaterEqual, threshold);
