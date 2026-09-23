@@ -57,6 +57,9 @@ Write-Host "Building the x64 Release add-in..."
     /t:Rebuild `
     /p:Configuration=Release `
     /p:Platform=AnyCPU `
+    /p:ExcelDnaPackRunMultithreaded=false `
+    /m:1 `
+    /nr:false `
     /verbosity:minimal
 if ($LASTEXITCODE -ne 0) {
     throw "The Release build failed with exit code $LASTEXITCODE."
