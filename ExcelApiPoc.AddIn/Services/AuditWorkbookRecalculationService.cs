@@ -103,6 +103,12 @@ namespace ExcelApiPoc.AddIn.Services
             AuditWorkbookWorksheetLayout.Apply(workbook);
             AuditWorkbookRecalculationResult result = Recalculate(workbook);
             AuditWorkbookWorksheetLayout.Apply(workbook);
+            if (AuditNavigationWorksheet.Exists(workbook))
+            {
+                AuditNavigationWorksheet.AddReturnLink((Excel.Worksheet)workbook.Worksheets["Account Summary"]);
+                AuditNavigationWorksheet.AddReturnLink((Excel.Worksheet)workbook.Worksheets["GL Comparison"]);
+                AuditNavigationWorksheet.Refresh(workbook);
+            }
             return result;
         }
 

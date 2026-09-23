@@ -132,7 +132,7 @@ namespace ExcelApiPoc.AddIn.Services
 
             RenameAccountWorksheet(workbook);
 
-            Excel.Worksheet previous = null;
+            Excel.Worksheet previous = FindWorksheet(workbook, "Navigation");
 
             foreach (string worksheetName in WorksheetOrder)
             {

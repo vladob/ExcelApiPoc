@@ -101,6 +101,10 @@ namespace ExcelApiPoc.AddIn.Services
             if (analyticalMapping != null && analyticalMapping.Rows.Count > 0)
                 AnalyticalMappingHeuristicRefreshService.RefreshAndRecalculate(workbook);
 
+            AuditNavigationWorksheet.AddReturnLinks(workbook);
+            AuditNavigationWorksheet.Refresh(workbook);
+            AuditNavigationWorksheet.Activate(workbook);
+
             JournalDateExceptionWarning.Show(journalImport);
             return workbook;
         }

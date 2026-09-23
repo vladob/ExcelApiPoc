@@ -8,10 +8,10 @@ namespace ExcelApiPoc.AddIn.Services
 {
     internal static class MultiYearBalanceSheetWorksheetWriter
     {
-        private const int TitleRow = 1;
-        private const int EntityRow = 2;
-        private const int TemplateRow = 3;
-        private const int HeaderRow = 5;
+        private const int TitleRow = 4;
+        private const int EntityRow = 5;
+        private const int TemplateRow = 6;
+        private const int HeaderRow = 8;
         private const int FirstDataRow = HeaderRow + 1;
         private const int FixedColumnCount = 5;
         private const int HasDataColumn = 5;
@@ -58,7 +58,7 @@ namespace ExcelApiPoc.AddIn.Services
             int lastRow = FirstDataRow + balanceSheet.Rows.Count - 1;
 
             Excel.Range renderedRange = worksheet.Range[
-                worksheet.Cells[TitleRow, 1],
+                worksheet.Cells[1, 1],
                 worksheet.Cells[lastRow, totalColumns]];
             renderedRange.Value2 = CreateValues(
                 balanceSheet,
@@ -346,7 +346,7 @@ namespace ExcelApiPoc.AddIn.Services
                 worksheet.Cells[lastRow, totalColumns]];
 
             worksheet.PageSetup.PrintArea = printRange.Address;
-            worksheet.PageSetup.PrintTitleRows = "$1:$5";
+            worksheet.PageSetup.PrintTitleRows = "$4:$8";
             worksheet.PageSetup.PaperSize = Excel.XlPaperSize.xlPaperA4;
             worksheet.PageSetup.Orientation =
                 Excel.XlPageOrientation.xlLandscape;

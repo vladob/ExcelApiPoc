@@ -30,9 +30,9 @@ namespace ExcelApiPoc.AddIn.Services
             worksheet.Name = WorksheetName;
 
             Excel.Range titleCell =
-                (Excel.Range)worksheet.Cells[1, 1];
+                (Excel.Range)worksheet.Cells[4, 1];
             titleCell.Value2 = "Calculation report unavailable";
-            Excel.Range title = worksheet.Range["A1:B1"];
+            Excel.Range title = worksheet.Range["A4:B4"];
             title.Merge();
             title.Font.Bold = true;
             title.Font.Size = 16;
@@ -135,8 +135,8 @@ namespace ExcelApiPoc.AddIn.Services
             string label,
             object value)
         {
-            Excel.Range labelCell = (Excel.Range)worksheet.Cells[row, 1];
-            Excel.Range valueCell = (Excel.Range)worksheet.Cells[row, 2];
+            Excel.Range labelCell = (Excel.Range)worksheet.Cells[row + 3, 1];
+            Excel.Range valueCell = (Excel.Range)worksheet.Cells[row + 3, 2];
 
             labelCell.Value2 = label;
             labelCell.Font.Bold = true;

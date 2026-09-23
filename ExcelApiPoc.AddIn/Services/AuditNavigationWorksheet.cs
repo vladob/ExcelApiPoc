@@ -14,9 +14,15 @@ namespace ExcelApiPoc.AddIn.Services
         {
             Excel.Worksheet sheet = (Excel.Worksheet)workbook.Worksheets.Add(Before: workbook.Worksheets[1]);
             sheet.Name = Name;
+            if (sheet.Index != 1)
+                sheet.Move(Before: workbook.Worksheets[1]);
             ((Excel.Range)sheet.Cells[4, 1]).Value2 = "Audit workbook";
             ((Excel.Range)sheet.Cells[5, 1]).Value2 = journal.CompanyName;
             ((Excel.Range)sheet.Cells[6, 1]).Value2 = "IČO: " + journal.Ico + "    Fiscal year: " + journal.FiscalYear;
+            ((Excel.Range)sheet.Cells[7, 1]).Formula =
+                "=IFERROR(MID(CELL(\"filename\",A1),FIND(\"]\",CELL(\"filename\",A1))+1,255),\"Unsaved workbook\")";
+            ((Excel.Range)sheet.Cells[7, 2]).Value2 = "Created by add-in: " +
+                DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
             ((Excel.Range)sheet.Cells[8, 1]).Value2 = "Accounting journal: " + System.IO.Path.GetFileName(journal.SourceFileName);
             if (ledger != null)
                 ((Excel.Range)sheet.Cells[9, 1]).Value2 = "General ledger: " + System.IO.Path.GetFileName(ledger.SourceFileName);
@@ -32,10 +38,34 @@ namespace ExcelApiPoc.AddIn.Services
             ((Excel.Range)sheet.Cells[4, 1]).Font.Bold = true;
             ((Excel.Range)sheet.Cells[12, 1]).Font.Bold = true;
             sheet.Columns[1].ColumnWidth = 68;
-            foreach (Excel.Worksheet existing in workbook.Worksheets)
-                if (existing.Name != Name && existing.Visible == Excel.XlSheetVisibility.xlSheetVisible)
-                    AddReturnLink(existing);
+            AddReturnLinks(workbook);
             Refresh(workbook);
+            sheet.Activate();
+        }
+
+        public static bool Exists(Excel.Workbook workbook)
+        {
+            foreach (Excel.Worksheet sheet in workbook.Worksheets)
+                if (sheet.Name == Name) return true;
+            return false;
+        }
+
+        public static void AddReturnLinks(Excel.Workbook workbook)
+        {
+            if (!Exists(workbook)) return;
+            foreach (Excel.Worksheet sheet in workbook.Worksheets)
+                if (sheet.Name != Name && sheet.Visible == Excel.XlSheetVisibility.xlSheetVisible)
+                    AddReturnLink(sheet);
+        }
+
+        public static void Activate(Excel.Workbook workbook)
+        {
+            foreach (Excel.Worksheet sheet in workbook.Worksheets)
+                if (sheet.Name == Name)
+                {
+                    sheet.Activate();
+                    return;
+                }
         }
 
         public static void Refresh(Excel.Workbook workbook)
@@ -80,8 +110,15 @@ namespace ExcelApiPoc.AddIn.Services
         public static void AddReturnLink(Excel.Worksheet sheet)
         {
             Excel.Range cell = (Excel.Range)sheet.Cells[1, 1];
+            if (cell.Hyperlinks.Count > 0)
+            {
+                Excel.Hyperlink existing = cell.Hyperlinks[1];
+                if (string.Equals(existing.SubAddress, "'" + Name + "'!A1", StringComparison.OrdinalIgnoreCase))
+                    existing.TextToDisplay = "Home";
+                return;
+            }
             if (cell.Value2 == null && cell.HasFormula == false)
-                sheet.Hyperlinks.Add(cell, "", "'" + Name + "'!A1", Type.Missing, "← Navigation");
+                sheet.Hyperlinks.Add(cell, "", "'" + Name + "'!A1", Type.Missing, "Home");
         }
     }
 }

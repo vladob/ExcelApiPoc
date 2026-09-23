@@ -9,10 +9,10 @@ namespace ExcelApiPoc.AddIn.Services
 {
     internal static class RegisterUzReportWorksheetWriter
     {
-        private const int TitleRow = 3;
-        private const int EntityRow = 4;
-        private const int PeriodRow = 5;
-        private const int HeaderFirstRow = 7;
+        private const int TitleRow = 4;
+        private const int EntityRow = 5;
+        private const int PeriodRow = 6;
+        private const int HeaderFirstRow = 8;
 
         public static Excel.Worksheet Write(
             Excel.Workbook workbook,
