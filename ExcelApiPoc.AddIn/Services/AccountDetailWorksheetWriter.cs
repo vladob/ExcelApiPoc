@@ -147,11 +147,11 @@ namespace ExcelApiPoc.AddIn.Services
                 {
                     Excel.Range amounts = sheet.Range[sheet.Cells[headerRow + 1, 5],
                         sheet.Cells[headerRow + entries.Count, 6]];
-                    string first = "E" + (headerRow + 1);
-                    string threshold = "IF(_WS_significance=0,_WB_significance,_WS_significance)";
+                    string threshold = "=IF(_WS_significance=0,_WB_significance,_WS_significance)";
                     Excel.FormatCondition rule = (Excel.FormatCondition)amounts.FormatConditions.Add(
-                        Excel.XlFormatConditionType.xlExpression,
-                        Formula1: "=AND(ISNUMBER(" + first + ")," + threshold + ">0," + first + ">=" + threshold + ")");
+                        Excel.XlFormatConditionType.xlCellValue,
+                        Excel.XlFormatConditionOperator.xlGreaterEqual, threshold);
+                    step = "styling the amount conditional formatting";
                     rule.Font.Bold = true;
                     rule.Interior.Color = System.Drawing.ColorTranslator.ToOle(System.Drawing.Color.FromArgb(255, 211, 217));
                 }
