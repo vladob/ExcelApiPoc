@@ -60,7 +60,7 @@ namespace ExcelApiPoc.AddIn.Services
                     CategoryCode = AuditWorkbookTableReader.GetString(r, "CategoryCode"),
                     TextSk = AuditWorkbookTableReader.GetString(r, "TextSk"), SortOrder = AuditWorkbookTableReader.GetInt32(r, "SortOrder") }).ToList();
             var defaults = AuditWorkbookTableReader.ReadRows(workbook, "AccountDetailDefaults")
-                .Select(r => new AccountDetailDefault { Account = AuditWorkbookTableReader.GetString(r, "Account"),
+                .Select(r => new AccountDetailDefault { Account = AuditWorkbookTableReader.GetString(r, "Account").PadLeft(3, '0'),
                     CategoryCode = AuditWorkbookTableReader.GetString(r, "CategoryCode"), TextId = AuditWorkbookTableReader.GetInt32(r, "TextId") }).ToList();
             return new AccountDetailTextSettings { Categories = categories, Texts = texts, Defaults = defaults };
         }
@@ -119,6 +119,8 @@ namespace ExcelApiPoc.AddIn.Services
 
         private static void WriteTable(Excel.Worksheet sheet, int column, string name, string[] headers, object[][] rows)
         {
+            if (name == "AccountDetailDefaults")
+                ((Excel.Range)sheet.Columns[column]).NumberFormat = "@";
             for (int index = 0; index < headers.Length; index++) ((Excel.Range)sheet.Cells[1, column + index]).Value2 = headers[index];
             for (int row = 0; row < rows.Length; row++)
                 for (int index = 0; index < headers.Length; index++) ((Excel.Range)sheet.Cells[row + 2, column + index]).Value2 = rows[row][index];

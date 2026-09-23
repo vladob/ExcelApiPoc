@@ -92,18 +92,23 @@ namespace ExcelApiPoc.AddIn.Services
             }
             if (entries.Count > 0)
             {
+                Excel.Range dataRange = sheet.Range[sheet.Cells[headerRow + 1, 1],
+                    sheet.Cells[headerRow + entries.Count, columns.Count]];
+                foreach (int column in new[] { 1, 2, 3 })
+                    ((Excel.Range)dataRange.Columns[column]).NumberFormat = "@";
+                ((Excel.Range)dataRange.Columns[5]).NumberFormat = "#,##0.00;[Red]-#,##0.00";
+                ((Excel.Range)dataRange.Columns[6]).NumberFormat = "#,##0.00;[Red]-#,##0.00";
+                ((Excel.Range)dataRange.Columns[7]).NumberFormat = "yyyy-mm-dd";
                 var data = new object[entries.Count, columns.Count];
                 for (int r = 0; r < entries.Count; r++)
                     for (int c = 0; c < columns.Count; c++) data[r, c] = entries[r][c];
-                sheet.Range[sheet.Cells[headerRow + 1, 1], sheet.Cells[headerRow + entries.Count, columns.Count]].Value2 = data;
+                dataRange.Value2 = data;
             }
             Excel.Range range = sheet.Range[sheet.Cells[headerRow, 1], sheet.Cells[headerRow + entries.Count, columns.Count]];
             Excel.ListObject table = sheet.ListObjects.Add(Excel.XlListObjectSourceType.xlSrcRange,
                 range, Type.Missing, Excel.XlYesNoGuess.xlYes, Type.Missing);
             table.Name = "AccountDetail_" + account;
             table.TableStyle = (string)definition["detailTable"]["style"];
-            sheet.Range[sheet.Cells[headerRow + 1, 5], sheet.Cells[headerRow + entries.Count, 6]].NumberFormat = "#,##0.00";
-            sheet.Range[sheet.Cells[headerRow + 1, 7], sheet.Cells[headerRow + entries.Count, 7]].NumberFormat = "dd.mm.yyyy";
 
             int textRow = headerRow + entries.Count + gapRows + 1;
             foreach (JToken categoryToken in (JArray)definition["textSection"]["categoryOrder"])

@@ -17,26 +17,29 @@ namespace ExcelApiPoc.AddIn.Services
             if (sheet.Index != 1)
                 sheet.Move(Before: workbook.Worksheets[1]);
             ((Excel.Range)sheet.Cells[4, 1]).Value2 = "Audit workbook";
-            ((Excel.Range)sheet.Cells[5, 1]).Value2 = journal.CompanyName;
-            ((Excel.Range)sheet.Cells[6, 1]).Value2 = "IČO: " + journal.Ico + "    Fiscal year: " + journal.FiscalYear;
-            ((Excel.Range)sheet.Cells[7, 1]).Formula =
-                "=IFERROR(MID(CELL(\"filename\",A1),FIND(\"]\",CELL(\"filename\",A1))+1,255),\"Unsaved workbook\")";
-            ((Excel.Range)sheet.Cells[7, 2]).Value2 = "Created by add-in: " +
+            ((Excel.Range)sheet.Cells[5, 1]).Value2 = "Created by add-in: " +
                 DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
-            ((Excel.Range)sheet.Cells[8, 1]).Value2 = "Accounting journal: " + System.IO.Path.GetFileName(journal.SourceFileName);
+            ((Excel.Range)sheet.Cells[6, 1]).Value2 = journal.CompanyName;
+            ((Excel.Range)sheet.Cells[7, 1]).Value2 = "IČO: " + journal.Ico + "    Fiscal year: " + journal.FiscalYear;
+            UpdateWorkbookFileName(workbook);
+            ((Excel.Range)sheet.Cells[9, 1]).Value2 = "Accounting journal: " + System.IO.Path.GetFileName(journal.SourceFileName);
             if (ledger != null)
-                ((Excel.Range)sheet.Cells[9, 1]).Value2 = "General ledger: " + System.IO.Path.GetFileName(ledger.SourceFileName);
+                ((Excel.Range)sheet.Cells[10, 1]).Value2 = "General ledger: " + System.IO.Path.GetFileName(ledger.SourceFileName);
             else
-                ((Excel.Range)sheet.Cells[9, 1]).Value2 = "General ledger calculated from " + journal.Rows.Count + " journal records.";
+                ((Excel.Range)sheet.Cells[10, 1]).Value2 = "General ledger calculated from " + journal.Rows.Count + " journal records.";
             int outsideYear = journal.Rows.Count(x => x.PostingDate.Year != journal.FiscalYear);
             if (outsideYear > 0)
-                ((Excel.Range)sheet.Cells[10, 1]).Value2 = outsideYear + " journal records have dates outside the fiscal year; review their resolutions.";
-            ((Excel.Range)sheet.Range["A8:A10"]).Font.Size = 9;
-            ((Excel.Range)sheet.Cells[12, 1]).Value2 = "Worksheets";
-            ((Excel.Range)sheet.Cells[11, 1]).Value2 = "Without the active add-in, this is a standard Excel workbook. Workbook controls and navigation updates are the user's responsibility.";
-            ((Excel.Range)sheet.Cells[11, 1]).Font.Size = 9;
+                ((Excel.Range)sheet.Cells[11, 1]).Value2 = outsideYear + " journal records have dates outside the fiscal year; review their resolutions.";
+            ((Excel.Range)sheet.Range["A9:A11"]).Font.Size = 9;
+            ((Excel.Range)sheet.Cells[13, 1]).Value2 = "Worksheets";
+            Excel.Range notice = (Excel.Range)sheet.Cells[12, 1];
+            notice.Value2 = "Without the active add-in, this is a standard Excel workbook." + Environment.NewLine +
+                "Workbook controls and navigation updates are the user's responsibility.";
+            notice.WrapText = true;
+            notice.Font.Size = 9;
+            notice.EntireRow.RowHeight = 30;
             ((Excel.Range)sheet.Cells[4, 1]).Font.Bold = true;
-            ((Excel.Range)sheet.Cells[12, 1]).Font.Bold = true;
+            ((Excel.Range)sheet.Cells[13, 1]).Font.Bold = true;
             sheet.Columns[1].ColumnWidth = 68;
             AddReturnLinks(workbook);
             Refresh(workbook);
@@ -75,9 +78,10 @@ namespace ExcelApiPoc.AddIn.Services
                 if (sheet.Name == Name) navigation = sheet;
             if (navigation == null) return;
 
-            navigation.Range["A13:A1000"].Hyperlinks.Delete();
-            navigation.Range["A13:A1000"].ClearContents();
-            int row = 13;
+            UpdateWorkbookFileName(workbook);
+            navigation.Range["A14:A1000"].Hyperlinks.Delete();
+            navigation.Range["A14:A1000"].ClearContents();
+            int row = 14;
             foreach (Excel.Worksheet sheet in workbook.Worksheets)
             {
                 if (sheet.Name == Name || sheet.Visible != Excel.XlSheetVisibility.xlSheetVisible) continue;
@@ -91,20 +95,34 @@ namespace ExcelApiPoc.AddIn.Services
             foreach (Excel.Worksheet sheet in workbook.Worksheets)
                 if (sheet.Name == Name) navigation = sheet;
             if (navigation == null) return;
+            UpdateWorkbookFileName(workbook);
 
             var names = new List<string>();
             foreach (Excel.Worksheet sheet in workbook.Worksheets)
                 if (sheet.Name != Name && sheet.Visible == Excel.XlSheetVisibility.xlSheetVisible)
                     names.Add(sheet.Name);
             for (int i = 0; i < names.Count; i++)
-                if (!string.Equals(Convert.ToString(((Excel.Range)navigation.Cells[13 + i, 1]).Value2),
+                if (!string.Equals(Convert.ToString(((Excel.Range)navigation.Cells[14 + i, 1]).Value2),
                     names[i], StringComparison.Ordinal))
                 {
                     Refresh(workbook);
                     return;
                 }
-            if (((Excel.Range)navigation.Cells[13 + names.Count, 1]).Value2 != null)
+            if (((Excel.Range)navigation.Cells[14 + names.Count, 1]).Value2 != null)
                 Refresh(workbook);
+        }
+
+        public static void UpdateWorkbookFileName(Excel.Workbook workbook)
+        {
+            foreach (Excel.Worksheet sheet in workbook.Worksheets)
+                if (sheet.Name == Name)
+                {
+                    string filename = string.IsNullOrEmpty(workbook.Path) ? "Unsaved workbook" : workbook.Name;
+                    Excel.Range cell = (Excel.Range)sheet.Cells[8, 1];
+                    if (!string.Equals(Convert.ToString(cell.Value2), filename, StringComparison.Ordinal))
+                        cell.Value2 = filename;
+                    return;
+                }
         }
 
         public static void AddReturnLink(Excel.Worksheet sheet)

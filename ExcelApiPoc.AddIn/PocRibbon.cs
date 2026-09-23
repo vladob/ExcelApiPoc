@@ -68,6 +68,7 @@ namespace ExcelApiPoc.AddIn
             application.SheetSelectionChange += OnSheetSelectionChange;
             application.SheetActivate += OnSheetActivate;
             application.WorkbookActivate += OnWorkbookActivate;
+            application.WorkbookAfterSave += OnWorkbookAfterSave;
             _applicationEventsSubscribed = true;
         }
 
@@ -146,6 +147,12 @@ namespace ExcelApiPoc.AddIn
             _ = workbook;
             InvalidateAuditControls();
             RefreshNavigationIfNeeded();
+        }
+
+        private void OnWorkbookAfterSave(Excel.Workbook workbook, bool success)
+        {
+            if (success && AuditWorkbookIdentity.IsAuditWorkbook(workbook))
+                AuditNavigationWorksheet.UpdateWorkbookFileName(workbook);
         }
 
         private static void RefreshNavigationIfNeeded()

@@ -33,8 +33,10 @@ namespace ExcelApiPoc.AddIn.Forms
             var tabs = new TabControl { Dock = DockStyle.Fill };
             var textTab = new TabPage("Predefined texts");
             var defaultTab = new TabPage("Account defaults");
-            _textGrid = Grid(_texts);
-            _defaultGrid = Grid(_defaults);
+            _textGrid = Grid(_texts, nameof(TextEdit.TextId), nameof(TextEdit.CategoryCode),
+                nameof(TextEdit.TextSk), nameof(TextEdit.SortOrder));
+            _defaultGrid = Grid(_defaults, nameof(DefaultEdit.Account),
+                nameof(DefaultEdit.CategoryCode), nameof(DefaultEdit.TextId));
             _textGrid.Columns[nameof(TextEdit.TextId)].ReadOnly = true;
             _textGrid.Columns[nameof(TextEdit.TextSk)].AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
             _defaultGrid.Columns[nameof(DefaultEdit.Account)].Width = 100;
@@ -60,11 +62,16 @@ namespace ExcelApiPoc.AddIn.Forms
             CancelButton = discard;
         }
 
-        private static DataGridView Grid<T>(BindingList<T> source)
+        private static DataGridView Grid<T>(BindingList<T> source, params string[] properties)
         {
-            return new DataGridView { Dock = DockStyle.Fill, DataSource = source,
-                AutoGenerateColumns = true, AllowUserToAddRows = true,
+            var grid = new DataGridView { Dock = DockStyle.Fill,
+                AutoGenerateColumns = false, AllowUserToAddRows = true,
                 AllowUserToDeleteRows = true, RowHeadersVisible = false };
+            foreach (string property in properties)
+                grid.Columns.Add(new DataGridViewTextBoxColumn {
+                    Name = property, DataPropertyName = property, HeaderText = property });
+            grid.DataSource = source;
+            return grid;
         }
 
         private void Save(object sender, EventArgs e)
