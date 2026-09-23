@@ -24,6 +24,7 @@ namespace ExcelApiPoc.AddIn.Services
             JArray columns = (JArray)definition["detailTable"]["columns"];
             if (titleRow < 4 || headerRow <= titleRow || columns.Count != 8)
                 throw new InvalidOperationException("The account detail layout has unsupported row or column positions.");
+            AuditNavigationWorksheet.EnsureWorkbookSignificance(workbook);
 
             var journal = AuditWorkbookTableReader.ReadRows(workbook, "JournalRows");
             var groups = new SortedDictionary<string, List<object[]>>(StringComparer.Ordinal);
@@ -33,6 +34,7 @@ namespace ExcelApiPoc.AddIn.Services
                 AddSide(groups, row, "CreditAccount", "CreditAmount", false);
             }
             int created = 0;
+            Excel.Worksheet previousSheet = (Excel.Worksheet)workbook.ActiveSheet;
             try
             {
                 foreach (KeyValuePair<string, List<object[]>> group in groups)
@@ -57,7 +59,11 @@ namespace ExcelApiPoc.AddIn.Services
                     }
                 }
             }
-            finally { AuditNavigationWorksheet.Refresh(workbook); }
+            finally
+            {
+                try { previousSheet.Activate(); }
+                finally { AuditNavigationWorksheet.Refresh(workbook); }
+            }
             return created;
         }
 
@@ -96,8 +102,8 @@ namespace ExcelApiPoc.AddIn.Services
                     sheet.Cells[headerRow + entries.Count, columns.Count]];
                 foreach (int column in new[] { 1, 2, 3 })
                     ((Excel.Range)dataRange.Columns[column]).NumberFormat = "@";
-                ((Excel.Range)dataRange.Columns[5]).NumberFormat = "#,##0.00;[Red]-#,##0.00";
-                ((Excel.Range)dataRange.Columns[6]).NumberFormat = "#,##0.00;[Red]-#,##0.00";
+                ((Excel.Range)dataRange.Columns[5]).NumberFormat = "#,##0.00";
+                ((Excel.Range)dataRange.Columns[6]).NumberFormat = "#,##0.00";
                 ((Excel.Range)dataRange.Columns[7]).NumberFormat = "yyyy-mm-dd";
                 var data = new object[entries.Count, columns.Count];
                 for (int r = 0; r < entries.Count; r++)
@@ -109,6 +115,32 @@ namespace ExcelApiPoc.AddIn.Services
                 range, Type.Missing, Excel.XlYesNoGuess.xlYes, Type.Missing);
             table.Name = "AccountDetail_" + account;
             table.TableStyle = (string)definition["detailTable"]["style"];
+
+            ((Excel.Range)sheet.Cells[1, 4]).Value2 = "Worksheet implementation significance:";
+            ((Excel.Range)sheet.Cells[1, 4]).HorizontalAlignment = Excel.XlHAlign.xlHAlignRight;
+            Excel.Range significance = (Excel.Range)sheet.Cells[1, 5];
+            significance.Value2 = 0;
+            significance.NumberFormat = "#,##0.00 \"€\"";
+            sheet.Names.Add(Name: "_WS_significance", RefersTo: "='" + sheet.Name.Replace("'", "''") + "'!$E$1");
+            if (entries.Count > 0)
+            {
+                Excel.Range amounts = sheet.Range[sheet.Cells[headerRow + 1, 5],
+                    sheet.Cells[headerRow + entries.Count, 6]];
+                string first = "E" + (headerRow + 1);
+                string threshold = "IF(_WS_significance=0,_WB_significance,_WS_significance)";
+                Excel.FormatCondition rule = (Excel.FormatCondition)amounts.FormatConditions.Add(
+                    Excel.XlFormatConditionType.xlExpression, Type.Missing,
+                    "=AND(ISNUMBER(" + first + ")," + threshold + ">0," + first + ">=" + threshold + ")");
+                rule.Font.Bold = true;
+                rule.Interior.Color = System.Drawing.ColorTranslator.ToOle(System.Drawing.Color.FromArgb(255, 211, 217));
+            }
+
+            sheet.Activate();
+            Excel.Window window = workbook.Application.ActiveWindow;
+            window.FreezePanes = false;
+            window.SplitColumn = 0;
+            window.SplitRow = titleRow;
+            window.FreezePanes = true;
 
             int textRow = headerRow + entries.Count + gapRows + 1;
             foreach (JToken categoryToken in (JArray)definition["textSection"]["categoryOrder"])

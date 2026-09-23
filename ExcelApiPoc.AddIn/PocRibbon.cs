@@ -204,7 +204,9 @@ namespace ExcelApiPoc.AddIn
                 Excel.Workbook workbook = application.ActiveWorkbook;
                 if (workbook == null || !AuditWorkbookIdentity.IsAuditWorkbook(workbook))
                     throw new InvalidOperationException("Open an audit workbook first.");
-                int count = AccountDetailWorksheetWriter.CreateMissing(workbook);
+                int count;
+                using (new ExcelApplicationStateScope(application))
+                    count = AccountDetailWorksheetWriter.CreateMissing(workbook);
                 MessageBox.Show(count + " account sheet(s) created.", "Account details", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
             catch (Exception exception)

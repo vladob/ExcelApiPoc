@@ -41,6 +41,7 @@ namespace ExcelApiPoc.AddIn.Services
             ((Excel.Range)sheet.Cells[4, 1]).Font.Bold = true;
             ((Excel.Range)sheet.Cells[13, 1]).Font.Bold = true;
             sheet.Columns[1].ColumnWidth = 68;
+            EnsureWorkbookSignificance(workbook);
             AddReturnLinks(workbook);
             Refresh(workbook);
             sheet.Activate();
@@ -51,6 +52,26 @@ namespace ExcelApiPoc.AddIn.Services
             foreach (Excel.Worksheet sheet in workbook.Worksheets)
                 if (sheet.Name == Name) return true;
             return false;
+        }
+
+        public static void EnsureWorkbookSignificance(Excel.Workbook workbook)
+        {
+            Excel.Worksheet navigation = null;
+            foreach (Excel.Worksheet sheet in workbook.Worksheets)
+                if (sheet.Name == Name) { navigation = sheet; break; }
+            if (navigation == null)
+                throw new InvalidOperationException("The audit workbook has no Navigation worksheet.");
+
+            ((Excel.Range)navigation.Cells[5, 4]).Value2 = "Workbook implementation significance:";
+            ((Excel.Range)navigation.Cells[5, 4]).HorizontalAlignment = Excel.XlHAlign.xlHAlignRight;
+            Excel.Range value = (Excel.Range)navigation.Cells[5, 5];
+            if (value.Value2 == null) value.Value2 = 0;
+            value.NumberFormat = "#,##0.00 \"€\"";
+            navigation.Columns[4].ColumnWidth = 38;
+            navigation.Columns[5].ColumnWidth = 18;
+            foreach (Excel.Name existing in workbook.Names)
+                if (string.Equals(existing.Name, "_WB_significance", StringComparison.OrdinalIgnoreCase)) return;
+            workbook.Names.Add(Name: "_WB_significance", RefersTo: "='" + Name + "'!$E$5");
         }
 
         public static void AddReturnLinks(Excel.Workbook workbook)
