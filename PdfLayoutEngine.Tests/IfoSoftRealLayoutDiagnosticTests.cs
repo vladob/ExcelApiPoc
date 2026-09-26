@@ -59,7 +59,7 @@ public sealed class IfoSoftRealLayoutDiagnosticTests(ITestOutputHelper output)
         {
             _output.WriteLine("First-page tokens: " + string.Join(" | ",
                 document.Pages[0].Tokens.Take(40).Select(x => x.Text)));
-            var expected = Assert.Single(layouts.Where(x => x.Id == expectedLayout));
+            var expected = Assert.Single(layouts, x => x.Id == expectedLayout);
             var matcher = new TokenRuleMatcher();
             foreach (var rule in expected.Rules)
                 _output.WriteLine($"Rule {rule.Id}: {matcher.Match(rule, document.Tokens, expected.Defaults).Status}");

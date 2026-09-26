@@ -33,21 +33,26 @@ public sealed class ITextPdfTokenExtractor
         var pages = new List<LayoutPage>(pdf.GetNumberOfPages());
         for (var pageNumber = 1; pageNumber <= pdf.GetNumberOfPages(); pageNumber++)
         {
-            var listener = new TextTokenEventListener(pageNumber);
-            new PdfCanvasProcessor(listener).ProcessPageContent(pdf.GetPage(pageNumber));
+            var page = pdf.GetPage(pageNumber);
+            var listener = new TextTokenEventListener(pageNumber, page.GetRotation(),
+                page.GetPageSize().GetWidth(), page.GetPageSize().GetHeight());
+            new PdfCanvasProcessor(listener).ProcessPageContent(page);
             pages.Add(new LayoutPage(pageNumber, listener.Tokens));
         }
 
         return new LayoutDocument(pages);
     }
 
-    private sealed class TextTokenEventListener(int pageNumber) : IEventListener
+    private sealed class TextTokenEventListener(int pageNumber, int rotation, double pageWidth, double pageHeight) : IEventListener
     {
         private static readonly ICollection<EventType> SupportedEvents = [EventType.RENDER_TEXT];
         private readonly int _pageNumber = pageNumber;
+        private readonly int _rotation = (rotation % 360 + 360) % 360;
+        private readonly double _pageWidth = pageWidth;
+        private readonly double _pageHeight = pageHeight;
         private readonly List<PdfTextToken> _tokens = [];
 
-        public IReadOnlyList<PdfTextToken> Tokens => AssembleCharacterRuns(_tokens);
+        public IReadOnlyList<PdfTextToken> Tokens => AssembleCharacterRuns(_tokens, _rotation == 90 || _rotation == 270);
 
         public void EventOccurred(IEventData data, EventType type)
         {
@@ -55,12 +60,27 @@ public sealed class ITextPdfTokenExtractor
 
             var baseline = textRenderInfo.GetBaseline().GetBoundingRectangle();
             var fontName = textRenderInfo.GetFont()?.GetFontProgram()?.ToString() ?? string.Empty;
+            var left = (double)baseline.GetLeft();
+            var right = (double)baseline.GetRight();
+            var y = (double)baseline.GetTop();
+            if (_rotation == 90)
+            {
+                left = baseline.GetBottom();
+                right = baseline.GetTop();
+                y = _pageWidth - baseline.GetLeft();
+            }
+            else if (_rotation == 270)
+            {
+                left = _pageHeight - baseline.GetTop();
+                right = _pageHeight - baseline.GetBottom();
+                y = baseline.GetLeft();
+            }
             _tokens.Add(new PdfTextToken(
                 _pageNumber,
                 textRenderInfo.GetText() ?? string.Empty,
-                baseline.GetLeft(),
-                baseline.GetRight(),
-                baseline.GetTop(),
+                left,
+                right,
+                y,
                 ContainsStyle(fontName, "bold"),
                 ContainsStyle(fontName, "italic") || ContainsStyle(fontName, "oblique")));
         }
@@ -71,7 +91,7 @@ public sealed class ITextPdfTokenExtractor
         // Reassemble adjacent glyphs before matching phrases in layout rules.
         // Keep complete text operations intact, and do not join across columns
         // or baselines. The original glyph positions still determine the run box.
-        private static IReadOnlyList<PdfTextToken> AssembleCharacterRuns(List<PdfTextToken> tokens)
+        private static IReadOnlyList<PdfTextToken> AssembleCharacterRuns(List<PdfTextToken> tokens, bool rotated)
         {
             var result = new List<PdfTextToken>();
             var index = 0;
@@ -98,7 +118,7 @@ public sealed class ITextPdfTokenExtractor
                                      Math.Abs(next.Right - first.Right) <= 0.25;
                     if (next.OriginalText.Length != 1 ||
                         Math.Abs(next.Baseline - first.Baseline) > 0.75 ||
-                        (!coincident && (gap < -1.5 || gap > 2)) ||
+                        (!coincident && (gap < -1.5 || gap > (rotated ? 10 : 2))) ||
                         next.IsBold != first.IsBold || next.IsItalic != first.IsItalic)
                         break;
                     text.Append(next.OriginalText);
