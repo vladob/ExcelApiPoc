@@ -12,6 +12,30 @@ namespace PdfLayoutEngine.Tests;
 public sealed class ITextPdfTokenExtractorTests
 {
     [Fact]
+    public void Reassembles_individually_rendered_glyphs_without_joining_distant_columns()
+    {
+        var stream = new MemoryStream();
+        using (var writer = CreateWriter(stream))
+        using (var pdf = new PdfDocument(writer))
+        {
+            pdf.AddNewPage();
+            var canvas = new PdfCanvas(pdf.GetPage(1));
+            var font = PdfFontFactory.CreateFont(StandardFonts.HELVETICA);
+            canvas.BeginText().SetFontAndSize(font, 10).MoveText(20, 700);
+            foreach (var character in "_DENNIK1.GMX")
+                canvas.ShowText(character.ToString());
+            canvas.EndText().BeginText().SetFontAndSize(font, 10)
+                .MoveText(200, 700).ShowText("OTHER").EndText();
+        }
+        stream.Position = 0;
+
+        var tokens = new ITextPdfTokenExtractor().Extract(stream).Tokens;
+        Assert.Equal(2, tokens.Count);
+        Assert.Equal("_DENNIK1.GMX", tokens[0].Text);
+        Assert.Equal("OTHER", tokens[1].Text);
+    }
+
+    [Fact]
     public void Extracts_all_pages_with_fractional_coordinates_and_style()
     {
         using var stream = CreateTwoPagePdf();

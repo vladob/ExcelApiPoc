@@ -46,7 +46,7 @@ public sealed class OpenXpsTokenExtractor
                 foreach (var glyph in page.Descendants().Where(e => e.Name.LocalName == "Glyphs"))
                 {
                     var value = (string?)glyph.Attribute("UnicodeString");
-                    if (string.IsNullOrEmpty(value)) continue;
+                    if (value is null || value.Length == 0) continue;
                     var x = Number(Required(glyph, "OriginX"));
                     var y = Number(Required(glyph, "OriginY"));
                     var em = Number(Required(glyph, "FontRenderingEmSize"));
@@ -72,7 +72,7 @@ public sealed class OpenXpsTokenExtractor
     private static double GetAdvance(XElement glyph, string value, double em)
     {
         var indices = (string?)glyph.Attribute("Indices");
-        if (string.IsNullOrEmpty(indices)) return value.Length * em * 0.5;
+        if (indices is null || indices.Length == 0) return value.Length * em * 0.5;
 
         // XPS glyph advances are hundredths of the font em. A missing advance
         // uses the font's intrinsic width, which is unavailable without decoding

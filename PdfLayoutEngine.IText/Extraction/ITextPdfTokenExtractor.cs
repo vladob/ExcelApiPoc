@@ -47,7 +47,7 @@ public sealed class ITextPdfTokenExtractor
         private readonly int _pageNumber = pageNumber;
         private readonly List<PdfTextToken> _tokens = [];
 
-        public IReadOnlyList<PdfTextToken> Tokens => _tokens;
+        public IReadOnlyList<PdfTextToken> Tokens => AssembleCharacterRuns(_tokens);
 
         public void EventOccurred(IEventData data, EventType type)
         {
@@ -66,6 +66,49 @@ public sealed class ITextPdfTokenExtractor
         }
 
         public ICollection<EventType> GetSupportedEvents() => SupportedEvents;
+
+        // Some accounting print drivers emit one PDF text operation per glyph.
+        // Reassemble adjacent glyphs before matching phrases in layout rules.
+        // Keep complete text operations intact, and do not join across columns
+        // or baselines. The original glyph positions still determine the run box.
+        private static IReadOnlyList<PdfTextToken> AssembleCharacterRuns(List<PdfTextToken> tokens)
+        {
+            var result = new List<PdfTextToken>();
+            var index = 0;
+            while (index < tokens.Count)
+            {
+                var first = tokens[index];
+                if (first.OriginalText.Length != 1)
+                {
+                    result.Add(first);
+                    index++;
+                    continue;
+                }
+
+                var text = new StringBuilder(first.OriginalText);
+                var right = first.Right;
+                var end = index + 1;
+                while (end < tokens.Count)
+                {
+                    var next = tokens[end];
+                    var gap = next.Left - right;
+                    if (next.OriginalText.Length != 1 ||
+                        Math.Abs(next.Baseline - first.Baseline) > 0.75 ||
+                        gap < -1.5 || gap > 2 ||
+                        next.IsBold != first.IsBold || next.IsItalic != first.IsItalic)
+                        break;
+                    text.Append(next.OriginalText);
+                    right = next.Right;
+                    end++;
+                }
+
+                result.Add(end == index + 1 ? first : new PdfTextToken(
+                    first.PageNumber, text.ToString(), first.Left, right,
+                    first.Baseline, first.IsBold, first.IsItalic));
+                index = end;
+            }
+            return result;
+        }
 
         private static bool ContainsStyle(string fontName, string style) =>
             fontName.IndexOf(style, StringComparison.OrdinalIgnoreCase) >= 0;
