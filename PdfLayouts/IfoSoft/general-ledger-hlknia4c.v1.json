@@ -1,0 +1,58 @@
+{
+  "schemaVersion": 1,
+  "id": "ifosoft-general-ledger-hlknia4c",
+  "name": "IfoSoft general ledger hlknia4c",
+  "defaults": {
+    "horizontalTolerance": 5,
+    "baselineTolerance": 3
+  },
+  "sections": [
+    {
+      "id": "page",
+      "scope": "PerPage",
+      "mayContinueOnNextPage": true
+    }
+  ],
+  "rules": [
+    {
+      "id": "report-title",
+      "text": "HLAVNÁ KNIHA",
+      "textMatch": "Contains",
+      "pageScope": "First"
+    },
+    {
+      "id": "gmx-marker",
+      "text": "_HLKNIA4C.GMX",
+      "textMatch": "Contains",
+      "ignoreCase": true,
+      "pageScope": "First"
+    }
+  ],
+  "recordRules": [
+    {
+      "id": "candidate-row",
+      "sectionId": "page",
+      "text": "^\\s*\\d{3}[A-Za-z0-9]*\\b",
+      "textMatch": "RegularExpression"
+    },
+    {
+      "id": "total-row",
+      "sectionId": "page",
+      "text": "^\\s*(?:SPOLU|CELKOM|Súčet)\\b",
+      "textMatch": "RegularExpression",
+      "ignoreCase": true
+    }
+  ],
+  "recordFields": [
+    {
+      "recordRuleId": "candidate-row",
+      "fields": [
+        {
+          "id": "account-candidate",
+          "text": "^\\d{3}[A-Za-z0-9]*$",
+          "textMatch": "RegularExpression"
+        }
+      ]
+    }
+  ]
+}

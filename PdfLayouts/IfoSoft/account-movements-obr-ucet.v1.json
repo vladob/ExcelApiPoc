@@ -1,0 +1,58 @@
+{
+  "schemaVersion": 1,
+  "id": "ifosoft-account-movements-obr-ucet",
+  "name": "IfoSoft account movements obr ucet",
+  "defaults": {
+    "horizontalTolerance": 5,
+    "baselineTolerance": 3
+  },
+  "sections": [
+    {
+      "id": "page",
+      "scope": "PerPage",
+      "mayContinueOnNextPage": true
+    }
+  ],
+  "rules": [
+    {
+      "id": "report-title",
+      "text": "O B R A T Y",
+      "textMatch": "Contains",
+      "pageScope": "First"
+    },
+    {
+      "id": "gmx-marker",
+      "text": "_OBR_UCET.GMX",
+      "textMatch": "Contains",
+      "ignoreCase": true,
+      "pageScope": "First"
+    }
+  ],
+  "recordRules": [
+    {
+      "id": "candidate-row",
+      "sectionId": "page",
+      "text": "^\\s*\\d{2}\\.\\d{2}\\.\\d{2,4}\\b",
+      "textMatch": "RegularExpression"
+    },
+    {
+      "id": "report-total",
+      "sectionId": "page",
+      "text": "(?:CELKOM|Spolu za účet|SPOLU za doklad)",
+      "textMatch": "RegularExpression",
+      "ignoreCase": true
+    }
+  ],
+  "recordFields": [
+    {
+      "recordRuleId": "candidate-row",
+      "fields": [
+        {
+          "id": "date-candidate",
+          "text": "^\\d{2}\\.\\d{2}\\.\\d{2,4}$",
+          "textMatch": "RegularExpression"
+        }
+      ]
+    }
+  ]
+}
