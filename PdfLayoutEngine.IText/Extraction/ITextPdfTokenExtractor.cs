@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using iText.Kernel.Pdf;
 using iText.Kernel.Pdf.Canvas.Parser;
 using iText.Kernel.Pdf.Canvas.Parser.Data;
@@ -52,7 +54,8 @@ public sealed class ITextPdfTokenExtractor
         private readonly double _pageHeight = pageHeight;
         private readonly List<PdfTextToken> _tokens = [];
 
-        public IReadOnlyList<PdfTextToken> Tokens => AssembleCharacterRuns(_tokens, _rotation == 90 || _rotation == 270);
+        public IReadOnlyList<PdfTextToken> Tokens => JoinSplitGmxMarkers(
+            AssembleCharacterRuns(_tokens, _rotation == 90 || _rotation == 270));
 
         public void EventOccurred(IEventData data, EventType type)
         {
@@ -142,6 +145,56 @@ public sealed class ITextPdfTokenExtractor
                     first.PageNumber, text.ToString(), first.Left, right,
                     first.Baseline, first.IsBold, first.IsItalic));
                 index = end;
+            }
+            return result;
+        }
+
+        // Some PDF printers split the small GMX label into several text operations
+        // interleaved with other header text. Join only fragments that touch on the
+        // same baseline and form a complete marker; leave every other token intact.
+        private static IReadOnlyList<PdfTextToken> JoinSplitGmxMarkers(IReadOnlyList<PdfTextToken> tokens)
+        {
+            var result = tokens.ToList();
+            foreach (var suffix in tokens.Where(token =>
+                         token.Text.EndsWith(".GMX", StringComparison.OrdinalIgnoreCase) &&
+                         !token.Text.StartsWith("_", StringComparison.Ordinal)))
+            {
+                var i = result.IndexOf(suffix);
+                if (i < 0) continue;
+
+                var pieces = new List<int> { i };
+                var combined = suffix.Text;
+                var left = suffix.Left;
+                while (pieces.Count < 6 && !combined.StartsWith("_", StringComparison.Ordinal))
+                {
+                    var previous = -1;
+                    var bestGap = double.MaxValue;
+                    for (var j = 0; j < result.Count; j++)
+                    {
+                        if (pieces.Contains(j)) continue;
+                        var candidate = result[j];
+                        var gap = left - candidate.Right;
+                        if (candidate.PageNumber != suffix.PageNumber ||
+                            Math.Abs(candidate.Baseline - suffix.Baseline) > 0.75 ||
+                            gap < -0.5 || gap > 0.75 || gap >= bestGap ||
+                            candidate.Text.Length > 12)
+                            continue;
+                        previous = j;
+                        bestGap = gap;
+                    }
+                    if (previous < 0) break;
+                    pieces.Add(previous);
+                    combined = result[previous].Text + combined;
+                    left = result[previous].Left;
+                }
+
+                if (!Regex.IsMatch(combined, @"^_[A-Z0-9]+\.GMX$", RegexOptions.IgnoreCase))
+                    continue;
+                var merged = new PdfTextToken(suffix.PageNumber, combined, left, suffix.Right,
+                    suffix.Baseline, suffix.IsBold, suffix.IsItalic);
+                var insertAt = pieces.Min();
+                foreach (var index in pieces.OrderByDescending(x => x)) result.RemoveAt(index);
+                result.Insert(insertAt, merged);
             }
             return result;
         }

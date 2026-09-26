@@ -64,6 +64,7 @@ public sealed class IfoSoftUnmatchedMarkerDiagnosticTests(ITestOutputHelper outp
             output.WriteLine("  " + Describe(token));
         output.WriteLine("First 45 tokens: " + string.Join(" | ",
             document.Pages[0].Tokens.Take(45).Select(Describe)));
+        Assert.Equal(expectedLayout, Assert.Single(matches).Id);
     }
 
     private static string Describe(PdfLayoutEngine.Models.PdfTextToken token) =>
