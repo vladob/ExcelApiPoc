@@ -65,9 +65,21 @@ public sealed class ITextPdfTokenExtractor
             var y = (double)baseline.GetTop();
             if (_rotation == 90)
             {
-                left = baseline.GetBottom();
-                right = baseline.GetTop();
-                y = _pageWidth - baseline.GetLeft();
+                if (baseline.GetWidth() > 1 && baseline.GetHeight() < 0.25)
+                {
+                    // Some print drivers draw text along decreasing raw X on
+                    // a page with /Rotate 90. Applying the vertical-text
+                    // transform would collapse every glyph to zero width.
+                    left = _pageWidth - baseline.GetRight();
+                    right = _pageWidth - baseline.GetLeft();
+                    y = baseline.GetTop();
+                }
+                else
+                {
+                    left = baseline.GetBottom();
+                    right = baseline.GetTop();
+                    y = _pageWidth - baseline.GetLeft();
+                }
             }
             else if (_rotation == 270)
             {

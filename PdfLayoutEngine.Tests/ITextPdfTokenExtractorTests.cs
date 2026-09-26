@@ -34,6 +34,28 @@ public sealed class ITextPdfTokenExtractorTests
     }
 
     [Fact]
+    public void Normalizes_horizontal_raw_glyphs_on_rotated_page()
+    {
+        var stream = new MemoryStream();
+        using (var writer = CreateWriter(stream))
+        using (var pdf = new PdfDocument(writer))
+        {
+            var page = pdf.AddNewPage().SetRotation(90);
+            var canvas = new PdfCanvas(page);
+            var font = PdfFontFactory.CreateFont(StandardFonts.HELVETICA);
+            canvas.BeginText().SetFontAndSize(font, 10).SetTextMatrix(-1, 0, 0, -1, 550, 35);
+            foreach (var character in "_PREDVAS3.GMX")
+                canvas.ShowText(character.ToString());
+            canvas.EndText();
+        }
+        stream.Position = 0;
+
+        var token = Assert.Single(new ITextPdfTokenExtractor().Extract(stream).Tokens);
+        Assert.Equal("_PREDVAS3.GMX", token.Text);
+        Assert.True(token.Right > token.Left);
+    }
+
+    [Fact]
     public void Reassembles_individually_rendered_glyphs_without_joining_distant_columns()
     {
         var stream = new MemoryStream();
