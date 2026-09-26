@@ -92,9 +92,13 @@ public sealed class ITextPdfTokenExtractor
                 {
                     var next = tokens[end];
                     var gap = next.Left - right;
+                    // Some print drivers assign every glyph in one text run the
+                    // same bounding box, so consecutive glyph boxes coincide.
+                    var coincident = Math.Abs(next.Left - first.Left) <= 0.25 &&
+                                     Math.Abs(next.Right - first.Right) <= 0.25;
                     if (next.OriginalText.Length != 1 ||
                         Math.Abs(next.Baseline - first.Baseline) > 0.75 ||
-                        gap < -1.5 || gap > 2 ||
+                        (!coincident && (gap < -1.5 || gap > 2)) ||
                         next.IsBold != first.IsBold || next.IsItalic != first.IsItalic)
                         break;
                     text.Append(next.OriginalText);
