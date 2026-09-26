@@ -56,8 +56,24 @@ public sealed class IfoSoftRealLayoutDiagnosticTests(ITestOutputHelper output)
         var matches = new LayoutSignatureDetector().Detect(document, layouts);
         _output.WriteLine("Detected: " + string.Join(", ", matches.Select(x => x.Id)));
         if (matches.Count != 1)
+        {
             _output.WriteLine("First-page tokens: " + string.Join(" | ",
                 document.Pages[0].Tokens.Take(40).Select(x => x.Text)));
+            var expected = Assert.Single(layouts.Where(x => x.Id == expectedLayout));
+            var matcher = new TokenRuleMatcher();
+            foreach (var rule in expected.Rules)
+                _output.WriteLine($"Rule {rule.Id}: {matcher.Match(rule, document.Tokens, expected.Defaults).Status}");
+            _output.WriteLine("First-page glyph geometry: " + string.Join(" | ",
+                document.Pages[0].Tokens.Take(110).Select(x =>
+                    $"{x.Text.Replace(' ', '·')}@{x.Left:F1}-{x.Right:F1},y={x.Baseline:F1}")));
+            var marker = document.Pages[0].Tokens
+                .Select((token, index) => (token, index))
+                .FirstOrDefault(x => x.token.Text == "_");
+            if (marker.token != null)
+                _output.WriteLine("Marker-area glyphs: " + string.Join(" | ",
+                    document.Pages[0].Tokens.Skip(marker.index).Take(25).Select(x =>
+                        $"{x.Text.Replace(' ', '·')}@{x.Left:F1}-{x.Right:F1},y={x.Baseline:F1}")));
+        }
         Assert.Equal(expectedLayout, Assert.Single(matches).Id);
     }
 }
