@@ -461,7 +461,7 @@ namespace ExcelApiPoc.AccountingImport.Services.Ives
                 if (Math.Abs(previous.Baseline - final.Baseline) > 1.5 ||
                     gap < -0.3 || gap > 4.0) break;
                 string digits = part.Replace(" ", string.Empty).Replace("\u00a0", string.Empty);
-                if (Regex.IsMatch(part, @"^-?\d{1,3}(?:[ \u00a0]\d{3})*$") &&
+                if (Regex.IsMatch(part, @"^-?\d{1,12}(?:[ \u00a0]\d{3})*$") &&
                     value.TrimStart('-').Split(',')[0].Length + digits.TrimStart('-').Length <= 12)
                 {
                     value = digits + value;
