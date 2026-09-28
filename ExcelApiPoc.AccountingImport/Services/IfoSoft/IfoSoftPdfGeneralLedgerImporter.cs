@@ -163,8 +163,8 @@ namespace ExcelApiPoc.AccountingImport.Services.IfoSoft
         private static void ReadAccountSummary(PdfDocument document, GeneralLedgerImport result)
         {
             // HLKNIA4C prints four columns: opening net, annual MD, annual DAL,
-            // closing net. Only account lines have an M/D type flag; the repeated
-            // "****" synthetic totals and class totals have none.
+            // closing net. Some account lines have no M/D type flag. The repeated
+            // synthetic totals carry "****" beside the account code.
             foreach (var page in document.Pages)
             {
                 var tokens = page.Tokens.ToArray();
@@ -172,7 +172,7 @@ namespace ExcelApiPoc.AccountingImport.Services.IfoSoft
                     .OrderByDescending(t => t.Baseline))
                 {
                     var line = tokens.Where(t => Math.Abs(t.Baseline - candidate.Baseline) < 3).ToArray();
-                    if (!line.Any(t => t.Left >= 80 && t.Left < 92 && (t.Text == "M" || t.Text == "D")))
+                    if (line.Any(t => t.Text == "****"))
                         continue;
                     var cells = new decimal[4];
                     bool hasAmount = false;
