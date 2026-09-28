@@ -98,6 +98,17 @@ public sealed class IfoSoftPdfLedgerAndFrameworkTests
             row.AccountCode == "4282025");
     }
 
+    [Fact]
+    public void Kolonica_framework_preserves_percentage_analytical_code()
+    {
+        string? path = Environment.GetEnvironmentVariable("IFOSOFT_PDF_AF_KOLONICA_TEST_FILE");
+        Assert.True(!string.IsNullOrWhiteSpace(path) && File.Exists(path),
+            "Set IFOSOFT_PDF_AF_KOLONICA_TEST_FILE to UCT_ROZVRH_00323161_2022.pdf.");
+        AccountingFrameworkImport result = new IfoSoftPdfAccountingFrameworkImporter().Import(path!);
+        Assert.Contains(result.Rows, row => row.SourceRecordNumber == 415 &&
+            row.AccountCode == "3575%" && row.RowKind == AccountingFrameworkRowKind.AnalyticalAccount);
+    }
+
     private static string Sample(string fileName)
     {
         string? root = Environment.GetEnvironmentVariable("IFOSOFT_PDF_GL_AF_TEST_DIR");
