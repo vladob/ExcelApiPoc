@@ -113,7 +113,7 @@ namespace ExcelApiPoc.AccountingImport.Services.IfoSoft
                     var head = AtBaseline(tokens, dateToken.Baseline, 0.9);
                     var amountLine = AtBaseline(tokens, dateToken.Baseline - 5.3, 1.3);
                     var details = AtBaseline(tokens, dateToken.Baseline - 10.4, 1.8);
-                    string debit = Account(head, 297, 350, page.PageNumber, sourceNumber);
+                    string debit = Account(head, 297, 350, page.PageNumber, sourceNumber, true);
                     string credit = Account(head, 415, 455, page.PageNumber, sourceNumber);
                     string amountText = Column(amountLine, 239, 301, false)
                         .Replace(" ", string.Empty).Replace("\u00a0", string.Empty);
@@ -175,19 +175,20 @@ namespace ExcelApiPoc.AccountingImport.Services.IfoSoft
                 .OrderBy(t => t.Left).Select(t => t.Text.Trim()).Where(t => t.Length > 0)).Trim();
 
         private static string Account(IEnumerable<PdfTextToken> tokens, double left, double right,
-            int pageNumber, int entryNumber)
+            int pageNumber, int entryNumber, bool allowSplitAnalytical = false)
         {
             var fragments = tokens.Where(t => t.Left >= left && t.Left < right)
                 .OrderBy(t => t.Left).Select(t => t.Text.Trim()).Where(t => t.Length > 0).ToArray();
-            if (fragments.Length == 0) return string.Empty;
-            if (fragments.Count(t => AccountPattern.IsMatch(t)) > 1)
+            if (allowSplitAnalytical && fragments.Length == 2 &&
+                AccountPattern.IsMatch(fragments[0]) && Regex.IsMatch(fragments[1], @"^\d$"))
+                return fragments[0] + fragments[1];
+            if (allowSplitAnalytical && fragments.Length == 1 &&
+                Regex.IsMatch(fragments[0], @"^\d{3}[\p{L}\d]*\s+\d$"))
+                return Regex.Replace(fragments[0], @"\s+", string.Empty);
+            var candidates = fragments.Where(t => AccountPattern.IsMatch(t)).ToArray();
+            if (candidates.Length > 1)
                 throw new InvalidDataException($"Page {pageNumber}, entry {entryNumber}: ambiguous account column.");
-            // The print driver can split an analytical account (e.g. 51816 2)
-            // into two adjacent glyph groups, including across the old x=338 boundary.
-            string account = Regex.Replace(string.Concat(fragments), @"\s+", string.Empty);
-            if (!AccountPattern.IsMatch(account))
-                throw new InvalidDataException($"Page {pageNumber}, entry {entryNumber}: ambiguous account column.");
-            return account;
+            return candidates.Length == 0 ? string.Empty : candidates[0];
         }
 
         private static Tuple<decimal, decimal> ReadPrintedTotals(IReadOnlyList<PdfTextToken> tokens)
