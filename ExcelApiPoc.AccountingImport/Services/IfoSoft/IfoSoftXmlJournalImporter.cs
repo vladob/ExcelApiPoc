@@ -128,7 +128,10 @@ namespace ExcelApiPoc.AccountingImport.Services.IfoSoft
                             row.CreditItem = credit.CreditItem;
                             row.CreditFundingSource = credit.CreditFundingSource;
                             row.TextNormalizationApplied |= credit.TextNormalizationApplied;
-                            row.SourceLocation = "XML records " + (i + 1) + " and " + (i + 2);
+                            row.SourceLocation = "XML records " + (i + 1) + " and " + (i + 2) +
+                                (row.SourceLocation.Contains("source date ")
+                                    ? " (source date " + Value(records[i], "ucPripDat") + ")"
+                                    : string.Empty);
                             i++;
                         }
                     }
