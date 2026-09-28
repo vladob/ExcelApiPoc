@@ -53,7 +53,7 @@ namespace ExcelApiPoc.AccountingImport.Services.IfoSoft
                     }
                     if (syn.Length > 0 && !Code.IsMatch(syn))
                         throw new InvalidDataException($"Page {page.PageNumber}, row {number.Text}: invalid synthetic account '{syn}'.");
-                    if (ana.Length > 0 && ana != "****" && !Regex.IsMatch(ana, @"^[\p{L}\d]+$"))
+                    if (ana.Length > 0 && ana != "****" && !Regex.IsMatch(ana, @"^[\p{L}\d]+\.?$"))
                         throw new InvalidDataException($"Page {page.PageNumber}, row {number.Text}: invalid analytical account '{ana}'.");
                     // IfoSoft permits an analytical code without a display name.
                     var kind = syn.Length == 0 ? AccountingFrameworkRowKind.Empty : ana == "****" ?

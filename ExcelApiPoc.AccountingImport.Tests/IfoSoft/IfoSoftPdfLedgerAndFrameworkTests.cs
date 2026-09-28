@@ -49,6 +49,7 @@ public sealed class IfoSoftPdfLedgerAndFrameworkTests
         Assert.Contains(result.Rows, r => r.AccountCode == "021130" && r.RowKind == AccountingFrameworkRowKind.AnalyticalAccount);
         Assert.Contains(result.Rows, r => r.SyntheticCode == "01" && r.RowKind == AccountingFrameworkRowKind.GroupHeading);
         Assert.Contains(result.Rows, r => r.AccountCode == "357UPSV" && r.AccountName == "");
+        Assert.Contains(result.Rows, r => r.AccountCode == "518TEL." && r.AccountName == "Ostatné služby telefon");
     }
 
     private static string Sample(string fileName)

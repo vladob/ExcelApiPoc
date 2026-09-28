@@ -15,7 +15,7 @@ namespace ExcelApiPoc.AccountingImport.Services.IfoSoft
     public sealed class IfoSoftPdfGeneralLedgerImporter : IGeneralLedgerImporter
     {
         private static readonly Regex FileName = new Regex(@"^HL_KNIHA_(?<ico>\d{8})_(?<year>\d{4})(?:[_\(].*)?\.pdf$", RegexOptions.IgnoreCase);
-        private static readonly Regex Period = new Regex(@"00\s*/\s*(?<year>\d{4})\s*-\s*(?<month>\d{1,2})\s*/\s*\k<year>");
+        private static readonly Regex Period = new Regex(@"00\s*/\s*(?<year>\d{4})\s*-?\s*(?<month>\d{1,2})\s*/\s*\k<year>");
         private static readonly Regex Account = new Regex(@"^\d{3}[\p{L}\d]*$");
         private static readonly Regex Amount = new Regex(@"^-?[\d.]+(?:,\d{2}|,-)$");
         private static readonly CultureInfo Sk = CultureInfo.GetCultureInfo("sk-SK");
