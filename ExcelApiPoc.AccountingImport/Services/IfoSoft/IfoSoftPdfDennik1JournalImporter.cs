@@ -189,6 +189,14 @@ namespace ExcelApiPoc.AccountingImport.Services.IfoSoft
         {
             var fragments = tokens.Where(t => t.Left >= left && t.Left < right)
                 .OrderBy(t => t.Left).Select(t => t.Text.Trim()).Where(t => t.Length > 0).ToArray();
+            // The Kamienka print driver spaces numeric account codes into separate
+            // runs ("75 2020", "75 1 1", "461 001") without changing columns.
+            // Rejoin only wholly numeric fragments inside one account column.
+            if (fragments.Length > 0 && fragments.All(t => Regex.IsMatch(t, @"^\d+(?:\s+\d+)*$")))
+            {
+                string numericCode = Regex.Replace(string.Concat(fragments), @"\s+", string.Empty);
+                if (AccountPattern.IsMatch(numericCode)) return numericCode;
+            }
             if (allowSplitAnalytical && fragments.Length == 2 &&
                 AccountPattern.IsMatch(fragments[0]) && Regex.IsMatch(fragments[1], @"^\d$"))
                 return fragments[0] + fragments[1];

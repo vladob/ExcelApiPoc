@@ -6,6 +6,27 @@ namespace ExcelApiPoc.AccountingImport.Tests.IfoSoft;
 
 public sealed class IfoSoftPdfDennik1JournalImporterTests
 {
+    [Theory]
+    [InlineData("U_DENNIK_00323110_2024.pdf", 2024, "752020", "461001", "5262005.17")]
+    [InlineData("U_DENNIK_00323110_2025.pdf", 2025, "752025", "461001", "6472424.52")]
+    public void Imports_kamienka_journal_with_spaced_numeric_accounts(
+        string fileName, int year, string debitCode, string creditCode, string totalText)
+    {
+        string? root = Environment.GetEnvironmentVariable("IFOSOFT_PDF_JOURNAL_KAMIENKA_TEST_DIR");
+        Assert.True(!string.IsNullOrWhiteSpace(root),
+            "Set IFOSOFT_PDF_JOURNAL_KAMIENKA_TEST_DIR to the folder containing the two Kamienka journal PDFs.");
+        string path = Path.Combine(root!, fileName);
+        Assert.True(File.Exists(path), "Missing PDF sample: " + path);
+
+        JournalImport import = new IfoSoftPdfDennik1JournalImporter().Import(path);
+        decimal total = decimal.Parse(totalText, System.Globalization.CultureInfo.InvariantCulture);
+        Assert.Equal(year, import.FiscalYear);
+        Assert.Contains(import.Rows, row => row.DebitAccount == debitCode);
+        Assert.Contains(import.Rows, row => row.CreditAccount == creditCode);
+        Assert.Equal(total, import.Rows.Sum(row => row.DebitAmount ?? 0m));
+        Assert.Equal(total, import.Rows.Sum(row => row.CreditAmount ?? 0m));
+    }
+
     [Fact]
     public void Imports_full_year_and_reconciles_printed_totals()
     {
