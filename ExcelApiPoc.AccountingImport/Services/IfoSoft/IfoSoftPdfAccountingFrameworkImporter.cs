@@ -42,7 +42,11 @@ namespace ExcelApiPoc.AccountingImport.Services.IfoSoft
                 {
                     var line = tokens.Where(t => Math.Abs(t.Baseline - number.Baseline) < 3.0).ToArray();
                     string syn = Cell(line, 45, 68);
-                    string ana = Cell(line, 68, 92);
+                    // Some IfoSoft PDFs render one analytical code as separate
+                    // text fragments (for example, "15" and "6"). The code
+                    // column contains no meaningful whitespace.
+                    string ana = string.Concat(line.Where(t => t.Left >= 68 && t.Left < 92)
+                        .OrderBy(t => t.Left).Select(t => t.Text.Trim()));
                     string title = Text(line, 93, 420);
                     if (syn.Length == 0 && ana.Length == 0 && title.Length == 0)
                     {
