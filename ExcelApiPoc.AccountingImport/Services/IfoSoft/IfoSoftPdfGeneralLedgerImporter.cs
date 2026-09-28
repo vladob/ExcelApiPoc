@@ -76,6 +76,7 @@ namespace ExcelApiPoc.AccountingImport.Services.IfoSoft
                             flaggedCodes.Add(token.Text);
                 }
             var unflaggedSeen = new HashSet<string>(StringComparer.Ordinal);
+            var encounteredCodes = new HashSet<string>(StringComparer.Ordinal);
             foreach (var page in document.Pages)
             {
                 var tokens = page.Tokens.ToArray();
@@ -89,10 +90,18 @@ namespace ExcelApiPoc.AccountingImport.Services.IfoSoft
                     if (predvas)
                     {
                         bool flagged = line.Any(t => t.Left >= 240 && t.Left < 310 && (t.Text == "M" || t.Text == "D"));
-                        if (!flagged && (flaggedCodes.Contains(candidate.Text) ||
-                            allCodes.Any(codePredva => codePredva.Length > candidate.Text.Length &&
-                                codePredva.StartsWith(candidate.Text, StringComparison.Ordinal)) ||
-                            !unflaggedSeen.Add(candidate.Text))) continue;
+                        bool childExists = allCodes.Any(codePredva => codePredva.Length > candidate.Text.Length &&
+                            codePredva.StartsWith(candidate.Text, StringComparison.Ordinal));
+                        // The first parent row can itself be a detail account (221 before 221RF).
+                        // The parent subtotal follows its children and must not be imported twice.
+                        bool parentDetailBeforeChildren = childExists && !encounteredCodes.Contains(candidate.Text) &&
+                            !encounteredCodes.Any(codePredva => codePredva.Length > candidate.Text.Length &&
+                                codePredva.StartsWith(candidate.Text, StringComparison.Ordinal));
+                        bool skip = !flagged && !parentDetailBeforeChildren &&
+                            (flaggedCodes.Contains(candidate.Text) || childExists || !unflaggedSeen.Add(candidate.Text));
+                        encounteredCodes.Add(candidate.Text);
+                        if (skip) continue;
+                        if (!flagged) unflaggedSeen.Add(candidate.Text);
                     }
                     else if (line.Any(t => t.Left >= 20 && t.Left < 195 &&
                         t.Text.Length > 1 && char.IsLetter(t.Text[0]) && t.Text != "R")) continue;
