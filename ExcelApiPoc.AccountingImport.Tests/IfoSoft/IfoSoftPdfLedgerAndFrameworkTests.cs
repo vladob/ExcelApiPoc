@@ -80,6 +80,8 @@ public sealed class IfoSoftPdfLedgerAndFrameworkTests
         Assert.Contains(result.Rows, r => r.SourceRecordNumber == 27 && r.AccountCode == "042A-PO" &&
             r.RowKind == AccountingFrameworkRowKind.AnalyticalAccount);
         Assert.Contains(result.Rows, r => r.AccountCode == "042MŠ-U");
+        Assert.Contains(result.Rows, r => r.SourceRecordNumber == 181 && r.AccountCode == "321-POD");
+        Assert.Contains(result.Rows, r => r.SourceRecordNumber == 387 && r.AnalyticalCode == "-POD");
     }
 
     private static string Sample(string fileName)
