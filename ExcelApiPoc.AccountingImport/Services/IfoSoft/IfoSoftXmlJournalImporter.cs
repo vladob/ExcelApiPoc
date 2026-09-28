@@ -5,6 +5,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Xml;
 using System.Xml.Linq;
@@ -14,6 +15,13 @@ namespace ExcelApiPoc.AccountingImport.Services.IfoSoft
     /// <summary>Reads the paired accounting entries in an IfoSoft UCT_VETA XML export.</summary>
     public sealed class IfoSoftXmlJournalImporter : IJournalImporter
     {
+        static IfoSoftXmlJournalImporter()
+        {
+            // IfoSoft declares windows-1250 in its XML header. .NET 8 needs the
+            // code-page provider registered before XmlReader opens the file.
+            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+        }
+
         private static readonly Regex Name = new Regex(@"^U_DENNIK_(?<ico>\d{8})_(?<year>\d{4})\.xml$", RegexOptions.IgnoreCase);
         private static readonly Regex Account = new Regex(@"^\d{3}[\p{L}\d.]*$");
         private static readonly CultureInfo Sk = CultureInfo.GetCultureInfo("sk-SK");
