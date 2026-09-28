@@ -40,6 +40,22 @@ public sealed class IfoSoftPdfLedgerAndFrameworkTests
     }
 
     [Fact]
+    public void Hudcovce_hlknia4c_reconciles_annual_turnover()
+    {
+        string? path = Environment.GetEnvironmentVariable("IFOSOFT_PDF_GL_HUDCOVCE_TEST_FILE");
+        Assert.True(!string.IsNullOrWhiteSpace(path) && File.Exists(path),
+            "Set IFOSOFT_PDF_GL_HUDCOVCE_TEST_FILE to HL_KNIHA_00323012_2024.pdf.");
+        GeneralLedgerImport result = new IfoSoftPdfGeneralLedgerImporter().Import(path!);
+        Assert.Equal("00323012", result.Ico);
+        Assert.Equal(2024, result.FiscalYear);
+        Assert.Equal(12, result.ThroughMonth);
+        Assert.Contains(result.Rows, r => r.AccountCode == "042VO" && r.AnnualDebitTurnover == 10920.56m);
+        Assert.Contains(result.Rows, r => r.AccountCode == "081" && r.OpeningCredit == 820560.87m);
+        Assert.Equal(1090180.74m, result.Rows.Sum(r => r.AnnualDebitTurnover));
+        Assert.Equal(1090180.74m, result.Rows.Sum(r => r.AnnualCreditTurnover));
+    }
+
+    [Fact]
     public void Framework_preserves_numbered_rows_and_analytical_accounts()
     {
         var result = new IfoSoftPdfAccountingFrameworkImporter().Import(Sample("UCT_ROZVRH_00322857_2023.pdf"));

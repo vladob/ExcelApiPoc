@@ -16,7 +16,7 @@ namespace ExcelApiPoc.AccountingImport.Services.IfoSoft
     {
         private static readonly Regex FileName = new Regex(@"^HL_KNIHA_(?<ico>\d{8})_(?<year>\d{4})(?:[_\(].*)?\.pdf$", RegexOptions.IgnoreCase);
         private static readonly Regex Period = new Regex(@"00\s*/\s*(?<year>\d{4})\s*-?\s*(?<month>\d{1,2})\s*/\s*\k<year>");
-        private static readonly Regex Account = new Regex(@"^\d{3}[\p{L}\d]*$");
+        private static readonly Regex Account = new Regex(@"^\d{3}[\p{L}\d]*(?:-[\p{L}\d]+)*$");
         private static readonly Regex Amount = new Regex(@"^-?[\d.]+(?:,\d{2}|,-)$");
         private static readonly CultureInfo Sk = CultureInfo.GetCultureInfo("sk-SK");
 
@@ -33,8 +33,10 @@ namespace ExcelApiPoc.AccountingImport.Services.IfoSoft
             string first = string.Join(" ", document.Pages[0].Tokens.OrderByDescending(t => t.Baseline).ThenBy(t => t.Left).Select(t => t.Text));
             bool predvas = first.Contains("_PREDVAS3.GMX");
             bool detailed = first.Contains("_HLKNIA4.GMX");
-            if (predvas == detailed || !first.Contains("HLAVNÁ KNIHA"))
-                throw new InvalidDataException("Expected one IfoSoft _PREDVAS3.GMX or _HLKNIA4.GMX ledger layout.");
+            bool accountSummary = first.Contains("_HLKNIA4C.GMX");
+            if ((predvas ? 1 : 0) + (detailed ? 1 : 0) + (accountSummary ? 1 : 0) != 1 ||
+                !first.Contains("HLAVNÁ KNIHA"))
+                throw new InvalidDataException("Expected one IfoSoft _PREDVAS3.GMX, _HLKNIA4.GMX, or _HLKNIA4C.GMX ledger layout.");
             var periodLine = document.Pages[0].Tokens
                 .FirstOrDefault(t => t.Text.StartsWith("00/", StringComparison.Ordinal));
             string printedPeriod = periodLine == null ? string.Empty : string.Join(" ",
@@ -62,6 +64,11 @@ namespace ExcelApiPoc.AccountingImport.Services.IfoSoft
                 ThroughMonth = through, PeriodHeader = through.ToString("00", CultureInfo.InvariantCulture) + "/" + file.Groups["year"].Value,
                 ImportedAtUtc = DateTime.UtcNow
             };
+            if (accountSummary)
+            {
+                ReadAccountSummary(document, result);
+                return result;
+            }
             var allCodes = document.Pages.SelectMany(p => p.Tokens)
                 .Where(t => t.Left < (predvas ? 70 : 19) && Account.IsMatch(t.Text))
                 .Select(t => t.Text).ToArray();
@@ -151,6 +158,61 @@ namespace ExcelApiPoc.AccountingImport.Services.IfoSoft
                         t.Text + "@" + t.Left.ToString("F1", CultureInfo.InvariantCulture))));
             ValidateAnnualTotals(document, result, predvas);
             return result;
+        }
+
+        private static void ReadAccountSummary(PdfDocument document, GeneralLedgerImport result)
+        {
+            // HLKNIA4C prints four columns: opening net, annual MD, annual DAL,
+            // closing net. Only account lines have an M/D type flag; the repeated
+            // "****" synthetic totals and class totals have none.
+            foreach (var page in document.Pages)
+            {
+                var tokens = page.Tokens.ToArray();
+                foreach (var candidate in tokens.Where(t => t.Left >= 40 && t.Left < 75 && Account.IsMatch(t.Text))
+                    .OrderByDescending(t => t.Baseline))
+                {
+                    var line = tokens.Where(t => Math.Abs(t.Baseline - candidate.Baseline) < 3).ToArray();
+                    if (!line.Any(t => t.Left >= 80 && t.Left < 92 && (t.Text == "M" || t.Text == "D")))
+                        continue;
+                    var cells = new decimal[4];
+                    bool hasAmount = false;
+                    foreach (var token in line.Where(t => t.Left >= 300 && Amount.IsMatch(t.Text)))
+                    {
+                        int column = Bin(token.Right, new[] { 375d, 440, 505, 575 });
+                        if (column < 0 || cells[column] != 0m)
+                            throw new InvalidDataException($"Page {page.PageNumber}, account {candidate.Text}: ambiguous amount column.");
+                        decimal value = Parse(token.Text);
+                        if (value >= 0 && line.Any(sign => sign.Text == "-" &&
+                            Math.Abs(sign.Baseline - token.Baseline) < 1 &&
+                            sign.Right <= token.Left && token.Left - sign.Right < 4))
+                            value = -value;
+                        cells[column] = value;
+                        hasAmount = true;
+                    }
+                    if (!hasAmount) continue;
+                    SplitNet(cells[0], out decimal openingDebit, out decimal openingCredit);
+                    SplitNet(cells[3], out decimal closingDebit, out decimal closingCredit);
+                    result.Rows.Add(new GeneralLedgerRow
+                    {
+                        SequenceNumber = result.Rows.Count + 1, SourceRecordNumber = page.PageNumber,
+                        AccountCode = candidate.Text, SyntheticCode = candidate.Text.Substring(0, 3),
+                        AnalyticalCode = candidate.Text.Substring(3), AccountName = Text(line, 94, 300),
+                        OpeningDebit = openingDebit, OpeningCredit = openingCredit,
+                        AnnualDebitTurnover = cells[1], AnnualCreditTurnover = cells[2],
+                        ClosingDebit = closingDebit, ClosingCredit = closingCredit
+                    });
+                }
+            }
+            if (result.Rows.Count == 0)
+                throw new InvalidDataException("No _HLKNIA4C.GMX account rows found.");
+            var last = document.Pages.Last().Tokens;
+            var label = last.LastOrDefault(t => t.Text.Contains("KONTROLNÝ"));
+            if (label == null) throw new InvalidDataException("Ledger has no final KONTROLNÝ SÚČET.");
+            var control = last.Where(t => Math.Abs(t.Baseline - label.Baseline) < 5 &&
+                t.Left >= 375 && Amount.IsMatch(t.Text)).OrderBy(t => t.Left).ToArray();
+            if (control.Length != 2 || result.Rows.Sum(r => r.AnnualDebitTurnover) != Parse(control[0].Text) ||
+                result.Rows.Sum(r => r.AnnualCreditTurnover) != Parse(control[1].Text))
+                throw new InvalidDataException("_HLKNIA4C.GMX annual turnover does not match the printed KONTROLNÝ SÚČET.");
         }
 
         private static void ValidateAnnualTotals(PdfDocument document, GeneralLedgerImport result, bool predvas)
