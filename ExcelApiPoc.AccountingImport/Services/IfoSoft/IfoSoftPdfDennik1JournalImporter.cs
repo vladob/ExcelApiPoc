@@ -25,7 +25,7 @@ namespace ExcelApiPoc.AccountingImport.Services.IfoSoft
         private const string LayoutResource =
             "ExcelApiPoc.AccountingImport.PdfLayouts.IfoSoft.journal-dennik1.v1.json";
         private static readonly Regex DatePattern = new Regex(@"^\d{2}\.\d{2}\.\d{2}$");
-        private static readonly Regex AccountPattern = new Regex(@"^\d{3}[A-Za-z0-9]*$");
+        private static readonly Regex AccountPattern = new Regex(@"^\d{3}[\p{L}\d]*$");
         private static readonly Regex AmountPattern = new Regex(@"^-?\d+(?:,\d{2}|,-)$");
         private static readonly Regex PeriodPattern = new Regex(
             @"(?<!\d)00/(?<year>\d{4})\s*-\s*12/\k<year>(?!\d)");
@@ -113,8 +113,8 @@ namespace ExcelApiPoc.AccountingImport.Services.IfoSoft
                     var head = AtBaseline(tokens, dateToken.Baseline, 0.9);
                     var amountLine = AtBaseline(tokens, dateToken.Baseline - 5.3, 1.3);
                     var details = AtBaseline(tokens, dateToken.Baseline - 10.4, 1.8);
-                    string debit = Column(head, 297, 338, false);
-                    string credit = Column(head, 415, 455, false);
+                    string debit = Account(head, 297, 338, page.PageNumber, sourceNumber);
+                    string credit = Account(head, 415, 455, page.PageNumber, sourceNumber);
                     string amountText = Column(amountLine, 239, 301, false)
                         .Replace(" ", string.Empty).Replace("\u00a0", string.Empty);
                     if (!AmountPattern.IsMatch(amountText) ||
@@ -173,6 +173,16 @@ namespace ExcelApiPoc.AccountingImport.Services.IfoSoft
         private static string Column(IEnumerable<PdfTextToken> tokens, double left, double right, bool spaced) =>
             string.Join(spaced ? " " : "", tokens.Where(t => t.Left >= left && t.Left < right)
                 .OrderBy(t => t.Left).Select(t => t.Text.Trim()).Where(t => t.Length > 0)).Trim();
+
+        private static string Account(IEnumerable<PdfTextToken> tokens, double left, double right,
+            int pageNumber, int entryNumber)
+        {
+            var candidates = tokens.Where(t => t.Left >= left && t.Left < right)
+                .Select(t => t.Text.Trim()).Where(t => AccountPattern.IsMatch(t)).ToArray();
+            if (candidates.Length > 1)
+                throw new InvalidDataException($"Page {pageNumber}, entry {entryNumber}: ambiguous account column.");
+            return candidates.Length == 0 ? string.Empty : candidates[0];
+        }
 
         private static Tuple<decimal, decimal> ReadPrintedTotals(IReadOnlyList<PdfTextToken> tokens)
         {

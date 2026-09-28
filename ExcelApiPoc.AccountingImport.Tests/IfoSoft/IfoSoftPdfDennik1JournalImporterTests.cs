@@ -28,4 +28,23 @@ public sealed class IfoSoftPdfDennik1JournalImporterTests
         Assert.Contains(import.Rows, row => row.RecordKind == JournalRecordKind.Opening);
         Assert.Contains(import.Rows, row => row.DebitAmount < 0 || row.CreditAmount < 0);
     }
+
+    [Fact]
+    public void Imports_second_entity_with_budget_marker_and_unicode_account()
+    {
+        var path = Environment.GetEnvironmentVariable("IFOSOFT_PDF_JOURNAL_SECOND_TEST_FILE");
+        Assert.True(!string.IsNullOrWhiteSpace(path) && File.Exists(path),
+            "Set IFOSOFT_PDF_JOURNAL_SECOND_TEST_FILE to U_DENNIK_00322857_2023.pdf.");
+
+        JournalImport import = new IfoSoftPdfDennik1JournalImporter().Import(path!);
+        Assert.Equal("00322857", import.Ico);
+        Assert.Equal(854, import.Rows.Count);
+        Assert.Equal(412470.07m, import.Rows.Sum(row => row.DebitAmount ?? 0m));
+        Assert.Equal(412470.07m, import.Rows.Sum(row => row.CreditAmount ?? 0m));
+        Assert.Contains(import.Rows, row => row.CreditAccount == "357ŽP");
+        Assert.Contains(import.Rows, row => row.DebitAccount == "357ŽP");
+        Assert.DoesNotContain(import.Rows, row =>
+            (row.DebitAccount ?? "").Contains("R633") ||
+            (row.CreditAccount ?? "").Contains("R633"));
+    }
 }
