@@ -87,6 +87,22 @@ public sealed class IfoSoftCsvJournalImporterTests
         Assert.Contains("not a recognized IfoSoft accounting journal", exception.Message);
     }
 
+    [Fact]
+    public void Import_Kamienka_export_with_timestamp_header_and_filename_ico()
+    {
+        string? path = Environment.GetEnvironmentVariable("IFOSOFT_CSV_KAMIENKA_JOURNAL_TEST_FILE");
+        Assert.True(!string.IsNullOrWhiteSpace(path) && File.Exists(path),
+            "Set IFOSOFT_CSV_KAMIENKA_JOURNAL_TEST_FILE to U_DENNIK_00323110_2024.CSV.");
+        Assert.True(IfoSoftCsvJournalDetector.TryDetect(path!, out JournalDetectionResult detection));
+        Assert.Equal("00323110", detection.Ico);
+        JournalImport import = new IfoSoftCsvJournalImporter().Import(path!);
+        Assert.Equal("00323110", import.Ico);
+        Assert.Equal("OBEC KAMIENKA", import.CompanyName);
+        Assert.Equal(2024, import.FiscalYear);
+        Assert.Contains(import.ImportReport.Diagnostics, d => d.Code == "IFOSOFT_CSV_ICO_FROM_FILENAME");
+        Assert.NotEmpty(import.Rows);
+    }
+
     private static TemporaryCsvFile CreateValidJournal()
     {
         return new TemporaryCsvFile(

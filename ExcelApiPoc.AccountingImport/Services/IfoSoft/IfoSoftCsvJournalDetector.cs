@@ -37,6 +37,13 @@ namespace ExcelApiPoc.AccountingImport.Services.IfoSoft
                     AccountingFormat = "IfoSoft"
                 };
                 DetectEntityInformation(entityLine, result);
+                if (string.IsNullOrEmpty(result.Ico) &&
+                    Regex.IsMatch(entityLine?.Trim().Trim('"') ?? "", @"^\d{8}_\d{4}\s+\S"))
+                {
+                    Match file = Regex.Match(Path.GetFileName(filePath),
+                        @"^U_DENNIK_(?<ico>\d{8})_\d{4}\.csv$", RegexOptions.IgnoreCase);
+                    if (file.Success) result.Ico = file.Groups["ico"].Value;
+                }
                 DetectFiscalYear(reader, result);
                 return true;
             }
@@ -88,6 +95,8 @@ namespace ExcelApiPoc.AccountingImport.Services.IfoSoft
             Match match = Regex.Match(normalized, @"^(?<ico>\d{8})(?:\s+(?<name>.*))?$");
             if (!match.Success)
             {
+                match = Regex.Match(normalized, @"^\d{8}_\d{4}\s+(?<name>.+)$");
+                if (match.Success) result.CompanyName = match.Groups["name"].Value.Trim();
                 return;
             }
             result.Ico = match.Groups["ico"].Value;

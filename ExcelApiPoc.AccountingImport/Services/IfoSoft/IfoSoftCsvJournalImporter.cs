@@ -64,7 +64,12 @@ namespace ExcelApiPoc.AccountingImport.Services.IfoSoft
                 Ico = detection.Ico,
                 CompanyName = detection.CompanyName,
                 FiscalYear = detection.FiscalYear ?? 0,
-                ImportedAtUtc = DateTime.UtcNow
+                ImportedAtUtc = DateTime.UtcNow,
+                ImportReport = new ExcelApiPoc.AccountingImport.Models.Reporting.ImportReport
+                {
+                    AccountingFormat = "IfoSoft", ImportType = "AccountingJournal",
+                    SourceFileName = Path.GetFileName(filePath)
+                }
             };
 
             using (IEnumerator<CsvRecord> records = ReadCsvRecords(filePath).GetEnumerator())
@@ -281,8 +286,24 @@ namespace ExcelApiPoc.AccountingImport.Services.IfoSoft
 
             if (!match.Success)
             {
-                throw new InvalidDataException($"{record.Location}: IČO was not found in " + "the IfoSoft entity-information record.");
+                match = Regex.Match(value, @"^\d{8}_\d{4}\s+(?<name>.+)$");
+                Match file = Regex.Match(journalImport.SourceFileName,
+                    @"^U_DENNIK_(?<ico>\d{8})_\d{4}\.csv$", RegexOptions.IgnoreCase);
+                if (!match.Success || !file.Success || journalImport.Ico != file.Groups["ico"].Value)
+                    throw new InvalidDataException($"{record.Location}: IČO was not found in " + "the IfoSoft entity-information record.");
+                journalImport.Ico = file.Groups["ico"].Value;
+                journalImport.CompanyName = match.Groups["name"].Value.Trim();
+                journalImport.ImportReport.Diagnostics.Add(new ExcelApiPoc.AccountingImport.Models.Reporting.ImportDiagnostic
+                {
+                    Code = "IFOSOFT_CSV_ICO_FROM_FILENAME",
+                    Severity = ExcelApiPoc.AccountingImport.Models.Reporting.ImportDiagnosticSeverity.Warning,
+                    Message = "The CSV header does not contain IČO; '" + journalImport.Ico +
+                        "' was taken from the filename. Verify that it belongs to '" + journalImport.CompanyName + "'."
+                });
+                return;
             }
+            if (!string.IsNullOrEmpty(journalImport.Ico) && journalImport.Ico != match.Groups["ico"].Value)
+                throw new InvalidDataException($"{record.Location}: IČO conflicts with detected journal metadata.");
             journalImport.Ico = match.Groups["ico"].Value;
 
             if (match.Groups["name"].Success)

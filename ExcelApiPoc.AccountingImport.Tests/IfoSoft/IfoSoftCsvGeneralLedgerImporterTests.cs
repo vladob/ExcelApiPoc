@@ -46,6 +46,20 @@ public sealed class IfoSoftCsvGeneralLedgerImporterTests
         Assert.Contains("invalid period or closing-balance columns", exception.Message);
     }
 
+    [Fact]
+    public void Import_Kamienka_ledger_with_timestamp_header_and_filename_ico()
+    {
+        string? path = Environment.GetEnvironmentVariable("IFOSOFT_CSV_KAMIENKA_LEDGER_TEST_FILE");
+        Assert.True(!string.IsNullOrWhiteSpace(path) && File.Exists(path),
+            "Set IFOSOFT_CSV_KAMIENKA_LEDGER_TEST_FILE to HL_KNIHA_00323110_2024.CSV.");
+        GeneralLedgerImport import = new IfoSoftCsvGeneralLedgerImporter().Import(path!);
+        Assert.Equal("00323110", import.Ico);
+        Assert.Equal("OBEC KAMIENKA", import.CompanyName);
+        Assert.Equal(2024, import.FiscalYear);
+        Assert.Contains(import.ImportReport.Diagnostics, d => d.Code == "IFOSOFT_CSV_ICO_FROM_FILENAME");
+        Assert.NotEmpty(import.Rows);
+    }
+
     private static TemporaryCsvFile CreateLedger(
         string debitPeriod,
         string creditPeriod)
