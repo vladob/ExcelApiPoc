@@ -47,4 +47,19 @@ public sealed class IfoSoftPdfDennik1JournalImporterTests
             (row.DebitAccount ?? "").Contains("R633") ||
             (row.CreditAccount ?? "").Contains("R633"));
     }
+
+    [Fact]
+    public void Imports_split_analytical_account_in_hankovce_journal()
+    {
+        var path = Environment.GetEnvironmentVariable("IFOSOFT_PDF_JOURNAL_HANKOVCE_TEST_FILE");
+        Assert.True(!string.IsNullOrWhiteSpace(path) && File.Exists(path),
+            "Set IFOSOFT_PDF_JOURNAL_HANKOVCE_TEST_FILE to U_DENNIK_00322962_2023_a.pdf.");
+
+        JournalImport import = new IfoSoftPdfDennik1JournalImporter().Import(path!);
+        Assert.Equal("00322962", import.Ico);
+        Assert.Equal(2023, import.FiscalYear);
+        Assert.Contains(import.Rows, row => row.DebitAccount == "518162" && row.DebitAmount == 110.50m);
+        Assert.Equal(4848547.91m, import.Rows.Sum(row => row.DebitAmount ?? 0m));
+        Assert.Equal(4848547.91m, import.Rows.Sum(row => row.CreditAmount ?? 0m));
+    }
 }
