@@ -1,6 +1,7 @@
 using ExcelApiPoc.AccountingImport.Models;
 using ExcelApiPoc.AccountingImport.Services;
 using ExcelApiPoc.AccountingImport.Services.IfoSoft;
+using ExcelApiPoc.AccountingImport.Services.Common;
 
 namespace ExcelApiPoc.AccountingImport.Tests.IfoSoft;
 
@@ -21,6 +22,17 @@ public sealed class IfoSoftXmlJournalImporterTests
         Assert.Contains(import.ImportReport.Diagnostics, d =>
             d.Code == "IFOSOFT_XML_DESCRIPTION_NORMALIZED" && d.Message.Contains("4 invalid XML characters"));
         Assert.Contains(import.Rows, row => row.Description.Contains("odvod& do VŠZP"));
+        Assert.Contains(import.ImportReport.Diagnostics, d => d.Code == "IFOSOFT_XML_MISTYPED_POSTING_YEAR" &&
+            d.Message.Contains("10 XML source records"));
+        Assert.Contains(import.Rows, row => row.PostingDate == new DateTime(2022, 2, 28) &&
+            row.SourceLocation.Contains("source date 28.02.0222"));
+        Assert.Equal(28, import.Rows.Count(row => row.PostingDate.Year == 2023));
+        Assert.Equal(28, JournalDateExceptionService.Apply(import, 2022));
+        Assert.All(import.Rows.Where(row => row.PostingDate.Year == 2023), row =>
+        {
+            Assert.Equal(JournalDateExceptionResolution.Excluded, row.DateExceptionResolution);
+            Assert.False(row.UsedForReportCalculation);
+        });
     }
 
     [Theory]

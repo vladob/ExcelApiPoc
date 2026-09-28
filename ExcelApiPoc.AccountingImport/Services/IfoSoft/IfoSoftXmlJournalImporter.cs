@@ -93,6 +93,17 @@ namespace ExcelApiPoc.AccountingImport.Services.IfoSoft
                         result.FiscalYear + "; every entry date and year will be validated."
                 });
             }
+            int mistypedYearRecords = records.Count(record =>
+                Value(record, "rok") == "0222" && Value(record, "ucPripDat") == "28.02.0222" &&
+                result.FiscalYear == 2022);
+            if (mistypedYearRecords > 0)
+                result.ImportReport.Diagnostics.Add(new ImportDiagnostic
+                {
+                    Code = "IFOSOFT_XML_MISTYPED_POSTING_YEAR",
+                    Severity = ImportDiagnosticSeverity.Warning,
+                    Message = mistypedYearRecords + " XML source records dated 28.02.0222 were interpreted as " +
+                        "28.02.2022. Their original date remains in SourceLocation; verify against the source."
+                });
             int nextYearEntries = 0;
             for (int i = 0; i < records.Length; i++)
             {
@@ -154,18 +165,24 @@ namespace ExcelApiPoc.AccountingImport.Services.IfoSoft
             string rawAccount = Value(record, "ucSuv") + Value(record, "ucAnl");
             string account = Regex.Replace(rawAccount, @"\s+", string.Empty);
             if (!Account.IsMatch(account)) throw new InvalidDataException(location + ": invalid account code '" + account + "'.");
-            if (!DateTime.TryParseExact(Value(record, "ucPripDat"), "dd.MM.yyyy", CultureInfo.InvariantCulture,
+            string sourceDate = Value(record, "ucPripDat");
+            string sourceYear = Value(record, "rok");
+            bool mistypedYear = year == 2022 && sourceDate == "28.02.0222" && sourceYear == "0222";
+            string postingDate = mistypedYear ? "28.02.2022" : sourceDate;
+            string postingYear = mistypedYear ? "2022" : sourceYear;
+            if (!DateTime.TryParseExact(postingDate, "dd.MM.yyyy", CultureInfo.InvariantCulture,
                     DateTimeStyles.None, out DateTime date) ||
                 (date.Year != year && !(date.Year == year + 1 && date.Month == 1)) ||
-                Value(record, "rok") != date.Year.ToString(CultureInfo.InvariantCulture) ||
+                postingYear != date.Year.ToString(CultureInfo.InvariantCulture) ||
                 Value(record, "mes") != date.Month.ToString("00", CultureInfo.InvariantCulture))
                 throw new InvalidDataException(location + ": accounting date differs from the filename's fiscal year.");
             XElement budget = record.Element("rozpocCis");
             var row = new JournalRow
             {
-                SourceRecordNumber = sourceNumber, SourceLocation = location,
+                SourceRecordNumber = sourceNumber,
+                SourceLocation = mistypedYear ? location + " (source date " + sourceDate + ")" : location,
                 PostingDate = date, DocumentNumber = Value(record, "ucDok"), Description = Value(record, "ucDokText"),
-                TextNormalizationApplied = account != rawAccount
+                TextNormalizationApplied = account != rawAccount || mistypedYear
             };
             if (debitText.Length > 0)
             {
