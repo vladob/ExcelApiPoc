@@ -109,6 +109,23 @@ public sealed class IfoSoftPdfLedgerAndFrameworkTests
             row.AccountCode == "3575%" && row.RowKind == AccountingFrameworkRowKind.AnalyticalAccount);
     }
 
+    [Theory]
+    [InlineData("HL_KNIHA_00323161_2022.pdf")]
+    [InlineData("HL_KNIHA_00323161_2022_b.pdf")]
+    public void Kolonica_2022_ledgers_reconcile_printed_turnover(string fileName)
+    {
+        string? root = Environment.GetEnvironmentVariable("IFOSOFT_PDF_GL_KOLONICA_TEST_DIR");
+        Assert.True(!string.IsNullOrWhiteSpace(root),
+            "Set IFOSOFT_PDF_GL_KOLONICA_TEST_DIR to the folder containing both Kolonica ledger PDFs.");
+        string path = Path.Combine(root!, fileName);
+        Assert.True(File.Exists(path), "Missing ledger PDF: " + path);
+        GeneralLedgerImport result = new IfoSoftPdfGeneralLedgerImporter().Import(path);
+        Assert.Equal("00323161", result.Ico);
+        Assert.Equal(2022, result.FiscalYear);
+        Assert.Equal(1566981.92m, result.Rows.Sum(row => row.AnnualDebitTurnover));
+        Assert.Equal(1566981.92m, result.Rows.Sum(row => row.AnnualCreditTurnover));
+    }
+
     private static string Sample(string fileName)
     {
         string? root = Environment.GetEnvironmentVariable("IFOSOFT_PDF_GL_AF_TEST_DIR");

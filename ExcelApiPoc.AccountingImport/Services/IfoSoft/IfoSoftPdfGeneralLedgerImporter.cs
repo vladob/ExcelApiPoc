@@ -110,12 +110,16 @@ namespace ExcelApiPoc.AccountingImport.Services.IfoSoft
                         if (skip) continue;
                         if (!flagged) unflaggedSeen.Add(candidate.Text);
                     }
-                    else if (line.Any(t => t.Left >= 20 && t.Left < 195 &&
+                    else if (!line.Any(t => t.Left >= 20 && t.Left < 195 && t.Text == "R") &&
+                        line.Any(t => t.Left >= 20 && t.Left < 195 &&
                         t.Text.Length > 1 && char.IsLetter(t.Text[0]) && t.Text != "R")) continue;
                     var cells = new decimal[8];
                     foreach (var token in line.Where(t => t.Left > (predvas ? 310 : 210) && Amount.IsMatch(t.Text)))
                     {
-                        int col = predvas ? Bin(token.Right, new[] { 370d, 430, 490, 550, 610, 670, 730, 810 })
+                        // PREDVAS amounts are right-aligned; their right edge can
+                        // cross a column boundary by a few points. The left edge
+                        // remains inside the printed amount column.
+                        int col = predvas ? Bin(token.Left, new[] { 370d, 430, 490, 550, 610, 670, 730, 810 })
                                           : Bin(token.Right, new[] { 275d, 335, 395, 455, 515, 580 });
                         if (col < 0) throw new InvalidDataException($"Page {page.PageNumber}: amount outside the known ledger columns.");
                         if (cells[col] != 0m) throw new InvalidDataException($"Page {page.PageNumber}, account {candidate.Text}: ambiguous amount column.");
