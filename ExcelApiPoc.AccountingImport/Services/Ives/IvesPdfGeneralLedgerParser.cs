@@ -446,12 +446,12 @@ namespace ExcelApiPoc.AccountingImport.Services.Ives
                 .ToArray();
             var final = tokens
                 .Where(token => Math.Abs(token.Right - anchor) <= 0.75 &&
-                    Regex.IsMatch(Trim(token.Text), @"^-?\d{1,12},\d{2}$"))
+                    Regex.IsMatch(Trim(token.Text), @"^-?(?:\d{1,12}|\d{1,3}(?:[ \u00a0]\d{3})+),\d{2}$"))
                 .OrderBy(token => Math.Abs(token.Right - anchor))
                 .FirstOrDefault();
             if (final == null) return false;
 
-            string value = Trim(final.Text);
+            string value = Trim(final.Text).Replace(" ", string.Empty).Replace("\u00a0", string.Empty);
             double left = final.Left;
             for (int i = Array.IndexOf(tokens, final) - 1; i >= 0; i--)
             {
