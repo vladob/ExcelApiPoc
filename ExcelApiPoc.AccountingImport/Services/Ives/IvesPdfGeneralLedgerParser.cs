@@ -329,9 +329,17 @@ namespace ExcelApiPoc.AccountingImport.Services.Ives
 
             if (comma == null)
             {
+                string nearby = string.Join(" ", record.SourceTokens
+                    .Where(token => token.Right >= anchor - 65.0 && token.Left <= anchor + 12.0)
+                    .OrderBy(token => token.Left)
+                    .Take(90)
+                    .Select(token => "'" + token.Text + "'@" +
+                        token.Right.ToString("F2", CultureInfo.InvariantCulture)));
                 throw new InvalidDataException(
                     "IVES general-ledger PDF contains no amount decimal separator near " +
-                    anchor.ToString("F1", CultureInfo.InvariantCulture) + ".");
+                    anchor.ToString("F1", CultureInfo.InvariantCulture) +
+                    " on page " + record.StartPageNumber +
+                    ". Record: '" + record.Text + "'. Nearby tokens: " + nearby + ".");
             }
 
             AmountGlyph decimal1 = FindNearestGlyph(
