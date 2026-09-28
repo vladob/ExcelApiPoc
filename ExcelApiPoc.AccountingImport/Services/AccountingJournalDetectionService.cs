@@ -24,6 +24,11 @@ namespace ExcelApiPoc.AccountingImport.Services
                 return true;
             }
 
+            if (IfoSoftPdfDennik1JournalImporter.TryDetect(filePath, out result))
+            {
+                return true;
+            }
+
             if (TryDetectIves(filePath, out result))
             {
                 return true;

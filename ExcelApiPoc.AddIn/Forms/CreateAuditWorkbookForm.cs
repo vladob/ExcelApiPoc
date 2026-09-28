@@ -477,8 +477,7 @@ namespace ExcelApiPoc.AddIn.Forms
                 };
                 importRequest.JournalFilePaths.AddRange(journalFilePaths);
 
-                AccountingImportPackage importPackage =
-                    AccountingImportCoordinator.CreateDefault().Import(importRequest);
+                AccountingImportPackage importPackage;
 
                 try
                 {
