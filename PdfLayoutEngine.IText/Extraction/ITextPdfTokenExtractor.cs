@@ -45,7 +45,28 @@ public sealed class ITextPdfTokenExtractor
         return new LayoutDocument(pages);
     }
 
-    private sealed class TextTokenEventListener(int pageNumber, int rotation, double pageWidth, double pageHeight) : IEventListener
+    // Importers that need fixed columns can request individual words. The default
+    // extraction stays unchanged for layout detection and existing journal imports.
+    public LayoutDocument ExtractWords(string filePath)
+    {
+        if (filePath == null) throw new ArgumentNullException(nameof(filePath));
+        using var stream = File.OpenRead(filePath);
+        using var reader = new PdfReader(stream);
+        using var pdf = new iText.Kernel.Pdf.PdfDocument(reader);
+        var pages = new List<LayoutPage>(pdf.GetNumberOfPages());
+        for (var pageNumber = 1; pageNumber <= pdf.GetNumberOfPages(); pageNumber++)
+        {
+            var page = pdf.GetPage(pageNumber);
+            var listener = new TextTokenEventListener(pageNumber, page.GetRotation(),
+                page.GetPageSize().GetWidth(), page.GetPageSize().GetHeight(), true);
+            new PdfCanvasProcessor(listener).ProcessPageContent(page);
+            pages.Add(new LayoutPage(pageNumber, listener.Tokens));
+        }
+        return new LayoutDocument(pages);
+    }
+
+    private sealed class TextTokenEventListener(int pageNumber, int rotation, double pageWidth, double pageHeight,
+        bool splitWords = false) : IEventListener
     {
         private static readonly ICollection<EventType> SupportedEvents = [EventType.RENDER_TEXT];
         private readonly int _pageNumber = pageNumber;
@@ -54,13 +75,24 @@ public sealed class ITextPdfTokenExtractor
         private readonly double _pageHeight = pageHeight;
         private readonly List<PdfTextToken> _tokens = [];
 
-        public IReadOnlyList<PdfTextToken> Tokens => JoinSplitGmxMarkers(
-            AssembleCharacterRuns(_tokens, _rotation == 90 || _rotation == 270));
+        public IReadOnlyList<PdfTextToken> Tokens => splitWords
+            ? AssembleWords(_tokens, _rotation == 90 || _rotation == 270)
+            : JoinSplitGmxMarkers(AssembleCharacterRuns(_tokens, _rotation == 90 || _rotation == 270));
 
         public void EventOccurred(IEventData data, EventType type)
         {
             if (type != EventType.RENDER_TEXT || data is not TextRenderInfo textRenderInfo) return;
 
+            if (splitWords)
+            {
+                foreach (var character in textRenderInfo.GetCharacterRenderInfos())
+                    AddToken(character);
+            }
+            else AddToken(textRenderInfo);
+        }
+
+        private void AddToken(TextRenderInfo textRenderInfo)
+        {
             var baseline = textRenderInfo.GetBaseline().GetBoundingRectangle();
             var fontName = textRenderInfo.GetFont()?.GetFontProgram()?.ToString() ?? string.Empty;
             var left = (double)baseline.GetLeft();
@@ -101,6 +133,34 @@ public sealed class ITextPdfTokenExtractor
         }
 
         public ICollection<EventType> GetSupportedEvents() => SupportedEvents;
+
+        private static IReadOnlyList<PdfTextToken> AssembleWords(List<PdfTextToken> glyphs, bool rotated)
+        {
+            var words = new List<PdfTextToken>();
+            var letters = new StringBuilder();
+            PdfTextToken first = null;
+            double right = 0;
+            void Flush()
+            {
+                if (first != null && letters.Length > 0)
+                    words.Add(new PdfTextToken(first.PageNumber, letters.ToString(), first.Left,
+                        right, first.Baseline, first.IsBold, first.IsItalic));
+                first = null;
+                letters.Clear();
+            }
+            foreach (var glyph in glyphs)
+            {
+                if (string.IsNullOrWhiteSpace(glyph.OriginalText)) { Flush(); continue; }
+                double gap = first == null ? 0 : glyph.Left - right;
+                if (first != null && (Math.Abs(glyph.Baseline - first.Baseline) > 0.75 ||
+                    gap < -1.5 || gap > (rotated ? 10 : 2))) Flush();
+                if (first == null) first = glyph;
+                letters.Append(glyph.OriginalText);
+                right = glyph.Right;
+            }
+            Flush();
+            return words;
+        }
 
         // Some accounting print drivers emit one PDF text operation per glyph.
         // Reassemble adjacent glyphs before matching phrases in layout rules.

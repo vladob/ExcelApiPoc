@@ -21,10 +21,12 @@ namespace ExcelApiPoc.AccountingImport.Services.IfoSoft
             if (!File.Exists(filePath)) throw new FileNotFoundException("Accounting framework PDF not found.", filePath);
             var name = Name.Match(Path.GetFileName(filePath));
             if (!name.Success) throw new InvalidDataException("Expected UCT_ROZVRH_<IČO>_<year>.pdf.");
-            var doc = new ITextPdfTokenExtractor().Extract(filePath);
+            var doc = new ITextPdfTokenExtractor().ExtractWords(filePath);
             string header = string.Join(" ", doc.Pages[0].Tokens.OrderByDescending(t => t.Baseline).ThenBy(t => t.Left).Select(t => t.Text));
-            if (!header.Contains("ÚČTOVÝ ROZVRH ANALYTICKÝCH ÚČTOV"))
-                throw new InvalidDataException("Expected the IfoSoft analytical accounting framework layout.");
+            if (!header.Contains("ÚČTOVÝ") || !header.Contains("ROZVRH") ||
+                !header.Contains("ANALYTICKÝCH") || !header.Contains("ÚČTOV"))
+                throw new InvalidDataException("Expected the IfoSoft analytical accounting framework layout. First tokens: " +
+                    string.Join(" | ", doc.Pages[0].Tokens.Take(30).Select(t => t.Text)));
             var result = new AccountingFrameworkImport
             {
                 SourceFileName = Path.GetFileName(filePath), SourceFilePath = Path.GetFullPath(filePath),

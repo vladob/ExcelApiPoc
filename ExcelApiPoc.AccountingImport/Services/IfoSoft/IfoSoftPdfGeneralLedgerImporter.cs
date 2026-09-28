@@ -29,13 +29,18 @@ namespace ExcelApiPoc.AccountingImport.Services.IfoSoft
             if (!File.Exists(filePath)) throw new FileNotFoundException("Ledger PDF not found.", filePath);
             var file = FileName.Match(Path.GetFileName(filePath));
             if (!file.Success) throw new InvalidDataException("Expected HL_KNIHA_<IČO>_<year>.pdf.");
-            var document = new ITextPdfTokenExtractor().Extract(filePath);
+            var document = new ITextPdfTokenExtractor().ExtractWords(filePath);
             string first = string.Join(" ", document.Pages[0].Tokens.OrderByDescending(t => t.Baseline).ThenBy(t => t.Left).Select(t => t.Text));
             bool predvas = first.Contains("_PREDVAS3.GMX");
             bool detailed = first.Contains("_HLKNIA4.GMX");
             if (predvas == detailed || !first.Contains("HLAVNÁ KNIHA"))
                 throw new InvalidDataException("Expected one IfoSoft _PREDVAS3.GMX or _HLKNIA4.GMX ledger layout.");
-            var period = Period.Match(first);
+            var periodLine = document.Pages[0].Tokens
+                .FirstOrDefault(t => t.Text.StartsWith("00/", StringComparison.Ordinal));
+            string printedPeriod = periodLine == null ? string.Empty : string.Join(" ",
+                document.Pages[0].Tokens.Where(t => Math.Abs(t.Baseline - periodLine.Baseline) < 2)
+                    .OrderBy(t => t.Left).Select(t => t.Text));
+            var period = Period.Match(printedPeriod);
             if (!period.Success || period.Groups["year"].Value != file.Groups["year"].Value)
                 throw new InvalidDataException("Printed accounting period does not agree with ledger filename.");
             int through = int.Parse(period.Groups["month"].Value, CultureInfo.InvariantCulture);
@@ -76,8 +81,8 @@ namespace ExcelApiPoc.AccountingImport.Services.IfoSoft
                     {
                         bool flagged = line.Any(t => t.Left >= 240 && t.Left < 310 && (t.Text == "M" || t.Text == "D"));
                         if (!flagged && (flaggedCodes.Contains(candidate.Text) ||
-                            allCodes.Any(code => code.Length > candidate.Text.Length &&
-                                code.StartsWith(candidate.Text, StringComparison.Ordinal)) ||
+                            allCodes.Any(codePredva => codePredva.Length > candidate.Text.Length &&
+                                codePredva.StartsWith(candidate.Text, StringComparison.Ordinal)) ||
                             !unflaggedSeen.Add(candidate.Text))) continue;
                     }
                     else if (line.Any(t => t.Left >= 20 && t.Left < 195 &&
@@ -89,7 +94,12 @@ namespace ExcelApiPoc.AccountingImport.Services.IfoSoft
                                           : Bin(token.Right, new[] { 275d, 335, 395, 455, 515, 580 });
                         if (col < 0) throw new InvalidDataException($"Page {page.PageNumber}: amount outside the known ledger columns.");
                         if (cells[col] != 0m) throw new InvalidDataException($"Page {page.PageNumber}, account {candidate.Text}: ambiguous amount column.");
-                        cells[col] = Parse(token.Text);
+                        decimal value = Parse(token.Text);
+                        if (value >= 0 && line.Any(sign => sign.Text == "-" &&
+                            Math.Abs(sign.Baseline - token.Baseline) < 1 &&
+                            sign.Right <= token.Left && token.Left - sign.Right < 4))
+                            value = -value;
+                        cells[col] = value;
                     }
                     if (!line.Any(t => t.Left > (predvas ? 310 : 210) && Amount.IsMatch(t.Text))) continue;
                     string code = candidate.Text;
@@ -118,7 +128,9 @@ namespace ExcelApiPoc.AccountingImport.Services.IfoSoft
                     result.Rows.Add(row);
                 }
             }
-            if (result.Rows.Count == 0) throw new InvalidDataException("No analytical ledger rows found.");
+            if (result.Rows.Count == 0) throw new InvalidDataException("No analytical ledger rows found. First tokens: " +
+                    string.Join(" | ", document.Pages[0].Tokens.Take(30).Select(t =>
+                        t.Text + "@" + t.Left.ToString("F1", CultureInfo.InvariantCulture))));
             ValidateAnnualTotals(document, result, predvas);
             return result;
         }

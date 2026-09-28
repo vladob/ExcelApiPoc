@@ -8,9 +8,9 @@ public sealed class IfoSoftPdfLedgerAndFrameworkTests
     [Theory]
     [InlineData("HL_KNIHA_00322857_2021.pdf", 2021, 12, 19688694, 37)]
     [InlineData("HL_KNIHA_00322857_2023_12.pdf", 2023, 12, 26341457, 50)]
-    [InlineData("HL_KNIHA_00322857_2023(2).pdf", 2023, 13, 31727023, 51)]
+    [InlineData("HL_KNIHA_00322857_2023.pdf", 2023, 13, 31727023, 51)]
     [InlineData("HL_KNIHA_00322857_2024_a.pdf", 2024, 12, 25653979, 126)]
-    [InlineData("HL_KNIHA_00322857_2024_b(1).pdf", 2024, 12, 25653979, 56)]
+    [InlineData("HL_KNIHA_00322857_2024_b.pdf", 2024, 12, 25653979, 56)]
     public void Ledger_matches_printed_annual_totals(string fileName, int year, int month, int cents, int rows)
     {
         string path = Sample(fileName);
@@ -30,7 +30,7 @@ public sealed class IfoSoftPdfLedgerAndFrameworkTests
     {
         var importer = new IfoSoftPdfGeneralLedgerImporter();
         var detailed = importer.Import(Sample("HL_KNIHA_00322857_2024_a.pdf"));
-        var analytical = importer.Import(Sample("HL_KNIHA_00322857_2024_b(1).pdf"));
+        var analytical = importer.Import(Sample("HL_KNIHA_00322857_2024_b.pdf"));
         var first = detailed.Rows.GroupBy(r => r.AccountCode)
             .ToDictionary(g => g.Key, g => (Debit: g.Sum(r => r.AnnualDebitTurnover), Credit: g.Sum(r => r.AnnualCreditTurnover)));
         var second = analytical.Rows.GroupBy(r => r.AccountCode)
