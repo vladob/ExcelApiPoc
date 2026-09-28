@@ -75,9 +75,13 @@ namespace ExcelApiPoc.AccountingImport.Services.IfoSoft
                 }
             }
             if (result.Rows.Count == 0) throw new InvalidDataException("No accounting framework rows found.");
-            for (int i = 0; i < result.Rows.Count; i++)
-                if (result.Rows[i].SourceRecordNumber != i + 1)
-                    throw new InvalidDataException("Framework row numbers are not consecutive at " + (i + 1) + ".");
+            // A newly added account can be printed next to its parent with the
+            // next available number (e.g. row 705 between rows 424 and 425).
+            // Preserve print order, while still requiring every number exactly once.
+            var numbers = result.Rows.Select(row => row.SourceRecordNumber).OrderBy(n => n).ToArray();
+            for (int i = 0; i < numbers.Length; i++)
+                if (numbers[i] != i + 1)
+                    throw new InvalidDataException("Framework row numbers are missing or duplicated at " + (i + 1) + ".");
             return result;
         }
         private static string Cell(PdfTextToken[] line, double left, double right) => Text(line, left, right).Trim();

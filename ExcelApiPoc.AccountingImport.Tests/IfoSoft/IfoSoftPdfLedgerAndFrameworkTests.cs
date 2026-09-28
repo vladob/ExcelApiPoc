@@ -84,6 +84,20 @@ public sealed class IfoSoftPdfLedgerAndFrameworkTests
         Assert.Contains(result.Rows, r => r.SourceRecordNumber == 387 && r.AnalyticalCode == "-POD");
     }
 
+    [Fact]
+    public void Kamienka_2025_framework_preserves_inserted_row_number()
+    {
+        string? path = Environment.GetEnvironmentVariable("IFOSOFT_PDF_AF_KAMIENKA_TEST_FILE");
+        Assert.True(!string.IsNullOrWhiteSpace(path) && File.Exists(path),
+            "Set IFOSOFT_PDF_AF_KAMIENKA_TEST_FILE to UCT_ROZVRH_00323110_2025.pdf.");
+        AccountingFrameworkImport result = new IfoSoftPdfAccountingFrameworkImporter().Import(path!);
+        Assert.Equal(705, result.Rows.Count);
+        Assert.Equal(new[] { 424, 705, 425 }, result.Rows.Skip(423).Take(3)
+            .Select(row => row.SourceRecordNumber).ToArray());
+        Assert.Contains(result.Rows, row => row.SourceRecordNumber == 705 &&
+            row.AccountCode == "4282025");
+    }
+
     private static string Sample(string fileName)
     {
         string? root = Environment.GetEnvironmentVariable("IFOSOFT_PDF_GL_AF_TEST_DIR");
