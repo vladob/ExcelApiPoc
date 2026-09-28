@@ -1,4 +1,5 @@
-using ExcelApiPoc.AccountingImport.Models;
+﻿using ExcelApiPoc.AccountingImport.Models;
+using ExcelApiPoc.AccountingImport.Services.IfoSoft;
 using ExcelApiPoc.AccountingImport.Services;
 using ExcelApiPoc.AccountingImport.Services.Ives;
 using ExcelApiPoc.AddIn.Models;
@@ -544,8 +545,9 @@ namespace ExcelApiPoc.AddIn.Forms
                             StringComparison.OrdinalIgnoreCase))
                     {
                         accountingFrameworkImport =
-                            new IfoSoftCsvAccountingFrameworkImporter()
-                                .Import(accountsPath);
+                            (string.Equals(Path.GetExtension(accountsPath), ".pdf", StringComparison.OrdinalIgnoreCase)
+                                ? new IfoSoftPdfAccountingFrameworkImporter().Import(accountsPath)
+                                : new IfoSoftCsvAccountingFrameworkImporter().Import(accountsPath));
                     }
                     else if (string.Equals(
                                  importPackage.AccountingFormat,
