@@ -15,7 +15,7 @@ namespace ExcelApiPoc.AccountingImport.Services.IfoSoft
     public sealed class IfoSoftPdfGeneralLedgerImporter : IGeneralLedgerImporter
     {
         private static readonly Regex FileName = new Regex(@"^HL_KNIHA_(?<ico>\d{8})_(?<year>\d{4})(?:[_\(].*)?\.pdf$", RegexOptions.IgnoreCase);
-        private static readonly Regex Period = new Regex(@"00/(?<year>\d{4})\s*-\s*(?<month>\d{1,2})/\k<year>");
+        private static readonly Regex Period = new Regex(@"00\s*/\s*(?<year>\d{4})\s*-\s*(?<month>\d{1,2})\s*/\s*\k<year>");
         private static readonly Regex Account = new Regex(@"^\d{3}[\p{L}\d]*$");
         private static readonly Regex Amount = new Regex(@"^-?[\d.]+(?:,\d{2}|,-)$");
         private static readonly CultureInfo Sk = CultureInfo.GetCultureInfo("sk-SK");
@@ -41,8 +41,17 @@ namespace ExcelApiPoc.AccountingImport.Services.IfoSoft
                 document.Pages[0].Tokens.Where(t => Math.Abs(t.Baseline - periodLine.Baseline) < 2)
                     .OrderBy(t => t.Left).Select(t => t.Text));
             var period = Period.Match(printedPeriod);
+            if (!period.Success)
+            {
+                // Older print drivers place period fragments on different baselines.
+                printedPeriod = string.Join(" ", document.Pages[0].Tokens
+                    .Where(t => t.Left >= 400 && t.Left < 550)
+                    .OrderByDescending(t => t.Baseline).ThenBy(t => t.Left)
+                    .Take(35).Select(t => t.Text));
+                period = Period.Match(printedPeriod);
+            }
             if (!period.Success || period.Groups["year"].Value != file.Groups["year"].Value)
-                throw new InvalidDataException("Printed accounting period does not agree with ledger filename.");
+                throw new InvalidDataException("Printed accounting period does not agree with ledger filename. Header: " + printedPeriod);
             int through = int.Parse(period.Groups["month"].Value, CultureInfo.InvariantCulture);
             if (through < 1 || through > 13) throw new InvalidDataException("Invalid printed ledger month.");
             var result = new GeneralLedgerImport

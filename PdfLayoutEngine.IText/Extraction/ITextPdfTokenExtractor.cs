@@ -138,7 +138,7 @@ public sealed class ITextPdfTokenExtractor
         {
             var words = new List<PdfTextToken>();
             var letters = new StringBuilder();
-            PdfTextToken first = null;
+            PdfTextToken? first = null;
             double right = 0;
             void Flush()
             {
