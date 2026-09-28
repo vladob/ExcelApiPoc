@@ -68,6 +68,20 @@ public sealed class IfoSoftPdfLedgerAndFrameworkTests
         Assert.Contains(result.Rows, r => r.AccountCode == "518TEL." && r.AccountName == "Ostatné služby telefon");
     }
 
+    [Fact]
+    public void Hudcovce_framework_preserves_hyphenated_analytical_codes()
+    {
+        string? path = Environment.GetEnvironmentVariable("IFOSOFT_PDF_AF_HUDCOVCE_TEST_FILE");
+        Assert.True(!string.IsNullOrWhiteSpace(path) && File.Exists(path),
+            "Set IFOSOFT_PDF_AF_HUDCOVCE_TEST_FILE to UCT_ROZVRH_00323012_2024.pdf.");
+        AccountingFrameworkImport result = new IfoSoftPdfAccountingFrameworkImporter().Import(path!);
+        Assert.Equal("00323012", result.Ico);
+        Assert.Equal(2024, result.FiscalYear);
+        Assert.Contains(result.Rows, r => r.SourceRecordNumber == 27 && r.AccountCode == "042A-PO" &&
+            r.RowKind == AccountingFrameworkRowKind.AnalyticalAccount);
+        Assert.Contains(result.Rows, r => r.AccountCode == "042MŠ-U");
+    }
+
     private static string Sample(string fileName)
     {
         string? root = Environment.GetEnvironmentVariable("IFOSOFT_PDF_GL_AF_TEST_DIR");
