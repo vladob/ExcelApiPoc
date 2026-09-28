@@ -139,7 +139,18 @@ namespace ExcelApiPoc.AddIn.Services
             string value = FindSingleValue(record);
             Match match = Regex.Match(value, @"^(?<ico>\d{8})(?:\s+(?<name>.*))?$");
             if (!match.Success)
-                throw new InvalidDataException(record.Location + ": IČO was not found in the IfoSoft entity-information record.");
+            {
+                // This export variant puts a print timestamp in the entity field.
+                // The filename supplies IČO; ApplyFileNameMetadata will validate it.
+                match = Regex.Match(value, @"^\d{8}_\d{4}\s+(?<name>.+)$");
+                Match file = Regex.Match(result.SourceFileName,
+                    @"^UCT_ROZVRH_(?<ico>\d{8})_\d{4}\.csv$", RegexOptions.IgnoreCase);
+                if (!match.Success || !file.Success)
+                    throw new InvalidDataException(record.Location + ": IČO was not found in the IfoSoft entity-information record.");
+                result.Ico = file.Groups["ico"].Value;
+                result.CompanyName = match.Groups["name"].Value.Trim();
+                return;
+            }
             result.Ico = match.Groups["ico"].Value;
             result.CompanyName = match.Groups["name"].Value.Trim();
         }
