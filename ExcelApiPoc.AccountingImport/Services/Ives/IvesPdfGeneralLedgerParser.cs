@@ -309,6 +309,10 @@ namespace ExcelApiPoc.AccountingImport.Services.Ives
             BaselineRecord record,
             double anchor)
         {
+            decimal tokenAmount;
+            if (TryReadGroupedAmount(record, anchor, out tokenAmount))
+                return tokenAmount;
+
             const double commaRightOffset = 8.30;
             const double decimalAdvance = 4.104;
             const double commaToUnitsRight = 2.052;
@@ -431,6 +435,46 @@ namespace ExcelApiPoc.AccountingImport.Services.Ives
             throw new InvalidDataException(
                 "IVES general-ledger PDF contains invalid amount '" +
                 amountText + "'.");
+        }
+
+        private static bool TryReadGroupedAmount(BaselineRecord record, double anchor, out decimal amount)
+        {
+            amount = 0m;
+            var tokens = record.SourceTokens
+                .Where(token => token.Right >= anchor - 70.0 && token.Left <= anchor + 1.0)
+                .OrderBy(token => token.Left)
+                .ToArray();
+            var final = tokens
+                .Where(token => Math.Abs(token.Right - anchor) <= 0.75 &&
+                    Regex.IsMatch(Trim(token.Text), @"^-?\d{1,12},\d{2}$"))
+                .OrderBy(token => Math.Abs(token.Right - anchor))
+                .FirstOrDefault();
+            if (final == null) return false;
+
+            string value = Trim(final.Text);
+            double left = final.Left;
+            for (int i = Array.IndexOf(tokens, final) - 1; i >= 0; i--)
+            {
+                var previous = tokens[i];
+                string part = Trim(previous.Text);
+                double gap = left - previous.Right;
+                if (Math.Abs(previous.Baseline - final.Baseline) > 1.5 ||
+                    gap < -0.3 || gap > 4.0) break;
+                if (Regex.IsMatch(part, @"^\d{1,3}$") &&
+                    value.TrimStart('-').Split(',')[0].Length + part.Length <= 12)
+                {
+                    value = part + value;
+                    left = previous.Left;
+                }
+                else if (part == "-" && !value.StartsWith("-", StringComparison.Ordinal))
+                {
+                    value = "-" + value;
+                    break;
+                }
+                else break;
+            }
+            return decimal.TryParse(value, NumberStyles.Number | NumberStyles.AllowLeadingSign,
+                CultureInfo.GetCultureInfo("sk-SK"), out amount);
         }
 
         private static AmountGlyph TryCreateAmountGlyph(
