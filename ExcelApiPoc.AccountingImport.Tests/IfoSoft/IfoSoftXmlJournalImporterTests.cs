@@ -44,8 +44,35 @@ public sealed class IfoSoftXmlJournalImporterTests
                 "<veta><ucDok>1</ucDok><ucSuv>321</ucSuv><ucPripDat>01.02.2023</ucPripDat><rok>2023</rok><mes>02</mes><dal>9,00</dal></veta>" +
                 "</vety><sucetKontrola>12,00</sucetKontrola></uctovny_vykaz>");
             var exception = Assert.Throws<InvalidDataException>(() => new IfoSoftXmlJournalImporter().Import(path));
-            Assert.Contains("XML records 1 and 2", exception.Message);
+            Assert.Contains("control total", exception.Message);
         }
         finally { File.Delete(path); }
+    }
+
+    [Theory]
+    [InlineData(2022, "3688552.01", 7707)]
+    [InlineData(2023, "4848547.91", 8501)]
+    public void Imports_multi_line_Hankovce_entries(int year, string totalText, int sourceRecords)
+    {
+        string? root = Environment.GetEnvironmentVariable("IFOSOFT_XML_JOURNAL_TEST_DIR");
+        Assert.True(!string.IsNullOrWhiteSpace(root), "Set IFOSOFT_XML_JOURNAL_TEST_DIR to the Hankovce sample folder.");
+        string path = Path.Combine(root!, $"U_DENNIK_00322962_{year}.xml");
+        Assert.True(File.Exists(path), "Missing XML sample: " + path);
+        Assert.True(AccountingJournalDetectionService.TryDetect(path, out JournalDetectionResult detection));
+        Assert.Equal(year, detection.FiscalYear);
+
+        JournalImport result = new IfoSoftXmlJournalImporter().Import(path);
+        decimal total = decimal.Parse(totalText, System.Globalization.CultureInfo.InvariantCulture);
+        Assert.Equal("00322962", result.Ico);
+        Assert.Equal(total, result.Rows.Sum(row => row.DebitAmount ?? 0m));
+        Assert.Equal(total, result.Rows.Sum(row => row.CreditAmount ?? 0m));
+        Assert.True(result.Rows.Count > sourceRecords / 2);
+        Assert.True(result.Rows.Count < sourceRecords);
+        Assert.Contains(result.Rows, row => row.DebitAmount.HasValue && !row.CreditAmount.HasValue);
+        Assert.Contains(result.Rows, row => row.CreditAmount.HasValue && !row.DebitAmount.HasValue);
+        if (year == 2022)
+            Assert.Contains(result.ImportReport.Diagnostics, d => d.Code == "IFOSOFT_XML_EXPORT_PERIOD_DIFFERS");
+        else
+            Assert.Contains(result.Rows, row => row.DebitAccount == "518162" && row.TextNormalizationApplied);
     }
 }

@@ -41,8 +41,7 @@ namespace ExcelApiPoc.AccountingImport.Services.IfoSoft
                 var name = Name.Match(Path.GetFileName(filePath));
                 if (root == null || root.Name != "uctovny_vykaz" || Value(root, "typDoc") != "UCT_VETA" ||
                     root.Element("vety") == null || root.Element("sucetKontrola") == null ||
-                    Value(root.Element("identifikacia")?.Element("identifikator"), "ico") != name.Groups["ico"].Value ||
-                    Value(root.Element("obdobie"), "rok") != name.Groups["year"].Value) return false;
+                    Value(root.Element("identifikacia")?.Element("identifikator"), "ico") != name.Groups["ico"].Value) return false;
                 detection = new JournalDetectionResult
                 {
                     TechnicalType = "XML", AccountingFormat = "IfoSoft", Ico = name.Groups["ico"].Value,
@@ -60,12 +59,12 @@ namespace ExcelApiPoc.AccountingImport.Services.IfoSoft
         public JournalImport Import(string filePath)
         {
             if (!TryDetect(filePath, out JournalDetectionResult detection))
-                throw new InvalidDataException("Expected an IfoSoft UCT_VETA journal XML with matching IČO and year.");
+                throw new InvalidDataException("Expected an IfoSoft UCT_VETA journal XML with matching IČO.");
             XElement root = Read(filePath).Root;
             var records = root.Element("vety").Elements("veta").ToArray();
-            if (records.Length == 0 || records.Length % 2 != 0 || records.Length > 1_000_000 ||
+            if (records.Length == 0 || records.Length > 1_000_000 ||
                 root.Element("vety").Elements().Count() != records.Length)
-                throw new InvalidDataException("IfoSoft XML must contain complete paired journal entries.");
+                throw new InvalidDataException("IfoSoft XML contains no entries, too many entries, or unexpected elements.");
             var result = new JournalImport
             {
                 SourceFileName = Path.GetFileName(filePath), SourceFilePath = Path.GetFullPath(filePath),
@@ -75,54 +74,101 @@ namespace ExcelApiPoc.AccountingImport.Services.IfoSoft
                 ImportReport = new ImportReport { AccountingFormat = "IfoSoft", ImportType = "AccountingJournal",
                     SourceFileName = Path.GetFileName(filePath) }
             };
-            for (int i = 0; i < records.Length; i += 2)
+            string exportYear = Value(root.Element("obdobie"), "rok");
+            if (exportYear != result.FiscalYear.ToString(CultureInfo.InvariantCulture))
             {
-                XElement debit = records[i], credit = records[i + 1];
-                string location = "XML records " + (i + 1) + " and " + (i + 2);
-                decimal md = Amount(Value(debit, "md"), location), dal = Amount(Value(credit, "dal"), location);
-                if (Value(debit, "dal").Length != 0 || Value(credit, "md").Length != 0 ||
-                    Value(debit, "md").Length == 0 || Value(credit, "dal").Length == 0 || md != dal ||
-                    Value(debit, "ucDok") != Value(credit, "ucDok") ||
-                    Value(debit, "ucPripDat") != Value(credit, "ucPripDat") ||
-                    Value(debit, "rok") != Value(credit, "rok") || Value(debit, "mes") != Value(credit, "mes"))
-                    throw new InvalidDataException(location + ": debit and credit records do not form one entry.");
-                string debitAccount = Value(debit, "ucSuv") + Value(debit, "ucAnl");
-                string creditAccount = Value(credit, "ucSuv") + Value(credit, "ucAnl");
-                if (!Account.IsMatch(debitAccount) || !Account.IsMatch(creditAccount))
-                    throw new InvalidDataException(location + ": invalid account code.");
-                if (!DateTime.TryParseExact(Value(debit, "ucPripDat"), "dd.MM.yyyy", CultureInfo.InvariantCulture,
-                        DateTimeStyles.None, out DateTime date) || date.Year != result.FiscalYear ||
-                    Value(debit, "rok") != result.FiscalYear.ToString(CultureInfo.InvariantCulture) ||
-                    Value(debit, "mes") != date.Month.ToString("00", CultureInfo.InvariantCulture))
-                    throw new InvalidDataException(location + ": accounting date differs from the XML fiscal period.");
-                XElement debitBudget = debit.Element("rozpocCis"), creditBudget = credit.Element("rozpocCis");
-                var row = new JournalRow
+                result.ImportReport.Diagnostics.Add(new ImportDiagnostic
                 {
-                    SequenceNumber = i / 2 + 1, SourceRecordNumber = i + 1, SourceLocation = location,
-                    PostingDate = date, DocumentNumber = Value(debit, "ucDok"),
-                    Description = Value(debit, "ucDokText"),
-                    DebitAccount = debitAccount, CreditAccount = creditAccount,
-                    DebitAmount = md, CreditAmount = dal,
-                    DebitSection = Value(debitBudget, "funkcKlasif"), DebitItem = Value(debitBudget, "ekonKlasif"),
-                    DebitFundingSource = Value(debitBudget, "akciaCis"),
-                    CreditSection = Value(creditBudget, "funkcKlasif"), CreditItem = Value(creditBudget, "ekonKlasif"),
-                    CreditFundingSource = Value(creditBudget, "akciaCis"),
-                    RecordKind = date.Month == 1 && date.Day == 1 &&
-                        (debitAccount == "701" || creditAccount == "701") ? JournalRecordKind.Opening :
-                        date.Month == 12 && date.Day == 31 &&
-                        (debitAccount == "702" || creditAccount == "702" ||
-                         debitAccount == "710" || creditAccount == "710") ? JournalRecordKind.Closing : JournalRecordKind.Normal
-                };
+                    Code = "IFOSOFT_XML_EXPORT_PERIOD_DIFFERS",
+                    Severity = ImportDiagnosticSeverity.Warning,
+                    Message = "XML export period year " + exportYear + " differs from the filename's fiscal year " +
+                        result.FiscalYear + "; every entry date and year will be validated."
+                });
+            }
+            for (int i = 0; i < records.Length; i++)
+            {
+                JournalRow row = ReadRecord(records[i], i + 1, result.FiscalYear);
+                if (row.DebitAmount.HasValue && i + 1 < records.Length)
+                {
+                    // Preserve the compact entry representation when two adjacent
+                    // source records clearly identify the same posting.
+                    XElement next = records[i + 1];
+                    if (Value(next, "dal").Length > 0 && Value(next, "md").Length == 0 &&
+                        Value(records[i], "ucDok") == Value(next, "ucDok") &&
+                        Value(records[i], "ucPripDat") == Value(next, "ucPripDat") &&
+                        Value(records[i], "rok") == Value(next, "rok") &&
+                        Value(records[i], "mes") == Value(next, "mes"))
+                    {
+                        JournalRow credit = ReadRecord(next, i + 2, result.FiscalYear);
+                        if (row.DebitAmount == credit.CreditAmount)
+                        {
+                            row.CreditAccount = credit.CreditAccount;
+                            row.CreditAmount = credit.CreditAmount;
+                            row.CreditSection = credit.CreditSection;
+                            row.CreditItem = credit.CreditItem;
+                            row.CreditFundingSource = credit.CreditFundingSource;
+                            row.TextNormalizationApplied |= credit.TextNormalizationApplied;
+                            row.SourceLocation = "XML records " + (i + 1) + " and " + (i + 2);
+                            i++;
+                        }
+                    }
+                }
+                row.SequenceNumber = result.Rows.Count + 1;
+                row.RecordKind = Classify(row);
+                if (row.TextNormalizationApplied) result.NormalizedTextFieldCount++;
                 result.Rows.Add(row);
             }
             // IfoSoft's sucetKontrola includes the sum of debit amounts and the count of source records.
             decimal control = Amount(Value(root, "sucetKontrola"), "XML control total");
-            decimal total = result.Rows.Sum(row => row.DebitAmount.Value);
-            if (total != result.Rows.Sum(row => row.CreditAmount.Value) || control != total + records.Length)
+            decimal total = result.Rows.Sum(row => row.DebitAmount ?? 0m);
+            if (total != result.Rows.Sum(row => row.CreditAmount ?? 0m) || control != total + records.Length)
                 throw new InvalidDataException("IfoSoft XML control total does not agree with the journal entries.");
             result.ImportReport.RecordCounts["JournalRows"] = result.Rows.Count;
             return result;
         }
+
+        private static JournalRow ReadRecord(XElement record, int sourceNumber, int year)
+        {
+            string location = "XML record " + sourceNumber;
+            string debitText = Value(record, "md"), creditText = Value(record, "dal");
+            if ((debitText.Length == 0) == (creditText.Length == 0))
+                throw new InvalidDataException(location + ": exactly one amount side is required.");
+            string rawAccount = Value(record, "ucSuv") + Value(record, "ucAnl");
+            string account = Regex.Replace(rawAccount, @"\s+", string.Empty);
+            if (!Account.IsMatch(account)) throw new InvalidDataException(location + ": invalid account code '" + account + "'.");
+            if (!DateTime.TryParseExact(Value(record, "ucPripDat"), "dd.MM.yyyy", CultureInfo.InvariantCulture,
+                    DateTimeStyles.None, out DateTime date) || date.Year != year ||
+                Value(record, "rok") != year.ToString(CultureInfo.InvariantCulture) ||
+                Value(record, "mes") != date.Month.ToString("00", CultureInfo.InvariantCulture))
+                throw new InvalidDataException(location + ": accounting date differs from the filename's fiscal year.");
+            XElement budget = record.Element("rozpocCis");
+            var row = new JournalRow
+            {
+                SourceRecordNumber = sourceNumber, SourceLocation = location,
+                PostingDate = date, DocumentNumber = Value(record, "ucDok"), Description = Value(record, "ucDokText"),
+                TextNormalizationApplied = account != rawAccount
+            };
+            if (debitText.Length > 0)
+            {
+                row.DebitAccount = account; row.DebitAmount = Amount(debitText, location);
+                row.DebitSection = Value(budget, "funkcKlasif"); row.DebitItem = Value(budget, "ekonKlasif");
+                row.DebitFundingSource = Value(budget, "akciaCis");
+            }
+            else
+            {
+                row.CreditAccount = account; row.CreditAmount = Amount(creditText, location);
+                row.CreditSection = Value(budget, "funkcKlasif"); row.CreditItem = Value(budget, "ekonKlasif");
+                row.CreditFundingSource = Value(budget, "akciaCis");
+            }
+            return row;
+        }
+
+        private static JournalRecordKind Classify(JournalRow row) =>
+            row.PostingDate.Month == 1 && row.PostingDate.Day == 1 &&
+                (row.DebitAccount == "701" || row.CreditAccount == "701") ? JournalRecordKind.Opening :
+            row.PostingDate.Month == 12 && row.PostingDate.Day == 31 &&
+                (row.DebitAccount == "702" || row.CreditAccount == "702" ||
+                 row.DebitAccount == "710" || row.CreditAccount == "710") ? JournalRecordKind.Closing : JournalRecordKind.Normal;
 
         private static string Value(XElement parent, string child) =>
             ((string)parent?.Element(child) ?? string.Empty).Trim();
