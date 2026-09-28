@@ -6,6 +6,23 @@ namespace ExcelApiPoc.AccountingImport.Tests.IfoSoft;
 
 public sealed class IfoSoftXmlJournalImporterTests
 {
+    [Fact]
+    public void Imports_kolonica_xml_with_invalid_description_characters()
+    {
+        string? path = Environment.GetEnvironmentVariable("IFOSOFT_XML_JOURNAL_KOLONICA_TEST_FILE");
+        Assert.True(!string.IsNullOrWhiteSpace(path) && File.Exists(path),
+            "Set IFOSOFT_XML_JOURNAL_KOLONICA_TEST_FILE to U_DENNIK_00323161_2022.xml.");
+        Assert.True(new IfoSoftXmlJournalImporter().CanImport(path!, "IfoSoft"));
+        JournalImport import = new IfoSoftXmlJournalImporter().Import(path!);
+        Assert.Equal("00323161", import.Ico);
+        Assert.Equal(2022, import.FiscalYear);
+        Assert.Equal(4260741.64m, import.Rows.Sum(row => row.DebitAmount ?? 0m));
+        Assert.Equal(4260741.64m, import.Rows.Sum(row => row.CreditAmount ?? 0m));
+        Assert.Contains(import.ImportReport.Diagnostics, d =>
+            d.Code == "IFOSOFT_XML_DESCRIPTION_NORMALIZED" && d.Message.Contains("4 invalid XML characters"));
+        Assert.Contains(import.Rows, row => row.Description.Contains("odvod& do VŠZP"));
+    }
+
     [Theory]
     [InlineData(2023, 854, "412470.07")]
     [InlineData(2024, 875, "419767.53")]

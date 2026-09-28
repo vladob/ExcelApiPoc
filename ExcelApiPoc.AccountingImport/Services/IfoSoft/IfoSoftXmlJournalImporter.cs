@@ -37,7 +37,7 @@ namespace ExcelApiPoc.AccountingImport.Services.IfoSoft
                 !Name.IsMatch(Path.GetFileName(filePath))) return false;
             try
             {
-                var root = Read(filePath).Root;
+                var root = Read(filePath, out _).Root;
                 var name = Name.Match(Path.GetFileName(filePath));
                 if (root == null || root.Name != "uctovny_vykaz" || Value(root, "typDoc") != "UCT_VETA" ||
                     root.Element("vety") == null || root.Element("sucetKontrola") == null ||
@@ -60,7 +60,7 @@ namespace ExcelApiPoc.AccountingImport.Services.IfoSoft
         {
             if (!TryDetect(filePath, out JournalDetectionResult detection))
                 throw new InvalidDataException("Expected an IfoSoft UCT_VETA journal XML with matching IČO.");
-            XElement root = Read(filePath).Root;
+            XElement root = Read(filePath, out int repairedTextCharacters).Root;
             var records = root.Element("vety").Elements("veta").ToArray();
             if (records.Length == 0 || records.Length > 1_000_000 ||
                 root.Element("vety").Elements().Count() != records.Length)
@@ -74,6 +74,14 @@ namespace ExcelApiPoc.AccountingImport.Services.IfoSoft
                 ImportReport = new ImportReport { AccountingFormat = "IfoSoft", ImportType = "AccountingJournal",
                     SourceFileName = Path.GetFileName(filePath) }
             };
+            if (repairedTextCharacters > 0)
+                result.ImportReport.Diagnostics.Add(new ImportDiagnostic
+                {
+                    Code = "IFOSOFT_XML_DESCRIPTION_NORMALIZED",
+                    Severity = ImportDiagnosticSeverity.Warning,
+                    Message = repairedTextCharacters + " invalid XML characters in journal descriptions were normalized; " +
+                        "check the affected descriptions in the source export."
+                });
             string exportYear = Value(root.Element("obdobie"), "rok");
             if (exportYear != result.FiscalYear.ToString(CultureInfo.InvariantCulture))
             {
@@ -193,10 +201,43 @@ namespace ExcelApiPoc.AccountingImport.Services.IfoSoft
             return amount;
         }
 
-        private static XDocument Read(string path)
+        private static XDocument Read(string path, out int repairedTextCharacters)
         {
+            repairedTextCharacters = 0;
             var settings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Prohibit, XmlResolver = null };
-            using (var reader = XmlReader.Create(path, settings)) return XDocument.Load(reader);
+            try
+            {
+                using (var reader = XmlReader.Create(path, settings)) return XDocument.Load(reader);
+            }
+            catch (XmlException)
+            {
+                // Repair malformed text content only; never alter structural
+                // markup, amounts, accounts, or dates.
+                string xml = File.ReadAllText(path, Encoding.GetEncoding(1250));
+                int count = 0;
+                string repaired = Regex.Replace(xml, @"<ucDokText>([^<]*)</ucDokText>", match =>
+                {
+                    string value = match.Groups[1].Value;
+                    value = Regex.Replace(value, @"&(?!amp;|lt;|gt;|quot;|apos;|#\d+;|#x[0-9a-fA-F]+;)", _ =>
+                    {
+                        count++;
+                        return "&amp;";
+                    });
+                    value = Regex.Replace(value, @"[\x00-\x08\x0B\x0C\x0E-\x1F]", _ =>
+                    {
+                        count++;
+                        return "\uFFFD";
+                    });
+                    return "<ucDokText>" + value + "</ucDokText>";
+                });
+                if (count == 0) throw;
+                using (var reader = XmlReader.Create(new StringReader(repaired), settings))
+                {
+                    var document = XDocument.Load(reader);
+                    repairedTextCharacters = count;
+                    return document;
+                }
+            }
         }
 
         private static string Hash(string path)
