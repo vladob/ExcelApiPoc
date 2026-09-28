@@ -460,11 +460,12 @@ namespace ExcelApiPoc.AccountingImport.Services.Ives
                 double gap = left - previous.Right;
                 if (Math.Abs(previous.Baseline - final.Baseline) > 1.5 ||
                     gap < -0.3 || gap > 4.0) break;
-                if (Regex.IsMatch(part, @"^\d{1,3}$") &&
-                    value.TrimStart('-').Split(',')[0].Length + part.Length <= 12)
+                if (Regex.IsMatch(part, @"^-?\d{1,3}$") &&
+                    value.TrimStart('-').Split(',')[0].Length + part.TrimStart('-').Length <= 12)
                 {
                     value = part + value;
                     left = previous.Left;
+                    if (part.StartsWith("-", StringComparison.Ordinal)) break;
                 }
                 else if (part == "-" && !value.StartsWith("-", StringComparison.Ordinal))
                 {
