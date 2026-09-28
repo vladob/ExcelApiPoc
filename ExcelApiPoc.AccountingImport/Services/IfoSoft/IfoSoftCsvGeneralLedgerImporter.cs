@@ -12,6 +12,7 @@ namespace ExcelApiPoc.AccountingImport.Services.IfoSoft
 {
     public sealed class IfoSoftCsvGeneralLedgerImporter : IGeneralLedgerImporter
     {
+        static IfoSoftCsvGeneralLedgerImporter() => Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
         private static readonly string[] FixedHeaders =
         {
             "Syn", "Ana", "Typ", "P", "Odd", "Polozka", "KZdroja", "Program",

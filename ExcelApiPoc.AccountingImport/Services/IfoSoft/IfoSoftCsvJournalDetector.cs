@@ -9,6 +9,7 @@ namespace ExcelApiPoc.AccountingImport.Services.IfoSoft
 {
     public static class IfoSoftCsvJournalDetector
     {
+        static IfoSoftCsvJournalDetector() => Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
         private const int MaximumDetectionRows = 100;
 
         public static bool TryDetect(string filePath,out JournalDetectionResult result)
