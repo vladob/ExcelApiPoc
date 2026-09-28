@@ -23,7 +23,7 @@ namespace ExcelApiPoc.AccountingImport.Services.IfoSoft
         }
 
         private static readonly Regex Name = new Regex(@"^U_DENNIK_(?<ico>\d{8})_(?<year>\d{4})\.xml$", RegexOptions.IgnoreCase);
-        private static readonly Regex Account = new Regex(@"^\d{3}[\p{L}\d.]*$");
+        private static readonly Regex Account = new Regex(@"^\d{3}[\p{L}\d.]*(?:-[\p{L}\d.]+)*$");
         private static readonly CultureInfo Sk = CultureInfo.GetCultureInfo("sk-SK");
 
         public bool CanImport(string filePath, string accountingFormat) =>
@@ -85,6 +85,7 @@ namespace ExcelApiPoc.AccountingImport.Services.IfoSoft
                         result.FiscalYear + "; every entry date and year will be validated."
                 });
             }
+            int nextYearEntries = 0;
             for (int i = 0; i < records.Length; i++)
             {
                 JournalRow row = ReadRecord(records[i], i + 1, result.FiscalYear);
@@ -114,6 +115,7 @@ namespace ExcelApiPoc.AccountingImport.Services.IfoSoft
                     }
                 }
                 row.SequenceNumber = result.Rows.Count + 1;
+                if (row.PostingDate.Year != result.FiscalYear) nextYearEntries++;
                 row.RecordKind = Classify(row);
                 if (row.TextNormalizationApplied) result.NormalizedTextFieldCount++;
                 result.Rows.Add(row);
@@ -123,6 +125,14 @@ namespace ExcelApiPoc.AccountingImport.Services.IfoSoft
             decimal total = result.Rows.Sum(row => row.DebitAmount ?? 0m);
             if (total != result.Rows.Sum(row => row.CreditAmount ?? 0m) || control != total + records.Length)
                 throw new InvalidDataException("IfoSoft XML control total does not agree with the journal entries.");
+            if (nextYearEntries > 0)
+                result.ImportReport.Diagnostics.Add(new ImportDiagnostic
+                {
+                    Code = "IFOSOFT_XML_NEXT_YEAR_POSTINGS",
+                    Severity = ImportDiagnosticSeverity.Warning,
+                    Message = nextYearEntries + " entries in the " + result.FiscalYear +
+                        " journal have January " + (result.FiscalYear + 1) + " posting dates; their source dates were preserved."
+                });
             result.ImportReport.RecordCounts["JournalRows"] = result.Rows.Count;
             return result;
         }
@@ -137,8 +147,9 @@ namespace ExcelApiPoc.AccountingImport.Services.IfoSoft
             string account = Regex.Replace(rawAccount, @"\s+", string.Empty);
             if (!Account.IsMatch(account)) throw new InvalidDataException(location + ": invalid account code '" + account + "'.");
             if (!DateTime.TryParseExact(Value(record, "ucPripDat"), "dd.MM.yyyy", CultureInfo.InvariantCulture,
-                    DateTimeStyles.None, out DateTime date) || date.Year != year ||
-                Value(record, "rok") != year.ToString(CultureInfo.InvariantCulture) ||
+                    DateTimeStyles.None, out DateTime date) ||
+                (date.Year != year && !(date.Year == year + 1 && date.Month == 1)) ||
+                Value(record, "rok") != date.Year.ToString(CultureInfo.InvariantCulture) ||
                 Value(record, "mes") != date.Month.ToString("00", CultureInfo.InvariantCulture))
                 throw new InvalidDataException(location + ": accounting date differs from the filename's fiscal year.");
             XElement budget = record.Element("rozpocCis");

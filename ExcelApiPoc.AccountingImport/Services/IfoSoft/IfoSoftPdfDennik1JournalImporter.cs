@@ -25,7 +25,7 @@ namespace ExcelApiPoc.AccountingImport.Services.IfoSoft
         private const string LayoutResource =
             "ExcelApiPoc.AccountingImport.PdfLayouts.IfoSoft.journal-dennik1.v1.json";
         private static readonly Regex DatePattern = new Regex(@"^\d{2}\.\d{2}\.\d{2}$");
-        private static readonly Regex AccountPattern = new Regex(@"^\d{3}[\p{L}\d]*$");
+        private static readonly Regex AccountPattern = new Regex(@"^\d{3}[\p{L}\d]*(?:-[\p{L}\d]+)*$");
         private static readonly Regex AmountPattern = new Regex(@"^-?\d+(?:,\d{2}|,-)$");
         private static readonly Regex PeriodPattern = new Regex(
             @"(?<!\d)00/(?<year>\d{4})\s*-\s*12/\k<year>(?!\d)");
@@ -103,6 +103,7 @@ namespace ExcelApiPoc.AccountingImport.Services.IfoSoft
                           "'. Verify that it belongs to the printed entity."
             });
 
+            int nextYearEntries = 0;
             foreach (var page in document.Pages)
             {
                 var tokens = page.Tokens.ToArray();
@@ -128,8 +129,9 @@ namespace ExcelApiPoc.AccountingImport.Services.IfoSoft
                         CultureInfo.GetCultureInfo("sk-SK"));
                     DateTime date = DateTime.ParseExact(dateToken.Text, "dd.MM.yy",
                         CultureInfo.InvariantCulture);
-                    if (date.Year != year)
+                    if (date.Year != year && !(date.Year == year + 1 && date.Month == 1))
                         throw new InvalidDataException($"Page {page.PageNumber}, entry {sourceNumber}: posting date is outside {year}.");
+                    if (date.Year != year) nextYearEntries++;
                     string description = Column(head, 54, 296, true);
                     string documentType = Column(head, 54, 91, true);
                     string documentNumber = Column(details, 25, 54, true);
@@ -163,6 +165,14 @@ namespace ExcelApiPoc.AccountingImport.Services.IfoSoft
             if (debitTotal != printed.Item1 || creditTotal != printed.Item2)
                 throw new InvalidDataException($"Journal totals disagree with the printed CELKOM line: " +
                     $"MD {debitTotal} versus {printed.Item1}; DAL {creditTotal} versus {printed.Item2}.");
+            if (nextYearEntries > 0)
+                result.ImportReport.Diagnostics.Add(new ImportDiagnostic
+                {
+                    Code = "IFOSOFT_PDF_NEXT_YEAR_POSTINGS",
+                    Severity = ImportDiagnosticSeverity.Warning,
+                    Message = nextYearEntries + " entries in the " + year +
+                        " journal have January " + (year + 1) + " posting dates; their printed dates were preserved."
+                });
             result.ImportReport.RecordCounts["JournalRows"] = result.Rows.Count;
             return result;
         }

@@ -62,4 +62,21 @@ public sealed class IfoSoftPdfDennik1JournalImporterTests
         Assert.Equal(4848547.91m, import.Rows.Sum(row => row.DebitAmount ?? 0m));
         Assert.Equal(4848547.91m, import.Rows.Sum(row => row.CreditAmount ?? 0m));
     }
+
+    [Fact]
+    public void Imports_hudcovce_journal_with_hyphenated_accounts_and_next_year_postings()
+    {
+        var path = Environment.GetEnvironmentVariable("IFOSOFT_PDF_JOURNAL_HUDCOVCE_TEST_FILE");
+        Assert.True(!string.IsNullOrWhiteSpace(path) && File.Exists(path),
+            "Set IFOSOFT_PDF_JOURNAL_HUDCOVCE_TEST_FILE to U_DENNIK_00323012_2024.pdf.");
+
+        JournalImport import = new IfoSoftPdfDennik1JournalImporter().Import(path!);
+        Assert.Equal("00323012", import.Ico);
+        Assert.Equal(2024, import.FiscalYear);
+        Assert.Contains(import.Rows, row => row.DebitAccount == "518P-OB");
+        Assert.Contains(import.Rows, row => row.PostingDate.Year == 2025);
+        Assert.Contains(import.ImportReport.Diagnostics, d => d.Code == "IFOSOFT_PDF_NEXT_YEAR_POSTINGS");
+        Assert.Equal(4101584.38m, import.Rows.Sum(row => row.DebitAmount ?? 0m));
+        Assert.Equal(4101584.38m, import.Rows.Sum(row => row.CreditAmount ?? 0m));
+    }
 }
