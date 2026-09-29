@@ -34,9 +34,10 @@ namespace ExcelApiPoc.AccountingImport.Services.IfoSoft
             bool predvas = first.Contains("_PREDVAS3.GMX");
             bool detailed = first.Contains("_HLKNIA4.GMX");
             bool accountSummary = first.Contains("_HLKNIA4C.GMX");
-            if ((predvas ? 1 : 0) + (detailed ? 1 : 0) + (accountSummary ? 1 : 0) != 1 ||
-                !first.Contains("HLAVNÁ KNIHA"))
-                throw new InvalidDataException("Expected one IfoSoft _PREDVAS3.GMX, _HLKNIA4.GMX, or _HLKNIA4C.GMX ledger layout.");
+            bool syntheticSummary = first.Contains("_HLKNIA4D.GMX");
+            if ((predvas ? 1 : 0) + (detailed ? 1 : 0) + (accountSummary ? 1 : 0) +
+                (syntheticSummary ? 1 : 0) != 1 || !first.Contains("HLAVNÁ KNIHA"))
+                throw new InvalidDataException("Expected one IfoSoft _PREDVAS3.GMX, _HLKNIA4.GMX, _HLKNIA4C.GMX, or _HLKNIA4D.GMX ledger layout.");
             var periodLine = document.Pages[0].Tokens
                 .FirstOrDefault(t => t.Text.StartsWith("00/", StringComparison.Ordinal));
             string printedPeriod = periodLine == null ? string.Empty : string.Join(" ",
@@ -69,50 +70,58 @@ namespace ExcelApiPoc.AccountingImport.Services.IfoSoft
                 ReadAccountSummary(document, result);
                 return result;
             }
-            var allCodes = document.Pages.SelectMany(p => p.Tokens)
-                .Where(t => t.Left < (predvas ? 70 : 19) && Account.IsMatch(t.Text))
-                .Select(t => t.Text).ToArray();
+            if (syntheticSummary)
+            {
+                ReadSyntheticSummary(document, result);
+                return result;
+            }
+            var allCodes = document.Pages.SelectMany(p => p.Tokens
+                .Where(t => t.Left < (predvas ? 70 : 19))
+                .Select(t => AccountCode(t, p.Tokens)))
+                .Where(code => code != null).ToArray();
             var flaggedCodes = new HashSet<string>(StringComparer.Ordinal);
             if (predvas)
                 foreach (var page in document.Pages)
                 {
                     var words = page.Tokens.ToArray();
-                    foreach (var token in words.Where(t => t.Left < 70 && Account.IsMatch(t.Text)))
+                    foreach (var token in words.Where(t => t.Left < 70 && AccountCode(t, words) != null))
                         if (words.Any(t => Math.Abs(t.Baseline - token.Baseline) < 5.3 &&
                             t.Left >= 240 && t.Left < 310 && (t.Text == "M" || t.Text == "D")))
-                            flaggedCodes.Add(token.Text);
+                            flaggedCodes.Add(AccountCode(token, words));
                 }
             var unflaggedSeen = new HashSet<string>(StringComparer.Ordinal);
             var encounteredCodes = new HashSet<string>(StringComparer.Ordinal);
             foreach (var page in document.Pages)
             {
                 var tokens = page.Tokens.ToArray();
-                foreach (var candidate in tokens.Where(t => t.Left < (predvas ? 70 : 19) && Account.IsMatch(t.Text))
+                foreach (var candidate in tokens.Where(t => t.Left < (predvas ? 70 : 19) && AccountCode(t, tokens) != null)
                          .OrderByDescending(t => t.Baseline))
                 {
                     var line = tokens.Where(t => Math.Abs(t.Baseline - candidate.Baseline) < 5.3).ToArray();
+                    string candidateCode = AccountCode(candidate, line);
                     // PREDVAS has analytical detail followed by a synthetic subtotal. Some
                     // detail rows omit flags; retain their first occurrence only. HLKNIA4
                     // has budget lines for the same account, all of which contribute to its total.
                     if (predvas)
                     {
                         bool flagged = line.Any(t => t.Left >= 240 && t.Left < 310 && (t.Text == "M" || t.Text == "D"));
-                        bool childExists = allCodes.Any(codePredva => codePredva.Length > candidate.Text.Length &&
-                            codePredva.StartsWith(candidate.Text, StringComparison.Ordinal));
+                        bool childExists = allCodes.Any(codePredva => codePredva.Length > candidateCode.Length &&
+                            codePredva.StartsWith(candidateCode, StringComparison.Ordinal));
                         // The first parent row can itself be a detail account (221 before 221RF).
                         // The parent subtotal follows its children and must not be imported twice.
-                        bool parentDetailBeforeChildren = childExists && !encounteredCodes.Contains(candidate.Text) &&
-                            !encounteredCodes.Any(codePredva => codePredva.Length > candidate.Text.Length &&
-                                codePredva.StartsWith(candidate.Text, StringComparison.Ordinal));
+                        bool parentDetailBeforeChildren = childExists && !encounteredCodes.Contains(candidateCode) &&
+                            !encounteredCodes.Any(codePredva => codePredva.Length > candidateCode.Length &&
+                                codePredva.StartsWith(candidateCode, StringComparison.Ordinal));
                         bool skip = !flagged && !parentDetailBeforeChildren &&
-                            (flaggedCodes.Contains(candidate.Text) || childExists || !unflaggedSeen.Add(candidate.Text));
-                        encounteredCodes.Add(candidate.Text);
+                            (flaggedCodes.Contains(candidateCode) || childExists || !unflaggedSeen.Add(candidateCode));
+                        encounteredCodes.Add(candidateCode);
                         if (skip) continue;
-                        if (!flagged) unflaggedSeen.Add(candidate.Text);
+                        if (!flagged) unflaggedSeen.Add(candidateCode);
                     }
                     else if (!line.Any(t => t.Left >= 20 && t.Left < 195 && t.Text == "R") &&
                         line.Any(t => t.Left >= 20 && t.Left < 195 &&
-                        t.Text.Length > 1 && char.IsLetter(t.Text[0]) && t.Text != "R")) continue;
+                        t.Text.Length > 1 && (char.IsLetter(t.Text[0]) || t.Text.All(c => c == '?')) &&
+                        t.Text != "R")) continue;
                     var cells = new decimal[8];
                     foreach (var token in line.Where(t => t.Left > (predvas ? 310 : 210) && Amount.IsMatch(t.Text)))
                     {
@@ -131,11 +140,12 @@ namespace ExcelApiPoc.AccountingImport.Services.IfoSoft
                         cells[col] = value;
                     }
                     if (!line.Any(t => t.Left > (predvas ? 310 : 210) && Amount.IsMatch(t.Text))) continue;
-                    string code = candidate.Text;
+                    string code = candidateCode;
                     var row = new GeneralLedgerRow
                     {
                         SequenceNumber = result.Rows.Count + 1, SourceRecordNumber = page.PageNumber,
-                        SyntheticCode = code.Substring(0, 3), AnalyticalCode = code.Substring(3), AccountCode = code,
+                        SyntheticCode = code.Substring(0, code == "75ZŠ" || code == "79ZŠ" ? 2 : 3),
+                        AnalyticalCode = code.Substring(code == "75ZŠ" || code == "79ZŠ" ? 2 : 3), AccountCode = code,
                         AccountName = predvas ? Text(line, 85, 240) : string.Empty
                     };
                     if (predvas)
@@ -219,6 +229,52 @@ namespace ExcelApiPoc.AccountingImport.Services.IfoSoft
                 throw new InvalidDataException("_HLKNIA4C.GMX annual turnover does not match the printed KONTROLNÝ SÚČET.");
         }
 
+        private static void ReadSyntheticSummary(PdfDocument document, GeneralLedgerImport result)
+        {
+            // HLKNIA4D has one account row per synthetic code and six right-aligned
+            // amount columns. Class subtotals and the final control are not accounts.
+            foreach (var page in document.Pages)
+            {
+                var tokens = page.Tokens.ToArray();
+                foreach (var candidate in tokens.Where(t => t.Left < 20 && Account.IsMatch(t.Text))
+                    .OrderByDescending(t => t.Baseline))
+                {
+                    var line = tokens.Where(t => Math.Abs(t.Baseline - candidate.Baseline) < 3).ToArray();
+                    var cells = new decimal[6];
+                    bool hasAmount = false;
+                    foreach (var token in line.Where(t => t.Left >= 240 && Amount.IsMatch(t.Text)))
+                    {
+                        int column = Bin(token.Right, new[] { 305d, 365, 420, 475, 535, 590 });
+                        if (column < 0 || cells[column] != 0m)
+                            throw new InvalidDataException($"Page {page.PageNumber}, account {candidate.Text}: ambiguous amount column.");
+                        decimal value = Parse(token.Text);
+                        if (value >= 0 && line.Any(sign => sign.Text == "-" &&
+                            Math.Abs(sign.Baseline - token.Baseline) < 1 &&
+                            sign.Right <= token.Left && token.Left - sign.Right < 4))
+                            value = -value;
+                        cells[column] = value;
+                        hasAmount = true;
+                    }
+                    if (!hasAmount) continue;
+                    SplitNet(cells[0], out decimal openingDebit, out decimal openingCredit);
+                    SplitNet(cells[5], out decimal closingDebit, out decimal closingCredit);
+                    result.Rows.Add(new GeneralLedgerRow
+                    {
+                        SequenceNumber = result.Rows.Count + 1, SourceRecordNumber = page.PageNumber,
+                        AccountCode = candidate.Text, SyntheticCode = candidate.Text.Substring(0, 3),
+                        AnalyticalCode = candidate.Text.Substring(3), AccountName = Text(line, 20, 240),
+                        OpeningDebit = openingDebit, OpeningCredit = openingCredit,
+                        AnnualDebitTurnover = cells[1], AnnualCreditTurnover = cells[2],
+                        PeriodDebitTurnover = cells[3], PeriodCreditTurnover = cells[4],
+                        ClosingDebit = closingDebit, ClosingCredit = closingCredit
+                    });
+                }
+            }
+            if (result.Rows.Count == 0)
+                throw new InvalidDataException("No _HLKNIA4D.GMX account rows found.");
+            ValidateAnnualTotals(document, result, false);
+        }
+
         private static void ValidateAnnualTotals(PdfDocument document, GeneralLedgerImport result, bool predvas)
         {
             var page = document.Pages.Last();
@@ -238,6 +294,15 @@ namespace ExcelApiPoc.AccountingImport.Services.IfoSoft
 
         private static string Text(IEnumerable<PdfTextToken> line, double left, double right) =>
             string.Join(" ", line.Where(t => t.Left >= left && t.Left < right).OrderBy(t => t.Left).Select(t => t.Text));
+        private static string AccountCode(PdfTextToken token, IEnumerable<PdfTextToken> pageTokens)
+        {
+            if (Account.IsMatch(token.Text)) return token.Text;
+            if ((token.Text == "75" || token.Text == "79") && token.Left < 70 &&
+                pageTokens.Any(t => t.Text == "ZŠ" && t.Left > token.Left && t.Left < 80 &&
+                    Math.Abs(t.Baseline - token.Baseline) < 2))
+                return token.Text + "ZŠ";
+            return null;
+        }
         private static int Bin(double right, double[] ends)
         {
             for (int i = 0; i < ends.Length; i++) if (right < ends[i]) return i;

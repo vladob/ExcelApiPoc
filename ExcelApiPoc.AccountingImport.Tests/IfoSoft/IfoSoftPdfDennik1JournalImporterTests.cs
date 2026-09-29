@@ -6,6 +6,35 @@ namespace ExcelApiPoc.AccountingImport.Tests.IfoSoft;
 
 public sealed class IfoSoftPdfDennik1JournalImporterTests
 {
+    [Fact]
+    public void Imports_kolonica_2025_spaced_two_digit_opening_accounts()
+    {
+        string? path = Environment.GetEnvironmentVariable("IFOSOFT_PDF_JOURNAL_KOLONICA_2025_TEST_FILE");
+        Assert.True(!string.IsNullOrWhiteSpace(path) && File.Exists(path),
+            "Set IFOSOFT_PDF_JOURNAL_KOLONICA_2025_TEST_FILE to U_DENNIK_00323161_2025.pdf.");
+
+        JournalImport import = new IfoSoftPdfDennik1JournalImporter().Import(path!);
+        Assert.Equal(5000794.06m, import.Rows.Sum(row => row.DebitAmount ?? 0m));
+        Assert.Equal(5000794.06m, import.Rows.Sum(row => row.CreditAmount ?? 0m));
+        Assert.Contains(import.Rows, row => row.DebitAccount == "75ZŠ" &&
+            row.CreditAccount == "701" && row.DebitAmount == 22929.45m);
+        Assert.Contains(import.Rows, row => row.DebitAccount == "701" &&
+            row.CreditAccount == "79ZŠ" && row.CreditAmount == 22929.45m);
+    }
+
+    [Fact]
+    public void Imports_kolonica_pdf_with_spaced_analytical_account()
+    {
+        string? path = Environment.GetEnvironmentVariable("IFOSOFT_PDF_JOURNAL_KOLONICA_TEST_FILE");
+        if (string.IsNullOrWhiteSpace(path)) return;
+        Assert.True(File.Exists(path), "Missing Kolonica PDF: " + path);
+        JournalImport pdf = new IfoSoftPdfDennik1JournalImporter().Import(path);
+        Assert.Equal(4260741.64m, pdf.Rows.Sum(row => row.DebitAmount ?? 0m));
+        Assert.Equal(4260741.64m, pdf.Rows.Sum(row => row.CreditAmount ?? 0m));
+        Assert.Equal(144m, pdf.Rows.Where(row => row.DebitAccount == "551Č93")
+            .Sum(row => row.DebitAmount ?? 0m));
+    }
+
     [Theory]
     [InlineData("U_DENNIK_00323110_2024.pdf", 2024, "752020", "461001", "5262005.17")]
     [InlineData("U_DENNIK_00323110_2025.pdf", 2025, "752025", "461001", "6472424.52")]

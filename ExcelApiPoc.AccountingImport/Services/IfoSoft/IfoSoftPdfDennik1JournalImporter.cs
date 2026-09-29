@@ -25,7 +25,7 @@ namespace ExcelApiPoc.AccountingImport.Services.IfoSoft
         private const string LayoutResource =
             "ExcelApiPoc.AccountingImport.PdfLayouts.IfoSoft.journal-dennik1.v1.json";
         private static readonly Regex DatePattern = new Regex(@"^\d{2}\.\d{2}\.\d{2}$");
-        private static readonly Regex AccountPattern = new Regex(@"^\d{3}[\p{L}\d]*(?:-[\p{L}\d]+)*$");
+        private static readonly Regex AccountPattern = new Regex(@"^(?:\d{3}[\p{L}\d]*(?:-[\p{L}\d]+)*|(?:75|79)ZŠ)$");
         private static readonly Regex AmountPattern = new Regex(@"^-?\d+(?:,\d{2}|,-)$");
         private static readonly Regex PeriodPattern = new Regex(
             @"(?<!\d)00/(?<year>\d{4})\s*-\s*12/\k<year>(?!\d)");
@@ -189,6 +189,10 @@ namespace ExcelApiPoc.AccountingImport.Services.IfoSoft
         {
             var fragments = tokens.Where(t => t.Left >= left && t.Left < right)
                 .OrderBy(t => t.Left).Select(t => t.Text.Trim()).Where(t => t.Length > 0).ToArray();
+            // Kolonica prints its two-digit asset-register accounts as "75 ZŠ"
+            // and "79 ZŠ", on both sides of opening entries.
+            string compact = Regex.Replace(string.Concat(fragments), @"\s+", string.Empty);
+            if (compact == "75ZŠ" || compact == "79ZŠ") return compact;
             // The Kamienka print driver spaces numeric account codes into separate
             // runs ("75 2020", "75 1 1", "461 001") without changing columns.
             // Rejoin only wholly numeric fragments inside one account column.
@@ -198,10 +202,12 @@ namespace ExcelApiPoc.AccountingImport.Services.IfoSoft
                 if (AccountPattern.IsMatch(numericCode)) return numericCode;
             }
             if (allowSplitAnalytical && fragments.Length == 2 &&
-                AccountPattern.IsMatch(fragments[0]) && Regex.IsMatch(fragments[1], @"^\d$"))
+                AccountPattern.IsMatch(fragments[0]) &&
+                Regex.IsMatch(fragments[1], @"^\d{1,3}$") &&
+                (fragments[1].Length == 1 || fragments[0].Any(char.IsLetter)))
                 return fragments[0] + fragments[1];
             if (allowSplitAnalytical && fragments.Length == 1 &&
-                Regex.IsMatch(fragments[0], @"^\d{3}[\p{L}\d]*\s+\d$"))
+                Regex.IsMatch(fragments[0], @"^\d{3}[\p{L}\d]*(?:-[\p{L}\d]+)*\s+\d{1,3}$"))
                 return Regex.Replace(fragments[0], @"\s+", string.Empty);
             var candidates = fragments.Where(t => AccountPattern.IsMatch(t)).ToArray();
             if (candidates.Length > 1)

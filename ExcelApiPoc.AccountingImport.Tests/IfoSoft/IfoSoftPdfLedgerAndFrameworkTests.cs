@@ -126,6 +126,60 @@ public sealed class IfoSoftPdfLedgerAndFrameworkTests
         Assert.Equal(1566981.92m, result.Rows.Sum(row => row.AnnualCreditTurnover));
     }
 
+    [Fact]
+    public void Kolonica_2023_ledger_includes_spaced_asset_register_accounts()
+    {
+        string? path = Environment.GetEnvironmentVariable("IFOSOFT_PDF_GL_KOLONICA_2023_TEST_FILE");
+        Assert.True(!string.IsNullOrWhiteSpace(path) && File.Exists(path),
+            "Set IFOSOFT_PDF_GL_KOLONICA_2023_TEST_FILE to HL_KNIHA_00323161_2023.pdf.");
+        GeneralLedgerImport result = new IfoSoftPdfGeneralLedgerImporter().Import(path!);
+        Assert.Equal("00323161", result.Ico);
+        Assert.Equal(2023, result.FiscalYear);
+        Assert.Contains(result.Rows, row => row.AccountCode == "75ZŠ" && row.SyntheticCode == "75" &&
+            row.AnalyticalCode == "ZŠ" && row.AnnualDebitTurnover == 22929.45m);
+        Assert.Contains(result.Rows, row => row.AccountCode == "79ZŠ" && row.SyntheticCode == "79" &&
+            row.AnalyticalCode == "ZŠ" && row.AnnualCreditTurnover == 22929.45m);
+        Assert.Equal(1599671.47m, result.Rows.Sum(row => row.AnnualDebitTurnover));
+        Assert.Equal(1599671.47m, result.Rows.Sum(row => row.AnnualCreditTurnover));
+    }
+
+    [Fact]
+    public void Kolonica_2025_detailed_ledger_does_not_double_count_question_mark_subtotals()
+    {
+        string? path = Environment.GetEnvironmentVariable("IFOSOFT_PDF_GL_KOLONICA_2025_TEST_FILE");
+        Assert.True(!string.IsNullOrWhiteSpace(path) && File.Exists(path),
+            "Set IFOSOFT_PDF_GL_KOLONICA_2025_TEST_FILE to HL_KNIHA_00323161_2025_a.pdf.");
+        GeneralLedgerImport result = new IfoSoftPdfGeneralLedgerImporter().Import(path!);
+        Assert.Equal("00323161", result.Ico);
+        Assert.Equal(2025, result.FiscalYear);
+        Assert.Contains(result.Rows, row => row.AccountCode == "751976" &&
+            row.AnnualDebitTurnover == 6748.44m && row.AnnualCreditTurnover == 3329.91m);
+        Assert.DoesNotContain(result.Rows, row => row.AccountCode == "751");
+        Assert.Single(result.Rows.Where(row => row.AccountCode == "799"));
+        Assert.Equal(1811217.28m, result.Rows.Sum(row => row.AnnualDebitTurnover));
+        Assert.Equal(1811217.28m, result.Rows.Sum(row => row.AnnualCreditTurnover));
+    }
+
+    [Fact]
+    public void Kolonica_2025_hlknia4d_synthetic_ledger_reconciles_its_printed_total()
+    {
+        string? path = Environment.GetEnvironmentVariable("IFOSOFT_PDF_GL_KOLONICA_2025_SUMMARY_TEST_FILE");
+        Assert.True(!string.IsNullOrWhiteSpace(path) && File.Exists(path),
+            "Set IFOSOFT_PDF_GL_KOLONICA_2025_SUMMARY_TEST_FILE to HL_KNIHA_00323161_2025_b.pdf.");
+        GeneralLedgerImport result = new IfoSoftPdfGeneralLedgerImporter().Import(path!);
+        Assert.Equal("00323161", result.Ico);
+        Assert.Equal(2025, result.FiscalYear);
+        Assert.Equal(12, result.ThroughMonth);
+        Assert.Contains(result.Rows, row => row.AccountCode == "021" &&
+            row.AnnualDebitTurnover == 31660.28m);
+        Assert.Contains(result.Rows, row => row.AccountCode == "751" &&
+            row.AnnualDebitTurnover == 6748.44m && row.AnnualCreditTurnover == 3329.91m);
+        Assert.Contains(result.Rows, row => row.AccountCode == "799" &&
+            row.AnnualDebitTurnover == 3329.91m && row.AnnualCreditTurnover == 6748.44m);
+        Assert.Equal(1811222.87m, result.Rows.Sum(row => row.AnnualDebitTurnover));
+        Assert.Equal(1811222.87m, result.Rows.Sum(row => row.AnnualCreditTurnover));
+    }
+
     private static string Sample(string fileName)
     {
         string? root = Environment.GetEnvironmentVariable("IFOSOFT_PDF_GL_AF_TEST_DIR");

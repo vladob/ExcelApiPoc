@@ -23,7 +23,9 @@ namespace ExcelApiPoc.AccountingImport.Services.IfoSoft
         }
 
         private static readonly Regex Name = new Regex(@"^U_DENNIK_(?<ico>\d{8})_(?<year>\d{4})\.xml$", RegexOptions.IgnoreCase);
-        private static readonly Regex Account = new Regex(@"^\d{3}[\p{L}\d.]*(?:-[\p{L}\d.]+)*$");
+        // Some IfoSoft exports use the two-digit 75/79 account pair for asset-register entries.
+        // Preserve those source codes rather than inventing a leading zero.
+        private static readonly Regex Account = new Regex(@"^(?:\d{3}[\p{L}\d.]*(?:-[\p{L}\d.]+)*|(?:75|79)[\p{L}][\p{L}\d.]*)$");
         private static readonly CultureInfo Sk = CultureInfo.GetCultureInfo("sk-SK");
 
         public bool CanImport(string filePath, string accountingFormat) =>
@@ -79,8 +81,8 @@ namespace ExcelApiPoc.AccountingImport.Services.IfoSoft
                 {
                     Code = "IFOSOFT_XML_DESCRIPTION_NORMALIZED",
                     Severity = ImportDiagnosticSeverity.Warning,
-                    Message = repairedTextCharacters + " invalid XML characters in journal descriptions were normalized; " +
-                        "check the affected descriptions in the source export."
+                    Message = repairedTextCharacters + " invalid XML characters in journal text fields were normalized; " +
+                        "check the affected descriptions and notes in the source export."
                 });
             string exportYear = Value(root.Element("obdobie"), "rok");
             if (exportYear != result.FiscalYear.ToString(CultureInfo.InvariantCulture))
@@ -231,13 +233,15 @@ namespace ExcelApiPoc.AccountingImport.Services.IfoSoft
             }
             catch (XmlException)
             {
-                // Repair malformed text content only; never alter structural
+                // Repair malformed description and note text only; never alter structural
                 // markup, amounts, accounts, or dates.
                 string xml = File.ReadAllText(path, Encoding.GetEncoding(1250));
                 int count = 0;
-                string repaired = Regex.Replace(xml, @"<ucDokText>([^<]*)</ucDokText>", match =>
+                string repaired = Regex.Replace(xml,
+                    @"<(?<tag>ucDokText|poznamka)>(?<value>[^<]*)</\k<tag>>", match =>
                 {
-                    string value = match.Groups[1].Value;
+                    string tag = match.Groups["tag"].Value;
+                    string value = match.Groups["value"].Value;
                     value = Regex.Replace(value, @"&(?!amp;|lt;|gt;|quot;|apos;|#\d+;|#x[0-9a-fA-F]+;)", _ =>
                     {
                         count++;
@@ -248,7 +252,7 @@ namespace ExcelApiPoc.AccountingImport.Services.IfoSoft
                         count++;
                         return "\uFFFD";
                     });
-                    return "<ucDokText>" + value + "</ucDokText>";
+                    return "<" + tag + ">" + value + "</" + tag + ">";
                 });
                 if (count == 0) throw;
                 using (var reader = XmlReader.Create(new StringReader(repaired), settings))

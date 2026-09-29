@@ -8,6 +8,42 @@ namespace ExcelApiPoc.AccountingImport.Tests.IfoSoft;
 public sealed class IfoSoftXmlJournalImporterTests
 {
     [Fact]
+    public void Imports_kolonica_2024_with_malformed_note_text()
+    {
+        string? path = Environment.GetEnvironmentVariable("IFOSOFT_XML_JOURNAL_KOLONICA_2024_TEST_FILE");
+        Assert.True(!string.IsNullOrWhiteSpace(path) && File.Exists(path),
+            "Set IFOSOFT_XML_JOURNAL_KOLONICA_2024_TEST_FILE to U_DENNIK_00323161_2024.xml.");
+
+        var importer = new IfoSoftXmlJournalImporter();
+        Assert.True(importer.CanImport(path!, "IfoSoft"));
+        JournalImport import = importer.Import(path!);
+        Assert.Equal("00323161", import.Ico);
+        Assert.Equal(2024, import.FiscalYear);
+        Assert.Equal(4530013.43m, import.Rows.Sum(row => row.DebitAmount ?? 0m));
+        Assert.Equal(4530013.43m, import.Rows.Sum(row => row.CreditAmount ?? 0m));
+        Assert.Contains(import.ImportReport.Diagnostics, d =>
+            d.Code == "IFOSOFT_XML_DESCRIPTION_NORMALIZED" &&
+            d.Message.Contains("6 invalid XML characters"));
+    }
+
+    [Fact]
+    public void Imports_kolonica_2023_two_digit_asset_register_accounts()
+    {
+        string? path = Environment.GetEnvironmentVariable("IFOSOFT_XML_JOURNAL_KOLONICA_2023_TEST_FILE");
+        Assert.True(!string.IsNullOrWhiteSpace(path) && File.Exists(path),
+            "Set IFOSOFT_XML_JOURNAL_KOLONICA_2023_TEST_FILE to U_DENNIK_00323161_2023.xml.");
+
+        JournalImport import = new IfoSoftXmlJournalImporter().Import(path!);
+        Assert.Equal("00323161", import.Ico);
+        Assert.Equal(2023, import.FiscalYear);
+        Assert.Contains(import.Rows, row => row.SourceRecordNumber == 8398 &&
+            row.DebitAccount == "75ZŠ" && row.CreditAccount == "79ZŠ" &&
+            row.DebitAmount == 22929.45m && row.CreditAmount == 22929.45m);
+        Assert.Equal(4416448.49m, import.Rows.Sum(row => row.DebitAmount ?? 0m));
+        Assert.Equal(4416448.49m, import.Rows.Sum(row => row.CreditAmount ?? 0m));
+    }
+
+    [Fact]
     public void Imports_kolonica_xml_with_invalid_description_characters()
     {
         string? path = Environment.GetEnvironmentVariable("IFOSOFT_XML_JOURNAL_KOLONICA_TEST_FILE");
