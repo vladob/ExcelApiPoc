@@ -107,8 +107,14 @@ namespace ExcelApiPoc.AccountingImport.Services.IfoSoft
                         "28.02.2022. Their original date remains in SourceLocation; verify against the source."
                 });
             int nextYearEntries = 0;
+            int missingDateRecords = 0;
+            int transposedYearRecords = 0;
+            int otherYearRecords = 0;
             for (int i = 0; i < records.Length; i++)
             {
+                if (Value(records[i], "ucPripDat").Length == 0) missingDateRecords++;
+                if (Value(records[i], "ucPripDat").EndsWith(".4202", StringComparison.Ordinal)) transposedYearRecords++;
+                if (IsDatedOutsideFiscalYear(records[i], result.FiscalYear)) otherYearRecords++;
                 JournalRow row = ReadRecord(records[i], i + 1, result.FiscalYear);
                 if (row.DebitAmount.HasValue && i + 1 < records.Length)
                 {
@@ -124,6 +130,9 @@ namespace ExcelApiPoc.AccountingImport.Services.IfoSoft
                         JournalRow credit = ReadRecord(next, i + 2, result.FiscalYear);
                         if (row.DebitAmount == credit.CreditAmount)
                         {
+                            if (Value(next, "ucPripDat").Length == 0) missingDateRecords++;
+                            if (Value(next, "ucPripDat").EndsWith(".4202", StringComparison.Ordinal)) transposedYearRecords++;
+                            if (IsDatedOutsideFiscalYear(next, result.FiscalYear)) otherYearRecords++;
                             row.CreditAccount = credit.CreditAccount;
                             row.CreditAmount = credit.CreditAmount;
                             row.CreditSection = credit.CreditSection;
@@ -131,7 +140,8 @@ namespace ExcelApiPoc.AccountingImport.Services.IfoSoft
                             row.CreditFundingSource = credit.CreditFundingSource;
                             row.TextNormalizationApplied |= credit.TextNormalizationApplied;
                             row.SourceLocation = "XML records " + (i + 1) + " and " + (i + 2) +
-                                (row.SourceLocation.Contains("source date ")
+                                (Value(records[i], "ucPripDat").Length == 0 ? " (source date missing)" :
+                                row.SourceLocation.Contains("source date ")
                                     ? " (source date " + Value(records[i], "ucPripDat") + ")"
                                     : string.Empty);
                             i++;
@@ -139,7 +149,7 @@ namespace ExcelApiPoc.AccountingImport.Services.IfoSoft
                     }
                 }
                 row.SequenceNumber = result.Rows.Count + 1;
-                if (row.PostingDate.Year != result.FiscalYear) nextYearEntries++;
+                if (row.PostingDate.Year == result.FiscalYear + 1) nextYearEntries++;
                 row.RecordKind = Classify(row);
                 if (row.TextNormalizationApplied) result.NormalizedTextFieldCount++;
                 result.Rows.Add(row);
@@ -155,7 +165,34 @@ namespace ExcelApiPoc.AccountingImport.Services.IfoSoft
                     Code = "IFOSOFT_XML_NEXT_YEAR_POSTINGS",
                     Severity = ImportDiagnosticSeverity.Warning,
                     Message = nextYearEntries + " entries in the " + result.FiscalYear +
-                        " journal have January " + (result.FiscalYear + 1) + " posting dates; their source dates were preserved."
+                        " journal have January " + (result.FiscalYear + 1) +
+                        " posting dates; source dates are preserved in SourceLocation when normalized."
+                });
+            if (missingDateRecords > 0)
+                result.ImportReport.Diagnostics.Add(new ImportDiagnostic
+                {
+                    Code = "IFOSOFT_XML_MISSING_POSTING_DATE",
+                    Severity = ImportDiagnosticSeverity.Warning,
+                    Message = missingDateRecords + " XML source records have no posting date, year, or month. " +
+                        "They retain their amounts but are excluded from report calculation until a corrected date is entered."
+                });
+            if (otherYearRecords > 0)
+                result.ImportReport.Diagnostics.Add(new ImportDiagnostic
+                {
+                    Code = "IFOSOFT_XML_OTHER_YEAR_POSTINGS",
+                    Severity = ImportDiagnosticSeverity.Warning,
+                    Message = otherYearRecords + " XML source records have valid dates outside fiscal year " +
+                        result.FiscalYear + ". Their original dates and amounts were preserved; " +
+                        "the entries are excluded from report calculation pending review."
+                });
+            if (transposedYearRecords > 0)
+                result.ImportReport.Diagnostics.Add(new ImportDiagnostic
+                {
+                    Code = "IFOSOFT_XML_TRANSPOSED_POSTING_YEAR",
+                    Severity = ImportDiagnosticSeverity.Warning,
+                    Message = transposedYearRecords + " XML source records have year 4202. " +
+                        "They have no trusted posting date and are excluded from report calculation pending review; " +
+                        "the original dates remain in SourceLocation."
                 });
             result.ImportReport.RecordCounts["JournalRows"] = result.Rows.Count;
             return result;
@@ -173,21 +210,27 @@ namespace ExcelApiPoc.AccountingImport.Services.IfoSoft
             string sourceDate = Value(record, "ucPripDat");
             string sourceYear = Value(record, "rok");
             bool mistypedYear = year == 2022 && sourceDate == "28.02.0222" && sourceYear == "0222";
+            bool missingDate = sourceDate.Length == 0 && sourceYear.Length == 0 && Value(record, "mes").Length == 0;
+            bool transposedYear = year == 2023 && sourceDate == "03.01.4202" && sourceYear == "4202" &&
+                Value(record, "mes") == "01";
             string postingDate = mistypedYear ? "28.02.2022" : sourceDate;
             string postingYear = mistypedYear ? "2022" : sourceYear;
-            if (!DateTime.TryParseExact(postingDate, "dd.MM.yyyy", CultureInfo.InvariantCulture,
-                    DateTimeStyles.None, out DateTime date) ||
-                (date.Year != year && !(date.Year == year + 1 && date.Month == 1)) ||
+            DateTime date = DateTime.MinValue;
+            if (!missingDate && !transposedYear && (!DateTime.TryParseExact(postingDate, "dd.MM.yyyy", CultureInfo.InvariantCulture,
+                    DateTimeStyles.None, out date) ||
                 postingYear != date.Year.ToString(CultureInfo.InvariantCulture) ||
-                Value(record, "mes") != date.Month.ToString("00", CultureInfo.InvariantCulture))
+                Value(record, "mes") != date.Month.ToString("00", CultureInfo.InvariantCulture)))
                 throw new InvalidDataException(location + ": accounting date differs from the filename's fiscal year.");
             XElement budget = record.Element("rozpocCis");
             var row = new JournalRow
             {
                 SourceRecordNumber = sourceNumber,
-                SourceLocation = mistypedYear ? location + " (source date " + sourceDate + ")" : location,
+                SourceLocation = missingDate ? location + " (source date missing)" :
+                    mistypedYear || transposedYear ? location + " (source date " + sourceDate + ")" : location,
                 PostingDate = date, DocumentNumber = Value(record, "ucDok"), Description = Value(record, "ucDokText"),
-                TextNormalizationApplied = account != rawAccount || mistypedYear
+                DateExceptionResolution = missingDate || transposedYear || date.Year != year ? JournalDateExceptionResolution.Excluded :
+                    (JournalDateExceptionResolution?)null,
+                TextNormalizationApplied = account != rawAccount || mistypedYear || transposedYear
             };
             if (debitText.Length > 0)
             {
@@ -202,6 +245,15 @@ namespace ExcelApiPoc.AccountingImport.Services.IfoSoft
                 row.CreditFundingSource = Value(budget, "akciaCis");
             }
             return row;
+        }
+
+        private static bool IsDatedOutsideFiscalYear(XElement record, int fiscalYear)
+        {
+            string sourceDate = Value(record, "ucPripDat");
+            return DateTime.TryParseExact(sourceDate, "dd.MM.yyyy", CultureInfo.InvariantCulture,
+                DateTimeStyles.None, out DateTime date) && date.Year != fiscalYear &&
+                !(date.Year == fiscalYear + 1 && date.Month == 1) &&
+                !(fiscalYear == 2023 && sourceDate == "03.01.4202");
         }
 
         private static JournalRecordKind Classify(JournalRow row) =>

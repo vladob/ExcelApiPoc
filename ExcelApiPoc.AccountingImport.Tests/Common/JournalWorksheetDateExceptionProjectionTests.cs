@@ -6,6 +6,22 @@ namespace ExcelApiPoc.AccountingImport.Tests.Common;
 public sealed class JournalWorksheetDateExceptionProjectionTests
 {
     [Fact]
+    public void MissingPostingDate_is_blank_and_excluded_in_the_journal_worksheet()
+    {
+        var row = new JournalRow
+        {
+            PostingDate = DateTime.MinValue,
+            DateExceptionResolution = JournalDateExceptionResolution.Excluded,
+            DebitAccount = "357REF", DebitAmount = 126.05m
+        };
+        object[,] values = JournalWorksheetDataProjector.CreateDataValues(new[] { row }, 0, 1, true);
+        Assert.Null(values[0, 1]);
+        Assert.Equal("Excluded", values[0, 2]);
+        Assert.Equal(false, values[0, 22]);
+        Assert.Equal(126.05d, values[0, 8]);
+    }
+
+    [Fact]
     public void DateExceptionColumns_AreInsertedOnlyWhenRequested()
     {
         object[,] cleanHeaders =

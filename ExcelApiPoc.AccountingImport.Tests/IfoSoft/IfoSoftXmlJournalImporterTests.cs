@@ -8,6 +8,63 @@ namespace ExcelApiPoc.AccountingImport.Tests.IfoSoft;
 public sealed class IfoSoftXmlJournalImporterTests
 {
     [Fact]
+    public void Imports_ladomirov_2024_with_other_year_and_undated_entries_excluded()
+    {
+        string? path = Environment.GetEnvironmentVariable("IFOSOFT_XML_JOURNAL_LADOMIROV_2024_TEST_FILE");
+        Assert.True(!string.IsNullOrWhiteSpace(path) && File.Exists(path),
+            "Set IFOSOFT_XML_JOURNAL_LADOMIROV_2024_TEST_FILE to U_DENNIK_00323195_2024.xml.");
+
+        JournalImport import = new IfoSoftXmlJournalImporter().Import(path!);
+        Assert.Equal("00323195", import.Ico);
+        Assert.Equal(2024, import.FiscalYear);
+        Assert.Equal(1633897.27m, import.Rows.Sum(row => row.DebitAmount ?? 0m));
+        Assert.Equal(1633897.27m, import.Rows.Sum(row => row.CreditAmount ?? 0m));
+        Assert.Contains(import.ImportReport.Diagnostics, d =>
+            d.Code == "IFOSOFT_XML_OTHER_YEAR_POSTINGS" && d.Message.Contains("8 XML source records"));
+        Assert.Contains(import.ImportReport.Diagnostics, d =>
+            d.Code == "IFOSOFT_XML_MISSING_POSTING_DATE" && d.Message.Contains("5 XML source records"));
+        Assert.Contains(import.Rows, row => row.SourceRecordNumber == 763 &&
+            row.PostingDate == new DateTime(2023, 3, 14) && row.DebitAccount == "321" &&
+            row.CreditAccount == "221" && row.DebitAmount == 45m && !row.UsedForReportCalculation);
+        Assert.Contains(import.Rows, row => row.SourceRecordNumber == 2406 &&
+            row.PostingDate == new DateTime(2026, 8, 19) && !row.UsedForReportCalculation);
+        Assert.Contains(import.Rows, row => row.SourceRecordNumber == 2207 &&
+            row.PostingDate == DateTime.MinValue && row.CreditAmount == -94.85m &&
+            !row.UsedForReportCalculation);
+        Assert.Equal(7, JournalDateExceptionService.Apply(import, 2024));
+    }
+
+    [Fact]
+    public void Imports_ladomirov_2023_without_inventing_missing_posting_dates()
+    {
+        string? path = Environment.GetEnvironmentVariable("IFOSOFT_XML_JOURNAL_LADOMIROV_2023_TEST_FILE");
+        Assert.True(!string.IsNullOrWhiteSpace(path) && File.Exists(path),
+            "Set IFOSOFT_XML_JOURNAL_LADOMIROV_2023_TEST_FILE to U_DENNIK_00323195_2023.xml.");
+
+        JournalImport import = new IfoSoftXmlJournalImporter().Import(path!);
+        Assert.Equal("00323195", import.Ico);
+        Assert.Equal(2023, import.FiscalYear);
+        Assert.Equal(1572765.50m, import.Rows.Sum(row => row.DebitAmount ?? 0m));
+        Assert.Equal(1572765.50m, import.Rows.Sum(row => row.CreditAmount ?? 0m));
+        Assert.Contains(import.ImportReport.Diagnostics, d => d.Code == "IFOSOFT_XML_EXPORT_PERIOD_DIFFERS");
+        Assert.Contains(import.ImportReport.Diagnostics, d => d.Code == "IFOSOFT_XML_MISSING_POSTING_DATE" &&
+            d.Message.Contains("10 XML source records"));
+        Assert.Contains(import.ImportReport.Diagnostics, d => d.Code == "IFOSOFT_XML_TRANSPOSED_POSTING_YEAR" &&
+            d.Message.Contains("2 XML source records"));
+        Assert.Equal(6, import.Rows.Count(row => row.PostingDate == DateTime.MinValue &&
+            row.DateExceptionResolution == JournalDateExceptionResolution.Excluded &&
+            !row.UsedForReportCalculation));
+        Assert.Contains(import.Rows, row => row.SourceRecordNumber == 443 &&
+            row.DebitAccount == "357REF" && row.CreditAccount == "693REF" &&
+            row.DebitAmount == 126.05m && row.SourceLocation.Contains("source date missing"));
+        Assert.Contains(import.Rows, row => row.SourceRecordNumber == 1016 &&
+            row.PostingDate == DateTime.MinValue &&
+            row.SourceLocation.Contains("source date 03.01.4202") &&
+            row.DateExceptionResolution == JournalDateExceptionResolution.Excluded);
+        Assert.Equal(6, JournalDateExceptionService.Apply(import, 2023));
+    }
+
+    [Fact]
     public void Imports_kolonica_2024_with_malformed_note_text()
     {
         string? path = Environment.GetEnvironmentVariable("IFOSOFT_XML_JOURNAL_KOLONICA_2024_TEST_FILE");

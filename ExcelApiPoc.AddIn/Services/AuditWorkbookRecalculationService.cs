@@ -187,7 +187,7 @@ namespace ExcelApiPoc.AddIn.Services
                 var row = new JournalRow
                 {
                     SequenceNumber = AuditWorkbookTableReader.GetInt32(source, "SequenceNumber"),
-                    PostingDate = AuditWorkbookTableReader.GetDateTime(source, "PostingDate"),
+                    PostingDate = AuditWorkbookTableReader.GetNullableDateTime(source, "PostingDate") ?? DateTime.MinValue,
                     DocumentType = AuditWorkbookTableReader.GetString(source, "DocumentType"),
                     DocumentNumber = AuditWorkbookTableReader.GetString(source, "DocumentNumber"),
                     Description = AuditWorkbookTableReader.GetString(source, "Description"),
@@ -280,6 +280,13 @@ namespace ExcelApiPoc.AddIn.Services
 
             row.DateExceptionResolution = resolution;
             row.CorrectedPostingDate = correctedDate;
+
+            if (row.PostingDate == DateTime.MinValue &&
+                resolution == JournalDateExceptionResolution.OriginalIncluded)
+                throw new InvalidOperationException(
+                    "Journal row " + row.SequenceNumber +
+                    " has no source posting date. Enter a corrected date and select '" +
+                    JournalWorksheetWriter.ModifiedIncludedCaption + "', or keep it excluded.");
 
             switch (resolution)
             {

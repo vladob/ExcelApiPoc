@@ -1,11 +1,33 @@
 using ExcelApiPoc.AccountingImport.Models;
 using ExcelApiPoc.AccountingImport.Services;
 using ExcelApiPoc.AccountingImport.Services.IfoSoft;
+using ExcelApiPoc.AccountingImport.Services.Common;
 
 namespace ExcelApiPoc.AccountingImport.Tests.IfoSoft;
 
 public sealed class IfoSoftPdfDennik1JournalImporterTests
 {
+    [Fact]
+    public void Imports_ladomirov_2025_pdf_without_dropping_undated_entry()
+    {
+        string? path = Environment.GetEnvironmentVariable("IFOSOFT_PDF_JOURNAL_LADOMIROV_2025_TEST_FILE");
+        Assert.True(!string.IsNullOrWhiteSpace(path) && File.Exists(path),
+            "Set IFOSOFT_PDF_JOURNAL_LADOMIROV_2025_TEST_FILE to U_DENNIK_00323195_2025.pdf.");
+        JournalImport import = new IfoSoftPdfDennik1JournalImporter().Import(path!);
+        Assert.Equal(2025, import.FiscalYear);
+        Assert.Equal(2142, import.Rows.Count);
+        Assert.Equal(1638050.39m, import.Rows.Sum(row => row.DebitAmount ?? 0m));
+        Assert.Equal(1638050.39m, import.Rows.Sum(row => row.CreditAmount ?? 0m));
+        JournalRow undated = Assert.Single(import.Rows.Where(row => row.PostingDate == DateTime.MinValue));
+        Assert.Equal("221", undated.DebitAccount);
+        Assert.Equal("261", undated.CreditAccount);
+        Assert.Equal(1266m, undated.DebitAmount);
+        Assert.Equal(JournalDateExceptionResolution.Excluded, undated.DateExceptionResolution);
+        Assert.Contains(import.Rows, row => row.PostingDate == new DateTime(2005, 9, 12));
+        Assert.Contains(import.ImportReport.Diagnostics, d => d.Code == "IFOSOFT_PDF_MISSING_POSTING_DATE");
+        Assert.Equal(11, JournalDateExceptionService.Apply(import, 2025));
+    }
+
     [Fact]
     public void Imports_kolonica_2025_spaced_two_digit_opening_accounts()
     {

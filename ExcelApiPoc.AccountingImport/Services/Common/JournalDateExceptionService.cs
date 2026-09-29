@@ -40,8 +40,11 @@ namespace ExcelApiPoc.AccountingImport.Services.Common
                         DiagnosticCode,
                         StringComparison.Ordinal)))
             {
-                DateTime firstDate = exceptionalRows.Min(row => row.PostingDate);
-                DateTime lastDate = exceptionalRows.Max(row => row.PostingDate);
+                List<JournalRow> datedRows = exceptionalRows
+                    .Where(row => row.PostingDate != DateTime.MinValue).ToList();
+                string range = datedRows.Count == 0 ? string.Empty :
+                    " Date range: " + datedRows.Min(row => row.PostingDate).ToString("yyyy-MM-dd") +
+                    " to " + datedRows.Max(row => row.PostingDate).ToString("yyyy-MM-dd") + ".";
 
                 journal.ImportReport.Diagnostics.Add(
                     new ImportDiagnostic
@@ -49,11 +52,10 @@ namespace ExcelApiPoc.AccountingImport.Services.Common
                         Code = DiagnosticCode,
                         Severity = ImportDiagnosticSeverity.Warning,
                         Message = exceptionalRows.Count +
-                            " accounting-journal row(s) contain posting dates outside fiscal year " +
+                            " accounting-journal row(s) have missing or out-of-range posting dates for fiscal year " +
                             fiscalYear +
                             ". They were imported and excluded from calculation pending auditor review. " +
-                            "Date range: " + firstDate.ToString("yyyy-MM-dd") +
-                            " to " + lastDate.ToString("yyyy-MM-dd") + ".",
+                            range,
                         Source = new SourceProvenance
                         {
                             SourceFileName = journal.SourceFileName,

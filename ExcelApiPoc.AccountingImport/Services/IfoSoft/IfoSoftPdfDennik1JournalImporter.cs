@@ -104,16 +104,28 @@ namespace ExcelApiPoc.AccountingImport.Services.IfoSoft
             });
 
             int nextYearEntries = 0;
+            int missingDateEntries = 0;
             foreach (var page in document.Pages)
             {
                 var tokens = page.Tokens.ToArray();
-                foreach (var dateToken in tokens.Where(t => t.Left >= 15 && t.Left < 35 &&
-                             DatePattern.IsMatch(t.Text)).OrderByDescending(t => t.Baseline))
+                var datedHeads = tokens.Where(t => t.Left >= 15 && t.Left < 35 &&
+                    DatePattern.IsMatch(t.Text)).ToArray();
+                // Some printouts contain a complete account/amount row without a date.
+                // Use the account row as its anchor so it cannot disappear silently.
+                var undatedHeads = tokens.Where(t =>
+                    ((t.Left >= 297 && t.Left < 350) || (t.Left >= 415 && t.Left < 455)) &&
+                    AccountPattern.IsMatch(t.Text) &&
+                    !datedHeads.Any(date => Math.Abs(date.Baseline - t.Baseline) <= 0.9) &&
+                    AmountPattern.IsMatch(Column(AtBaseline(tokens, t.Baseline - 5.3, 1.3),
+                        239, 301, false).Replace(" ", string.Empty).Replace("\u00a0", string.Empty)))
+                    .GroupBy(t => Math.Round(t.Baseline, 1)).Select(group => group.First());
+                foreach (var anchor in datedHeads.Concat(undatedHeads).OrderByDescending(t => t.Baseline))
                 {
                     int sourceNumber = result.Rows.Count + 1;
-                    var head = AtBaseline(tokens, dateToken.Baseline, 0.9);
-                    var amountLine = AtBaseline(tokens, dateToken.Baseline - 5.3, 1.3);
-                    var details = AtBaseline(tokens, dateToken.Baseline - 10.4, 1.8);
+                    bool missingDate = !DatePattern.IsMatch(anchor.Text);
+                    var head = AtBaseline(tokens, anchor.Baseline, 0.9);
+                    var amountLine = AtBaseline(tokens, anchor.Baseline - 5.3, 1.3);
+                    var details = AtBaseline(tokens, anchor.Baseline - 10.4, 1.8);
                     string debit = Account(head, 297, 350, page.PageNumber, sourceNumber, true);
                     string credit = Account(head, 415, 455, page.PageNumber, sourceNumber);
                     string amountText = Column(amountLine, 239, 301, false)
@@ -127,19 +139,21 @@ namespace ExcelApiPoc.AccountingImport.Services.IfoSoft
                     decimal amount = decimal.Parse(amountText.Replace(",-", ",00"),
                         NumberStyles.AllowLeadingSign | NumberStyles.AllowDecimalPoint,
                         CultureInfo.GetCultureInfo("sk-SK"));
-                    DateTime date = DateTime.ParseExact(dateToken.Text, "dd.MM.yy",
-                        CultureInfo.InvariantCulture);
-                    if (date.Year != year && !(date.Year == year + 1 && date.Month == 1))
-                        throw new InvalidDataException($"Page {page.PageNumber}, entry {sourceNumber}: posting date is outside {year}.");
-                    if (date.Year != year) nextYearEntries++;
+                    DateTime date = missingDate ? DateTime.MinValue :
+                        DateTime.ParseExact(anchor.Text, "dd.MM.yy", CultureInfo.InvariantCulture);
+                    if (missingDate) missingDateEntries++;
+                    if (date.Year == year + 1 && date.Month == 1) nextYearEntries++;
                     string description = Column(head, 54, 296, true);
                     string documentType = Column(head, 54, 91, true);
                     string documentNumber = Column(details, 25, 54, true);
                     var row = new JournalRow
                     {
                         SequenceNumber = sourceNumber, SourceRecordNumber = sourceNumber,
-                        SourceLocation = $"Page {page.PageNumber}, entry {sourceNumber}",
+                        SourceLocation = $"Page {page.PageNumber}, entry {sourceNumber}" +
+                            (missingDate ? " (source date missing)" : string.Empty),
                         PostingDate = date, DocumentType = documentType,
+                        DateExceptionResolution = missingDate ? JournalDateExceptionResolution.Excluded :
+                            (JournalDateExceptionResolution?)null,
                         DocumentNumber = documentNumber, Description = description,
                         DebitAccount = debit.Length == 0 ? null : debit,
                         CreditAccount = credit.Length == 0 ? null : credit,
@@ -172,6 +186,14 @@ namespace ExcelApiPoc.AccountingImport.Services.IfoSoft
                     Severity = ImportDiagnosticSeverity.Warning,
                     Message = nextYearEntries + " entries in the " + year +
                         " journal have January " + (year + 1) + " posting dates; their printed dates were preserved."
+                });
+            if (missingDateEntries > 0)
+                result.ImportReport.Diagnostics.Add(new ImportDiagnostic
+                {
+                    Code = "IFOSOFT_PDF_MISSING_POSTING_DATE",
+                    Severity = ImportDiagnosticSeverity.Warning,
+                    Message = missingDateEntries + " PDF journal entry/entries have no printed posting date. " +
+                        "Their amounts were preserved, but they are excluded from report calculation until reviewed."
                 });
             result.ImportReport.RecordCounts["JournalRows"] = result.Rows.Count;
             return result;

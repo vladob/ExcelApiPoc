@@ -52,3 +52,11 @@ f:\Audit\TESTS\TestAll\00323161 - Obec Kolonica\U_DENNIK_00323161_2023.xml
 f:\Audit\TESTS\TestAll\00323161 - Obec Kolonica\U_DENNIK_00323161_2024.xml
 f:\Audit\TESTS\TestAll\00323161 - Obec Kolonica\U_DENNIK_00323161_2025.pdf
 f:\Audit\TESTS\TestAll\00323161 - Obec Kolonica\U_DENNIK_00323161_2025.xml
+f:\Audit\TESTS\TestAll\00323195 - Obec Ladomirov\HL_KNIHA_00323195_2024_12.pdf
+f:\Audit\TESTS\TestAll\00323195 - Obec Ladomirov\HL_KNIHA_00323195_2024.pdf
+f:\Audit\TESTS\TestAll\00323195 - Obec Ladomirov\HL_KNIHA_00323195_2025.pdf
+f:\Audit\TESTS\TestAll\00323195 - Obec Ladomirov\HL_KNIHA_00323195_2025.CSV
+f:\Audit\TESTS\TestAll\00323195 - Obec Ladomirov\U_DENNIK_00323195_2023.xml
+f:\Audit\TESTS\TestAll\00323195 - Obec Ladomirov\U_DENNIK_00323195_2024.xml
+f:\Audit\TESTS\TestAll\00323195 - Obec Ladomirov\U_DENNIK_00323195_2025.CSV
+f:\Audit\TESTS\TestAll\00323195 - Obec Ladomirov\U_DENNIK_00323195_2025.pdf

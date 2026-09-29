@@ -84,6 +84,7 @@ namespace ExcelApiPoc.AccountingImport.Services.IfoSoft
 
                 int sequenceNumber = 0;
                 int sourceRecordNumber = 0;
+                int missingDateRows = 0;
 
                 while (records.MoveNext())
                 {
@@ -106,8 +107,17 @@ namespace ExcelApiPoc.AccountingImport.Services.IfoSoft
                         throw new InvalidDataException( $"The accounting journal contains more than " + $"{MaximumJournalRows:N0} records. " + "This file size is not currently supported.");
                     }
                     JournalRow row = MapJournalRow(sourceRecord, sourceRecordNumber, sequenceNumber, journalImport);
+                    if (row.PostingDate == DateTime.MinValue) missingDateRows++;
                     journalImport.Rows.Add(row);
                 }
+                if (missingDateRows > 0)
+                    journalImport.ImportReport.Diagnostics.Add(new ExcelApiPoc.AccountingImport.Models.Reporting.ImportDiagnostic
+                    {
+                        Code = "IFOSOFT_CSV_MISSING_POSTING_DATE",
+                        Severity = ExcelApiPoc.AccountingImport.Models.Reporting.ImportDiagnosticSeverity.Warning,
+                        Message = missingDateRows + " CSV journal row(s) have no posting date. Their amounts were " +
+                            "preserved, but they are excluded from report calculation until a corrected date is entered."
+                    });
             }
 
             if (journalImport.Rows.Count == 0)
@@ -121,9 +131,12 @@ namespace ExcelApiPoc.AccountingImport.Services.IfoSoft
         {
             string[] fields = source.Fields;
             bool rowNormalized = false;
-            DateTime postingDate = ParseDate(fields[2], source.Location);
+            bool missingDate = string.IsNullOrWhiteSpace(fields[2]);
+            DateTime postingDate = missingDate ? DateTime.MinValue : ParseDate(fields[2], source.Location);
             if (journalImport.FiscalYear == 0)
             {
+                if (missingDate)
+                    throw new InvalidDataException($"{source.Location}: the fiscal year cannot be determined for an undated CSV row.");
                 journalImport.FiscalYear = postingDate.Year;
             }
 
@@ -133,10 +146,12 @@ namespace ExcelApiPoc.AccountingImport.Services.IfoSoft
                 SourceRecordNumber = sourceRecordNumber,
                 SourceStartLineNumber = source.StartLineNumber,
                 SourceEndLineNumber = source.EndLineNumber,
-                SourceLocation = source.Location,
+                SourceLocation = missingDate ? source.Location + " (source date missing)" : source.Location,
                 DocumentType = Normalize(fields[0], journalImport, ref rowNormalized),
                 DocumentNumber = Normalize(fields[1], journalImport, ref rowNormalized),
                 PostingDate = postingDate,
+                DateExceptionResolution = missingDate ? JournalDateExceptionResolution.Excluded :
+                    (JournalDateExceptionResolution?)null,
                 Description = Normalize(fields[3], journalImport, ref rowNormalized),
                 DebitAccount = Normalize(fields[4], journalImport, ref rowNormalized),
                 DebitItem = Normalize(fields[5], journalImport, ref rowNormalized),

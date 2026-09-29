@@ -112,7 +112,7 @@ namespace ExcelApiPoc.AccountingImport.Services.Common
                         (startIndex + targetRow) + ".");
 
                 values[targetRow, 0] = row.SequenceNumber;
-                values[targetRow, 1] = row.PostingDate;
+                values[targetRow, 1] = row.PostingDate == DateTime.MinValue ? null : (object)row.PostingDate;
 
                 int targetColumn = 2;
                 if (includeDateExceptionColumns)
