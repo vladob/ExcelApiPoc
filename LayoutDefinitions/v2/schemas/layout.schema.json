@@ -1,0 +1,188 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.excelapipoc.local/positioned/v2/layout.schema.json",
+  "type": "object",
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "minLength": 1
+    },
+    "schemaVersion": {
+      "const": 2
+    },
+    "definitionVersion": {
+      "type": "string",
+      "minLength": 1
+    },
+    "id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "kind": {
+      "const": "layout"
+    },
+    "status": {
+      "enum": [
+        "reviewDraft",
+        "approved"
+      ]
+    },
+    "productionApproved": {
+      "type": "boolean"
+    },
+    "requiresCapabilities": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 0
+    },
+    "sourceRefs": {
+      "type": "array",
+      "items": {
+        "$ref": "common.schema.json#/$defs/source"
+      },
+      "minItems": 0
+    },
+    "reviewNotes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 0
+    },
+    "formats": {
+      "type": "array",
+      "items": {
+        "enum": [
+          "PDF",
+          "XPS",
+          "OXPS"
+        ]
+      },
+      "minItems": 1
+    },
+    "modelRef": {
+      "$ref": "common.schema.json#/$defs/reference"
+    },
+    "identificationRefs": {
+      "type": "array",
+      "items": {
+        "$ref": "common.schema.json#/$defs/reference"
+      },
+      "minItems": 1
+    },
+    "parserRefs": {
+      "type": "array",
+      "items": {
+        "$ref": "common.schema.json#/$defs/reference"
+      },
+      "minItems": 1
+    },
+    "validationRefs": {
+      "type": "array",
+      "items": {
+        "$ref": "common.schema.json#/$defs/reference"
+      },
+      "minItems": 0
+    },
+    "variants": {
+      "type": "array",
+      "items": {
+        "$ref": "common.schema.json#/$defs/variant"
+      },
+      "minItems": 1
+    },
+    "metadata": {
+      "type": "array",
+      "items": {
+        "$ref": "common.schema.json#/$defs/metadata"
+      },
+      "minItems": 0
+    },
+    "metadataDerivations": {
+      "type": "array",
+      "items": {
+        "$ref": "common.schema.json#/$defs/metadataDerivation"
+      },
+      "minItems": 0
+    },
+    "classification": {
+      "type": "array",
+      "items": {
+        "$ref": "common.schema.json#/$defs/classification"
+      },
+      "minItems": 0
+    },
+    "classificationPolicy": {
+      "type": "object",
+      "properties": {
+        "evaluation": {
+          "const": "allRules"
+        },
+        "noMatch": {
+          "const": "unrecognizedCandidate"
+        },
+        "incompatibleMatches": {
+          "const": "ambiguous"
+        }
+      },
+      "required": [
+        "evaluation",
+        "noMatch",
+        "incompatibleMatches"
+      ],
+      "additionalProperties": false
+    },
+    "groups": {
+      "type": "array",
+      "items": {
+        "$ref": "common.schema.json#/$defs/group"
+      },
+      "minItems": 0
+    },
+    "completeness": {
+      "type": "array",
+      "items": {
+        "$ref": "common.schema.json#/$defs/completeness"
+      },
+      "minItems": 0
+    },
+    "openQuestions": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 0
+    }
+  },
+  "required": [
+    "$schema",
+    "schemaVersion",
+    "definitionVersion",
+    "id",
+    "kind",
+    "status",
+    "productionApproved",
+    "requiresCapabilities",
+    "sourceRefs",
+    "reviewNotes",
+    "formats",
+    "modelRef",
+    "identificationRefs",
+    "parserRefs",
+    "validationRefs",
+    "variants",
+    "metadata",
+    "metadataDerivations",
+    "classification",
+    "classificationPolicy",
+    "groups",
+    "completeness",
+    "openQuestions"
+  ],
+  "additionalProperties": false
+}

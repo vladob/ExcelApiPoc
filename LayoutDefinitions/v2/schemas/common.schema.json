@@ -1,0 +1,4020 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.excelapipoc.local/positioned/v2/common.schema.json",
+  "$defs": {
+    "reference": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "version": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "id",
+        "version"
+      ],
+      "additionalProperties": false
+    },
+    "source": {
+      "type": "object",
+      "properties": {
+        "file": {
+          "type": "string",
+          "minLength": 1
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "line": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "rawCommand": {
+          "type": "string",
+          "minLength": 1
+        },
+        "expression": {
+          "type": "string",
+          "minLength": 1
+        },
+        "notes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 0
+        }
+      },
+      "required": [
+        "file"
+      ],
+      "additionalProperties": false
+    },
+    "rect": {
+      "type": "array",
+      "items": {
+        "type": "number"
+      },
+      "minItems": 4,
+      "maxItems": 4
+    },
+    "point": {
+      "type": "array",
+      "items": {
+        "type": "number"
+      },
+      "minItems": 2,
+      "maxItems": 2
+    },
+    "pageScope": {
+      "type": "object",
+      "properties": {
+        "selection": {
+          "enum": [
+            "all",
+            "first",
+            "last",
+            "indices"
+          ]
+        },
+        "indices": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "minItems": 0
+        },
+        "maximumPages": {
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      "required": [
+        "selection",
+        "indices",
+        "maximumPages"
+      ],
+      "additionalProperties": false
+    },
+    "textMatch": {
+      "type": "object",
+      "properties": {
+        "mode": {
+          "enum": [
+            "exact",
+            "contains",
+            "regex"
+          ]
+        },
+        "value": {
+          "type": "string",
+          "minLength": 1
+        },
+        "ignoreCase": {
+          "type": "boolean"
+        },
+        "whitespace": {
+          "enum": [
+            "preserve",
+            "collapse",
+            "remove"
+          ]
+        },
+        "unicodeNormalization": {
+          "const": "NFC"
+        },
+        "regexTimeoutMs": {
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      "required": [
+        "mode",
+        "value",
+        "ignoreCase",
+        "whitespace",
+        "unicodeNormalization",
+        "regexTimeoutMs"
+      ],
+      "additionalProperties": false
+    },
+    "locator": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "pages": {
+              "$ref": "common.schema.json#/$defs/pageScope"
+            },
+            "assembly": {
+              "enum": [
+                "readingOrder",
+                "baseline",
+                "glyphClusters"
+              ]
+            },
+            "cardinality": {
+              "enum": [
+                "one",
+                "zeroOrOne",
+                "many"
+              ]
+            },
+            "kind": {
+              "const": "normalizedPage"
+            },
+            "regionFraction": {
+              "type": "array",
+              "items": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "minItems": 4,
+              "maxItems": 4
+            }
+          },
+          "required": [
+            "pages",
+            "assembly",
+            "cardinality",
+            "kind",
+            "regionFraction"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "pages": {
+              "$ref": "common.schema.json#/$defs/pageScope"
+            },
+            "assembly": {
+              "enum": [
+                "readingOrder",
+                "baseline",
+                "glyphClusters"
+              ]
+            },
+            "cardinality": {
+              "enum": [
+                "one",
+                "zeroOrOne",
+                "many"
+              ]
+            },
+            "kind": {
+              "const": "calibratedRegion"
+            },
+            "variantRef": {
+              "type": "string",
+              "minLength": 1
+            },
+            "frame": {
+              "const": "nominalPage"
+            },
+            "rectPt": {
+              "$ref": "common.schema.json#/$defs/rect"
+            },
+            "paddingPt": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "pages",
+            "assembly",
+            "cardinality",
+            "kind",
+            "variantRef",
+            "frame",
+            "rectPt",
+            "paddingPt"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "pages": {
+              "$ref": "common.schema.json#/$defs/pageScope"
+            },
+            "assembly": {
+              "enum": [
+                "readingOrder",
+                "baseline",
+                "glyphClusters"
+              ]
+            },
+            "cardinality": {
+              "enum": [
+                "one",
+                "zeroOrOne",
+                "many"
+              ]
+            },
+            "kind": {
+              "const": "blockField"
+            },
+            "variantRef": {
+              "type": "string",
+              "minLength": 1
+            },
+            "blockRef": {
+              "type": "string",
+              "minLength": 1
+            },
+            "fieldRef": {
+              "type": "string",
+              "minLength": 1
+            },
+            "frame": {
+              "enum": [
+                "nominalPage",
+                "blockLocal"
+              ]
+            }
+          },
+          "required": [
+            "pages",
+            "assembly",
+            "cardinality",
+            "kind",
+            "variantRef",
+            "blockRef",
+            "fieldRef",
+            "frame"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "pages": {
+              "$ref": "common.schema.json#/$defs/pageScope"
+            },
+            "assembly": {
+              "enum": [
+                "readingOrder",
+                "baseline",
+                "glyphClusters"
+              ]
+            },
+            "cardinality": {
+              "enum": [
+                "one",
+                "zeroOrOne",
+                "many"
+              ]
+            },
+            "kind": {
+              "const": "relativeToAnchor"
+            },
+            "variantRef": {
+              "type": "string",
+              "minLength": 1
+            },
+            "anchorRef": {
+              "type": "string",
+              "minLength": 1
+            },
+            "frame": {
+              "const": "nominalPage"
+            },
+            "offsetRectPt": {
+              "$ref": "common.schema.json#/$defs/rect"
+            }
+          },
+          "required": [
+            "pages",
+            "assembly",
+            "cardinality",
+            "kind",
+            "variantRef",
+            "anchorRef",
+            "frame",
+            "offsetRectPt"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "selector": {
+      "type": "object",
+      "properties": {
+        "semanticClasses": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 0
+        },
+        "aggregationMemberships": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 0
+        },
+        "level": {
+          "enum": [
+            "detail",
+            "analytic",
+            "synthetic",
+            "class",
+            "document",
+            "any"
+          ]
+        },
+        "occurrences": {
+          "enum": [
+            "records",
+            "childGroups"
+          ]
+        }
+      },
+      "required": [
+        "semanticClasses",
+        "aggregationMemberships",
+        "level",
+        "occurrences"
+      ],
+      "additionalProperties": false
+    },
+    "scope": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "enum": [
+            "document",
+            "section",
+            "group",
+            "record"
+          ]
+        },
+        "groupRef": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "kind",
+        "groupRef"
+      ],
+      "additionalProperties": false
+    },
+    "operand": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "field"
+            },
+            "semanticName": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": [
+            "kind",
+            "semanticName"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "calculation"
+            },
+            "ruleRef": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": [
+            "kind",
+            "ruleRef"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "literal"
+            },
+            "decimal": {
+              "type": "string",
+              "pattern": "^-?[0-9]+(\\.[0-9]+)?$"
+            }
+          },
+          "required": [
+            "kind",
+            "decimal"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "predicate": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "op": {
+              "enum": [
+                "all",
+                "any"
+              ]
+            },
+            "conditions": {
+              "type": "array",
+              "items": {
+                "$ref": "common.schema.json#/$defs/predicate"
+              },
+              "minItems": 1
+            }
+          },
+          "required": [
+            "op",
+            "conditions"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "not"
+            },
+            "condition": {
+              "$ref": "common.schema.json#/$defs/predicate"
+            }
+          },
+          "required": [
+            "op",
+            "condition"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "fieldState"
+            },
+            "fieldRef": {
+              "type": "string",
+              "minLength": 1
+            },
+            "states": {
+              "type": "array",
+              "items": {
+                "enum": [
+                  "present",
+                  "blank",
+                  "unresolved",
+                  "invalid",
+                  "ambiguous"
+                ]
+              },
+              "minItems": 1
+            }
+          },
+          "required": [
+            "op",
+            "fieldRef",
+            "states"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "textMatch"
+            },
+            "fieldRef": {
+              "type": "string",
+              "minLength": 1
+            },
+            "match": {
+              "$ref": "common.schema.json#/$defs/textMatch"
+            }
+          },
+          "required": [
+            "op",
+            "fieldRef",
+            "match"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "blockKind"
+            },
+            "blockRefs": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              },
+              "minItems": 1
+            }
+          },
+          "required": [
+            "op",
+            "blockRefs"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "groupContext"
+            },
+            "groupRef": {
+              "type": "string",
+              "minLength": 1
+            },
+            "state": {
+              "enum": [
+                "open",
+                "closed",
+                "incomplete"
+              ]
+            }
+          },
+          "required": [
+            "op",
+            "groupRef",
+            "state"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "calibration": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "enabled": {
+          "type": "boolean"
+        },
+        "evidenceStatus": {
+          "enum": [
+            "sourceDerived",
+            "sampleVerified",
+            "unverified"
+          ]
+        },
+        "sourceRefs": {
+          "type": "array",
+          "items": {
+            "$ref": "common.schema.json#/$defs/source"
+          },
+          "minItems": 0
+        },
+        "reviewNotes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 0
+        },
+        "op": {
+          "const": "fitUniformScaleTranslation"
+        },
+        "anchorRefs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 2
+        },
+        "minimumInliers": {
+          "type": "integer",
+          "minimum": 2
+        },
+        "minimumAnchorSeparationPt": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "minimumSpanPt": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "minItems": 2,
+          "maxItems": 2
+        },
+        "scaleRange": {
+          "type": "array",
+          "items": {
+            "type": "number",
+            "exclusiveMinimum": 0
+          },
+          "minItems": 2,
+          "maxItems": 2
+        },
+        "maximumResidualPt": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "maximumHypotheses": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "onFailure": {
+          "const": "retainUnresolvedPage"
+        },
+        "inferScaleFromPageSize": {
+          "const": false
+        }
+      },
+      "required": [
+        "id",
+        "enabled",
+        "evidenceStatus",
+        "sourceRefs",
+        "reviewNotes",
+        "op",
+        "anchorRefs",
+        "minimumInliers",
+        "minimumAnchorSeparationPt",
+        "minimumSpanPt",
+        "scaleRange",
+        "maximumResidualPt",
+        "maximumHypotheses",
+        "onFailure",
+        "inferScaleFromPageSize"
+      ],
+      "additionalProperties": false
+    },
+    "anchor": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "feature": {
+          "const": "rulingEndpoint"
+        },
+        "pointPt": {
+          "$ref": "common.schema.json#/$defs/point"
+        },
+        "blockRef": {
+          "type": "string",
+          "minLength": 1
+        },
+        "lineRef": {
+          "type": "string",
+          "minLength": 1
+        },
+        "endpointIndex": {
+          "enum": [
+            0,
+            1
+          ]
+        },
+        "evidenceStatus": {
+          "enum": [
+            "sourceDerived",
+            "sampleVerified",
+            "unverified"
+          ]
+        },
+        "sourceRefs": {
+          "type": "array",
+          "items": {
+            "$ref": "common.schema.json#/$defs/source"
+          },
+          "minItems": 0
+        }
+      },
+      "required": [
+        "id",
+        "feature",
+        "pointPt",
+        "blockRef",
+        "lineRef",
+        "endpointIndex",
+        "evidenceStatus",
+        "sourceRefs"
+      ],
+      "additionalProperties": false
+    },
+    "field": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "semanticName": {
+          "type": "string",
+          "minLength": 1
+        },
+        "rectPt": {
+          "$ref": "common.schema.json#/$defs/rect"
+        },
+        "parserRef": {
+          "type": "string",
+          "minLength": 1
+        },
+        "sourceRefs": {
+          "type": "array",
+          "items": {
+            "$ref": "common.schema.json#/$defs/source"
+          },
+          "minItems": 0
+        }
+      },
+      "required": [
+        "id",
+        "semanticName",
+        "rectPt",
+        "parserRef",
+        "sourceRefs"
+      ],
+      "additionalProperties": false
+    },
+    "label": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "text": {
+          "type": "string"
+        },
+        "rectPt": {
+          "$ref": "common.schema.json#/$defs/rect"
+        },
+        "sourceRefs": {
+          "type": "array",
+          "items": {
+            "$ref": "common.schema.json#/$defs/source"
+          },
+          "minItems": 0
+        }
+      },
+      "required": [
+        "id",
+        "text",
+        "rectPt",
+        "sourceRefs"
+      ],
+      "additionalProperties": false
+    },
+    "line": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "pointsPt": {
+          "type": "array",
+          "items": {
+            "$ref": "common.schema.json#/$defs/point"
+          },
+          "minItems": 2,
+          "maxItems": 2
+        },
+        "sourceRefs": {
+          "type": "array",
+          "items": {
+            "$ref": "common.schema.json#/$defs/source"
+          },
+          "minItems": 0
+        }
+      },
+      "required": [
+        "id",
+        "pointsPt",
+        "sourceRefs"
+      ],
+      "additionalProperties": false
+    },
+    "locateBlock": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "enabled": {
+          "type": "boolean"
+        },
+        "evidenceStatus": {
+          "enum": [
+            "sourceDerived",
+            "sampleVerified",
+            "unverified"
+          ]
+        },
+        "sourceRefs": {
+          "type": "array",
+          "items": {
+            "$ref": "common.schema.json#/$defs/source"
+          },
+          "minItems": 0
+        },
+        "reviewNotes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 0
+        },
+        "op": {
+          "const": "locateBlock"
+        },
+        "frame": {
+          "enum": [
+            "nominalPage",
+            "blockLocal"
+          ]
+        },
+        "origin": {
+          "enum": [
+            "pageCalibration",
+            "independentOccurrence"
+          ]
+        },
+        "signals": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "rulings",
+              "labels",
+              "fieldColumns",
+              "unassignedText"
+            ]
+          },
+          "minItems": 1
+        },
+        "combination": {
+          "const": "union"
+        },
+        "onAmbiguous": {
+          "const": "retainHypotheses"
+        }
+      },
+      "required": [
+        "id",
+        "enabled",
+        "evidenceStatus",
+        "sourceRefs",
+        "reviewNotes",
+        "op",
+        "frame",
+        "origin",
+        "signals",
+        "combination",
+        "onAmbiguous"
+      ],
+      "additionalProperties": false
+    },
+    "detectCandidates": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "enabled": {
+          "type": "boolean"
+        },
+        "evidenceStatus": {
+          "enum": [
+            "sourceDerived",
+            "sampleVerified",
+            "unverified"
+          ]
+        },
+        "sourceRefs": {
+          "type": "array",
+          "items": {
+            "$ref": "common.schema.json#/$defs/source"
+          },
+          "minItems": 0
+        },
+        "reviewNotes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 0
+        },
+        "op": {
+          "const": "detectCandidates"
+        },
+        "signals": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "rulings",
+              "labels",
+              "fieldColumns",
+              "unassignedText"
+            ]
+          },
+          "minItems": 1
+        },
+        "combination": {
+          "const": "union"
+        },
+        "requiresSuccessfulParsing": {
+          "const": false
+        }
+      },
+      "required": [
+        "id",
+        "enabled",
+        "evidenceStatus",
+        "sourceRefs",
+        "reviewNotes",
+        "op",
+        "signals",
+        "combination",
+        "requiresSuccessfulParsing"
+      ],
+      "additionalProperties": false
+    },
+    "assignFields": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "enabled": {
+          "type": "boolean"
+        },
+        "evidenceStatus": {
+          "enum": [
+            "sourceDerived",
+            "sampleVerified",
+            "unverified"
+          ]
+        },
+        "sourceRefs": {
+          "type": "array",
+          "items": {
+            "$ref": "common.schema.json#/$defs/source"
+          },
+          "minItems": 0
+        },
+        "reviewNotes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 0
+        },
+        "op": {
+          "const": "assignFields"
+        },
+        "paddingPt": {
+          "type": "number",
+          "minimum": 0
+        },
+        "assembly": {
+          "const": "glyphClusters"
+        },
+        "splitAcrossFields": {
+          "const": "requireGlyphGeometry"
+        },
+        "overlap": {
+          "const": "retainAmbiguity"
+        },
+        "retainClippedSource": {
+          "const": true
+        }
+      },
+      "required": [
+        "id",
+        "enabled",
+        "evidenceStatus",
+        "sourceRefs",
+        "reviewNotes",
+        "op",
+        "paddingPt",
+        "assembly",
+        "splitAcrossFields",
+        "overlap",
+        "retainClippedSource"
+      ],
+      "additionalProperties": false
+    },
+    "block": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "kind": {
+          "enum": [
+            "pageHeader",
+            "repeatingRecord",
+            "groupHeader",
+            "groupFooter",
+            "reportFooter",
+            "decoration"
+          ]
+        },
+        "frame": {
+          "enum": [
+            "nominalPage",
+            "blockLocal"
+          ]
+        },
+        "sourceRefs": {
+          "type": "array",
+          "items": {
+            "$ref": "common.schema.json#/$defs/source"
+          },
+          "minItems": 0
+        },
+        "nominalAdvancePt": {
+          "anyOf": [
+            {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "emptyTemplate": {
+          "type": "boolean"
+        },
+        "placement": {
+          "$ref": "common.schema.json#/$defs/locateBlock"
+        },
+        "candidateDetection": {
+          "$ref": "common.schema.json#/$defs/detectCandidates"
+        },
+        "fieldAssignment": {
+          "$ref": "common.schema.json#/$defs/assignFields"
+        },
+        "fields": {
+          "type": "array",
+          "items": {
+            "$ref": "common.schema.json#/$defs/field"
+          },
+          "minItems": 0
+        },
+        "labels": {
+          "type": "array",
+          "items": {
+            "$ref": "common.schema.json#/$defs/label"
+          },
+          "minItems": 0
+        },
+        "lines": {
+          "type": "array",
+          "items": {
+            "$ref": "common.schema.json#/$defs/line"
+          },
+          "minItems": 0
+        }
+      },
+      "required": [
+        "id",
+        "kind",
+        "frame",
+        "sourceRefs",
+        "nominalAdvancePt",
+        "emptyTemplate",
+        "placement",
+        "candidateDetection",
+        "fieldAssignment",
+        "fields",
+        "labels",
+        "lines"
+      ],
+      "additionalProperties": false
+    },
+    "variant": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "evidenceStatus": {
+          "enum": [
+            "sourceDerived",
+            "sampleVerified",
+            "unverified"
+          ]
+        },
+        "sourceRefs": {
+          "type": "array",
+          "items": {
+            "$ref": "common.schema.json#/$defs/source"
+          },
+          "minItems": 1
+        },
+        "nominalPageSizePt": {
+          "type": "array",
+          "items": {
+            "type": "number",
+            "exclusiveMinimum": 0
+          },
+          "minItems": 2,
+          "maxItems": 2
+        },
+        "anchors": {
+          "type": "array",
+          "items": {
+            "$ref": "common.schema.json#/$defs/anchor"
+          },
+          "minItems": 2
+        },
+        "calibration": {
+          "$ref": "common.schema.json#/$defs/calibration"
+        },
+        "blocks": {
+          "type": "array",
+          "items": {
+            "$ref": "common.schema.json#/$defs/block"
+          },
+          "minItems": 1
+        }
+      },
+      "required": [
+        "id",
+        "evidenceStatus",
+        "sourceRefs",
+        "nominalPageSizePt",
+        "anchors",
+        "calibration",
+        "blocks"
+      ],
+      "additionalProperties": false
+    },
+    "metadata": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "semanticName": {
+          "type": "string",
+          "minLength": 1
+        },
+        "locator": {
+          "$ref": "common.schema.json#/$defs/locator"
+        },
+        "parserRef": {
+          "type": "string",
+          "minLength": 1
+        },
+        "onAbsent": {
+          "const": "unresolved"
+        },
+        "onConflict": {
+          "const": "ambiguous"
+        },
+        "sourceRefs": {
+          "type": "array",
+          "items": {
+            "$ref": "common.schema.json#/$defs/source"
+          },
+          "minItems": 0
+        }
+      },
+      "required": [
+        "id",
+        "semanticName",
+        "locator",
+        "parserRef",
+        "onAbsent",
+        "onConflict",
+        "sourceRefs"
+      ],
+      "additionalProperties": false
+    },
+    "classification": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "enabled": {
+          "type": "boolean"
+        },
+        "evidenceStatus": {
+          "enum": [
+            "sourceDerived",
+            "sampleVerified",
+            "unverified"
+          ]
+        },
+        "sourceRefs": {
+          "type": "array",
+          "items": {
+            "$ref": "common.schema.json#/$defs/source"
+          },
+          "minItems": 0
+        },
+        "reviewNotes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 0
+        },
+        "op": {
+          "const": "classify"
+        },
+        "when": {
+          "$ref": "common.schema.json#/$defs/predicate"
+        },
+        "semanticClass": {
+          "type": "string",
+          "minLength": 1
+        },
+        "exportEligibility": {
+          "enum": [
+            "eligible",
+            "excluded",
+            "review"
+          ]
+        },
+        "aggregationMemberships": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 0
+        },
+        "level": {
+          "enum": [
+            "detail",
+            "analytic",
+            "synthetic",
+            "class",
+            "document",
+            "any"
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "enabled",
+        "evidenceStatus",
+        "sourceRefs",
+        "reviewNotes",
+        "op",
+        "when",
+        "semanticClass",
+        "exportEligibility",
+        "aggregationMemberships",
+        "level"
+      ],
+      "additionalProperties": false
+    },
+    "boundary": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "op": {
+              "enum": [
+                "sectionStart",
+                "sectionEnd",
+                "afterPreviousClosure"
+              ]
+            }
+          },
+          "required": [
+            "op"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "match"
+            },
+            "when": {
+              "$ref": "common.schema.json#/$defs/predicate"
+            }
+          },
+          "required": [
+            "op",
+            "when"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "group": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "parentRef": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "memberSelector": {
+          "$ref": "common.schema.json#/$defs/selector"
+        },
+        "startRule": {
+          "$ref": "common.schema.json#/$defs/boundary"
+        },
+        "endRule": {
+          "$ref": "common.schema.json#/$defs/boundary"
+        },
+        "keyFields": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 0
+        },
+        "crossPagePolicy": {
+          "const": "requireContinuityEvidence"
+        },
+        "partialInputPolicy": {
+          "const": "retainIncomplete"
+        },
+        "repeatedHeaderResets": {
+          "const": false
+        },
+        "inheritance": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "fieldRef": {
+                "type": "string",
+                "minLength": 1
+              },
+              "from": {
+                "const": "closingOccurrence"
+              },
+              "when": {
+                "const": "absent"
+              },
+              "onConflict": {
+                "const": "retainBothAndDiagnose"
+              }
+            },
+            "required": [
+              "fieldRef",
+              "from",
+              "when",
+              "onConflict"
+            ],
+            "additionalProperties": false
+          },
+          "minItems": 0
+        }
+      },
+      "required": [
+        "id",
+        "parentRef",
+        "memberSelector",
+        "startRule",
+        "endRule",
+        "keyFields",
+        "crossPagePolicy",
+        "partialInputPolicy",
+        "repeatedHeaderResets",
+        "inheritance"
+      ],
+      "additionalProperties": false
+    },
+    "completeness": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "enabled": {
+              "type": "boolean"
+            },
+            "evidenceStatus": {
+              "enum": [
+                "sourceDerived",
+                "sampleVerified",
+                "unverified"
+              ]
+            },
+            "sourceRefs": {
+              "type": "array",
+              "items": {
+                "$ref": "common.schema.json#/$defs/source"
+              },
+              "minItems": 0
+            },
+            "reviewNotes": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              },
+              "minItems": 0
+            },
+            "op": {
+              "const": "requireFields"
+            },
+            "selector": {
+              "$ref": "common.schema.json#/$defs/selector"
+            },
+            "fieldRefs": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              },
+              "minItems": 1
+            },
+            "requiredState": {
+              "const": "present"
+            }
+          },
+          "required": [
+            "id",
+            "enabled",
+            "evidenceStatus",
+            "sourceRefs",
+            "reviewNotes",
+            "op",
+            "selector",
+            "fieldRefs",
+            "requiredState"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "enabled": {
+              "type": "boolean"
+            },
+            "evidenceStatus": {
+              "enum": [
+                "sourceDerived",
+                "sampleVerified",
+                "unverified"
+              ]
+            },
+            "sourceRefs": {
+              "type": "array",
+              "items": {
+                "$ref": "common.schema.json#/$defs/source"
+              },
+              "minItems": 0
+            },
+            "reviewNotes": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              },
+              "minItems": 0
+            },
+            "op": {
+              "const": "requireAny"
+            },
+            "selector": {
+              "$ref": "common.schema.json#/$defs/selector"
+            },
+            "fieldRefs": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              },
+              "minItems": 1
+            },
+            "requiredState": {
+              "const": "present"
+            }
+          },
+          "required": [
+            "id",
+            "enabled",
+            "evidenceStatus",
+            "sourceRefs",
+            "reviewNotes",
+            "op",
+            "selector",
+            "fieldRefs",
+            "requiredState"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "enabled": {
+              "type": "boolean"
+            },
+            "evidenceStatus": {
+              "enum": [
+                "sourceDerived",
+                "sampleVerified",
+                "unverified"
+              ]
+            },
+            "sourceRefs": {
+              "type": "array",
+              "items": {
+                "$ref": "common.schema.json#/$defs/source"
+              },
+              "minItems": 0
+            },
+            "reviewNotes": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              },
+              "minItems": 0
+            },
+            "op": {
+              "const": "accountForCandidates"
+            },
+            "onUnrecognized": {
+              "const": "preventCleanSuccess"
+            }
+          },
+          "required": [
+            "id",
+            "enabled",
+            "evidenceStatus",
+            "sourceRefs",
+            "reviewNotes",
+            "op",
+            "onUnrecognized"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "enabled": {
+              "type": "boolean"
+            },
+            "evidenceStatus": {
+              "enum": [
+                "sourceDerived",
+                "sampleVerified",
+                "unverified"
+              ]
+            },
+            "sourceRefs": {
+              "type": "array",
+              "items": {
+                "$ref": "common.schema.json#/$defs/source"
+              },
+              "minItems": 0
+            },
+            "reviewNotes": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              },
+              "minItems": 0
+            },
+            "op": {
+              "const": "accountForTokens"
+            },
+            "decorationRequiresRuleId": {
+              "const": true
+            }
+          },
+          "required": [
+            "id",
+            "enabled",
+            "evidenceStatus",
+            "sourceRefs",
+            "reviewNotes",
+            "op",
+            "decorationRequiresRuleId"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "enabled": {
+              "type": "boolean"
+            },
+            "evidenceStatus": {
+              "enum": [
+                "sourceDerived",
+                "sampleVerified",
+                "unverified"
+              ]
+            },
+            "sourceRefs": {
+              "type": "array",
+              "items": {
+                "$ref": "common.schema.json#/$defs/source"
+              },
+              "minItems": 0
+            },
+            "reviewNotes": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              },
+              "minItems": 0
+            },
+            "op": {
+              "const": "inspectCoverage"
+            },
+            "printedPageField": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "contiguousPagesProveOriginalComplete": {
+              "const": false
+            }
+          },
+          "required": [
+            "id",
+            "enabled",
+            "evidenceStatus",
+            "sourceRefs",
+            "reviewNotes",
+            "op",
+            "printedPageField",
+            "contiguousPagesProveOriginalComplete"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "enabled": {
+              "type": "boolean"
+            },
+            "evidenceStatus": {
+              "enum": [
+                "sourceDerived",
+                "sampleVerified",
+                "unverified"
+              ]
+            },
+            "sourceRefs": {
+              "type": "array",
+              "items": {
+                "$ref": "common.schema.json#/$defs/source"
+              },
+              "minItems": 0
+            },
+            "reviewNotes": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              },
+              "minItems": 0
+            },
+            "op": {
+              "const": "checkSpacing"
+            },
+            "excludeExplainedBlocks": {
+              "const": true
+            },
+            "maximumAdvanceMultiplier": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "onGap": {
+              "const": "suspectedMissingRecord"
+            }
+          },
+          "required": [
+            "id",
+            "enabled",
+            "evidenceStatus",
+            "sourceRefs",
+            "reviewNotes",
+            "op",
+            "excludeExplainedBlocks",
+            "maximumAdvanceMultiplier",
+            "onGap"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "enabled": {
+              "type": "boolean"
+            },
+            "evidenceStatus": {
+              "enum": [
+                "sourceDerived",
+                "sampleVerified",
+                "unverified"
+              ]
+            },
+            "sourceRefs": {
+              "type": "array",
+              "items": {
+                "$ref": "common.schema.json#/$defs/source"
+              },
+              "minItems": 0
+            },
+            "reviewNotes": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              },
+              "minItems": 0
+            },
+            "op": {
+              "const": "sequence"
+            },
+            "fieldRef": {
+              "type": "string",
+              "minLength": 1
+            },
+            "scope": {
+              "$ref": "common.schema.json#/$defs/scope"
+            },
+            "increment": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "onGap": {
+              "const": "diagnosticOnly"
+            }
+          },
+          "required": [
+            "id",
+            "enabled",
+            "evidenceStatus",
+            "sourceRefs",
+            "reviewNotes",
+            "op",
+            "fieldRef",
+            "scope",
+            "increment",
+            "onGap"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "calculation": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "enabled": {
+              "type": "boolean"
+            },
+            "evidenceStatus": {
+              "enum": [
+                "sourceDerived",
+                "sampleVerified",
+                "unverified"
+              ]
+            },
+            "sourceRefs": {
+              "type": "array",
+              "items": {
+                "$ref": "common.schema.json#/$defs/source"
+              },
+              "minItems": 0
+            },
+            "reviewNotes": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              },
+              "minItems": 0
+            },
+            "op": {
+              "const": "sum"
+            },
+            "scope": {
+              "$ref": "common.schema.json#/$defs/scope"
+            },
+            "memberSelector": {
+              "$ref": "common.schema.json#/$defs/selector"
+            },
+            "inputRefs": {
+              "type": "array",
+              "items": {
+                "$ref": "common.schema.json#/$defs/operand"
+              },
+              "minItems": 1
+            },
+            "prerequisites": {
+              "type": "array",
+              "items": {
+                "enum": [
+                  "resolvedClassification",
+                  "resolvedGroupMembership",
+                  "unambiguousOperands",
+                  "completeScope"
+                ]
+              },
+              "minItems": 0
+            },
+            "onMissingInput": {
+              "const": "inconclusive"
+            }
+          },
+          "required": [
+            "id",
+            "enabled",
+            "evidenceStatus",
+            "sourceRefs",
+            "reviewNotes",
+            "op",
+            "scope",
+            "memberSelector",
+            "inputRefs",
+            "prerequisites",
+            "onMissingInput"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "enabled": {
+              "type": "boolean"
+            },
+            "evidenceStatus": {
+              "enum": [
+                "sourceDerived",
+                "sampleVerified",
+                "unverified"
+              ]
+            },
+            "sourceRefs": {
+              "type": "array",
+              "items": {
+                "$ref": "common.schema.json#/$defs/source"
+              },
+              "minItems": 0
+            },
+            "reviewNotes": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              },
+              "minItems": 0
+            },
+            "op": {
+              "const": "count"
+            },
+            "scope": {
+              "$ref": "common.schema.json#/$defs/scope"
+            },
+            "memberSelector": {
+              "$ref": "common.schema.json#/$defs/selector"
+            },
+            "inputRefs": {
+              "type": "array",
+              "items": {
+                "$ref": "common.schema.json#/$defs/operand"
+              },
+              "minItems": 0,
+              "maxItems": 0
+            },
+            "prerequisites": {
+              "type": "array",
+              "items": {
+                "enum": [
+                  "resolvedClassification",
+                  "resolvedGroupMembership",
+                  "unambiguousOperands",
+                  "completeScope"
+                ]
+              },
+              "minItems": 0
+            },
+            "onMissingInput": {
+              "const": "inconclusive"
+            },
+            "mode": {
+              "enum": [
+                "occurrences",
+                "distinct"
+              ]
+            },
+            "distinctKey": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              },
+              "minItems": 0
+            }
+          },
+          "required": [
+            "id",
+            "enabled",
+            "evidenceStatus",
+            "sourceRefs",
+            "reviewNotes",
+            "op",
+            "scope",
+            "memberSelector",
+            "inputRefs",
+            "prerequisites",
+            "onMissingInput",
+            "mode",
+            "distinctKey"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "enabled": {
+              "type": "boolean"
+            },
+            "evidenceStatus": {
+              "enum": [
+                "sourceDerived",
+                "sampleVerified",
+                "unverified"
+              ]
+            },
+            "sourceRefs": {
+              "type": "array",
+              "items": {
+                "$ref": "common.schema.json#/$defs/source"
+              },
+              "minItems": 0
+            },
+            "reviewNotes": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              },
+              "minItems": 0
+            },
+            "op": {
+              "const": "add"
+            },
+            "scope": {
+              "$ref": "common.schema.json#/$defs/scope"
+            },
+            "memberSelector": {
+              "$ref": "common.schema.json#/$defs/selector"
+            },
+            "inputRefs": {
+              "type": "array",
+              "items": {
+                "$ref": "common.schema.json#/$defs/operand"
+              },
+              "minItems": 2
+            },
+            "prerequisites": {
+              "type": "array",
+              "items": {
+                "enum": [
+                  "resolvedClassification",
+                  "resolvedGroupMembership",
+                  "unambiguousOperands",
+                  "completeScope"
+                ]
+              },
+              "minItems": 0
+            },
+            "onMissingInput": {
+              "const": "inconclusive"
+            }
+          },
+          "required": [
+            "id",
+            "enabled",
+            "evidenceStatus",
+            "sourceRefs",
+            "reviewNotes",
+            "op",
+            "scope",
+            "memberSelector",
+            "inputRefs",
+            "prerequisites",
+            "onMissingInput"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "enabled": {
+              "type": "boolean"
+            },
+            "evidenceStatus": {
+              "enum": [
+                "sourceDerived",
+                "sampleVerified",
+                "unverified"
+              ]
+            },
+            "sourceRefs": {
+              "type": "array",
+              "items": {
+                "$ref": "common.schema.json#/$defs/source"
+              },
+              "minItems": 0
+            },
+            "reviewNotes": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              },
+              "minItems": 0
+            },
+            "op": {
+              "const": "subtract"
+            },
+            "scope": {
+              "$ref": "common.schema.json#/$defs/scope"
+            },
+            "memberSelector": {
+              "$ref": "common.schema.json#/$defs/selector"
+            },
+            "inputRefs": {
+              "type": "array",
+              "items": {
+                "$ref": "common.schema.json#/$defs/operand"
+              },
+              "minItems": 2,
+              "maxItems": 2
+            },
+            "prerequisites": {
+              "type": "array",
+              "items": {
+                "enum": [
+                  "resolvedClassification",
+                  "resolvedGroupMembership",
+                  "unambiguousOperands",
+                  "completeScope"
+                ]
+              },
+              "minItems": 0
+            },
+            "onMissingInput": {
+              "const": "inconclusive"
+            }
+          },
+          "required": [
+            "id",
+            "enabled",
+            "evidenceStatus",
+            "sourceRefs",
+            "reviewNotes",
+            "op",
+            "scope",
+            "memberSelector",
+            "inputRefs",
+            "prerequisites",
+            "onMissingInput"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "control": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "variantRef": {
+          "type": "string",
+          "minLength": 1
+        },
+        "blockRef": {
+          "type": "string",
+          "minLength": 1
+        },
+        "fieldRef": {
+          "type": "string",
+          "minLength": 1
+        },
+        "scope": {
+          "$ref": "common.schema.json#/$defs/scope"
+        }
+      },
+      "required": [
+        "id",
+        "variantRef",
+        "blockRef",
+        "fieldRef",
+        "scope"
+      ],
+      "additionalProperties": false
+    },
+    "validationRule": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "enabled": {
+              "type": "boolean"
+            },
+            "evidenceStatus": {
+              "enum": [
+                "sourceDerived",
+                "sampleVerified",
+                "unverified"
+              ]
+            },
+            "sourceRefs": {
+              "type": "array",
+              "items": {
+                "$ref": "common.schema.json#/$defs/source"
+              },
+              "minItems": 0
+            },
+            "reviewNotes": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              },
+              "minItems": 0
+            },
+            "op": {
+              "const": "compare"
+            },
+            "scope": {
+              "$ref": "common.schema.json#/$defs/scope"
+            },
+            "calculatedRef": {
+              "type": "string",
+              "minLength": 1
+            },
+            "printedControlRef": {
+              "type": "string",
+              "minLength": 1
+            },
+            "absoluteTolerance": {
+              "type": "string",
+              "pattern": "^[0-9]+(\\.[0-9]+)?$"
+            },
+            "coverageRequirement": {
+              "enum": [
+                "completeScope",
+                "completeDocument"
+              ]
+            },
+            "onMissingInput": {
+              "const": "inconclusive"
+            },
+            "onPartialCoverage": {
+              "const": "notEvaluated"
+            }
+          },
+          "required": [
+            "id",
+            "enabled",
+            "evidenceStatus",
+            "sourceRefs",
+            "reviewNotes",
+            "op",
+            "scope",
+            "calculatedRef",
+            "printedControlRef",
+            "absoluteTolerance",
+            "coverageRequirement",
+            "onMissingInput",
+            "onPartialCoverage"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "enabled": {
+              "type": "boolean"
+            },
+            "evidenceStatus": {
+              "enum": [
+                "sourceDerived",
+                "sampleVerified",
+                "unverified"
+              ]
+            },
+            "sourceRefs": {
+              "type": "array",
+              "items": {
+                "$ref": "common.schema.json#/$defs/source"
+              },
+              "minItems": 0
+            },
+            "reviewNotes": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              },
+              "minItems": 0
+            },
+            "op": {
+              "const": "dateRange"
+            },
+            "scope": {
+              "$ref": "common.schema.json#/$defs/scope"
+            },
+            "memberSelector": {
+              "$ref": "common.schema.json#/$defs/selector"
+            },
+            "fieldRef": {
+              "type": "string",
+              "minLength": 1
+            },
+            "startMetadataRef": {
+              "type": "string",
+              "minLength": 1
+            },
+            "endMetadataRef": {
+              "type": "string",
+              "minLength": 1
+            },
+            "onMissingInput": {
+              "const": "notEvaluated"
+            }
+          },
+          "required": [
+            "id",
+            "enabled",
+            "evidenceStatus",
+            "sourceRefs",
+            "reviewNotes",
+            "op",
+            "scope",
+            "memberSelector",
+            "fieldRef",
+            "startMetadataRef",
+            "endMetadataRef",
+            "onMissingInput"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "enabled": {
+              "type": "boolean"
+            },
+            "evidenceStatus": {
+              "enum": [
+                "sourceDerived",
+                "sampleVerified",
+                "unverified"
+              ]
+            },
+            "sourceRefs": {
+              "type": "array",
+              "items": {
+                "$ref": "common.schema.json#/$defs/source"
+              },
+              "minItems": 0
+            },
+            "reviewNotes": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              },
+              "minItems": 0
+            },
+            "op": {
+              "const": "periodCodeRange"
+            },
+            "scope": {
+              "$ref": "common.schema.json#/$defs/scope"
+            },
+            "fieldRef": {
+              "type": "string",
+              "minLength": 1
+            },
+            "minimumCode": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "maximumCode": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "onUnknown": {
+              "const": "retainWithDiagnostic"
+            }
+          },
+          "required": [
+            "id",
+            "enabled",
+            "evidenceStatus",
+            "sourceRefs",
+            "reviewNotes",
+            "op",
+            "scope",
+            "fieldRef",
+            "minimumCode",
+            "maximumCode",
+            "onUnknown"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "enabled": {
+              "type": "boolean"
+            },
+            "evidenceStatus": {
+              "enum": [
+                "sourceDerived",
+                "sampleVerified",
+                "unverified"
+              ]
+            },
+            "sourceRefs": {
+              "type": "array",
+              "items": {
+                "$ref": "common.schema.json#/$defs/source"
+              },
+              "minItems": 0
+            },
+            "reviewNotes": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              },
+              "minItems": 0
+            },
+            "op": {
+              "const": "compare"
+            },
+            "scope": {
+              "$ref": "common.schema.json#/$defs/scope"
+            },
+            "calculatedRef": {
+              "type": "string",
+              "minLength": 1
+            },
+            "otherCalculatedRef": {
+              "type": "string",
+              "minLength": 1
+            },
+            "absoluteTolerance": {
+              "type": "string",
+              "pattern": "^[0-9]+(\\.[0-9]+)?$"
+            },
+            "coverageRequirement": {
+              "enum": [
+                "completeScope",
+                "completeDocument"
+              ]
+            },
+            "onMissingInput": {
+              "const": "inconclusive"
+            },
+            "onPartialCoverage": {
+              "const": "notEvaluated"
+            }
+          },
+          "required": [
+            "id",
+            "enabled",
+            "evidenceStatus",
+            "sourceRefs",
+            "reviewNotes",
+            "op",
+            "scope",
+            "calculatedRef",
+            "otherCalculatedRef",
+            "absoluteTolerance",
+            "coverageRequirement",
+            "onMissingInput",
+            "onPartialCoverage"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "parser": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "enabled": {
+              "type": "boolean"
+            },
+            "evidenceStatus": {
+              "enum": [
+                "sourceDerived",
+                "sampleVerified",
+                "unverified"
+              ]
+            },
+            "sourceRefs": {
+              "type": "array",
+              "items": {
+                "$ref": "common.schema.json#/$defs/source"
+              },
+              "minItems": 0
+            },
+            "reviewNotes": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              },
+              "minItems": 0
+            },
+            "op": {
+              "const": "text"
+            },
+            "trim": {
+              "type": "boolean"
+            },
+            "normalizeNbsp": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "id",
+            "enabled",
+            "evidenceStatus",
+            "sourceRefs",
+            "reviewNotes",
+            "op",
+            "trim",
+            "normalizeNbsp"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "enabled": {
+              "type": "boolean"
+            },
+            "evidenceStatus": {
+              "enum": [
+                "sourceDerived",
+                "sampleVerified",
+                "unverified"
+              ]
+            },
+            "sourceRefs": {
+              "type": "array",
+              "items": {
+                "$ref": "common.schema.json#/$defs/source"
+              },
+              "minItems": 0
+            },
+            "reviewNotes": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              },
+              "minItems": 0
+            },
+            "op": {
+              "const": "identifier"
+            },
+            "trimOuterWhitespace": {
+              "type": "boolean"
+            },
+            "unicodeNormalization": {
+              "const": "NFC"
+            },
+            "preserveLeadingZeros": {
+              "const": true
+            },
+            "preserveInternalSpaces": {
+              "const": true
+            },
+            "allowLettersAndDiacritics": {
+              "const": true
+            }
+          },
+          "required": [
+            "id",
+            "enabled",
+            "evidenceStatus",
+            "sourceRefs",
+            "reviewNotes",
+            "op",
+            "trimOuterWhitespace",
+            "unicodeNormalization",
+            "preserveLeadingZeros",
+            "preserveInternalSpaces",
+            "allowLettersAndDiacritics"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "enabled": {
+              "type": "boolean"
+            },
+            "evidenceStatus": {
+              "enum": [
+                "sourceDerived",
+                "sampleVerified",
+                "unverified"
+              ]
+            },
+            "sourceRefs": {
+              "type": "array",
+              "items": {
+                "$ref": "common.schema.json#/$defs/source"
+              },
+              "minItems": 0
+            },
+            "reviewNotes": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              },
+              "minItems": 0
+            },
+            "op": {
+              "const": "integer"
+            },
+            "allowGrouping": {
+              "type": "boolean"
+            },
+            "allowTrailingDot": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "id",
+            "enabled",
+            "evidenceStatus",
+            "sourceRefs",
+            "reviewNotes",
+            "op",
+            "allowGrouping",
+            "allowTrailingDot"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "enabled": {
+              "type": "boolean"
+            },
+            "evidenceStatus": {
+              "enum": [
+                "sourceDerived",
+                "sampleVerified",
+                "unverified"
+              ]
+            },
+            "sourceRefs": {
+              "type": "array",
+              "items": {
+                "$ref": "common.schema.json#/$defs/source"
+              },
+              "minItems": 0
+            },
+            "reviewNotes": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              },
+              "minItems": 0
+            },
+            "op": {
+              "const": "exactDate"
+            },
+            "formats": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              },
+              "minItems": 1
+            },
+            "twoDigitYear": {
+              "const": "uniqueExplicitContextOrAmbiguous"
+            },
+            "repairInvalidDate": {
+              "const": false
+            }
+          },
+          "required": [
+            "id",
+            "enabled",
+            "evidenceStatus",
+            "sourceRefs",
+            "reviewNotes",
+            "op",
+            "formats",
+            "twoDigitYear",
+            "repairInvalidDate"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "enabled": {
+              "type": "boolean"
+            },
+            "evidenceStatus": {
+              "enum": [
+                "sourceDerived",
+                "sampleVerified",
+                "unverified"
+              ]
+            },
+            "sourceRefs": {
+              "type": "array",
+              "items": {
+                "$ref": "common.schema.json#/$defs/source"
+              },
+              "minItems": 0
+            },
+            "reviewNotes": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              },
+              "minItems": 0
+            },
+            "op": {
+              "const": "exactTime"
+            },
+            "formats": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              },
+              "minItems": 1
+            }
+          },
+          "required": [
+            "id",
+            "enabled",
+            "evidenceStatus",
+            "sourceRefs",
+            "reviewNotes",
+            "op",
+            "formats"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "enabled": {
+              "type": "boolean"
+            },
+            "evidenceStatus": {
+              "enum": [
+                "sourceDerived",
+                "sampleVerified",
+                "unverified"
+              ]
+            },
+            "sourceRefs": {
+              "type": "array",
+              "items": {
+                "$ref": "common.schema.json#/$defs/source"
+              },
+              "minItems": 0
+            },
+            "reviewNotes": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              },
+              "minItems": 0
+            },
+            "op": {
+              "const": "accountingPeriod"
+            },
+            "pattern": {
+              "type": "string",
+              "minLength": 1
+            },
+            "codeGroup": {
+              "type": "string",
+              "minLength": 1
+            },
+            "yearGroup": {
+              "type": "string",
+              "minLength": 1
+            },
+            "observedCodes": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              },
+              "minItems": 0
+            },
+            "unknownCode": {
+              "const": "retainWithDiagnostic"
+            },
+            "calendarDateConversion": {
+              "const": false
+            }
+          },
+          "required": [
+            "id",
+            "enabled",
+            "evidenceStatus",
+            "sourceRefs",
+            "reviewNotes",
+            "op",
+            "pattern",
+            "codeGroup",
+            "yearGroup",
+            "observedCodes",
+            "unknownCode",
+            "calendarDateConversion"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "enabled": {
+              "type": "boolean"
+            },
+            "evidenceStatus": {
+              "enum": [
+                "sourceDerived",
+                "sampleVerified",
+                "unverified"
+              ]
+            },
+            "sourceRefs": {
+              "type": "array",
+              "items": {
+                "$ref": "common.schema.json#/$defs/source"
+              },
+              "minItems": 0
+            },
+            "reviewNotes": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              },
+              "minItems": 0
+            },
+            "op": {
+              "const": "decimal"
+            },
+            "formats": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "decimalSeparator": {
+                    "enum": [
+                      ",",
+                      "."
+                    ]
+                  },
+                  "groupingSeparators": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "minItems": 0
+                  },
+                  "wholeAmountSuffix": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "decimalSeparator",
+                  "groupingSeparators",
+                  "wholeAmountSuffix"
+                ],
+                "additionalProperties": false
+              },
+              "minItems": 1
+            },
+            "groupingSize": {
+              "const": 3
+            },
+            "oneGroupingConventionPerValue": {
+              "const": true
+            },
+            "allowLeadingSign": {
+              "type": "boolean"
+            },
+            "allowSpaceAfterSign": {
+              "type": "boolean"
+            },
+            "fractionDigits": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "blankState": {
+              "const": "blank"
+            },
+            "distinctSuccessfulValues": {
+              "const": "ambiguous"
+            }
+          },
+          "required": [
+            "id",
+            "enabled",
+            "evidenceStatus",
+            "sourceRefs",
+            "reviewNotes",
+            "op",
+            "formats",
+            "groupingSize",
+            "oneGroupingConventionPerValue",
+            "allowLeadingSign",
+            "allowSpaceAfterSign",
+            "fractionDigits",
+            "blankState",
+            "distinctSuccessfulValues"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "metadataDerivation": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "enabled": {
+          "type": "boolean"
+        },
+        "evidenceStatus": {
+          "enum": [
+            "sourceDerived",
+            "sampleVerified",
+            "unverified"
+          ]
+        },
+        "sourceRefs": {
+          "type": "array",
+          "items": {
+            "$ref": "common.schema.json#/$defs/source"
+          },
+          "minItems": 0
+        },
+        "reviewNotes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 0
+        },
+        "op": {
+          "const": "deriveFiscalYear"
+        },
+        "inputMetadataNames": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 2,
+          "maxItems": 2
+        },
+        "outputMetadataName": {
+          "const": "fiscalYear"
+        },
+        "onDifferentYears": {
+          "const": "unresolved"
+        },
+        "onMissingInput": {
+          "const": "unresolved"
+        },
+        "origin": {
+          "const": "derived"
+        }
+      },
+      "required": [
+        "id",
+        "enabled",
+        "evidenceStatus",
+        "sourceRefs",
+        "reviewNotes",
+        "op",
+        "inputMetadataNames",
+        "outputMetadataName",
+        "onDifferentYears",
+        "onMissingInput",
+        "origin"
+      ],
+      "additionalProperties": false
+    },
+    "signal": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "enabled": {
+              "type": "boolean"
+            },
+            "evidenceStatus": {
+              "enum": [
+                "sourceDerived",
+                "sampleVerified",
+                "unverified"
+              ]
+            },
+            "sourceRefs": {
+              "type": "array",
+              "items": {
+                "$ref": "common.schema.json#/$defs/source"
+              },
+              "minItems": 0
+            },
+            "reviewNotes": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              },
+              "minItems": 0
+            },
+            "op": {
+              "const": "textMatch"
+            },
+            "locator": {
+              "$ref": "common.schema.json#/$defs/locator"
+            },
+            "target": {
+              "enum": [
+                "category",
+                "producer",
+                "layout"
+              ]
+            },
+            "candidate": {
+              "type": "string",
+              "minLength": 1
+            },
+            "weight": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "evidenceGroup": {
+              "type": "string",
+              "minLength": 1
+            },
+            "polarity": {
+              "enum": [
+                "support",
+                "contradiction"
+              ]
+            },
+            "missing": {
+              "const": "neutral"
+            },
+            "match": {
+              "$ref": "common.schema.json#/$defs/textMatch"
+            }
+          },
+          "required": [
+            "id",
+            "enabled",
+            "evidenceStatus",
+            "sourceRefs",
+            "reviewNotes",
+            "op",
+            "locator",
+            "target",
+            "candidate",
+            "weight",
+            "evidenceGroup",
+            "polarity",
+            "missing",
+            "match"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "enabled": {
+              "type": "boolean"
+            },
+            "evidenceStatus": {
+              "enum": [
+                "sourceDerived",
+                "sampleVerified",
+                "unverified"
+              ]
+            },
+            "sourceRefs": {
+              "type": "array",
+              "items": {
+                "$ref": "common.schema.json#/$defs/source"
+              },
+              "minItems": 0
+            },
+            "reviewNotes": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              },
+              "minItems": 0
+            },
+            "op": {
+              "const": "markerMatch"
+            },
+            "locator": {
+              "$ref": "common.schema.json#/$defs/locator"
+            },
+            "target": {
+              "enum": [
+                "category",
+                "producer",
+                "layout"
+              ]
+            },
+            "candidate": {
+              "type": "string",
+              "minLength": 1
+            },
+            "weight": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "evidenceGroup": {
+              "type": "string",
+              "minLength": 1
+            },
+            "polarity": {
+              "enum": [
+                "support",
+                "contradiction"
+              ]
+            },
+            "missing": {
+              "const": "neutral"
+            },
+            "match": {
+              "$ref": "common.schema.json#/$defs/textMatch"
+            }
+          },
+          "required": [
+            "id",
+            "enabled",
+            "evidenceStatus",
+            "sourceRefs",
+            "reviewNotes",
+            "op",
+            "locator",
+            "target",
+            "candidate",
+            "weight",
+            "evidenceGroup",
+            "polarity",
+            "missing",
+            "match"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "enabled": {
+              "type": "boolean"
+            },
+            "evidenceStatus": {
+              "enum": [
+                "sourceDerived",
+                "sampleVerified",
+                "unverified"
+              ]
+            },
+            "sourceRefs": {
+              "type": "array",
+              "items": {
+                "$ref": "common.schema.json#/$defs/source"
+              },
+              "minItems": 0
+            },
+            "reviewNotes": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              },
+              "minItems": 0
+            },
+            "op": {
+              "const": "orderedLabels"
+            },
+            "locator": {
+              "$ref": "common.schema.json#/$defs/locator"
+            },
+            "target": {
+              "enum": [
+                "category",
+                "producer",
+                "layout"
+              ]
+            },
+            "candidate": {
+              "type": "string",
+              "minLength": 1
+            },
+            "weight": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "evidenceGroup": {
+              "type": "string",
+              "minLength": 1
+            },
+            "polarity": {
+              "enum": [
+                "support",
+                "contradiction"
+              ]
+            },
+            "missing": {
+              "const": "neutral"
+            },
+            "labels": {
+              "type": "array",
+              "items": {
+                "$ref": "common.schema.json#/$defs/textMatch"
+              },
+              "minItems": 2
+            },
+            "axis": {
+              "enum": [
+                "x",
+                "y"
+              ]
+            },
+            "maximumOrthogonalGapPt": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            }
+          },
+          "required": [
+            "id",
+            "enabled",
+            "evidenceStatus",
+            "sourceRefs",
+            "reviewNotes",
+            "op",
+            "locator",
+            "target",
+            "candidate",
+            "weight",
+            "evidenceGroup",
+            "polarity",
+            "missing",
+            "labels",
+            "axis",
+            "maximumOrthogonalGapPt"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "enabled": {
+              "type": "boolean"
+            },
+            "evidenceStatus": {
+              "enum": [
+                "sourceDerived",
+                "sampleVerified",
+                "unverified"
+              ]
+            },
+            "sourceRefs": {
+              "type": "array",
+              "items": {
+                "$ref": "common.schema.json#/$defs/source"
+              },
+              "minItems": 0
+            },
+            "reviewNotes": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              },
+              "minItems": 0
+            },
+            "op": {
+              "const": "relativePositions"
+            },
+            "locator": {
+              "$ref": "common.schema.json#/$defs/locator"
+            },
+            "target": {
+              "enum": [
+                "category",
+                "producer",
+                "layout"
+              ]
+            },
+            "candidate": {
+              "type": "string",
+              "minLength": 1
+            },
+            "weight": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "evidenceGroup": {
+              "type": "string",
+              "minLength": 1
+            },
+            "polarity": {
+              "enum": [
+                "support",
+                "contradiction"
+              ]
+            },
+            "missing": {
+              "const": "neutral"
+            },
+            "pairs": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "first": {
+                    "$ref": "common.schema.json#/$defs/textMatch"
+                  },
+                  "second": {
+                    "$ref": "common.schema.json#/$defs/textMatch"
+                  },
+                  "deltaPt": {
+                    "$ref": "common.schema.json#/$defs/point"
+                  },
+                  "tolerancePt": {
+                    "type": "number",
+                    "exclusiveMinimum": 0
+                  }
+                },
+                "required": [
+                  "first",
+                  "second",
+                  "deltaPt",
+                  "tolerancePt"
+                ],
+                "additionalProperties": false
+              },
+              "minItems": 1
+            }
+          },
+          "required": [
+            "id",
+            "enabled",
+            "evidenceStatus",
+            "sourceRefs",
+            "reviewNotes",
+            "op",
+            "locator",
+            "target",
+            "candidate",
+            "weight",
+            "evidenceGroup",
+            "polarity",
+            "missing",
+            "pairs"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "enabled": {
+              "type": "boolean"
+            },
+            "evidenceStatus": {
+              "enum": [
+                "sourceDerived",
+                "sampleVerified",
+                "unverified"
+              ]
+            },
+            "sourceRefs": {
+              "type": "array",
+              "items": {
+                "$ref": "common.schema.json#/$defs/source"
+              },
+              "minItems": 0
+            },
+            "reviewNotes": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              },
+              "minItems": 0
+            },
+            "op": {
+              "const": "geometryFit"
+            },
+            "locator": {
+              "$ref": "common.schema.json#/$defs/locator"
+            },
+            "target": {
+              "enum": [
+                "category",
+                "producer",
+                "layout"
+              ]
+            },
+            "candidate": {
+              "type": "string",
+              "minLength": 1
+            },
+            "weight": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "evidenceGroup": {
+              "type": "string",
+              "minLength": 1
+            },
+            "polarity": {
+              "enum": [
+                "support",
+                "contradiction"
+              ]
+            },
+            "missing": {
+              "const": "neutral"
+            },
+            "layoutRef": {
+              "$ref": "common.schema.json#/$defs/reference"
+            },
+            "variantRefs": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              },
+              "minItems": 1
+            }
+          },
+          "required": [
+            "id",
+            "enabled",
+            "evidenceStatus",
+            "sourceRefs",
+            "reviewNotes",
+            "op",
+            "locator",
+            "target",
+            "candidate",
+            "weight",
+            "evidenceGroup",
+            "polarity",
+            "missing",
+            "layoutRef",
+            "variantRefs"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "decision": {
+      "type": "object",
+      "properties": {
+        "target": {
+          "enum": [
+            "category",
+            "producer",
+            "layout"
+          ]
+        },
+        "candidate": {
+          "type": "string",
+          "minLength": 1
+        },
+        "minimumScore": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "minimumLead": {
+          "type": "number",
+          "minimum": 0
+        },
+        "requiredSignals": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 0
+        },
+        "vetoSignals": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 0
+        },
+        "requiredDecisions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "target": {
+                "enum": [
+                  "category",
+                  "producer"
+                ]
+              },
+              "candidate": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "required": [
+              "target",
+              "candidate"
+            ],
+            "additionalProperties": false
+          },
+          "minItems": 0
+        }
+      },
+      "required": [
+        "target",
+        "candidate",
+        "minimumScore",
+        "minimumLead",
+        "requiredSignals",
+        "vetoSignals",
+        "requiredDecisions"
+      ],
+      "additionalProperties": false
+    },
+    "diagnostic": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "string",
+          "minLength": 1
+        },
+        "severity": {
+          "enum": [
+            "info",
+            "warning",
+            "error"
+          ]
+        },
+        "message": {
+          "type": "string",
+          "minLength": 1
+        },
+        "evidenceRefs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 0
+        },
+        "ruleIds": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 0
+        }
+      },
+      "required": [
+        "code",
+        "severity",
+        "message",
+        "evidenceRefs",
+        "ruleIds"
+      ],
+      "additionalProperties": false
+    },
+    "coverage": {
+      "type": "object",
+      "properties": {
+        "inspectedPages": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "minItems": 0
+        },
+        "availablePageCount": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "originalInputCompleteness": {
+          "enum": [
+            "established",
+            "partial",
+            "unknown"
+          ]
+        },
+        "unresolvedCandidateCount": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "orphanTokenCount": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "inspectedPages",
+        "availablePageCount",
+        "originalInputCompleteness",
+        "unresolvedCandidateCount",
+        "orphanTokenCount"
+      ],
+      "additionalProperties": false
+    },
+    "value": {
+      "type": "object",
+      "properties": {
+        "state": {
+          "enum": [
+            "present",
+            "blank",
+            "unresolved",
+            "invalid",
+            "ambiguous"
+          ]
+        },
+        "value": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "origin": {
+          "anyOf": [
+            {
+              "enum": [
+                "printed",
+                "derived",
+                "inherited"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "rawText": {
+          "type": "string"
+        },
+        "evidenceRefs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 0
+        },
+        "alternatives": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 0
+        },
+        "derivationInputs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 0
+        }
+      },
+      "required": [
+        "state",
+        "value",
+        "origin",
+        "rawText",
+        "evidenceRefs",
+        "alternatives",
+        "derivationInputs"
+      ],
+      "additionalProperties": false
+    },
+    "record": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "variantRef": {
+          "type": "string",
+          "minLength": 1
+        },
+        "blockRef": {
+          "type": "string",
+          "minLength": 1
+        },
+        "semanticClass": {
+          "type": "string",
+          "minLength": 1
+        },
+        "exportEligibility": {
+          "enum": [
+            "eligible",
+            "excluded",
+            "review"
+          ]
+        },
+        "aggregationMemberships": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 0
+        },
+        "fields": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "common.schema.json#/$defs/value"
+          }
+        },
+        "evidenceRefs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 0
+        }
+      },
+      "required": [
+        "id",
+        "variantRef",
+        "blockRef",
+        "semanticClass",
+        "exportEligibility",
+        "aggregationMemberships",
+        "fields",
+        "evidenceRefs"
+      ],
+      "additionalProperties": false
+    },
+    "evidence": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "physicalPageIndex": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "sourcePageId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "sourceElementRefs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 0
+        },
+        "rawText": {
+          "type": "string"
+        },
+        "rawGeometry": {
+          "type": "array",
+          "items": {
+            "$ref": "common.schema.json#/$defs/rect"
+          },
+          "minItems": 0
+        },
+        "normalizedGeometry": {
+          "type": "array",
+          "items": {
+            "$ref": "common.schema.json#/$defs/rect"
+          },
+          "minItems": 0
+        },
+        "transformRefs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 0
+        },
+        "ruleIds": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 0
+        },
+        "blockOccurrenceId": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "inheritedFrom": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 0
+        }
+      },
+      "required": [
+        "id",
+        "physicalPageIndex",
+        "sourcePageId",
+        "sourceElementRefs",
+        "rawText",
+        "rawGeometry",
+        "normalizedGeometry",
+        "transformRefs",
+        "ruleIds",
+        "blockOccurrenceId",
+        "inheritedFrom"
+      ],
+      "additionalProperties": false
+    }
+  }
+}

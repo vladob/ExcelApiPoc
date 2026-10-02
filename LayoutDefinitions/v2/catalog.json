@@ -1,0 +1,424 @@
+{
+  "$schema": "schemas/catalog.schema.json",
+  "schemaVersion": 2,
+  "definitionVersion": "2.0.0-draft.4",
+  "id": "ifosoft.catalog",
+  "kind": "catalog",
+  "status": "reviewDraft",
+  "productionApproved": false,
+  "requiresCapabilities": [
+    "positioned.v2"
+  ],
+  "sourceRefs": [],
+  "reviewNotes": [],
+  "definitions": [
+    {
+      "ref": {
+        "id": "ifosoft.account-movements-obr-ucet",
+        "version": "2.0.0-draft.4"
+      },
+      "kind": "layout",
+      "path": "layouts/account-movements-obr-ucet.json",
+      "sha256": "cbdd41cd193e7d2813e0fc1c7d9aed585b45cc24b09530d737f9f13bbbbe4313"
+    },
+    {
+      "ref": {
+        "id": "ifosoft.account-plan-uctrozvrh",
+        "version": "2.0.0-draft.4"
+      },
+      "kind": "layout",
+      "path": "layouts/account-plan-uctrozvrh.json",
+      "sha256": "e87381ca1c9c26ea7e7a022ab7557e63df89d2655a74b1b6642fd4cf8a1a086e"
+    },
+    {
+      "ref": {
+        "id": "ifosoft.general-ledger-hlknia4-legacy",
+        "version": "2.0.0-draft.4"
+      },
+      "kind": "layout",
+      "path": "layouts/general-ledger-hlknia4-legacy.json",
+      "sha256": "558b519ef8f16d3b74f7a613172a848b21d111732c19f9ec6a563b0aa4251ccc"
+    },
+    {
+      "ref": {
+        "id": "ifosoft.general-ledger-hlknia4",
+        "version": "2.0.0-draft.4"
+      },
+      "kind": "layout",
+      "path": "layouts/general-ledger-hlknia4.json",
+      "sha256": "0140c4eeaf93e4610f824f92105203ab8127564bba6e19f2daa99385fa9fc73b"
+    },
+    {
+      "ref": {
+        "id": "ifosoft.general-ledger-hlknia4b",
+        "version": "2.0.0-draft.4"
+      },
+      "kind": "layout",
+      "path": "layouts/general-ledger-hlknia4b.json",
+      "sha256": "866409b22e27f101ffac8b06359e6b9fd1b5a47139362af09ca84e6a4883e29e"
+    },
+    {
+      "ref": {
+        "id": "ifosoft.general-ledger-hlknia4c",
+        "version": "2.0.0-draft.4"
+      },
+      "kind": "layout",
+      "path": "layouts/general-ledger-hlknia4c.json",
+      "sha256": "c888237ed143c14882d7a3ffb7b7b931be3fdb18ebcf06d8d7c7c13c8a109a06"
+    },
+    {
+      "ref": {
+        "id": "ifosoft.general-ledger-hlknia4d",
+        "version": "2.0.0-draft.4"
+      },
+      "kind": "layout",
+      "path": "layouts/general-ledger-hlknia4d.json",
+      "sha256": "b4489cca011266dd3caca90ed1c3c409686754454651cee32a2d45b471763105"
+    },
+    {
+      "ref": {
+        "id": "ifosoft.general-ledger-predvas3",
+        "version": "2.0.0-draft.4"
+      },
+      "kind": "layout",
+      "path": "layouts/general-ledger-predvas3.json",
+      "sha256": "a673d16ca56fd52482472727c138b30eb923f3a8a4024760b056a0f34a97ed24"
+    },
+    {
+      "ref": {
+        "id": "ifosoft.journal-dennik-simplified",
+        "version": "2.0.0-draft.4"
+      },
+      "kind": "layout",
+      "path": "layouts/journal-dennik-simplified.json",
+      "sha256": "b4fddd9309f929b7d39c311bb240705223b75b0d8ac63ebbaf6b1fd3a694d6b3"
+    },
+    {
+      "ref": {
+        "id": "ifosoft.journal-dennik",
+        "version": "2.0.0-draft.4"
+      },
+      "kind": "layout",
+      "path": "layouts/journal-dennik.json",
+      "sha256": "a5654d8565641ce24358d4ac127c5e7ff3e34e9c710528fc4af489dc3fad8684"
+    },
+    {
+      "ref": {
+        "id": "ifosoft.journal-dennik1",
+        "version": "2.0.0-draft.4"
+      },
+      "kind": "layout",
+      "path": "layouts/journal-dennik1.json",
+      "sha256": "216cf8285924fd50c7065735b7afd3c06ce704a0156534cef74800f2d9af45c8"
+    },
+    {
+      "ref": {
+        "id": "ifosoft.identify.dennik",
+        "version": "2.0.0-draft.4"
+      },
+      "kind": "identification",
+      "path": "identification/dennik.json",
+      "sha256": "f8ac3d634fba09f77aecd31917ced5c030798d281effe69f993c79c9dda4e0df"
+    },
+    {
+      "ref": {
+        "id": "ifosoft.identify.dennik1",
+        "version": "2.0.0-draft.4"
+      },
+      "kind": "identification",
+      "path": "identification/dennik1.json",
+      "sha256": "17a00caed99336c420aa83a523e358921deb3e729bef8b7d6fda7c9e69e120d8"
+    },
+    {
+      "ref": {
+        "id": "ifosoft.identify.hlknia4",
+        "version": "2.0.0-draft.4"
+      },
+      "kind": "identification",
+      "path": "identification/hlknia4.json",
+      "sha256": "74cade5f55c990f0984594b85efe407ace5e85822ce457315077a4364876d211"
+    },
+    {
+      "ref": {
+        "id": "ifosoft.identify.hlknia4b",
+        "version": "2.0.0-draft.4"
+      },
+      "kind": "identification",
+      "path": "identification/hlknia4b.json",
+      "sha256": "307d3f36ffbd2df5035399d15af5cf750a1b2e1b38cddc6468091db86060ffa5"
+    },
+    {
+      "ref": {
+        "id": "ifosoft.identify.hlknia4c",
+        "version": "2.0.0-draft.4"
+      },
+      "kind": "identification",
+      "path": "identification/hlknia4c.json",
+      "sha256": "3867fca74d7893cf9289d9b572615374b973987bf459cc55439296b45f325650"
+    },
+    {
+      "ref": {
+        "id": "ifosoft.identify.hlknia4d",
+        "version": "2.0.0-draft.4"
+      },
+      "kind": "identification",
+      "path": "identification/hlknia4d.json",
+      "sha256": "f4e207bae871e1f687e72fbfdc957a62e00c485c3b1254aa64daab333b7b84cd"
+    },
+    {
+      "ref": {
+        "id": "ifosoft.identify.obr_ucet",
+        "version": "2.0.0-draft.4"
+      },
+      "kind": "identification",
+      "path": "identification/obr_ucet.json",
+      "sha256": "b8391e49cdbc358f2269230f5d76f52560637a1f6cd2e781875d1077bee36204"
+    },
+    {
+      "ref": {
+        "id": "ifosoft.identify.predvas3",
+        "version": "2.0.0-draft.4"
+      },
+      "kind": "identification",
+      "path": "identification/predvas3.json",
+      "sha256": "6a832fc96c1a4ae657cf221660a46ded786ef8619eefbf00453c4af67a5d18eb"
+    },
+    {
+      "ref": {
+        "id": "ifosoft.identify.uctrozvrh",
+        "version": "2.0.0-draft.4"
+      },
+      "kind": "identification",
+      "path": "identification/uctrozvrh.json",
+      "sha256": "9871cb0124d14efa792b4c3d957508a367b16b04b1935cededea81f4c7eeb429"
+    },
+    {
+      "ref": {
+        "id": "ifosoft.model.account-movements-obr-ucet",
+        "version": "2.0.0-draft.4"
+      },
+      "kind": "model",
+      "path": "models/account-movements-obr-ucet.json",
+      "sha256": "6c23501ecd93a713dbf47298b156d9faa324381f9b965ca2db3b8521adf320df"
+    },
+    {
+      "ref": {
+        "id": "ifosoft.model.account-plan-uctrozvrh",
+        "version": "2.0.0-draft.4"
+      },
+      "kind": "model",
+      "path": "models/account-plan-uctrozvrh.json",
+      "sha256": "f8a32a50d283c9d8c336757f1dab701e169de63b26676f23756b03e9f9beefce"
+    },
+    {
+      "ref": {
+        "id": "ifosoft.model.general-ledger-hlknia4-legacy",
+        "version": "2.0.0-draft.4"
+      },
+      "kind": "model",
+      "path": "models/general-ledger-hlknia4-legacy.json",
+      "sha256": "d121e743e6b750b12d9817c85aa156dffa104555ee4f4a0f0534808c5e16c763"
+    },
+    {
+      "ref": {
+        "id": "ifosoft.model.general-ledger-hlknia4",
+        "version": "2.0.0-draft.4"
+      },
+      "kind": "model",
+      "path": "models/general-ledger-hlknia4.json",
+      "sha256": "24419c556857a8364227dc73c1d04c97fd5b8959dc374c32e15dc7c07aace12e"
+    },
+    {
+      "ref": {
+        "id": "ifosoft.model.general-ledger-hlknia4b",
+        "version": "2.0.0-draft.4"
+      },
+      "kind": "model",
+      "path": "models/general-ledger-hlknia4b.json",
+      "sha256": "bc20d87a82cd6fac34ceb7aa3b8df877d370c911ea8ddf19cf8f44abdad418d6"
+    },
+    {
+      "ref": {
+        "id": "ifosoft.model.general-ledger-hlknia4c",
+        "version": "2.0.0-draft.4"
+      },
+      "kind": "model",
+      "path": "models/general-ledger-hlknia4c.json",
+      "sha256": "1660ef4f43387349a79ee4af2c7ebfa92b0f1f6295f6301a89edd3ed9b880e92"
+    },
+    {
+      "ref": {
+        "id": "ifosoft.model.general-ledger-hlknia4d",
+        "version": "2.0.0-draft.4"
+      },
+      "kind": "model",
+      "path": "models/general-ledger-hlknia4d.json",
+      "sha256": "d45c191c83879207d920a320b4fb13065862672131d358e80a41d438e371a584"
+    },
+    {
+      "ref": {
+        "id": "ifosoft.model.general-ledger-predvas3",
+        "version": "2.0.0-draft.4"
+      },
+      "kind": "model",
+      "path": "models/general-ledger-predvas3.json",
+      "sha256": "e24a9ef4763e184791631109c56ef554ca908fd435dfe6ea678dba2fe6dbc9ab"
+    },
+    {
+      "ref": {
+        "id": "ifosoft.model.journal-dennik-simplified",
+        "version": "2.0.0-draft.4"
+      },
+      "kind": "model",
+      "path": "models/journal-dennik-simplified.json",
+      "sha256": "108928e1e9aaa1eb2284c2856581218b48f4eb11023937e46974ad1bdffb4871"
+    },
+    {
+      "ref": {
+        "id": "ifosoft.model.journal-dennik",
+        "version": "2.0.0-draft.4"
+      },
+      "kind": "model",
+      "path": "models/journal-dennik.json",
+      "sha256": "c46244b3ce720db2cb40ad8d8b94502e0571eb23b4404d643c971e5df27f523e"
+    },
+    {
+      "ref": {
+        "id": "ifosoft.model.journal-dennik1",
+        "version": "2.0.0-draft.4"
+      },
+      "kind": "model",
+      "path": "models/journal-dennik1.json",
+      "sha256": "c2b1c90cb9ca8c06bfda14636e368e1a5c40ec88473548e20413bf1b8a2a1322"
+    },
+    {
+      "ref": {
+        "id": "ifosoft.parsers",
+        "version": "2.0.0-draft.4"
+      },
+      "kind": "parsers",
+      "path": "parsers/ifosoft.json",
+      "sha256": "fe11d48f3b21368f53d8c1a64979eded890a0a7e8022bce5cf69475e296df542"
+    },
+    {
+      "ref": {
+        "id": "ifosoft.account-movements-obr-ucet.validation",
+        "version": "2.0.0-draft.4"
+      },
+      "kind": "validation",
+      "path": "validation/account-movements-obr-ucet.json",
+      "sha256": "8c632e3ed53c54be787e27956ca7652f6516c7775d5bc9dda4306176aad60095"
+    },
+    {
+      "ref": {
+        "id": "ifosoft.account-plan-uctrozvrh.validation",
+        "version": "2.0.0-draft.4"
+      },
+      "kind": "validation",
+      "path": "validation/account-plan-uctrozvrh.json",
+      "sha256": "56861f19fb5a1afbff9f6f7c592b9ed955f8310edc624d75fbfd523f4e15f986"
+    },
+    {
+      "ref": {
+        "id": "ifosoft.general-ledger-hlknia4-legacy.validation",
+        "version": "2.0.0-draft.4"
+      },
+      "kind": "validation",
+      "path": "validation/general-ledger-hlknia4-legacy.json",
+      "sha256": "38bba337f479f4b6812d1085f47e0f88157202fb8d67a77c147782c1b16c71e7"
+    },
+    {
+      "ref": {
+        "id": "ifosoft.general-ledger-hlknia4.validation",
+        "version": "2.0.0-draft.4"
+      },
+      "kind": "validation",
+      "path": "validation/general-ledger-hlknia4.json",
+      "sha256": "a921a9b96599a1858a3c9e23ca0b8683e1d92a3ed50f0ccdff8ecd33148ffc3f"
+    },
+    {
+      "ref": {
+        "id": "ifosoft.general-ledger-hlknia4b.validation",
+        "version": "2.0.0-draft.4"
+      },
+      "kind": "validation",
+      "path": "validation/general-ledger-hlknia4b.json",
+      "sha256": "d0c81b224441f14108b30aa64145e7a1be0556c68f9feed4fcbf4d53c7be63e7"
+    },
+    {
+      "ref": {
+        "id": "ifosoft.general-ledger-hlknia4c.validation",
+        "version": "2.0.0-draft.4"
+      },
+      "kind": "validation",
+      "path": "validation/general-ledger-hlknia4c.json",
+      "sha256": "18fe4eb241b2e50691311bf3fab7eb84ea5c18faa04aa94a7d2029926ad73b3a"
+    },
+    {
+      "ref": {
+        "id": "ifosoft.general-ledger-hlknia4d.validation",
+        "version": "2.0.0-draft.4"
+      },
+      "kind": "validation",
+      "path": "validation/general-ledger-hlknia4d.json",
+      "sha256": "e129ec7e20ac25fa3b00d8267a25d1c3e0ae4a31844439daebd756a0ef848129"
+    },
+    {
+      "ref": {
+        "id": "ifosoft.general-ledger-predvas3.validation",
+        "version": "2.0.0-draft.4"
+      },
+      "kind": "validation",
+      "path": "validation/general-ledger-predvas3.json",
+      "sha256": "a8244039aa28914f9a3c72dd6b02be8837a1c2c4047e9ef6d2b7ac815f04e58b"
+    },
+    {
+      "ref": {
+        "id": "ifosoft.journal-dennik-simplified.validation",
+        "version": "2.0.0-draft.4"
+      },
+      "kind": "validation",
+      "path": "validation/journal-dennik-simplified.json",
+      "sha256": "547b01a82427780210409b539d1b5e5063c56d38f0056e41815b0c760a8fbddf"
+    },
+    {
+      "ref": {
+        "id": "ifosoft.journal-dennik.validation",
+        "version": "2.0.0-draft.4"
+      },
+      "kind": "validation",
+      "path": "validation/journal-dennik.json",
+      "sha256": "914f786bd4635d0e56de79a7d05f6be8911f08352e3427387220a9c12173a043"
+    },
+    {
+      "ref": {
+        "id": "ifosoft.journal-dennik1.validation",
+        "version": "2.0.0-draft.4"
+      },
+      "kind": "validation",
+      "path": "validation/journal-dennik1.json",
+      "sha256": "e3279835f12dd4a50d96cdb342e02f038d18202a5eeaed3aa18111fb018ce2c5"
+    }
+  ],
+  "geometry": {
+    "unit": "pt",
+    "origin": "lowerLeft",
+    "frame": "uprightCropLocal",
+    "rectangleOrder": [
+      "left",
+      "bottom",
+      "right",
+      "top"
+    ]
+  },
+  "limits": {
+    "fileBytes": 268435456,
+    "pageCount": 10000,
+    "decompressedPackageBytes": 1073741824,
+    "regexTimeoutMs": 100,
+    "predicateDepth": 32,
+    "candidateHypotheses": 256,
+    "calibrationHypotheses": 256,
+    "executionTimeMs": 120000
+  }
+}

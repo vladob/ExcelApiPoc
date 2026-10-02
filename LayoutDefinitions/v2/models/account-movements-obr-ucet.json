@@ -1,0 +1,180 @@
+{
+  "$schema": "../schemas/model.schema.json",
+  "schemaVersion": 2,
+  "definitionVersion": "2.0.0-draft.4",
+  "id": "ifosoft.model.account-movements-obr-ucet",
+  "kind": "model",
+  "status": "reviewDraft",
+  "productionApproved": false,
+  "requiresCapabilities": [
+    "positioned.v2"
+  ],
+  "sourceRefs": [],
+  "reviewNotes": [
+    "C# domain export mapping is deferred to Step 3; source fields are preserved."
+  ],
+  "category": "unresolved",
+  "fields": [
+    {
+      "id": "printedPageNumber",
+      "type": "integer",
+      "domainTarget": null
+    },
+    {
+      "id": "licensedUserText",
+      "type": "text",
+      "domainTarget": null
+    },
+    {
+      "id": "periodStart",
+      "type": "accountingPeriod",
+      "domainTarget": null
+    },
+    {
+      "id": "periodEnd",
+      "type": "accountingPeriod",
+      "domainTarget": null
+    },
+    {
+      "id": "reportSubtitle",
+      "type": "text",
+      "domainTarget": null
+    },
+    {
+      "id": "entityName",
+      "type": "text",
+      "domainTarget": null
+    },
+    {
+      "id": "debit",
+      "type": "decimal",
+      "domainTarget": null
+    },
+    {
+      "id": "description",
+      "type": "text",
+      "domainTarget": null
+    },
+    {
+      "id": "credit",
+      "type": "decimal",
+      "domainTarget": null
+    },
+    {
+      "id": "source_STR",
+      "type": "text",
+      "domainTarget": null
+    },
+    {
+      "id": "source_ZAKC",
+      "type": "text",
+      "domainTarget": null
+    },
+    {
+      "id": "source_KP",
+      "type": "text",
+      "domainTarget": null
+    },
+    {
+      "id": "accountCode",
+      "type": "identifier",
+      "domainTarget": null
+    },
+    {
+      "id": "source_KZ",
+      "type": "text",
+      "domainTarget": null
+    },
+    {
+      "id": "source_ZAK",
+      "type": "text",
+      "domainTarget": null
+    },
+    {
+      "id": "source_PROG",
+      "type": "text",
+      "domainTarget": null
+    },
+    {
+      "id": "postingDate",
+      "type": "date",
+      "domainTarget": null
+    },
+    {
+      "id": "source_T",
+      "type": "text",
+      "domainTarget": null
+    },
+    {
+      "id": "partnerId",
+      "type": "identifier",
+      "domainTarget": null
+    },
+    {
+      "id": "partnerName",
+      "type": "text",
+      "domainTarget": null
+    },
+    {
+      "id": "invoiceNumber",
+      "type": "identifier",
+      "domainTarget": null
+    },
+    {
+      "id": "documentNumber",
+      "type": "identifier",
+      "domainTarget": null
+    },
+    {
+      "id": "documentType",
+      "type": "identifier",
+      "domainTarget": null
+    },
+    {
+      "id": "counterAccount",
+      "type": "identifier",
+      "domainTarget": null
+    },
+    {
+      "id": "net",
+      "type": "decimal",
+      "domainTarget": null
+    },
+    {
+      "id": "sequenceOrCount1",
+      "type": "integer",
+      "domainTarget": null
+    },
+    {
+      "id": "source_REV",
+      "type": "text",
+      "domainTarget": null
+    },
+    {
+      "id": "source_SP",
+      "type": "text",
+      "domainTarget": null
+    },
+    {
+      "id": "source_HMENO",
+      "type": "text",
+      "domainTarget": null
+    },
+    {
+      "id": "source_IMENO",
+      "type": "text",
+      "domainTarget": null
+    },
+    {
+      "id": "source_JMENO",
+      "type": "text",
+      "domainTarget": null
+    },
+    {
+      "id": "sequenceOrCount2",
+      "type": "integer",
+      "domainTarget": null
+    }
+  ],
+  "domainMappingStatus": "pendingReview"
+}

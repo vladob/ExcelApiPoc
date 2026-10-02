@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.excelapipoc.local/positioned/v2/manifest-row.schema.json",
+  "type": "object",
+  "properties": {
+    "FilePath": {
+      "type": "string",
+      "minLength": 1
+    },
+    "AccountingEntity": {
+      "type": "string"
+    },
+    "PerceivedCategory": {
+      "enum": [
+        "HL_KNIHA",
+        "U_DENNIK",
+        "UCT_ROZVRH"
+      ]
+    },
+    "PreviousTestResult": {
+      "type": "string"
+    },
+    "ExpectedYear": {
+      "type": "string",
+      "pattern": "^(|[0-9]{4})$"
+    }
+  },
+  "required": [
+    "FilePath",
+    "AccountingEntity",
+    "PerceivedCategory",
+    "PreviousTestResult",
+    "ExpectedYear"
+  ],
+  "additionalProperties": false
+}

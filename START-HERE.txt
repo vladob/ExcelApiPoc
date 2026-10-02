@@ -1,0 +1,14 @@
+Overwrite the included files in your ExcelApiPoc repository.
+Then run from the repository root:
+
+python LayoutDefinitions/v2/tools/build_schemas.py
+python LayoutDefinitions/v2/tools/migrate.py
+python LayoutDefinitions/v2/tools/validate.py --self-test
+
+The migration must complete to repair the catalog left by the interrupted run.
+This fix normalizes CRLF to LF for definition hashes and uses explicit UTF-8
+JSON reads and LF writes. GMX input remains Windows-1250.
+
+Verified: full self-test; CRLF-converted package; content tampering still fails;
+regeneration with assertions requiring explicit read/write encodings and newlines.
+These portability checks ran on Linux; native Windows execution awaits your run.

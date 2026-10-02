@@ -1,0 +1,1285 @@
+{
+  "$schema": "../schemas/validation.schema.json",
+  "schemaVersion": 2,
+  "definitionVersion": "2.0.0-draft.4",
+  "id": "ifosoft.general-ledger-hlknia4-legacy.validation",
+  "kind": "validation",
+  "status": "reviewDraft",
+  "productionApproved": false,
+  "requiresCapabilities": [
+    "positioned.v2"
+  ],
+  "sourceRefs": [],
+  "reviewNotes": [
+    "Blank monetary values remain blank; no implicit effective zero.",
+    "CSV expected fiscal year is comparison-only and never supplies parsing or detection context.",
+    "Printed aggregate controls remain disabled pending fixture reconciliation."
+  ],
+  "layoutRef": {
+    "id": "ifosoft.general-ledger-hlknia4-legacy",
+    "version": "2.0.0-draft.4"
+  },
+  "printedControls": [
+    {
+      "id": "original.foot3.field-59",
+      "variantRef": "original",
+      "blockRef": "foot3",
+      "fieldRef": "field-59",
+      "scope": {
+        "kind": "group",
+        "groupRef": "synthetic"
+      }
+    },
+    {
+      "id": "original.foot3.field-60",
+      "variantRef": "original",
+      "blockRef": "foot3",
+      "fieldRef": "field-60",
+      "scope": {
+        "kind": "group",
+        "groupRef": "synthetic"
+      }
+    },
+    {
+      "id": "original.foot3.field-61",
+      "variantRef": "original",
+      "blockRef": "foot3",
+      "fieldRef": "field-61",
+      "scope": {
+        "kind": "group",
+        "groupRef": "synthetic"
+      }
+    },
+    {
+      "id": "original.foot3.field-62",
+      "variantRef": "original",
+      "blockRef": "foot3",
+      "fieldRef": "field-62",
+      "scope": {
+        "kind": "group",
+        "groupRef": "synthetic"
+      }
+    },
+    {
+      "id": "original.foot3.field-63",
+      "variantRef": "original",
+      "blockRef": "foot3",
+      "fieldRef": "field-63",
+      "scope": {
+        "kind": "group",
+        "groupRef": "synthetic"
+      }
+    },
+    {
+      "id": "original.foot3.field-64",
+      "variantRef": "original",
+      "blockRef": "foot3",
+      "fieldRef": "field-64",
+      "scope": {
+        "kind": "group",
+        "groupRef": "synthetic"
+      }
+    },
+    {
+      "id": "original.foot2.field-75",
+      "variantRef": "original",
+      "blockRef": "foot2",
+      "fieldRef": "field-75",
+      "scope": {
+        "kind": "group",
+        "groupRef": "accountClass"
+      }
+    },
+    {
+      "id": "original.foot2.field-76",
+      "variantRef": "original",
+      "blockRef": "foot2",
+      "fieldRef": "field-76",
+      "scope": {
+        "kind": "group",
+        "groupRef": "accountClass"
+      }
+    },
+    {
+      "id": "original.foot2.field-77",
+      "variantRef": "original",
+      "blockRef": "foot2",
+      "fieldRef": "field-77",
+      "scope": {
+        "kind": "group",
+        "groupRef": "accountClass"
+      }
+    },
+    {
+      "id": "original.foot2.field-78",
+      "variantRef": "original",
+      "blockRef": "foot2",
+      "fieldRef": "field-78",
+      "scope": {
+        "kind": "group",
+        "groupRef": "accountClass"
+      }
+    },
+    {
+      "id": "original.foot2.field-79",
+      "variantRef": "original",
+      "blockRef": "foot2",
+      "fieldRef": "field-79",
+      "scope": {
+        "kind": "group",
+        "groupRef": "accountClass"
+      }
+    },
+    {
+      "id": "original.foot2.field-80",
+      "variantRef": "original",
+      "blockRef": "foot2",
+      "fieldRef": "field-80",
+      "scope": {
+        "kind": "group",
+        "groupRef": "accountClass"
+      }
+    },
+    {
+      "id": "original.foot1.field-91",
+      "variantRef": "original",
+      "blockRef": "foot1",
+      "fieldRef": "field-91",
+      "scope": {
+        "kind": "document",
+        "groupRef": null
+      }
+    },
+    {
+      "id": "original.foot1.field-92",
+      "variantRef": "original",
+      "blockRef": "foot1",
+      "fieldRef": "field-92",
+      "scope": {
+        "kind": "document",
+        "groupRef": null
+      }
+    },
+    {
+      "id": "original.foot1.field-93",
+      "variantRef": "original",
+      "blockRef": "foot1",
+      "fieldRef": "field-93",
+      "scope": {
+        "kind": "document",
+        "groupRef": null
+      }
+    },
+    {
+      "id": "original.foot1.field-94",
+      "variantRef": "original",
+      "blockRef": "foot1",
+      "fieldRef": "field-94",
+      "scope": {
+        "kind": "document",
+        "groupRef": null
+      }
+    },
+    {
+      "id": "original.foot1.field-95",
+      "variantRef": "original",
+      "blockRef": "foot1",
+      "fieldRef": "field-95",
+      "scope": {
+        "kind": "document",
+        "groupRef": null
+      }
+    },
+    {
+      "id": "original.foot1.field-96",
+      "variantRef": "original",
+      "blockRef": "foot1",
+      "fieldRef": "field-96",
+      "scope": {
+        "kind": "document",
+        "groupRef": null
+      }
+    }
+  ],
+  "calculations": [
+    {
+      "id": "calc.original.foot3.field-59",
+      "op": "sum",
+      "enabled": false,
+      "evidenceStatus": "unverified",
+      "sourceRefs": [],
+      "reviewNotes": [],
+      "scope": {
+        "kind": "group",
+        "groupRef": "synthetic"
+      },
+      "memberSelector": {
+        "semanticClasses": [],
+        "aggregationMemberships": [
+          "exportedDetails"
+        ],
+        "level": "any",
+        "occurrences": "records"
+      },
+      "inputRefs": [
+        {
+          "kind": "field",
+          "semanticName": "openingNet"
+        }
+      ],
+      "prerequisites": [
+        "resolvedClassification",
+        "resolvedGroupMembership",
+        "unambiguousOperands",
+        "completeScope"
+      ],
+      "onMissingInput": "inconclusive"
+    },
+    {
+      "id": "calc.original.foot3.field-60",
+      "op": "sum",
+      "enabled": false,
+      "evidenceStatus": "unverified",
+      "sourceRefs": [],
+      "reviewNotes": [],
+      "scope": {
+        "kind": "group",
+        "groupRef": "synthetic"
+      },
+      "memberSelector": {
+        "semanticClasses": [],
+        "aggregationMemberships": [
+          "exportedDetails"
+        ],
+        "level": "any",
+        "occurrences": "records"
+      },
+      "inputRefs": [
+        {
+          "kind": "field",
+          "semanticName": "turnoverDebit"
+        }
+      ],
+      "prerequisites": [
+        "resolvedClassification",
+        "resolvedGroupMembership",
+        "unambiguousOperands",
+        "completeScope"
+      ],
+      "onMissingInput": "inconclusive"
+    },
+    {
+      "id": "calc.original.foot3.field-61",
+      "op": "sum",
+      "enabled": false,
+      "evidenceStatus": "unverified",
+      "sourceRefs": [],
+      "reviewNotes": [],
+      "scope": {
+        "kind": "group",
+        "groupRef": "synthetic"
+      },
+      "memberSelector": {
+        "semanticClasses": [],
+        "aggregationMemberships": [
+          "exportedDetails"
+        ],
+        "level": "any",
+        "occurrences": "records"
+      },
+      "inputRefs": [
+        {
+          "kind": "field",
+          "semanticName": "turnoverCredit"
+        }
+      ],
+      "prerequisites": [
+        "resolvedClassification",
+        "resolvedGroupMembership",
+        "unambiguousOperands",
+        "completeScope"
+      ],
+      "onMissingInput": "inconclusive"
+    },
+    {
+      "id": "calc.original.foot3.field-62",
+      "op": "sum",
+      "enabled": false,
+      "evidenceStatus": "unverified",
+      "sourceRefs": [],
+      "reviewNotes": [],
+      "scope": {
+        "kind": "group",
+        "groupRef": "synthetic"
+      },
+      "memberSelector": {
+        "semanticClasses": [],
+        "aggregationMemberships": [
+          "exportedDetails"
+        ],
+        "level": "any",
+        "occurrences": "records"
+      },
+      "inputRefs": [
+        {
+          "kind": "field",
+          "semanticName": "monthDebit"
+        }
+      ],
+      "prerequisites": [
+        "resolvedClassification",
+        "resolvedGroupMembership",
+        "unambiguousOperands",
+        "completeScope"
+      ],
+      "onMissingInput": "inconclusive"
+    },
+    {
+      "id": "calc.original.foot3.field-63",
+      "op": "sum",
+      "enabled": false,
+      "evidenceStatus": "unverified",
+      "sourceRefs": [],
+      "reviewNotes": [],
+      "scope": {
+        "kind": "group",
+        "groupRef": "synthetic"
+      },
+      "memberSelector": {
+        "semanticClasses": [],
+        "aggregationMemberships": [
+          "exportedDetails"
+        ],
+        "level": "any",
+        "occurrences": "records"
+      },
+      "inputRefs": [
+        {
+          "kind": "field",
+          "semanticName": "monthCredit"
+        }
+      ],
+      "prerequisites": [
+        "resolvedClassification",
+        "resolvedGroupMembership",
+        "unambiguousOperands",
+        "completeScope"
+      ],
+      "onMissingInput": "inconclusive"
+    },
+    {
+      "id": "calc.original.foot3.field-64",
+      "op": "sum",
+      "enabled": false,
+      "evidenceStatus": "unverified",
+      "sourceRefs": [],
+      "reviewNotes": [],
+      "scope": {
+        "kind": "group",
+        "groupRef": "synthetic"
+      },
+      "memberSelector": {
+        "semanticClasses": [],
+        "aggregationMemberships": [
+          "exportedDetails"
+        ],
+        "level": "any",
+        "occurrences": "records"
+      },
+      "inputRefs": [
+        {
+          "kind": "field",
+          "semanticName": "closingNet"
+        }
+      ],
+      "prerequisites": [
+        "resolvedClassification",
+        "resolvedGroupMembership",
+        "unambiguousOperands",
+        "completeScope"
+      ],
+      "onMissingInput": "inconclusive"
+    },
+    {
+      "id": "calc.original.foot2.field-75",
+      "op": "sum",
+      "enabled": false,
+      "evidenceStatus": "unverified",
+      "sourceRefs": [],
+      "reviewNotes": [],
+      "scope": {
+        "kind": "group",
+        "groupRef": "accountClass"
+      },
+      "memberSelector": {
+        "semanticClasses": [],
+        "aggregationMemberships": [
+          "exportedDetails"
+        ],
+        "level": "any",
+        "occurrences": "records"
+      },
+      "inputRefs": [
+        {
+          "kind": "field",
+          "semanticName": "openingNet"
+        }
+      ],
+      "prerequisites": [
+        "resolvedClassification",
+        "resolvedGroupMembership",
+        "unambiguousOperands",
+        "completeScope"
+      ],
+      "onMissingInput": "inconclusive"
+    },
+    {
+      "id": "calc.original.foot2.field-76",
+      "op": "sum",
+      "enabled": false,
+      "evidenceStatus": "unverified",
+      "sourceRefs": [],
+      "reviewNotes": [],
+      "scope": {
+        "kind": "group",
+        "groupRef": "accountClass"
+      },
+      "memberSelector": {
+        "semanticClasses": [],
+        "aggregationMemberships": [
+          "exportedDetails"
+        ],
+        "level": "any",
+        "occurrences": "records"
+      },
+      "inputRefs": [
+        {
+          "kind": "field",
+          "semanticName": "turnoverDebit"
+        }
+      ],
+      "prerequisites": [
+        "resolvedClassification",
+        "resolvedGroupMembership",
+        "unambiguousOperands",
+        "completeScope"
+      ],
+      "onMissingInput": "inconclusive"
+    },
+    {
+      "id": "calc.original.foot2.field-77",
+      "op": "sum",
+      "enabled": false,
+      "evidenceStatus": "unverified",
+      "sourceRefs": [],
+      "reviewNotes": [],
+      "scope": {
+        "kind": "group",
+        "groupRef": "accountClass"
+      },
+      "memberSelector": {
+        "semanticClasses": [],
+        "aggregationMemberships": [
+          "exportedDetails"
+        ],
+        "level": "any",
+        "occurrences": "records"
+      },
+      "inputRefs": [
+        {
+          "kind": "field",
+          "semanticName": "turnoverCredit"
+        }
+      ],
+      "prerequisites": [
+        "resolvedClassification",
+        "resolvedGroupMembership",
+        "unambiguousOperands",
+        "completeScope"
+      ],
+      "onMissingInput": "inconclusive"
+    },
+    {
+      "id": "calc.original.foot2.field-78",
+      "op": "sum",
+      "enabled": false,
+      "evidenceStatus": "unverified",
+      "sourceRefs": [],
+      "reviewNotes": [],
+      "scope": {
+        "kind": "group",
+        "groupRef": "accountClass"
+      },
+      "memberSelector": {
+        "semanticClasses": [],
+        "aggregationMemberships": [
+          "exportedDetails"
+        ],
+        "level": "any",
+        "occurrences": "records"
+      },
+      "inputRefs": [
+        {
+          "kind": "field",
+          "semanticName": "monthDebit"
+        }
+      ],
+      "prerequisites": [
+        "resolvedClassification",
+        "resolvedGroupMembership",
+        "unambiguousOperands",
+        "completeScope"
+      ],
+      "onMissingInput": "inconclusive"
+    },
+    {
+      "id": "calc.original.foot2.field-79",
+      "op": "sum",
+      "enabled": false,
+      "evidenceStatus": "unverified",
+      "sourceRefs": [],
+      "reviewNotes": [],
+      "scope": {
+        "kind": "group",
+        "groupRef": "accountClass"
+      },
+      "memberSelector": {
+        "semanticClasses": [],
+        "aggregationMemberships": [
+          "exportedDetails"
+        ],
+        "level": "any",
+        "occurrences": "records"
+      },
+      "inputRefs": [
+        {
+          "kind": "field",
+          "semanticName": "monthCredit"
+        }
+      ],
+      "prerequisites": [
+        "resolvedClassification",
+        "resolvedGroupMembership",
+        "unambiguousOperands",
+        "completeScope"
+      ],
+      "onMissingInput": "inconclusive"
+    },
+    {
+      "id": "calc.original.foot2.field-80",
+      "op": "sum",
+      "enabled": false,
+      "evidenceStatus": "unverified",
+      "sourceRefs": [],
+      "reviewNotes": [],
+      "scope": {
+        "kind": "group",
+        "groupRef": "accountClass"
+      },
+      "memberSelector": {
+        "semanticClasses": [],
+        "aggregationMemberships": [
+          "exportedDetails"
+        ],
+        "level": "any",
+        "occurrences": "records"
+      },
+      "inputRefs": [
+        {
+          "kind": "field",
+          "semanticName": "closingNet"
+        }
+      ],
+      "prerequisites": [
+        "resolvedClassification",
+        "resolvedGroupMembership",
+        "unambiguousOperands",
+        "completeScope"
+      ],
+      "onMissingInput": "inconclusive"
+    },
+    {
+      "id": "calc.original.foot1.field-91",
+      "op": "sum",
+      "enabled": false,
+      "evidenceStatus": "unverified",
+      "sourceRefs": [],
+      "reviewNotes": [],
+      "scope": {
+        "kind": "document",
+        "groupRef": null
+      },
+      "memberSelector": {
+        "semanticClasses": [],
+        "aggregationMemberships": [
+          "exportedDetails"
+        ],
+        "level": "any",
+        "occurrences": "records"
+      },
+      "inputRefs": [
+        {
+          "kind": "field",
+          "semanticName": "openingNet"
+        }
+      ],
+      "prerequisites": [
+        "resolvedClassification",
+        "resolvedGroupMembership",
+        "unambiguousOperands",
+        "completeScope"
+      ],
+      "onMissingInput": "inconclusive"
+    },
+    {
+      "id": "calc.original.foot1.field-92",
+      "op": "sum",
+      "enabled": false,
+      "evidenceStatus": "unverified",
+      "sourceRefs": [],
+      "reviewNotes": [],
+      "scope": {
+        "kind": "document",
+        "groupRef": null
+      },
+      "memberSelector": {
+        "semanticClasses": [],
+        "aggregationMemberships": [
+          "exportedDetails"
+        ],
+        "level": "any",
+        "occurrences": "records"
+      },
+      "inputRefs": [
+        {
+          "kind": "field",
+          "semanticName": "turnoverDebit"
+        }
+      ],
+      "prerequisites": [
+        "resolvedClassification",
+        "resolvedGroupMembership",
+        "unambiguousOperands",
+        "completeScope"
+      ],
+      "onMissingInput": "inconclusive"
+    },
+    {
+      "id": "calc.original.foot1.field-93",
+      "op": "sum",
+      "enabled": false,
+      "evidenceStatus": "unverified",
+      "sourceRefs": [],
+      "reviewNotes": [],
+      "scope": {
+        "kind": "document",
+        "groupRef": null
+      },
+      "memberSelector": {
+        "semanticClasses": [],
+        "aggregationMemberships": [
+          "exportedDetails"
+        ],
+        "level": "any",
+        "occurrences": "records"
+      },
+      "inputRefs": [
+        {
+          "kind": "field",
+          "semanticName": "turnoverCredit"
+        }
+      ],
+      "prerequisites": [
+        "resolvedClassification",
+        "resolvedGroupMembership",
+        "unambiguousOperands",
+        "completeScope"
+      ],
+      "onMissingInput": "inconclusive"
+    },
+    {
+      "id": "calc.original.foot1.field-94",
+      "op": "sum",
+      "enabled": false,
+      "evidenceStatus": "unverified",
+      "sourceRefs": [],
+      "reviewNotes": [],
+      "scope": {
+        "kind": "document",
+        "groupRef": null
+      },
+      "memberSelector": {
+        "semanticClasses": [],
+        "aggregationMemberships": [
+          "exportedDetails"
+        ],
+        "level": "any",
+        "occurrences": "records"
+      },
+      "inputRefs": [
+        {
+          "kind": "field",
+          "semanticName": "monthDebit"
+        }
+      ],
+      "prerequisites": [
+        "resolvedClassification",
+        "resolvedGroupMembership",
+        "unambiguousOperands",
+        "completeScope"
+      ],
+      "onMissingInput": "inconclusive"
+    },
+    {
+      "id": "calc.original.foot1.field-95",
+      "op": "sum",
+      "enabled": false,
+      "evidenceStatus": "unverified",
+      "sourceRefs": [],
+      "reviewNotes": [],
+      "scope": {
+        "kind": "document",
+        "groupRef": null
+      },
+      "memberSelector": {
+        "semanticClasses": [],
+        "aggregationMemberships": [
+          "exportedDetails"
+        ],
+        "level": "any",
+        "occurrences": "records"
+      },
+      "inputRefs": [
+        {
+          "kind": "field",
+          "semanticName": "monthCredit"
+        }
+      ],
+      "prerequisites": [
+        "resolvedClassification",
+        "resolvedGroupMembership",
+        "unambiguousOperands",
+        "completeScope"
+      ],
+      "onMissingInput": "inconclusive"
+    },
+    {
+      "id": "calc.original.foot1.field-96",
+      "op": "sum",
+      "enabled": false,
+      "evidenceStatus": "unverified",
+      "sourceRefs": [],
+      "reviewNotes": [],
+      "scope": {
+        "kind": "document",
+        "groupRef": null
+      },
+      "memberSelector": {
+        "semanticClasses": [],
+        "aggregationMemberships": [
+          "exportedDetails"
+        ],
+        "level": "any",
+        "occurrences": "records"
+      },
+      "inputRefs": [
+        {
+          "kind": "field",
+          "semanticName": "closingNet"
+        }
+      ],
+      "prerequisites": [
+        "resolvedClassification",
+        "resolvedGroupMembership",
+        "unambiguousOperands",
+        "completeScope"
+      ],
+      "onMissingInput": "inconclusive"
+    },
+    {
+      "id": "balance.opening-plus-debit",
+      "op": "add",
+      "enabled": true,
+      "evidenceStatus": "sourceDerived",
+      "sourceRefs": [],
+      "reviewNotes": [],
+      "scope": {
+        "kind": "record",
+        "groupRef": null
+      },
+      "memberSelector": {
+        "semanticClasses": [
+          "accountBalance"
+        ],
+        "aggregationMemberships": [],
+        "level": "any",
+        "occurrences": "records"
+      },
+      "inputRefs": [
+        {
+          "kind": "field",
+          "semanticName": "openingNet"
+        },
+        {
+          "kind": "field",
+          "semanticName": "turnoverDebit"
+        }
+      ],
+      "prerequisites": [
+        "resolvedClassification",
+        "unambiguousOperands"
+      ],
+      "onMissingInput": "inconclusive"
+    },
+    {
+      "id": "balance.expected",
+      "op": "subtract",
+      "enabled": true,
+      "evidenceStatus": "sourceDerived",
+      "sourceRefs": [],
+      "reviewNotes": [],
+      "scope": {
+        "kind": "record",
+        "groupRef": null
+      },
+      "memberSelector": {
+        "semanticClasses": [
+          "accountBalance"
+        ],
+        "aggregationMemberships": [],
+        "level": "any",
+        "occurrences": "records"
+      },
+      "inputRefs": [
+        {
+          "kind": "calculation",
+          "ruleRef": "balance.opening-plus-debit"
+        },
+        {
+          "kind": "field",
+          "semanticName": "turnoverCredit"
+        }
+      ],
+      "prerequisites": [
+        "resolvedClassification",
+        "unambiguousOperands"
+      ],
+      "onMissingInput": "inconclusive"
+    },
+    {
+      "id": "balance.printed",
+      "op": "add",
+      "enabled": true,
+      "evidenceStatus": "sourceDerived",
+      "sourceRefs": [],
+      "reviewNotes": [],
+      "scope": {
+        "kind": "record",
+        "groupRef": null
+      },
+      "memberSelector": {
+        "semanticClasses": [
+          "accountBalance"
+        ],
+        "aggregationMemberships": [],
+        "level": "any",
+        "occurrences": "records"
+      },
+      "inputRefs": [
+        {
+          "kind": "field",
+          "semanticName": "closingNet"
+        },
+        {
+          "kind": "literal",
+          "decimal": "0"
+        }
+      ],
+      "prerequisites": [
+        "resolvedClassification",
+        "unambiguousOperands"
+      ],
+      "onMissingInput": "inconclusive"
+    }
+  ],
+  "rules": [
+    {
+      "id": "compare.original.foot3.field-59",
+      "op": "compare",
+      "enabled": false,
+      "evidenceStatus": "unverified",
+      "sourceRefs": [],
+      "reviewNotes": [
+        "Disabled pending fixture reconciliation of membership, scope and printed control semantics."
+      ],
+      "scope": {
+        "kind": "group",
+        "groupRef": "synthetic"
+      },
+      "calculatedRef": "calc.original.foot3.field-59",
+      "printedControlRef": "original.foot3.field-59",
+      "absoluteTolerance": "0.01",
+      "coverageRequirement": "completeScope",
+      "onMissingInput": "inconclusive",
+      "onPartialCoverage": "notEvaluated"
+    },
+    {
+      "id": "compare.original.foot3.field-60",
+      "op": "compare",
+      "enabled": false,
+      "evidenceStatus": "unverified",
+      "sourceRefs": [],
+      "reviewNotes": [
+        "Disabled pending fixture reconciliation of membership, scope and printed control semantics."
+      ],
+      "scope": {
+        "kind": "group",
+        "groupRef": "synthetic"
+      },
+      "calculatedRef": "calc.original.foot3.field-60",
+      "printedControlRef": "original.foot3.field-60",
+      "absoluteTolerance": "0.01",
+      "coverageRequirement": "completeScope",
+      "onMissingInput": "inconclusive",
+      "onPartialCoverage": "notEvaluated"
+    },
+    {
+      "id": "compare.original.foot3.field-61",
+      "op": "compare",
+      "enabled": false,
+      "evidenceStatus": "unverified",
+      "sourceRefs": [],
+      "reviewNotes": [
+        "Disabled pending fixture reconciliation of membership, scope and printed control semantics."
+      ],
+      "scope": {
+        "kind": "group",
+        "groupRef": "synthetic"
+      },
+      "calculatedRef": "calc.original.foot3.field-61",
+      "printedControlRef": "original.foot3.field-61",
+      "absoluteTolerance": "0.01",
+      "coverageRequirement": "completeScope",
+      "onMissingInput": "inconclusive",
+      "onPartialCoverage": "notEvaluated"
+    },
+    {
+      "id": "compare.original.foot3.field-62",
+      "op": "compare",
+      "enabled": false,
+      "evidenceStatus": "unverified",
+      "sourceRefs": [],
+      "reviewNotes": [
+        "Disabled pending fixture reconciliation of membership, scope and printed control semantics."
+      ],
+      "scope": {
+        "kind": "group",
+        "groupRef": "synthetic"
+      },
+      "calculatedRef": "calc.original.foot3.field-62",
+      "printedControlRef": "original.foot3.field-62",
+      "absoluteTolerance": "0.01",
+      "coverageRequirement": "completeScope",
+      "onMissingInput": "inconclusive",
+      "onPartialCoverage": "notEvaluated"
+    },
+    {
+      "id": "compare.original.foot3.field-63",
+      "op": "compare",
+      "enabled": false,
+      "evidenceStatus": "unverified",
+      "sourceRefs": [],
+      "reviewNotes": [
+        "Disabled pending fixture reconciliation of membership, scope and printed control semantics."
+      ],
+      "scope": {
+        "kind": "group",
+        "groupRef": "synthetic"
+      },
+      "calculatedRef": "calc.original.foot3.field-63",
+      "printedControlRef": "original.foot3.field-63",
+      "absoluteTolerance": "0.01",
+      "coverageRequirement": "completeScope",
+      "onMissingInput": "inconclusive",
+      "onPartialCoverage": "notEvaluated"
+    },
+    {
+      "id": "compare.original.foot3.field-64",
+      "op": "compare",
+      "enabled": false,
+      "evidenceStatus": "unverified",
+      "sourceRefs": [],
+      "reviewNotes": [
+        "Disabled pending fixture reconciliation of membership, scope and printed control semantics."
+      ],
+      "scope": {
+        "kind": "group",
+        "groupRef": "synthetic"
+      },
+      "calculatedRef": "calc.original.foot3.field-64",
+      "printedControlRef": "original.foot3.field-64",
+      "absoluteTolerance": "0.01",
+      "coverageRequirement": "completeScope",
+      "onMissingInput": "inconclusive",
+      "onPartialCoverage": "notEvaluated"
+    },
+    {
+      "id": "compare.original.foot2.field-75",
+      "op": "compare",
+      "enabled": false,
+      "evidenceStatus": "unverified",
+      "sourceRefs": [],
+      "reviewNotes": [
+        "Disabled pending fixture reconciliation of membership, scope and printed control semantics."
+      ],
+      "scope": {
+        "kind": "group",
+        "groupRef": "accountClass"
+      },
+      "calculatedRef": "calc.original.foot2.field-75",
+      "printedControlRef": "original.foot2.field-75",
+      "absoluteTolerance": "0.01",
+      "coverageRequirement": "completeScope",
+      "onMissingInput": "inconclusive",
+      "onPartialCoverage": "notEvaluated"
+    },
+    {
+      "id": "compare.original.foot2.field-76",
+      "op": "compare",
+      "enabled": false,
+      "evidenceStatus": "unverified",
+      "sourceRefs": [],
+      "reviewNotes": [
+        "Disabled pending fixture reconciliation of membership, scope and printed control semantics."
+      ],
+      "scope": {
+        "kind": "group",
+        "groupRef": "accountClass"
+      },
+      "calculatedRef": "calc.original.foot2.field-76",
+      "printedControlRef": "original.foot2.field-76",
+      "absoluteTolerance": "0.01",
+      "coverageRequirement": "completeScope",
+      "onMissingInput": "inconclusive",
+      "onPartialCoverage": "notEvaluated"
+    },
+    {
+      "id": "compare.original.foot2.field-77",
+      "op": "compare",
+      "enabled": false,
+      "evidenceStatus": "unverified",
+      "sourceRefs": [],
+      "reviewNotes": [
+        "Disabled pending fixture reconciliation of membership, scope and printed control semantics."
+      ],
+      "scope": {
+        "kind": "group",
+        "groupRef": "accountClass"
+      },
+      "calculatedRef": "calc.original.foot2.field-77",
+      "printedControlRef": "original.foot2.field-77",
+      "absoluteTolerance": "0.01",
+      "coverageRequirement": "completeScope",
+      "onMissingInput": "inconclusive",
+      "onPartialCoverage": "notEvaluated"
+    },
+    {
+      "id": "compare.original.foot2.field-78",
+      "op": "compare",
+      "enabled": false,
+      "evidenceStatus": "unverified",
+      "sourceRefs": [],
+      "reviewNotes": [
+        "Disabled pending fixture reconciliation of membership, scope and printed control semantics."
+      ],
+      "scope": {
+        "kind": "group",
+        "groupRef": "accountClass"
+      },
+      "calculatedRef": "calc.original.foot2.field-78",
+      "printedControlRef": "original.foot2.field-78",
+      "absoluteTolerance": "0.01",
+      "coverageRequirement": "completeScope",
+      "onMissingInput": "inconclusive",
+      "onPartialCoverage": "notEvaluated"
+    },
+    {
+      "id": "compare.original.foot2.field-79",
+      "op": "compare",
+      "enabled": false,
+      "evidenceStatus": "unverified",
+      "sourceRefs": [],
+      "reviewNotes": [
+        "Disabled pending fixture reconciliation of membership, scope and printed control semantics."
+      ],
+      "scope": {
+        "kind": "group",
+        "groupRef": "accountClass"
+      },
+      "calculatedRef": "calc.original.foot2.field-79",
+      "printedControlRef": "original.foot2.field-79",
+      "absoluteTolerance": "0.01",
+      "coverageRequirement": "completeScope",
+      "onMissingInput": "inconclusive",
+      "onPartialCoverage": "notEvaluated"
+    },
+    {
+      "id": "compare.original.foot2.field-80",
+      "op": "compare",
+      "enabled": false,
+      "evidenceStatus": "unverified",
+      "sourceRefs": [],
+      "reviewNotes": [
+        "Disabled pending fixture reconciliation of membership, scope and printed control semantics."
+      ],
+      "scope": {
+        "kind": "group",
+        "groupRef": "accountClass"
+      },
+      "calculatedRef": "calc.original.foot2.field-80",
+      "printedControlRef": "original.foot2.field-80",
+      "absoluteTolerance": "0.01",
+      "coverageRequirement": "completeScope",
+      "onMissingInput": "inconclusive",
+      "onPartialCoverage": "notEvaluated"
+    },
+    {
+      "id": "compare.original.foot1.field-91",
+      "op": "compare",
+      "enabled": false,
+      "evidenceStatus": "unverified",
+      "sourceRefs": [],
+      "reviewNotes": [
+        "Disabled pending fixture reconciliation of membership, scope and printed control semantics."
+      ],
+      "scope": {
+        "kind": "document",
+        "groupRef": null
+      },
+      "calculatedRef": "calc.original.foot1.field-91",
+      "printedControlRef": "original.foot1.field-91",
+      "absoluteTolerance": "0.01",
+      "coverageRequirement": "completeScope",
+      "onMissingInput": "inconclusive",
+      "onPartialCoverage": "notEvaluated"
+    },
+    {
+      "id": "compare.original.foot1.field-92",
+      "op": "compare",
+      "enabled": false,
+      "evidenceStatus": "unverified",
+      "sourceRefs": [],
+      "reviewNotes": [
+        "Disabled pending fixture reconciliation of membership, scope and printed control semantics."
+      ],
+      "scope": {
+        "kind": "document",
+        "groupRef": null
+      },
+      "calculatedRef": "calc.original.foot1.field-92",
+      "printedControlRef": "original.foot1.field-92",
+      "absoluteTolerance": "0.01",
+      "coverageRequirement": "completeScope",
+      "onMissingInput": "inconclusive",
+      "onPartialCoverage": "notEvaluated"
+    },
+    {
+      "id": "compare.original.foot1.field-93",
+      "op": "compare",
+      "enabled": false,
+      "evidenceStatus": "unverified",
+      "sourceRefs": [],
+      "reviewNotes": [
+        "Disabled pending fixture reconciliation of membership, scope and printed control semantics."
+      ],
+      "scope": {
+        "kind": "document",
+        "groupRef": null
+      },
+      "calculatedRef": "calc.original.foot1.field-93",
+      "printedControlRef": "original.foot1.field-93",
+      "absoluteTolerance": "0.01",
+      "coverageRequirement": "completeScope",
+      "onMissingInput": "inconclusive",
+      "onPartialCoverage": "notEvaluated"
+    },
+    {
+      "id": "compare.original.foot1.field-94",
+      "op": "compare",
+      "enabled": false,
+      "evidenceStatus": "unverified",
+      "sourceRefs": [],
+      "reviewNotes": [
+        "Disabled pending fixture reconciliation of membership, scope and printed control semantics."
+      ],
+      "scope": {
+        "kind": "document",
+        "groupRef": null
+      },
+      "calculatedRef": "calc.original.foot1.field-94",
+      "printedControlRef": "original.foot1.field-94",
+      "absoluteTolerance": "0.01",
+      "coverageRequirement": "completeScope",
+      "onMissingInput": "inconclusive",
+      "onPartialCoverage": "notEvaluated"
+    },
+    {
+      "id": "compare.original.foot1.field-95",
+      "op": "compare",
+      "enabled": false,
+      "evidenceStatus": "unverified",
+      "sourceRefs": [],
+      "reviewNotes": [
+        "Disabled pending fixture reconciliation of membership, scope and printed control semantics."
+      ],
+      "scope": {
+        "kind": "document",
+        "groupRef": null
+      },
+      "calculatedRef": "calc.original.foot1.field-95",
+      "printedControlRef": "original.foot1.field-95",
+      "absoluteTolerance": "0.01",
+      "coverageRequirement": "completeScope",
+      "onMissingInput": "inconclusive",
+      "onPartialCoverage": "notEvaluated"
+    },
+    {
+      "id": "compare.original.foot1.field-96",
+      "op": "compare",
+      "enabled": false,
+      "evidenceStatus": "unverified",
+      "sourceRefs": [],
+      "reviewNotes": [
+        "Disabled pending fixture reconciliation of membership, scope and printed control semantics."
+      ],
+      "scope": {
+        "kind": "document",
+        "groupRef": null
+      },
+      "calculatedRef": "calc.original.foot1.field-96",
+      "printedControlRef": "original.foot1.field-96",
+      "absoluteTolerance": "0.01",
+      "coverageRequirement": "completeScope",
+      "onMissingInput": "inconclusive",
+      "onPartialCoverage": "notEvaluated"
+    },
+    {
+      "id": "balance-equation",
+      "op": "compare",
+      "enabled": true,
+      "evidenceStatus": "sourceDerived",
+      "sourceRefs": [],
+      "reviewNotes": [],
+      "scope": {
+        "kind": "record",
+        "groupRef": null
+      },
+      "calculatedRef": "balance.expected",
+      "otherCalculatedRef": "balance.printed",
+      "absoluteTolerance": "0.01",
+      "coverageRequirement": "completeScope",
+      "onMissingInput": "inconclusive",
+      "onPartialCoverage": "notEvaluated"
+    }
+  ]
+}

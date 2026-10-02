@@ -1,0 +1,128 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.excelapipoc.local/positioned/v2/model.schema.json",
+  "type": "object",
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "minLength": 1
+    },
+    "schemaVersion": {
+      "const": 2
+    },
+    "definitionVersion": {
+      "type": "string",
+      "minLength": 1
+    },
+    "id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "kind": {
+      "const": "model"
+    },
+    "status": {
+      "enum": [
+        "reviewDraft",
+        "approved"
+      ]
+    },
+    "productionApproved": {
+      "type": "boolean"
+    },
+    "requiresCapabilities": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 0
+    },
+    "sourceRefs": {
+      "type": "array",
+      "items": {
+        "$ref": "common.schema.json#/$defs/source"
+      },
+      "minItems": 0
+    },
+    "reviewNotes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 0
+    },
+    "category": {
+      "enum": [
+        "AJ",
+        "GL",
+        "AF",
+        "unresolved"
+      ]
+    },
+    "fields": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "type": {
+            "enum": [
+              "text",
+              "identifier",
+              "integer",
+              "decimal",
+              "date",
+              "time",
+              "accountingPeriod"
+            ]
+          },
+          "domainTarget": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "type",
+          "domainTarget"
+        ],
+        "additionalProperties": false
+      },
+      "minItems": 0
+    },
+    "domainMappingStatus": {
+      "enum": [
+        "pendingReview",
+        "approved"
+      ]
+    }
+  },
+  "required": [
+    "$schema",
+    "schemaVersion",
+    "definitionVersion",
+    "id",
+    "kind",
+    "status",
+    "productionApproved",
+    "requiresCapabilities",
+    "sourceRefs",
+    "reviewNotes",
+    "category",
+    "fields",
+    "domainMappingStatus"
+  ],
+  "additionalProperties": false
+}

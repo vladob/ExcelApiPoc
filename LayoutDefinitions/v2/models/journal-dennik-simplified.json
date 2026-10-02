@@ -1,0 +1,110 @@
+{
+  "$schema": "../schemas/model.schema.json",
+  "schemaVersion": 2,
+  "definitionVersion": "2.0.0-draft.4",
+  "id": "ifosoft.model.journal-dennik-simplified",
+  "kind": "model",
+  "status": "reviewDraft",
+  "productionApproved": false,
+  "requiresCapabilities": [
+    "positioned.v2"
+  ],
+  "sourceRefs": [],
+  "reviewNotes": [
+    "C# domain export mapping is deferred to Step 3; source fields are preserved."
+  ],
+  "category": "AJ",
+  "fields": [
+    {
+      "id": "printedPageNumber",
+      "type": "integer",
+      "domainTarget": null
+    },
+    {
+      "id": "licensedUserText",
+      "type": "text",
+      "domainTarget": null
+    },
+    {
+      "id": "periodEnd",
+      "type": "accountingPeriod",
+      "domainTarget": null
+    },
+    {
+      "id": "reportSubtitle",
+      "type": "text",
+      "domainTarget": null
+    },
+    {
+      "id": "description",
+      "type": "text",
+      "domainTarget": null
+    },
+    {
+      "id": "amount",
+      "type": "decimal",
+      "domainTarget": null
+    },
+    {
+      "id": "sequenceOrCount2",
+      "type": "integer",
+      "domainTarget": null
+    },
+    {
+      "id": "creditAccount",
+      "type": "identifier",
+      "domainTarget": null
+    },
+    {
+      "id": "sequenceOrCount1",
+      "type": "integer",
+      "domainTarget": null
+    },
+    {
+      "id": "debitAccount",
+      "type": "identifier",
+      "domainTarget": null
+    },
+    {
+      "id": "additionalDescription",
+      "type": "text",
+      "domainTarget": null
+    },
+    {
+      "id": "source_KOD",
+      "type": "text",
+      "domainTarget": null
+    },
+    {
+      "id": "source_CPOPIS_20",
+      "type": "text",
+      "domainTarget": null
+    },
+    {
+      "id": "debitControl",
+      "type": "decimal",
+      "domainTarget": null
+    },
+    {
+      "id": "documentNumber",
+      "type": "identifier",
+      "domainTarget": null
+    },
+    {
+      "id": "documentType",
+      "type": "identifier",
+      "domainTarget": null
+    },
+    {
+      "id": "postingDate",
+      "type": "date",
+      "domainTarget": null
+    },
+    {
+      "id": "creditControl",
+      "type": "decimal",
+      "domainTarget": null
+    }
+  ],
+  "domainMappingStatus": "pendingReview"
+}

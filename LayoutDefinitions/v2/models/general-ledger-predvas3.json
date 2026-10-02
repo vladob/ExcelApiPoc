@@ -1,0 +1,140 @@
+{
+  "$schema": "../schemas/model.schema.json",
+  "schemaVersion": 2,
+  "definitionVersion": "2.0.0-draft.4",
+  "id": "ifosoft.model.general-ledger-predvas3",
+  "kind": "model",
+  "status": "reviewDraft",
+  "productionApproved": false,
+  "requiresCapabilities": [
+    "positioned.v2"
+  ],
+  "sourceRefs": [],
+  "reviewNotes": [
+    "C# domain export mapping is deferred to Step 3; source fields are preserved."
+  ],
+  "category": "GL",
+  "fields": [
+    {
+      "id": "licensedUserText",
+      "type": "text",
+      "domainTarget": null
+    },
+    {
+      "id": "periodStart",
+      "type": "accountingPeriod",
+      "domainTarget": null
+    },
+    {
+      "id": "periodEnd",
+      "type": "accountingPeriod",
+      "domainTarget": null
+    },
+    {
+      "id": "printedPageNumber",
+      "type": "integer",
+      "domainTarget": null
+    },
+    {
+      "id": "printingDate",
+      "type": "date",
+      "domainTarget": null
+    },
+    {
+      "id": "printingTime",
+      "type": "time",
+      "domainTarget": null
+    },
+    {
+      "id": "accountCode",
+      "type": "identifier",
+      "domainTarget": null
+    },
+    {
+      "id": "accountName",
+      "type": "text",
+      "domainTarget": null
+    },
+    {
+      "id": "accountType",
+      "type": "identifier",
+      "domainTarget": null
+    },
+    {
+      "id": "source_AP",
+      "type": "text",
+      "domainTarget": null
+    },
+    {
+      "id": "source_AD",
+      "type": "text",
+      "domainTarget": null
+    },
+    {
+      "id": "source_AS",
+      "type": "text",
+      "domainTarget": null
+    },
+    {
+      "id": "source_AK",
+      "type": "text",
+      "domainTarget": null
+    },
+    {
+      "id": "openingDebit",
+      "type": "decimal",
+      "domainTarget": null
+    },
+    {
+      "id": "openingCredit",
+      "type": "decimal",
+      "domainTarget": null
+    },
+    {
+      "id": "turnoverDebit",
+      "type": "decimal",
+      "domainTarget": null
+    },
+    {
+      "id": "turnoverCredit",
+      "type": "decimal",
+      "domainTarget": null
+    },
+    {
+      "id": "monthDebit",
+      "type": "decimal",
+      "domainTarget": null
+    },
+    {
+      "id": "monthCredit",
+      "type": "decimal",
+      "domainTarget": null
+    },
+    {
+      "id": "closingDebit",
+      "type": "decimal",
+      "domainTarget": null
+    },
+    {
+      "id": "closingCredit",
+      "type": "decimal",
+      "domainTarget": null
+    },
+    {
+      "id": "source_AZ",
+      "type": "text",
+      "domainTarget": null
+    },
+    {
+      "id": "syntheticAccountCode",
+      "type": "identifier",
+      "domainTarget": null
+    },
+    {
+      "id": "accountClassCode",
+      "type": "identifier",
+      "domainTarget": null
+    }
+  ],
+  "domainMappingStatus": "pendingReview"
+}

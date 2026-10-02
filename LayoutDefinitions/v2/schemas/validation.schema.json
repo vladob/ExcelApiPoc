@@ -1,0 +1,98 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.excelapipoc.local/positioned/v2/validation.schema.json",
+  "type": "object",
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "minLength": 1
+    },
+    "schemaVersion": {
+      "const": 2
+    },
+    "definitionVersion": {
+      "type": "string",
+      "minLength": 1
+    },
+    "id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "kind": {
+      "const": "validation"
+    },
+    "status": {
+      "enum": [
+        "reviewDraft",
+        "approved"
+      ]
+    },
+    "productionApproved": {
+      "type": "boolean"
+    },
+    "requiresCapabilities": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 0
+    },
+    "sourceRefs": {
+      "type": "array",
+      "items": {
+        "$ref": "common.schema.json#/$defs/source"
+      },
+      "minItems": 0
+    },
+    "reviewNotes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 0
+    },
+    "layoutRef": {
+      "$ref": "common.schema.json#/$defs/reference"
+    },
+    "printedControls": {
+      "type": "array",
+      "items": {
+        "$ref": "common.schema.json#/$defs/control"
+      },
+      "minItems": 0
+    },
+    "calculations": {
+      "type": "array",
+      "items": {
+        "$ref": "common.schema.json#/$defs/calculation"
+      },
+      "minItems": 0
+    },
+    "rules": {
+      "type": "array",
+      "items": {
+        "$ref": "common.schema.json#/$defs/validationRule"
+      },
+      "minItems": 0
+    }
+  },
+  "required": [
+    "$schema",
+    "schemaVersion",
+    "definitionVersion",
+    "id",
+    "kind",
+    "status",
+    "productionApproved",
+    "requiresCapabilities",
+    "sourceRefs",
+    "reviewNotes",
+    "layoutRef",
+    "printedControls",
+    "calculations",
+    "rules"
+  ],
+  "additionalProperties": false
+}

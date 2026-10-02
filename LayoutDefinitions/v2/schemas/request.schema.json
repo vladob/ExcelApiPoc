@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.excelapipoc.local/positioned/v2/request.schema.json",
+  "type": "object",
+  "properties": {
+    "schemaVersion": {
+      "const": 2
+    },
+    "extractionLevel": {
+      "enum": [
+        "recognition",
+        "metadata",
+        "records"
+      ]
+    },
+    "validationLevel": {
+      "enum": [
+        "none",
+        "completeness",
+        "internalConsistency"
+      ]
+    },
+    "catalogRef": {
+      "$ref": "common.schema.json#/$defs/reference"
+    },
+    "inputPath": {
+      "type": "string",
+      "minLength": 1
+    },
+    "allowedFormats": {
+      "type": "array",
+      "items": {
+        "enum": [
+          "PDF",
+          "XPS",
+          "OXPS"
+        ]
+      },
+      "minItems": 1
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "extractionLevel",
+    "validationLevel",
+    "catalogRef",
+    "inputPath",
+    "allowedFormats"
+  ],
+  "additionalProperties": false
+}

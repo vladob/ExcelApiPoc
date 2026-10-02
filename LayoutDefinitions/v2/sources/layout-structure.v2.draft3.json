@@ -1,0 +1,215 @@
+{
+  "schemaVersion": 2,
+  "definitionVersion": "2.0.0-draft.3",
+  "kind": "structureProposal",
+  "status": "reviewDraft",
+  "productionApproved": false,
+  "implementationStatus": "Proposed contract only. This file is neither a runnable layout nor a formal JSON Schema. Existing engine compatibility has not been verified.",
+  "packaging": {
+    "catalog": "catalog.json: explicit references to versioned definitions; no execution order inferred from directory names",
+    "identification": "identification/<family>.json: composite fingerprints, independently scored category, producer and layout decisions",
+    "layouts": "layouts/<layout>.json: nominal geometry, metadata, records, classification, groups and completeness",
+    "parsers": "parsers/<profile>.json: reusable typed value parsers",
+    "validation": "validation/<layout>.json: scoped calculations and printed-control comparisons",
+    "models": "models/<category>.json: semantic field names, types and mappings to C# domain models",
+    "schemas": "schemas/*.schema.json: closed, operation-specific JSON Schemas to be supplied with the migrated definitions",
+    "bundle": "Optional generated distribution bundle; separate files remain authoritative"
+  },
+  "commonEnvelope": {
+    "required": ["schemaVersion", "definitionVersion", "id", "kind", "status", "requiresCapabilities"],
+    "reference": {"id": "stable definition ID", "version": "exact definition version"},
+    "ruleEnvelope": {
+      "required": ["id", "op", "enabled", "evidenceStatus"],
+      "evidenceStatus": ["sourceDerived", "sampleVerified", "unverified"],
+      "optional": ["sourceRefs", "reviewNotes"]
+    },
+    "loadChecks": [
+      "Reject unknown operations, unknown executable properties and unsupported capabilities",
+      "Resolve every definition, variant, block, field, group, parser and rule reference",
+      "Reject duplicate IDs in their declared scope and cyclic calculation dependencies",
+      "Check rectangle ordering, positive dimensions and finite coordinates",
+      "Separate schema validity, evidence status and engine implementation status"
+    ]
+  },
+  "identificationContract": {
+    "sections": ["scan", "signals", "decisions", "layoutCandidates"],
+    "scan": {
+      "initialPages": "Explicit bounded physical-page selection",
+      "additionalPages": "Conditional bounded scan of additional headers, bodies or last page/footer",
+      "onBudgetExhausted": "Return inspected coverage and unresolved decisions; never pretend full-document inspection"
+    },
+    "signal": {
+      "required": ["id", "op", "locator", "target", "weight", "evidenceGroup"],
+      "target": ["category", "producer", "layout"],
+      "operations": ["textMatch", "orderedLabels", "relativePositions", "markerMatch", "geometryFit"],
+      "polarity": ["support", "contradiction"],
+      "evidenceGroup": "Correlated signals share a score cap; repeated page headers cannot multiply confidence"
+    },
+    "decision": {
+      "required": ["minimumScore", "minimumLead", "requiredSignals", "vetoSignals"],
+      "states": ["confirmed", "tentative", "ambiguous", "unknown"],
+      "scoreMeaning": "Ranking score, not probability",
+      "missingMarker": "Neutral unless a particular rule explicitly establishes that it must be present",
+      "producerGate": "Generic title alone cannot confirm IfoSoft. A layout may require independent producer evidence before automatic selection.",
+      "ties": "Retain candidates and evidence; do not select the first definition",
+      "testExpectations": "Never used as recognition evidence"
+    }
+  },
+  "layoutContract": {
+    "sections": ["formats", "modelRef", "identificationRefs", "parserRefs", "validationRefs", "variants", "metadata", "classification", "groups", "completeness", "provenance", "openQuestions"],
+    "formats": ["PDF", "XPS", "OXPS"],
+    "variant": {
+      "required": ["id", "sourceRefs", "nominalPageSizePt", "anchors", "calibration", "blocks"],
+      "selection": "Use observed geometry and header differences; a shared GMX marker does not distinguish variants"
+    },
+    "metadata": {
+      "field": {
+        "required": ["id", "semanticName", "locator", "parserRef", "onAbsent", "onConflict"],
+        "locatorKinds": ["calibratedRegion", "relativeToAnchor", "blockField"],
+        "locatorRequirements": "Specify page scope, coordinate frame, region or anchor, text assembly and expected cardinality",
+        "onAbsent": "unresolved",
+        "onConflict": "ambiguous"
+      },
+      "semanticNames": ["reportingEntity.cin", "reportingEntity.name", "licensedUserText", "fiscalYear", "period.start", "period.end", "printingDate", "printingTime", "reportTitle"],
+      "rules": [
+        "Keep licensed-user text separate from reporting entity",
+        "Never use a partner CIN as reporting-entity CIN",
+        "Keep printing date separate from fiscal year and transaction date",
+        "Metadata-only requests may inspect later pages when their locators require it",
+        "Missing metadata remains missing; filename-derived hints retain a separate origin"
+      ]
+    }
+  },
+  "geometryContract": {
+    "unit": "pt",
+    "rectangleOrder": ["left", "bottom", "right", "top"],
+    "normalizedPageFrame": "uprightCropLocal",
+    "origin": "lowerLeft",
+    "yDirection": "up",
+    "sourceConversion": {
+      "gmxUnitToPt": "72/254 at authoring time only",
+      "gmxInterpretation": "Sample-supported upper-left origin and tenths of millimeter; unrecognized flags remain opaque provenance"
+    },
+    "adapter": {
+      "required": ["physicalPageIndex", "sourcePageId", "pageSizePt", "sourceToNormalizedTransform", "normalizedToSourceTransform", "sourceElements"],
+      "normalization": "Explicitly account for PDF UserUnit, page rotation, crop-box origin and extractor-applied transforms; account for XPS/OXPS units, nested transforms and clipping",
+      "xpsPageOrder": "Follow document/page package references, never ZIP entry order",
+      "sourceElements": "Retain raw text, raw geometry, normalized geometry, glyph/cluster mapping, font information when available and clipping state",
+      "insufficientGlyphData": "Return unsupportedCapability when safe field separation requires unavailable glyph geometry"
+    },
+    "calibration": {
+      "op": "fitUniformScaleTranslation",
+      "equation": "observedPoint = scale * nominalPoint + [tx, ty]",
+      "requiredParameters": ["anchorRefs", "minimumInliers", "minimumAnchorSeparationPt", "scaleRange", "maximumResidualPt", "maximumHypotheses"],
+      "constraints": "Fit one positive uniform scale and independent translations per page from nondegenerate anchor correspondences; page dimensions alone cannot establish scale",
+      "anchorFeature": "Specify matching feature: ruling endpoint, text baseline, text edge or other supported feature. Do not equate GMX rectangle corners with glyph bounds.",
+      "output": ["scale", "tx", "ty", "inliers", "rejectedAnchors", "residuals", "ruleId"],
+      "onFailure": "Retain page and diagnostic; do not silently reuse another page's calibration"
+    },
+    "blocks": {
+      "kinds": ["pageHeader", "repeatingRecord", "groupHeader", "groupFooter", "reportFooter", "decoration"],
+      "frames": ["nominalPage", "blockLocal"],
+      "localOrigin": "Nominal X=0 at detected block top; negative local Y extends downward",
+      "localEquation": "observedPoint = pageScale * localPoint + independentlyDetectedBlockOrigin",
+      "recordAdvance": "Nominal advance is supporting evidence, not a formula that fabricates records",
+      "footerOrigins": "Detect independently on every occurrence",
+      "overlapPolicy": "Allow declared field rectangles to overlap; preserve competing token assignments",
+      "fieldRegions": "Soft search regions with explicit tolerances and assignment rules"
+    }
+  },
+  "fiveStages": {
+    "geometry": {
+      "operations": ["locateBlock", "detectCandidates", "assignFields"],
+      "candidateDetection": "Union independent signals so malformed dates/accounts/amounts do not eliminate a candidate",
+      "output": "Physical block occurrences, record candidates, field token assignments and unresolved/orphan tokens"
+    },
+    "parsing": {
+      "operations": ["text", "identifier", "integer", "decimal", "exactDate", "exactTime", "accountingPeriod"],
+      "fieldStates": ["present", "blank", "unresolved", "invalid", "ambiguous"],
+      "valueOrigins": ["printed", "derived", "inherited"],
+      "decimal": "Use decimal arithmetic and explicit formats per field/block. Distinct successful parse values remain ambiguous.",
+      "identifier": "Keep leading zeros, letters, diacritics and allowed spaces",
+      "accountingPeriod": "Preserve raw code and year separately. Observed 00 through 14 are not calendar months or a closed set; unknown codes are retained with a diagnostic.",
+      "blank": "A scoped derivation may provide effective zero only for a confidently located blank monetary field; retain blank source state"
+    },
+    "classification": {
+      "predicateOperations": ["all", "any", "not", "fieldState", "textMatch", "blockKind", "groupContext"],
+      "evaluate": "Evaluate all rules; no match retains unrecognizedCandidate, incompatible matches retain ambiguity",
+      "outputs": ["semanticClass", "exportEligibility", "aggregationMemberships", "ruleIds", "evidenceRefs"],
+      "separation": "Physical block kind is distinct from semantic class, export eligibility and each individual aggregation/count membership",
+      "examples": ["entry", "heading", "subtotal", "grandTotal", "numberedBlankRow", "unrecognizedCandidate"]
+    },
+    "completeness": {
+      "operations": ["requireFields", "requireAny", "accountForCandidates", "accountForTokens", "checkSpacing", "sequence", "inspectCoverage"],
+      "selection": "Required fields depend on semantic class, not every physical row",
+      "oneSidedJournal": "Entry rules may require any of debitAccount/creditAccount; do not require both or invent pairs",
+      "unknownCandidate": "Retain source occurrence and diagnostic; material unresolved candidates prevent clean success",
+      "coverage": "Track document, group and page continuity. A header/footer-only page can be valid; contiguous available pages do not prove complete original input."
+    },
+    "validation": {
+      "operations": ["sum", "count", "add", "subtract", "compare", "dateRange", "periodCodeRange"],
+      "calculationRequired": ["id", "op", "scope", "memberSelector", "inputRefs", "prerequisites"],
+      "comparisonRequired": ["id", "calculatedRef", "printedControlRef", "absoluteTolerance", "coverageRequirement"],
+      "scope": "Explicit document/section/group occurrence and aggregation level",
+      "count": "Declare occurrence count or explicit distinct key; source numbered headings may count even when excluded from exported accounts",
+      "sum": "Select details or child summaries explicitly, never both accidentally",
+      "missingInput": "Inconclusive/notEvaluated with reason; do not default missing values to zero",
+      "partialInput": "Skip document-wide controls when required coverage is not established; evaluate eligible complete groups",
+      "resultStates": ["pass", "fail", "inconclusive", "notEvaluated"],
+      "restriction": "A matching total cannot resolve ambiguous parsing or prove extraction completeness"
+    }
+  },
+  "groupsContract": {
+    "required": ["id", "parentRef", "memberSelector", "startRule", "endRule", "crossPagePolicy", "partialInputPolicy"],
+    "crossPage": "Carry state only with recorded continuity evidence; repeated headers do not reset groups",
+    "trailingMetadata": "A footer can supply group/document metadata to earlier members by explicit source references",
+    "conflicts": "Never overwrite a conflicting explicit member value with inherited footer metadata",
+    "unclosedGroup": "Retain group with incomplete coverage and diagnostics"
+  },
+  "executionContract": {
+    "extractionLevels": ["recognition", "metadata", "records"],
+    "validationLevels": ["none", "completeness", "internalConsistency"],
+    "dependencies": "Requested validation promotes effective extraction level; return requested and effective levels",
+    "caching": "Reuse decoded pages within a request and compiled immutable definitions by version/hash",
+    "result": ["format", "recognitionDecisions", "metadata", "records", "printedControls", "calculations", "validationResults", "coverage", "diagnostics", "provenance"],
+    "domainModels": "AJ/AF/GL mappings are separate from the positioned-document engine; future invoice and bank-statement models use the same contracts where applicable",
+    "extensionBoundary": "New layouts need JSON only when existing bounded operations and adapters express them; genuinely new behavior requires an explicit versioned engine capability",
+    "limits": ["fileBytes", "pageCount", "decompressedPackageBytes", "regexTimeoutMs", "predicateDepth", "candidateHypotheses", "calibrationHypotheses", "executionTime"],
+    "onLimit": "Return incomplete result with diagnostic and retained evidence"
+  },
+  "provenanceContract": {
+    "required": ["documentHash", "engineVersion", "definitionIdsVersionsHashes", "physicalPageIndex", "sourceElementRefs", "rawText", "rawGeometry", "normalizedGeometry", "transformRefs", "ruleIds"],
+    "whenApplicable": ["printedPageLabel", "blockOccurrenceId", "blockOrigin", "parseAttempts", "classificationEvidence", "inheritedFrom", "derivationInputs"],
+    "identity": "Use source occurrence identity; duplicate business identifiers do not imply duplicate records"
+  },
+  "testManifestContract": {
+    "encoding": "UTF-8 with optional BOM",
+    "delimiter": ";",
+    "columns": ["FilePath", "AccountingEntity", "PerceivedCategory", "PreviousTestResult", "ExpectedYear"],
+    "accountingEntity": "Split initial eight-digit CIN and name at first ' - '; retain original value and leading zeros",
+    "categoryAliases": {"HL_KNIHA": "GL", "U_DENNIK": "AJ", "UCT_ROZVRH": "AF"},
+    "previousResultZero": "NotTested",
+    "expectedYear": "Four-digit year or blank when no expectation is asserted",
+    "confirmedCorrections": "Rows 101 and 106 of the supplied second CSV both have expected year 2025 per user confirmation",
+    "expectations": "Compare only after independent processing; never feed expected year/entity/category or historical outcome into detection",
+    "paths": "Absolute paths supported; relative paths resolved against manifest directory",
+    "formats": "Allow PDF/XPS/OXPS filtering; explicitly report excluded or unsupported inputs",
+    "output": {
+      "csv": "One row per manifest row with expected/actual metadata, recognition, processing, expectation comparison, coverage, record count, validation summary, standard category totals and explanations",
+      "json": "Full results including multiple scopes/periods, named totals, calculated/printed values, differences and evidence",
+      "statuses": "Keep processing, recognition, expectation comparison and validation statuses separate"
+    }
+  },
+  "migrationDecisions": [
+    "Preserve existing converted GMX geometry and source provenance; do not reconvert point coordinates",
+    "Replace prose-only executable instructions with operation-specific typed arguments in step 2",
+    "Split category/producer/layout recognition and add concrete metadata locators",
+    "Move required-field decisions from raw geometry to class-dependent completeness rules",
+    "Give every calculation an explicit scope and member selection",
+    "Replace empirical UCT_ROZVRH geometry using sample-matching _UROZVRH.gmx; _UROZVRH_V2.gmx remains a separate unverified variant",
+    "Retain DENNIK1 header variants despite identical record geometry",
+    "Classify PREDVAS3 as GL; preserve uncertainty for account-movement category mappings",
+    "Keep unverified controls disabled until semantics and matching samples establish their meaning"
+  ],
+  "reviewGate": "Review this structure before migrating all definitions. Step 2 supplies formal JSON Schemas, typed operation arguments, migrated definitions and reference-validation results. Production code is unchanged."
+}

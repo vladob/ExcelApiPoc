@@ -1,0 +1,381 @@
+{
+  "$schema": "../schemas/identification.schema.json",
+  "schemaVersion": 2,
+  "definitionVersion": "2.0.0-draft.4",
+  "id": "ifosoft.identify.hlknia4",
+  "kind": "identification",
+  "status": "reviewDraft",
+  "productionApproved": false,
+  "requiresCapabilities": [
+    "positioned.v2"
+  ],
+  "sourceRefs": [],
+  "reviewNotes": [
+    "Scores and thresholds are provisional, not probabilities. Missing markers are neutral. Geometry is required for layout selection.",
+    "Scan budgets count physical available pages; test expectations and filenames are never recognition inputs."
+  ],
+  "scan": {
+    "initialPages": {
+      "selection": "first",
+      "indices": [],
+      "maximumPages": 3
+    },
+    "additionalPages": {
+      "selection": "all",
+      "indices": [],
+      "maximumPages": 20
+    },
+    "expandWhen": "unresolvedDecision",
+    "onBudgetExhausted": "retainCoverageAndUnresolvedDecisions"
+  },
+  "signals": [
+    {
+      "id": "title",
+      "op": "textMatch",
+      "enabled": true,
+      "evidenceStatus": "sourceDerived",
+      "sourceRefs": [],
+      "reviewNotes": [],
+      "locator": {
+        "kind": "normalizedPage",
+        "pages": {
+          "selection": "all",
+          "indices": [],
+          "maximumPages": 10000
+        },
+        "assembly": "readingOrder",
+        "cardinality": "many",
+        "regionFraction": [
+          0,
+          0,
+          1,
+          1
+        ]
+      },
+      "target": "category",
+      "candidate": "GL",
+      "weight": 35,
+      "evidenceGroup": "title",
+      "polarity": "support",
+      "missing": "neutral",
+      "match": {
+        "mode": "contains",
+        "value": "HLAVNÁ KNIHA PODROBNÁ",
+        "ignoreCase": true,
+        "whitespace": "remove",
+        "unicodeNormalization": "NFC",
+        "regexTimeoutMs": 100
+      }
+    },
+    {
+      "id": "columns",
+      "op": "orderedLabels",
+      "enabled": true,
+      "evidenceStatus": "sourceDerived",
+      "sourceRefs": [],
+      "reviewNotes": [],
+      "locator": {
+        "kind": "normalizedPage",
+        "pages": {
+          "selection": "all",
+          "indices": [],
+          "maximumPages": 10000
+        },
+        "assembly": "readingOrder",
+        "cardinality": "many",
+        "regionFraction": [
+          0,
+          0,
+          1,
+          1
+        ]
+      },
+      "target": "category",
+      "candidate": "GL",
+      "weight": 25,
+      "evidenceGroup": "columns",
+      "polarity": "support",
+      "missing": "neutral",
+      "labels": [
+        {
+          "mode": "contains",
+          "value": "Účet",
+          "ignoreCase": true,
+          "whitespace": "collapse",
+          "unicodeNormalization": "NFC",
+          "regexTimeoutMs": 100
+        },
+        {
+          "mode": "contains",
+          "value": "Počiatočný stav",
+          "ignoreCase": true,
+          "whitespace": "collapse",
+          "unicodeNormalization": "NFC",
+          "regexTimeoutMs": 100
+        },
+        {
+          "mode": "contains",
+          "value": "Obrat od začiatku roka",
+          "ignoreCase": true,
+          "whitespace": "collapse",
+          "unicodeNormalization": "NFC",
+          "regexTimeoutMs": 100
+        },
+        {
+          "mode": "contains",
+          "value": "Zostatok účtu",
+          "ignoreCase": true,
+          "whitespace": "collapse",
+          "unicodeNormalization": "NFC",
+          "regexTimeoutMs": 100
+        }
+      ],
+      "axis": "x",
+      "maximumOrthogonalGapPt": 40
+    },
+    {
+      "id": "producer-brand",
+      "op": "textMatch",
+      "enabled": true,
+      "evidenceStatus": "sourceDerived",
+      "sourceRefs": [],
+      "reviewNotes": [],
+      "locator": {
+        "kind": "normalizedPage",
+        "pages": {
+          "selection": "all",
+          "indices": [],
+          "maximumPages": 10000
+        },
+        "assembly": "readingOrder",
+        "cardinality": "many",
+        "regionFraction": [
+          0,
+          0,
+          1,
+          1
+        ]
+      },
+      "target": "producer",
+      "candidate": "IfoSoft",
+      "weight": 40,
+      "evidenceGroup": "producer",
+      "polarity": "support",
+      "missing": "neutral",
+      "match": {
+        "mode": "contains",
+        "value": "IFOsoft",
+        "ignoreCase": true,
+        "whitespace": "collapse",
+        "unicodeNormalization": "NFC",
+        "regexTimeoutMs": 100
+      }
+    },
+    {
+      "id": "producer-marker",
+      "op": "markerMatch",
+      "enabled": true,
+      "evidenceStatus": "sourceDerived",
+      "sourceRefs": [],
+      "reviewNotes": [],
+      "locator": {
+        "kind": "normalizedPage",
+        "pages": {
+          "selection": "all",
+          "indices": [],
+          "maximumPages": 10000
+        },
+        "assembly": "readingOrder",
+        "cardinality": "many",
+        "regionFraction": [
+          0,
+          0,
+          1,
+          1
+        ]
+      },
+      "target": "producer",
+      "candidate": "IfoSoft",
+      "weight": 40,
+      "evidenceGroup": "producer",
+      "polarity": "support",
+      "missing": "neutral",
+      "match": {
+        "mode": "contains",
+        "value": "_HLKNIA4.GMX",
+        "ignoreCase": true,
+        "whitespace": "remove",
+        "unicodeNormalization": "NFC",
+        "regexTimeoutMs": 100
+      }
+    },
+    {
+      "id": "geometry-0",
+      "op": "geometryFit",
+      "enabled": true,
+      "evidenceStatus": "unverified",
+      "sourceRefs": [],
+      "reviewNotes": [],
+      "locator": {
+        "kind": "normalizedPage",
+        "pages": {
+          "selection": "all",
+          "indices": [],
+          "maximumPages": 10000
+        },
+        "assembly": "readingOrder",
+        "cardinality": "many",
+        "regionFraction": [
+          0,
+          0,
+          1,
+          1
+        ]
+      },
+      "target": "layout",
+      "candidate": "ifosoft.general-ledger-hlknia4-legacy",
+      "weight": 50,
+      "evidenceGroup": "geometry",
+      "polarity": "support",
+      "missing": "neutral",
+      "layoutRef": {
+        "id": "ifosoft.general-ledger-hlknia4-legacy",
+        "version": "2.0.0-draft.4"
+      },
+      "variantRefs": [
+        "original"
+      ]
+    },
+    {
+      "id": "geometry-1",
+      "op": "geometryFit",
+      "enabled": true,
+      "evidenceStatus": "unverified",
+      "sourceRefs": [],
+      "reviewNotes": [],
+      "locator": {
+        "kind": "normalizedPage",
+        "pages": {
+          "selection": "all",
+          "indices": [],
+          "maximumPages": 10000
+        },
+        "assembly": "readingOrder",
+        "cardinality": "many",
+        "regionFraction": [
+          0,
+          0,
+          1,
+          1
+        ]
+      },
+      "target": "layout",
+      "candidate": "ifosoft.general-ledger-hlknia4",
+      "weight": 50,
+      "evidenceGroup": "geometry",
+      "polarity": "support",
+      "missing": "neutral",
+      "layoutRef": {
+        "id": "ifosoft.general-ledger-hlknia4",
+        "version": "2.0.0-draft.4"
+      },
+      "variantRefs": [
+        "original"
+      ]
+    }
+  ],
+  "evidenceGroups": [
+    {
+      "id": "title",
+      "scoreCap": 35,
+      "repeatedOccurrences": "maximumOnce"
+    },
+    {
+      "id": "columns",
+      "scoreCap": 25,
+      "repeatedOccurrences": "maximumOnce"
+    },
+    {
+      "id": "producer",
+      "scoreCap": 40,
+      "repeatedOccurrences": "maximumOnce"
+    },
+    {
+      "id": "geometry",
+      "scoreCap": 50,
+      "repeatedOccurrences": "maximumOnce"
+    }
+  ],
+  "decisions": [
+    {
+      "target": "category",
+      "candidate": "GL",
+      "minimumScore": 50,
+      "minimumLead": 15,
+      "requiredSignals": [],
+      "vetoSignals": [],
+      "requiredDecisions": []
+    },
+    {
+      "target": "producer",
+      "candidate": "IfoSoft",
+      "minimumScore": 40,
+      "minimumLead": 15,
+      "requiredSignals": [],
+      "vetoSignals": [],
+      "requiredDecisions": []
+    },
+    {
+      "target": "layout",
+      "candidate": "ifosoft.general-ledger-hlknia4-legacy",
+      "minimumScore": 50,
+      "minimumLead": 15,
+      "requiredSignals": [
+        "geometry-0"
+      ],
+      "vetoSignals": [],
+      "requiredDecisions": [
+        {
+          "target": "producer",
+          "candidate": "IfoSoft"
+        },
+        {
+          "target": "category",
+          "candidate": "GL"
+        }
+      ]
+    },
+    {
+      "target": "layout",
+      "candidate": "ifosoft.general-ledger-hlknia4",
+      "minimumScore": 50,
+      "minimumLead": 15,
+      "requiredSignals": [
+        "geometry-1"
+      ],
+      "vetoSignals": [],
+      "requiredDecisions": [
+        {
+          "target": "producer",
+          "candidate": "IfoSoft"
+        },
+        {
+          "target": "category",
+          "candidate": "GL"
+        }
+      ]
+    }
+  ],
+  "layoutCandidates": [
+    {
+      "id": "ifosoft.general-ledger-hlknia4-legacy",
+      "version": "2.0.0-draft.4"
+    },
+    {
+      "id": "ifosoft.general-ledger-hlknia4",
+      "version": "2.0.0-draft.4"
+    }
+  ],
+  "onTie": "retainCandidates",
+  "scoreMeaning": "rankingNotProbability"
+}

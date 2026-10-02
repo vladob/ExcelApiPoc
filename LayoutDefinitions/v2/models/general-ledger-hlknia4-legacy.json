@@ -1,0 +1,120 @@
+{
+  "$schema": "../schemas/model.schema.json",
+  "schemaVersion": 2,
+  "definitionVersion": "2.0.0-draft.4",
+  "id": "ifosoft.model.general-ledger-hlknia4-legacy",
+  "kind": "model",
+  "status": "reviewDraft",
+  "productionApproved": false,
+  "requiresCapabilities": [
+    "positioned.v2"
+  ],
+  "sourceRefs": [],
+  "reviewNotes": [
+    "C# domain export mapping is deferred to Step 3; source fields are preserved."
+  ],
+  "category": "GL",
+  "fields": [
+    {
+      "id": "licensedUserText",
+      "type": "text",
+      "domainTarget": null
+    },
+    {
+      "id": "periodStart",
+      "type": "accountingPeriod",
+      "domainTarget": null
+    },
+    {
+      "id": "periodEnd",
+      "type": "accountingPeriod",
+      "domainTarget": null
+    },
+    {
+      "id": "printedPageNumber",
+      "type": "integer",
+      "domainTarget": null
+    },
+    {
+      "id": "reportSubtitle",
+      "type": "text",
+      "domainTarget": null
+    },
+    {
+      "id": "openingNet",
+      "type": "decimal",
+      "domainTarget": null
+    },
+    {
+      "id": "turnoverDebit",
+      "type": "decimal",
+      "domainTarget": null
+    },
+    {
+      "id": "turnoverCredit",
+      "type": "decimal",
+      "domainTarget": null
+    },
+    {
+      "id": "monthDebit",
+      "type": "decimal",
+      "domainTarget": null
+    },
+    {
+      "id": "monthCredit",
+      "type": "decimal",
+      "domainTarget": null
+    },
+    {
+      "id": "closingNet",
+      "type": "decimal",
+      "domainTarget": null
+    },
+    {
+      "id": "accountCode",
+      "type": "identifier",
+      "domainTarget": null
+    },
+    {
+      "id": "source_ZAKC",
+      "type": "text",
+      "domainTarget": null
+    },
+    {
+      "id": "source_KP",
+      "type": "text",
+      "domainTarget": null
+    },
+    {
+      "id": "source_KZ",
+      "type": "text",
+      "domainTarget": null
+    },
+    {
+      "id": "source_STR",
+      "type": "text",
+      "domainTarget": null
+    },
+    {
+      "id": "source_ZAK",
+      "type": "text",
+      "domainTarget": null
+    },
+    {
+      "id": "syntheticAccountCode",
+      "type": "identifier",
+      "domainTarget": null
+    },
+    {
+      "id": "accountName",
+      "type": "text",
+      "domainTarget": null
+    },
+    {
+      "id": "accountClassCode",
+      "type": "identifier",
+      "domainTarget": null
+    }
+  ],
+  "domainMappingStatus": "pendingReview"
+}

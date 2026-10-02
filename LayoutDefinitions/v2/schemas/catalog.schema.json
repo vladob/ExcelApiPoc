@@ -1,0 +1,186 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.excelapipoc.local/positioned/v2/catalog.schema.json",
+  "type": "object",
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "minLength": 1
+    },
+    "schemaVersion": {
+      "const": 2
+    },
+    "definitionVersion": {
+      "type": "string",
+      "minLength": 1
+    },
+    "id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "kind": {
+      "const": "catalog"
+    },
+    "status": {
+      "enum": [
+        "reviewDraft",
+        "approved"
+      ]
+    },
+    "productionApproved": {
+      "type": "boolean"
+    },
+    "requiresCapabilities": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 0
+    },
+    "sourceRefs": {
+      "type": "array",
+      "items": {
+        "$ref": "common.schema.json#/$defs/source"
+      },
+      "minItems": 0
+    },
+    "reviewNotes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 0
+    },
+    "definitions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "ref": {
+            "$ref": "common.schema.json#/$defs/reference"
+          },
+          "kind": {
+            "enum": [
+              "layout",
+              "identification",
+              "parsers",
+              "validation",
+              "model"
+            ]
+          },
+          "path": {
+            "type": "string",
+            "minLength": 1
+          },
+          "sha256": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          }
+        },
+        "required": [
+          "ref",
+          "kind",
+          "path",
+          "sha256"
+        ],
+        "additionalProperties": false
+      },
+      "minItems": 1
+    },
+    "geometry": {
+      "type": "object",
+      "properties": {
+        "unit": {
+          "const": "pt"
+        },
+        "origin": {
+          "const": "lowerLeft"
+        },
+        "frame": {
+          "const": "uprightCropLocal"
+        },
+        "rectangleOrder": {
+          "const": [
+            "left",
+            "bottom",
+            "right",
+            "top"
+          ]
+        }
+      },
+      "required": [
+        "unit",
+        "origin",
+        "frame",
+        "rectangleOrder"
+      ],
+      "additionalProperties": false
+    },
+    "limits": {
+      "type": "object",
+      "properties": {
+        "fileBytes": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "pageCount": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "decompressedPackageBytes": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "regexTimeoutMs": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "predicateDepth": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "candidateHypotheses": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "calibrationHypotheses": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "executionTimeMs": {
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      "required": [
+        "fileBytes",
+        "pageCount",
+        "decompressedPackageBytes",
+        "regexTimeoutMs",
+        "predicateDepth",
+        "candidateHypotheses",
+        "calibrationHypotheses",
+        "executionTimeMs"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "$schema",
+    "schemaVersion",
+    "definitionVersion",
+    "id",
+    "kind",
+    "status",
+    "productionApproved",
+    "requiresCapabilities",
+    "sourceRefs",
+    "reviewNotes",
+    "definitions",
+    "geometry",
+    "limits"
+  ],
+  "additionalProperties": false
+}

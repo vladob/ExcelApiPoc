@@ -1,0 +1,3308 @@
+{
+  "$schema": "../schemas/layout.schema.json",
+  "schemaVersion": 2,
+  "definitionVersion": "2.0.0-draft.4",
+  "id": "ifosoft.account-movements-obr-ucet",
+  "kind": "layout",
+  "status": "reviewDraft",
+  "productionApproved": false,
+  "requiresCapabilities": [
+    "positioned.v2"
+  ],
+  "sourceRefs": [
+    {
+      "file": "sources/IfoSoft-v2-review.zip",
+      "sha256": "3d74f8a56bfd23fe52557f82018268612f62005cfdb1063064f211fbbb9788c0"
+    }
+  ],
+  "reviewNotes": [],
+  "formats": [
+    "PDF",
+    "XPS",
+    "OXPS"
+  ],
+  "modelRef": {
+    "id": "ifosoft.model.account-movements-obr-ucet",
+    "version": "2.0.0-draft.4"
+  },
+  "identificationRefs": [
+    {
+      "id": "ifosoft.identify.obr_ucet",
+      "version": "2.0.0-draft.4"
+    }
+  ],
+  "parserRefs": [
+    {
+      "id": "ifosoft.parsers",
+      "version": "2.0.0-draft.4"
+    }
+  ],
+  "validationRefs": [
+    {
+      "id": "ifosoft.account-movements-obr-ucet.validation",
+      "version": "2.0.0-draft.4"
+    }
+  ],
+  "variants": [
+    {
+      "id": "original",
+      "evidenceStatus": "sourceDerived",
+      "sourceRefs": [
+        {
+          "file": "_OBR_UCET.gmx",
+          "sha256": "fddc694abf497d78cd9ad2a6111de4c1a0220f86ab86db1a7e1d4c66b9d9eca2"
+        }
+      ],
+      "nominalPageSizePt": [
+        595.275591,
+        841.889764
+      ],
+      "anchors": [
+        {
+          "id": "anchor-1",
+          "feature": "rulingEndpoint",
+          "pointPt": [
+            17.007874,
+            790.866142
+          ],
+          "blockRef": "pagehead",
+          "lineRef": "line-6",
+          "endpointIndex": 0,
+          "evidenceStatus": "sourceDerived",
+          "sourceRefs": [
+            {
+              "file": "_OBR_UCET.gmx",
+              "line": 6,
+              "rawCommand": "|CPLINE(60,180,2030,180,4,0,0,0)"
+            }
+          ]
+        },
+        {
+          "id": "anchor-2",
+          "feature": "rulingEndpoint",
+          "pointPt": [
+            575.433071,
+            790.866142
+          ],
+          "blockRef": "pagehead",
+          "lineRef": "line-6",
+          "endpointIndex": 1,
+          "evidenceStatus": "sourceDerived",
+          "sourceRefs": [
+            {
+              "file": "_OBR_UCET.gmx",
+              "line": 6,
+              "rawCommand": "|CPLINE(60,180,2030,180,4,0,0,0)"
+            }
+          ]
+        },
+        {
+          "id": "anchor-3",
+          "feature": "rulingEndpoint",
+          "pointPt": [
+            17.007874,
+            768.188976
+          ],
+          "blockRef": "pagehead",
+          "lineRef": "line-8",
+          "endpointIndex": 0,
+          "evidenceStatus": "sourceDerived",
+          "sourceRefs": [
+            {
+              "file": "_OBR_UCET.gmx",
+              "line": 8,
+              "rawCommand": "|CPLINE(60,260,2030,260,4,0,0,0)"
+            }
+          ]
+        },
+        {
+          "id": "anchor-4",
+          "feature": "rulingEndpoint",
+          "pointPt": [
+            575.433071,
+            768.188976
+          ],
+          "blockRef": "pagehead",
+          "lineRef": "line-8",
+          "endpointIndex": 1,
+          "evidenceStatus": "sourceDerived",
+          "sourceRefs": [
+            {
+              "file": "_OBR_UCET.gmx",
+              "line": 8,
+              "rawCommand": "|CPLINE(60,260,2030,260,4,0,0,0)"
+            }
+          ]
+        },
+        {
+          "id": "anchor-5",
+          "feature": "rulingEndpoint",
+          "pointPt": [
+            340.15748,
+            790.866142
+          ],
+          "blockRef": "pagehead",
+          "lineRef": "line-9",
+          "endpointIndex": 0,
+          "evidenceStatus": "sourceDerived",
+          "sourceRefs": [
+            {
+              "file": "_OBR_UCET.gmx",
+              "line": 9,
+              "rawCommand": "|CPLINE(1200,180,1200,260,1,0,0,0)"
+            }
+          ]
+        },
+        {
+          "id": "anchor-6",
+          "feature": "rulingEndpoint",
+          "pointPt": [
+            340.15748,
+            768.188976
+          ],
+          "blockRef": "pagehead",
+          "lineRef": "line-9",
+          "endpointIndex": 1,
+          "evidenceStatus": "sourceDerived",
+          "sourceRefs": [
+            {
+              "file": "_OBR_UCET.gmx",
+              "line": 9,
+              "rawCommand": "|CPLINE(1200,180,1200,260,1,0,0,0)"
+            }
+          ]
+        },
+        {
+          "id": "anchor-7",
+          "feature": "rulingEndpoint",
+          "pointPt": [
+            521.574803,
+            790.866142
+          ],
+          "blockRef": "pagehead",
+          "lineRef": "line-10",
+          "endpointIndex": 0,
+          "evidenceStatus": "sourceDerived",
+          "sourceRefs": [
+            {
+              "file": "_OBR_UCET.gmx",
+              "line": 10,
+              "rawCommand": "|CPLINE(1840,180,1840,260,4,0,0,0)"
+            }
+          ]
+        },
+        {
+          "id": "anchor-8",
+          "feature": "rulingEndpoint",
+          "pointPt": [
+            521.574803,
+            768.188976
+          ],
+          "blockRef": "pagehead",
+          "lineRef": "line-10",
+          "endpointIndex": 1,
+          "evidenceStatus": "sourceDerived",
+          "sourceRefs": [
+            {
+              "file": "_OBR_UCET.gmx",
+              "line": 10,
+              "rawCommand": "|CPLINE(1840,180,1840,260,4,0,0,0)"
+            }
+          ]
+        },
+        {
+          "id": "anchor-9",
+          "feature": "rulingEndpoint",
+          "pointPt": [
+            396.850394,
+            790.866142
+          ],
+          "blockRef": "pagehead",
+          "lineRef": "line-11",
+          "endpointIndex": 0,
+          "evidenceStatus": "sourceDerived",
+          "sourceRefs": [
+            {
+              "file": "_OBR_UCET.gmx",
+              "line": 11,
+              "rawCommand": "|CPLINE(1400,180,1400,260,4,0,0,0)"
+            }
+          ]
+        },
+        {
+          "id": "anchor-10",
+          "feature": "rulingEndpoint",
+          "pointPt": [
+            396.850394,
+            768.188976
+          ],
+          "blockRef": "pagehead",
+          "lineRef": "line-11",
+          "endpointIndex": 1,
+          "evidenceStatus": "sourceDerived",
+          "sourceRefs": [
+            {
+              "file": "_OBR_UCET.gmx",
+              "line": 11,
+              "rawCommand": "|CPLINE(1400,180,1400,260,4,0,0,0)"
+            }
+          ]
+        },
+        {
+          "id": "anchor-11",
+          "feature": "rulingEndpoint",
+          "pointPt": [
+            62.362205,
+            790.866142
+          ],
+          "blockRef": "pagehead",
+          "lineRef": "line-13",
+          "endpointIndex": 0,
+          "evidenceStatus": "sourceDerived",
+          "sourceRefs": [
+            {
+              "file": "_OBR_UCET.gmx",
+              "line": 13,
+              "rawCommand": "|CPLINE(220,180,220,260,1,0,0,0)"
+            }
+          ]
+        },
+        {
+          "id": "anchor-12",
+          "feature": "rulingEndpoint",
+          "pointPt": [
+            62.362205,
+            768.188976
+          ],
+          "blockRef": "pagehead",
+          "lineRef": "line-13",
+          "endpointIndex": 1,
+          "evidenceStatus": "sourceDerived",
+          "sourceRefs": [
+            {
+              "file": "_OBR_UCET.gmx",
+              "line": 13,
+              "rawCommand": "|CPLINE(220,180,220,260,1,0,0,0)"
+            }
+          ]
+        },
+        {
+          "id": "anchor-13",
+          "feature": "rulingEndpoint",
+          "pointPt": [
+            243.779528,
+            790.866142
+          ],
+          "blockRef": "pagehead",
+          "lineRef": "line-19",
+          "endpointIndex": 0,
+          "evidenceStatus": "sourceDerived",
+          "sourceRefs": [
+            {
+              "file": "_OBR_UCET.gmx",
+              "line": 19,
+              "rawCommand": "|CPLINE(860,180,860,260,4,0,0,0)"
+            }
+          ]
+        },
+        {
+          "id": "anchor-14",
+          "feature": "rulingEndpoint",
+          "pointPt": [
+            243.779528,
+            768.188976
+          ],
+          "blockRef": "pagehead",
+          "lineRef": "line-19",
+          "endpointIndex": 1,
+          "evidenceStatus": "sourceDerived",
+          "sourceRefs": [
+            {
+              "file": "_OBR_UCET.gmx",
+              "line": 19,
+              "rawCommand": "|CPLINE(860,180,860,260,4,0,0,0)"
+            }
+          ]
+        },
+        {
+          "id": "anchor-15",
+          "feature": "rulingEndpoint",
+          "pointPt": [
+            283.464567,
+            790.866142
+          ],
+          "blockRef": "pagehead",
+          "lineRef": "line-24",
+          "endpointIndex": 0,
+          "evidenceStatus": "sourceDerived",
+          "sourceRefs": [
+            {
+              "file": "_OBR_UCET.gmx",
+              "line": 24,
+              "rawCommand": "|CPLINE(1000,180,1000,260,1,0,0,0)"
+            }
+          ]
+        },
+        {
+          "id": "anchor-16",
+          "feature": "rulingEndpoint",
+          "pointPt": [
+            283.464567,
+            768.188976
+          ],
+          "blockRef": "pagehead",
+          "lineRef": "line-24",
+          "endpointIndex": 1,
+          "evidenceStatus": "sourceDerived",
+          "sourceRefs": [
+            {
+              "file": "_OBR_UCET.gmx",
+              "line": 24,
+              "rawCommand": "|CPLINE(1000,180,1000,260,1,0,0,0)"
+            }
+          ]
+        }
+      ],
+      "blocks": [
+        {
+          "id": "pagehead",
+          "kind": "pageHeader",
+          "frame": "nominalPage",
+          "sourceRefs": [
+            {
+              "file": "_OBR_UCET.gmx",
+              "rawCommand": "#PAGEHEAD(80,0)"
+            }
+          ],
+          "nominalAdvancePt": 22.677165,
+          "emptyTemplate": false,
+          "placement": {
+            "id": "locate-pagehead",
+            "op": "locateBlock",
+            "enabled": true,
+            "evidenceStatus": "sourceDerived",
+            "sourceRefs": [],
+            "reviewNotes": [],
+            "frame": "nominalPage",
+            "origin": "pageCalibration",
+            "signals": [
+              "rulings",
+              "labels",
+              "fieldColumns",
+              "unassignedText"
+            ],
+            "combination": "union",
+            "onAmbiguous": "retainHypotheses"
+          },
+          "candidateDetection": {
+            "id": "detect-pagehead",
+            "op": "detectCandidates",
+            "enabled": true,
+            "evidenceStatus": "sourceDerived",
+            "sourceRefs": [],
+            "reviewNotes": [],
+            "signals": [
+              "rulings",
+              "labels",
+              "fieldColumns",
+              "unassignedText"
+            ],
+            "combination": "union",
+            "requiresSuccessfulParsing": false
+          },
+          "fieldAssignment": {
+            "id": "assign-pagehead",
+            "op": "assignFields",
+            "enabled": true,
+            "evidenceStatus": "sourceDerived",
+            "sourceRefs": [],
+            "reviewNotes": [],
+            "paddingPt": 1.5,
+            "assembly": "glyphClusters",
+            "splitAcrossFields": "requireGlyphGeometry",
+            "overlap": "retainAmbiguity",
+            "retainClippedSource": true
+          },
+          "fields": [
+            {
+              "id": "field-26",
+              "semanticName": "printedPageNumber",
+              "rectPt": [
+                552.755906,
+                794.267717,
+                574.866142,
+                805.03937
+              ],
+              "parserRef": "integer",
+              "sourceRefs": [
+                {
+                  "file": "_OBR_UCET.gmx",
+                  "line": 26,
+                  "rawCommand": "|CPDATABASE(1950,130,2028,168,1,0,0,1,16777215,1,0,2,5,8,0,0,0,400,0,0,0,238,3,2,1,18,\"Tahoma\",0,0,2,0,\"'$PAGENO'\",1,0,0,0,0,0)",
+                  "expression": "$PAGENO"
+                }
+              ]
+            },
+            {
+              "id": "field-28",
+              "semanticName": "licensedUserText",
+              "rectPt": [
+                334.488189,
+                828.283465,
+                573.448819,
+                839.055118
+              ],
+              "parserRef": "text",
+              "sourceRefs": [
+                {
+                  "file": "_OBR_UCET.gmx",
+                  "line": 28,
+                  "rawCommand": "|CPDATABASE(1180,10,2023,48,1,0,0,1,16777215,1,0,2,5,8,0,0,0,400,0,0,0,238,3,2,1,18,\"Tahoma\",0,1,2,0,\"'$USER'\",1,0,0,0,0,0)",
+                  "expression": "$USER"
+                }
+              ]
+            },
+            {
+              "id": "field-29",
+              "semanticName": "periodStart",
+              "rectPt": [
+                362.834646,
+                805.889764,
+                407.338583,
+                819.212598
+              ],
+              "parserRef": "period",
+              "sourceRefs": [
+                {
+                  "file": "_OBR_UCET.gmx",
+                  "line": 29,
+                  "rawCommand": "|CPDATABASE(1280,80,1437,127,0,0,0,1,0,1,16777215,2,5,10,0,0,0,700,0,0,0,238,3,2,1,34,\"Tahoma\",0,0,2,0,\"';^ODL'\",1,0,0,0,0,0)",
+                  "expression": ";^ODL"
+                }
+              ]
+            },
+            {
+              "id": "field-30",
+              "semanticName": "periodEnd",
+              "rectPt": [
+                413.858268,
+                805.889764,
+                458.362205,
+                819.212598
+              ],
+              "parserRef": "period",
+              "sourceRefs": [
+                {
+                  "file": "_OBR_UCET.gmx",
+                  "line": 30,
+                  "rawCommand": "|CPDATABASE(1460,80,1617,127,0,0,0,1,0,1,16777215,2,5,10,0,0,0,700,0,0,0,238,3,2,1,34,\"Tahoma\",0,0,2,0,\"';^DOL'\",1,0,0,0,0,0)",
+                  "expression": ";^DOL"
+                }
+              ]
+            },
+            {
+              "id": "field-33",
+              "semanticName": "reportSubtitle",
+              "rectPt": [
+                187.086614,
+                794.267717,
+                473.669291,
+                805.03937
+              ],
+              "parserRef": "text",
+              "sourceRefs": [
+                {
+                  "file": "_OBR_UCET.gmx",
+                  "line": 33,
+                  "rawCommand": "|CPDATABASE(660,130,1671,168,0,0,0,1,0,1,16777215,2,5,8,0,0,0,400,0,0,0,238,3,2,1,34,\"Tahoma\",0,2,2,0,\"'^Q0'\",1,0,0,0,0,0)",
+                  "expression": "^Q0"
+                }
+              ]
+            },
+            {
+              "id": "field-34",
+              "semanticName": "entityName",
+              "rectPt": [
+                17.007874,
+                828.283465,
+                160.440945,
+                839.055118
+              ],
+              "parserRef": "text",
+              "sourceRefs": [
+                {
+                  "file": "_OBR_UCET.gmx",
+                  "line": 34,
+                  "rawCommand": "|CPDATABASE(60,10,566,48,0,0,0,1,0,1,16777215,2,5,8,0,0,0,400,0,0,0,238,3,2,1,34,\"Tahoma\",0,0,2,0,\"'^NAF'\",1,0,0,0,0,0)",
+                  "expression": "^NAF"
+                }
+              ]
+            }
+          ],
+          "labels": [
+            {
+              "id": "label-5",
+              "text": "Popis operácie",
+              "rectPt": [
+                65.19685,
+                778.677165,
+                109.700787,
+                788.031496
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_OBR_UCET.gmx",
+                  "line": 5,
+                  "rawCommand": "|CPLABEL(230,190,387,223,1,0,0,1,16777215,1,0,2,5,7,0,0,0,400,0,0,0,238,3,2,1,18,\"Tahoma\",0,0,2,\"Popis operácie\")"
+                }
+              ]
+            },
+            {
+              "id": "label-7",
+              "text": "MÁ DAŤ",
+              "rectPt": [
+                297.637795,
+                774.425197,
+                326.267717,
+                785.19685
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_OBR_UCET.gmx",
+                  "line": 7,
+                  "rawCommand": "|CPLABEL(1050,200,1151,238,1,0,0,1,16777215,1,0,2,5,8,0,0,0,400,0,0,0,238,3,2,1,18,\"Tahoma\",0,2,2,\"MÁ DAŤ\")"
+                }
+              ]
+            },
+            {
+              "id": "label-12",
+              "text": "Stredisko",
+              "rectPt": [
+                399.685039,
+                770.173228,
+                428.031496,
+                779.527559
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_OBR_UCET.gmx",
+                  "line": 12,
+                  "rawCommand": "|CPLABEL(1410,220,1510,253,1,0,0,1,16777215,1,0,2,5,7,0,0,0,400,0,0,0,238,3,2,1,18,\"Tahoma\",0,0,2,\"Stredisko\")"
+                }
+              ]
+            },
+            {
+              "id": "label-14",
+              "text": "Dátum UÚP",
+              "rectPt": [
+                19.84252,
+                778.677165,
+                55.84252,
+                788.031496
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_OBR_UCET.gmx",
+                  "line": 14,
+                  "rawCommand": "|CPLABEL(70,190,197,223,1,0,0,1,16777215,1,0,2,5,7,0,0,0,400,0,0,0,238,3,2,1,18,\"Tahoma\",0,0,2,\"Dátum UÚP\")"
+                }
+              ]
+            },
+            {
+              "id": "label-15",
+              "text": "DAL",
+              "rectPt": [
+                362.834646,
+                774.425197,
+                377.291339,
+                785.19685
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_OBR_UCET.gmx",
+                  "line": 15,
+                  "rawCommand": "|CPLABEL(1280,200,1331,238,1,0,0,1,16777215,1,0,2,5,8,0,0,0,400,0,0,0,238,3,2,1,18,\"Tahoma\",0,2,2,\"DAL\")"
+                }
+              ]
+            },
+            {
+              "id": "label-16",
+              "text": "Zákazka",
+              "rectPt": [
+                433.700787,
+                770.173228,
+                458.929134,
+                779.527559
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_OBR_UCET.gmx",
+                  "line": 16,
+                  "rawCommand": "|CPLABEL(1530,220,1619,253,1,0,0,1,16777215,1,0,2,5,7,0,0,0,400,0,0,0,238,3,2,1,18,\"Tahoma\",0,0,2,\"Zákazka\")"
+                }
+              ]
+            },
+            {
+              "id": "label-17",
+              "text": "Zdroj T",
+              "rectPt": [
+                450.708661,
+                778.677165,
+                473.102362,
+                788.031496
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_OBR_UCET.gmx",
+                  "line": 17,
+                  "rawCommand": "|CPLABEL(1590,190,1669,223,1,0,0,1,16777215,1,0,2,5,7,0,0,0,400,0,0,0,238,3,2,1,18,\"Tahoma\",0,0,2,\"Zdroj T\")"
+                }
+              ]
+            },
+            {
+              "id": "label-18",
+              "text": "Účet",
+              "rectPt": [
+                246.614173,
+                774.425197,
+                262.488189,
+                785.19685
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_OBR_UCET.gmx",
+                  "line": 18,
+                  "rawCommand": "|CPLABEL(870,200,926,238,1,0,0,1,16777215,1,0,2,5,8,0,0,0,400,0,0,0,238,3,2,1,18,\"Tahoma\",0,0,2,\"Účet\")"
+                }
+              ]
+            },
+            {
+              "id": "label-21",
+              "text": "OdSTP",
+              "rectPt": [
+                399.685039,
+                778.677165,
+                420.377953,
+                788.031496
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_OBR_UCET.gmx",
+                  "line": 21,
+                  "rawCommand": "|CPLABEL(1410,190,1483,223,1,0,0,1,16777215,1,0,2,5,7,0,0,0,400,0,0,0,238,3,2,1,18,\"Tahoma\",0,0,2,\"OdSTP\")"
+                }
+              ]
+            },
+            {
+              "id": "label-22",
+              "text": "Položka",
+              "rectPt": [
+                422.362205,
+                778.677165,
+                445.606299,
+                788.031496
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_OBR_UCET.gmx",
+                  "line": 22,
+                  "rawCommand": "|CPLABEL(1490,190,1572,223,1,0,0,1,16777215,1,0,2,5,7,0,0,0,400,0,0,0,238,3,2,1,18,\"Tahoma\",0,0,2,\"Položka\")"
+                }
+              ]
+            },
+            {
+              "id": "label-23",
+              "text": "Program",
+              "rectPt": [
+                476.220472,
+                778.677165,
+                502.299213,
+                788.031496
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_OBR_UCET.gmx",
+                  "line": 23,
+                  "rawCommand": "|CPLABEL(1680,190,1772,223,1,0,0,1,16777215,1,0,2,5,7,0,0,0,400,0,0,0,238,3,2,1,18,\"Tahoma\",0,0,2,\"Program\")"
+                }
+              ]
+            },
+            {
+              "id": "label-25",
+              "text": "Strana:",
+              "rectPt": [
+                524.409449,
+                794.267717,
+                550.204724,
+                805.03937
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_OBR_UCET.gmx",
+                  "line": 25,
+                  "rawCommand": "|CPLABEL(1850,130,1941,168,1,0,0,1,16777215,1,0,2,5,8,0,0,0,400,0,0,0,238,3,2,1,18,\"Tahoma\",0,0,2,\"Strana:\")"
+                }
+              ]
+            },
+            {
+              "id": "label-27",
+              "text": "_OBR_UCET.GMX",
+              "rectPt": [
+                17.007874,
+                792.850394,
+                70.299213,
+                802.204724
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_OBR_UCET.gmx",
+                  "line": 27,
+                  "rawCommand": "|CPLABEL(60,140,248,173,1,0,0,1,16777215,1,0,2,5,7,0,0,0,400,0,0,0,238,3,2,1,18,\"Tahoma\",0,0,0,\"_OBR_UCET.GMX\")"
+                }
+              ]
+            },
+            {
+              "id": "label-31",
+              "text": "-",
+              "rectPt": [
+                408.188976,
+                805.889764,
+                412.724409,
+                819.212598
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_OBR_UCET.gmx",
+                  "line": 31,
+                  "rawCommand": "|CPLABEL(1440,80,1456,127,1,0,0,1,16777215,1,0,2,5,10,0,0,0,700,0,0,0,238,3,2,1,18,\"Tahoma\",0,0,2,\"-\")"
+                }
+              ]
+            },
+            {
+              "id": "label-32",
+              "text": "O B R A T Y  podľa   ÚČTOV",
+              "rectPt": [
+                218.267717,
+                805.889764,
+                353.76378,
+                819.212598
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_OBR_UCET.gmx",
+                  "line": 32,
+                  "rawCommand": "|CPLABEL(770,80,1248,127,1,0,0,1,16777215,1,0,2,5,10,0,0,0,700,0,0,0,238,3,2,1,18,\"Tahoma\",0,0,2,\"O B R A T Y  podľa   ÚČTOV\")"
+                }
+              ]
+            },
+            {
+              "id": "label-35",
+              "text": "Čislo dokladu",
+              "rectPt": [
+                19.84252,
+                770.173228,
+                60.661417,
+                779.527559
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_OBR_UCET.gmx",
+                  "line": 35,
+                  "rawCommand": "|CPLABEL(70,220,214,253,1,0,0,1,16777215,1,0,2,5,7,0,0,0,400,0,0,0,238,3,2,1,18,\"Tahoma\",0,0,2,\"Čislo dokladu\")"
+                }
+              ]
+            },
+            {
+              "id": "label-36",
+              "text": "IČO",
+              "rectPt": [
+                65.19685,
+                770.173228,
+                77.102362,
+                779.527559
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_OBR_UCET.gmx",
+                  "line": 36,
+                  "rawCommand": "|CPLABEL(230,220,272,253,1,0,0,1,16777215,1,0,2,5,7,0,0,0,400,0,0,0,238,3,2,1,18,\"Tahoma\",0,0,2,\"IČO\")"
+                }
+              ]
+            },
+            {
+              "id": "label-37",
+              "text": "Názov partnera",
+              "rectPt": [
+                107.716535,
+                770.173228,
+                154.771654,
+                779.527559
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_OBR_UCET.gmx",
+                  "line": 37,
+                  "rawCommand": "|CPLABEL(380,220,546,253,1,0,0,1,16777215,1,0,2,5,7,0,0,0,400,0,0,0,238,3,2,1,18,\"Tahoma\",0,0,2,\"Názov partnera\")"
+                }
+              ]
+            },
+            {
+              "id": "label-38",
+              "text": "Faktúra číslo",
+              "rectPt": [
+                532.913386,
+                770.173228,
+                571.464567,
+                779.527559
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_OBR_UCET.gmx",
+                  "line": 38,
+                  "rawCommand": "|CPLABEL(1880,220,2016,253,1,0,0,1,16777215,1,0,2,5,7,0,0,0,400,0,0,0,238,3,2,1,18,\"Tahoma\",0,0,2,\"Faktúra číslo\")"
+                }
+              ]
+            },
+            {
+              "id": "label-40",
+              "text": "Protiúčet",
+              "rectPt": [
+                524.409449,
+                778.677165,
+                551.905512,
+                788.031496
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_OBR_UCET.gmx",
+                  "line": 40,
+                  "rawCommand": "|CPLABEL(1850,190,1947,223,1,0,0,1,16777215,1,0,2,5,7,0,0,0,400,0,0,0,238,3,2,1,18,\"Tahoma\",0,0,2,\"Protiúčet\")"
+                }
+              ]
+            }
+          ],
+          "lines": [
+            {
+              "id": "line-6",
+              "pointsPt": [
+                [
+                  17.007874,
+                  790.866142
+                ],
+                [
+                  575.433071,
+                  790.866142
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_OBR_UCET.gmx",
+                  "line": 6,
+                  "rawCommand": "|CPLINE(60,180,2030,180,4,0,0,0)"
+                }
+              ]
+            },
+            {
+              "id": "line-8",
+              "pointsPt": [
+                [
+                  17.007874,
+                  768.188976
+                ],
+                [
+                  575.433071,
+                  768.188976
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_OBR_UCET.gmx",
+                  "line": 8,
+                  "rawCommand": "|CPLINE(60,260,2030,260,4,0,0,0)"
+                }
+              ]
+            },
+            {
+              "id": "line-9",
+              "pointsPt": [
+                [
+                  340.15748,
+                  790.866142
+                ],
+                [
+                  340.15748,
+                  768.188976
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_OBR_UCET.gmx",
+                  "line": 9,
+                  "rawCommand": "|CPLINE(1200,180,1200,260,1,0,0,0)"
+                }
+              ]
+            },
+            {
+              "id": "line-10",
+              "pointsPt": [
+                [
+                  521.574803,
+                  790.866142
+                ],
+                [
+                  521.574803,
+                  768.188976
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_OBR_UCET.gmx",
+                  "line": 10,
+                  "rawCommand": "|CPLINE(1840,180,1840,260,4,0,0,0)"
+                }
+              ]
+            },
+            {
+              "id": "line-11",
+              "pointsPt": [
+                [
+                  396.850394,
+                  790.866142
+                ],
+                [
+                  396.850394,
+                  768.188976
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_OBR_UCET.gmx",
+                  "line": 11,
+                  "rawCommand": "|CPLINE(1400,180,1400,260,4,0,0,0)"
+                }
+              ]
+            },
+            {
+              "id": "line-13",
+              "pointsPt": [
+                [
+                  62.362205,
+                  790.866142
+                ],
+                [
+                  62.362205,
+                  768.188976
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_OBR_UCET.gmx",
+                  "line": 13,
+                  "rawCommand": "|CPLINE(220,180,220,260,1,0,0,0)"
+                }
+              ]
+            },
+            {
+              "id": "line-19",
+              "pointsPt": [
+                [
+                  243.779528,
+                  790.866142
+                ],
+                [
+                  243.779528,
+                  768.188976
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_OBR_UCET.gmx",
+                  "line": 19,
+                  "rawCommand": "|CPLINE(860,180,860,260,4,0,0,0)"
+                }
+              ]
+            },
+            {
+              "id": "line-20",
+              "pointsPt": [
+                [
+                  17.007874,
+                  790.866142
+                ],
+                [
+                  17.007874,
+                  768.188976
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_OBR_UCET.gmx",
+                  "line": 20,
+                  "rawCommand": "|CPLINE(60,180,60,260,4,0,0,0)"
+                }
+              ]
+            },
+            {
+              "id": "line-24",
+              "pointsPt": [
+                [
+                  283.464567,
+                  790.866142
+                ],
+                [
+                  283.464567,
+                  768.188976
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_OBR_UCET.gmx",
+                  "line": 24,
+                  "rawCommand": "|CPLINE(1000,180,1000,260,1,0,0,0)"
+                }
+              ]
+            },
+            {
+              "id": "line-39",
+              "pointsPt": [
+                [
+                  575.433071,
+                  790.866142
+                ],
+                [
+                  575.433071,
+                  768.188976
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_OBR_UCET.gmx",
+                  "line": 39,
+                  "rawCommand": "|CPLINE(2030,180,2030,260,4,0,0,0)"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "record",
+          "kind": "repeatingRecord",
+          "frame": "blockLocal",
+          "sourceRefs": [
+            {
+              "file": "_OBR_UCET.gmx",
+              "rawCommand": "#RECORD(70,0)"
+            }
+          ],
+          "nominalAdvancePt": 19.84252,
+          "emptyTemplate": false,
+          "placement": {
+            "id": "locate-record",
+            "op": "locateBlock",
+            "enabled": true,
+            "evidenceStatus": "sourceDerived",
+            "sourceRefs": [],
+            "reviewNotes": [],
+            "frame": "blockLocal",
+            "origin": "independentOccurrence",
+            "signals": [
+              "rulings",
+              "labels",
+              "fieldColumns",
+              "unassignedText"
+            ],
+            "combination": "union",
+            "onAmbiguous": "retainHypotheses"
+          },
+          "candidateDetection": {
+            "id": "detect-record",
+            "op": "detectCandidates",
+            "enabled": true,
+            "evidenceStatus": "sourceDerived",
+            "sourceRefs": [],
+            "reviewNotes": [],
+            "signals": [
+              "rulings",
+              "labels",
+              "fieldColumns",
+              "unassignedText"
+            ],
+            "combination": "union",
+            "requiresSuccessfulParsing": false
+          },
+          "fieldAssignment": {
+            "id": "assign-record",
+            "op": "assignFields",
+            "enabled": true,
+            "evidenceStatus": "sourceDerived",
+            "sourceRefs": [],
+            "reviewNotes": [],
+            "paddingPt": 1.5,
+            "assembly": "glyphClusters",
+            "splitAcrossFields": "requireGlyphGeometry",
+            "overlap": "retainAmbiguity",
+            "retainClippedSource": true
+          },
+          "fields": [
+            {
+              "id": "field-43",
+              "semanticName": "debit",
+              "rectPt": [
+                283.464567,
+                -15.023622,
+                338.173228,
+                -5.669291
+              ],
+              "parserRef": "money-dot",
+              "sourceRefs": [
+                {
+                  "file": "_OBR_UCET.gmx",
+                  "line": 43,
+                  "rawCommand": "|CPDATABASE(1000,284,1193,317,1,0,0,1,16777215,1,0,2,5,7,0,0,0,400,0,0,0,238,3,2,1,18,\"Tahoma\",0,1,1,0,\"'[=*13.2'\",1,1,158,8,27,0)",
+                  "expression": "[=*13.2"
+                }
+              ]
+            },
+            {
+              "id": "field-44",
+              "semanticName": "description",
+              "rectPt": [
+                65.19685,
+                -9.354331,
+                232.440945,
+                0.0
+              ],
+              "parserRef": "text",
+              "sourceRefs": [
+                {
+                  "file": "_OBR_UCET.gmx",
+                  "line": 44,
+                  "rawCommand": "|CPDATABASE(230,264,820,297,1,0,0,1,16777215,1,0,2,5,7,0,0,0,400,0,0,0,238,3,2,1,18,\"Tahoma\",0,0,1,0,\"'POPIS'\",1,0,0,0,0,0)",
+                  "expression": "POPIS"
+                }
+              ]
+            },
+            {
+              "id": "field-49",
+              "semanticName": "credit",
+              "rectPt": [
+                340.15748,
+                -15.023622,
+                394.866142,
+                -5.669291
+              ],
+              "parserRef": "money-dot",
+              "sourceRefs": [
+                {
+                  "file": "_OBR_UCET.gmx",
+                  "line": 49,
+                  "rawCommand": "|CPDATABASE(1200,284,1393,317,1,0,0,1,16777215,1,0,2,5,7,0,0,0,400,0,0,0,238,3,2,1,18,\"Tahoma\",0,1,1,0,\"'[=*13.2'\",1,1,158,8,27,0)",
+                  "expression": "[=*13.2"
+                }
+              ]
+            },
+            {
+              "id": "field-50",
+              "semanticName": "source_STR",
+              "rectPt": [
+                399.685039,
+                -17.858268,
+                429.165354,
+                -8.503937
+              ],
+              "parserRef": "text",
+              "sourceRefs": [
+                {
+                  "file": "_OBR_UCET.gmx",
+                  "line": 50,
+                  "rawCommand": "|CPDATABASE(1410,294,1514,327,0,0,0,1,0,1,16777215,2,5,7,0,0,0,400,0,0,0,238,3,2,1,34,\"Tahoma\",0,0,1,0,\"'STR'\",1,0,0,0,0,0)",
+                  "expression": "STR"
+                }
+              ]
+            },
+            {
+              "id": "field-51",
+              "semanticName": "source_ZAKC",
+              "rectPt": [
+                399.685039,
+                -9.354331,
+                420.944882,
+                0.0
+              ],
+              "parserRef": "text",
+              "sourceRefs": [
+                {
+                  "file": "_OBR_UCET.gmx",
+                  "line": 51,
+                  "rawCommand": "|CPDATABASE(1410,264,1485,297,0,0,0,1,0,1,16777215,2,5,7,0,0,0,400,0,0,0,238,3,2,1,34,\"Tahoma\",0,0,1,0,\"'ZAKC'\",1,0,0,0,0,0)",
+                  "expression": "ZAKC"
+                }
+              ]
+            },
+            {
+              "id": "field-52",
+              "semanticName": "source_KP",
+              "rectPt": [
+                422.362205,
+                -9.354331,
+                447.590551,
+                0.0
+              ],
+              "parserRef": "text",
+              "sourceRefs": [
+                {
+                  "file": "_OBR_UCET.gmx",
+                  "line": 52,
+                  "rawCommand": "|CPDATABASE(1490,264,1579,297,0,0,0,1,0,1,16777215,2,5,7,0,0,0,400,0,0,0,238,3,2,1,34,\"Tahoma\",0,0,1,0,\"'KP'\",1,0,0,0,0,0)",
+                  "expression": "KP"
+                }
+              ]
+            },
+            {
+              "id": "field-53",
+              "semanticName": "accountCode",
+              "rectPt": [
+                246.614173,
+                -15.023622,
+                280.062992,
+                -5.669291
+              ],
+              "parserRef": "code",
+              "sourceRefs": [
+                {
+                  "file": "_OBR_UCET.gmx",
+                  "line": 53,
+                  "rawCommand": "|CPDATABASE(870,284,988,317,0,0,0,1,0,1,16777215,2,5,7,0,0,0,700,0,0,0,238,3,2,1,34,\"Tahoma\",0,0,2,0,\"'UCET'\",1,0,0,0,0,0)",
+                  "expression": "UCET"
+                }
+              ]
+            },
+            {
+              "id": "field-57",
+              "semanticName": "source_KZ",
+              "rectPt": [
+                450.708661,
+                -9.354331,
+                467.716535,
+                0.0
+              ],
+              "parserRef": "text",
+              "sourceRefs": [
+                {
+                  "file": "_OBR_UCET.gmx",
+                  "line": 57,
+                  "rawCommand": "|CPDATABASE(1590,264,1650,297,0,0,0,1,0,1,16777215,2,5,7,0,0,0,400,0,0,0,238,3,2,1,34,\"Tahoma\",0,0,1,0,\"'KZ'\",1,0,0,0,0,0)",
+                  "expression": "KZ"
+                }
+              ]
+            },
+            {
+              "id": "field-58",
+              "semanticName": "source_ZAK",
+              "rectPt": [
+                433.700787,
+                -17.858268,
+                475.653543,
+                -8.503937
+              ],
+              "parserRef": "text",
+              "sourceRefs": [
+                {
+                  "file": "_OBR_UCET.gmx",
+                  "line": 58,
+                  "rawCommand": "|CPDATABASE(1530,294,1678,327,0,0,0,1,0,1,16777215,2,5,7,0,0,0,400,0,0,0,238,3,2,1,34,\"Tahoma\",0,0,1,0,\"'ZAK'\",1,0,0,0,0,0)",
+                  "expression": "ZAK"
+                }
+              ]
+            },
+            {
+              "id": "field-59",
+              "semanticName": "source_PROG",
+              "rectPt": [
+                476.220472,
+                -9.354331,
+                518.173228,
+                0.0
+              ],
+              "parserRef": "text",
+              "sourceRefs": [
+                {
+                  "file": "_OBR_UCET.gmx",
+                  "line": 59,
+                  "rawCommand": "|CPDATABASE(1680,264,1828,297,0,0,0,1,0,1,16777215,2,5,7,0,0,0,400,0,0,0,238,3,2,1,34,\"Tahoma\",0,0,1,0,\"'PROG'\",1,0,0,0,0,0)",
+                  "expression": "PROG"
+                }
+              ]
+            },
+            {
+              "id": "field-61",
+              "semanticName": "postingDate",
+              "rectPt": [
+                22.677165,
+                -9.354331,
+                57.543307,
+                0.0
+              ],
+              "parserRef": "date",
+              "sourceRefs": [
+                {
+                  "file": "_OBR_UCET.gmx",
+                  "line": 61,
+                  "rawCommand": "|CPDATABASE(80,264,203,297,0,0,0,1,0,1,16777215,2,5,7,0,0,0,400,0,0,0,238,3,2,1,34,\"Tahoma\",0,0,1,0,\"':DATUM'\",1,0,0,0,0,0)",
+                  "expression": ":DATUM"
+                }
+              ]
+            },
+            {
+              "id": "field-62",
+              "semanticName": "source_T",
+              "rectPt": [
+                467.716535,
+                -9.354331,
+                476.220472,
+                0.0
+              ],
+              "parserRef": "text",
+              "sourceRefs": [
+                {
+                  "file": "_OBR_UCET.gmx",
+                  "line": 62,
+                  "rawCommand": "|CPDATABASE(1650,264,1680,297,0,0,0,1,0,1,16777215,2,5,7,0,0,0,400,0,0,0,238,3,2,1,34,\"Tahoma\",0,0,1,0,\"'T'\",1,0,0,0,0,0)",
+                  "expression": "T"
+                }
+              ]
+            },
+            {
+              "id": "field-63",
+              "semanticName": "partnerId",
+              "rectPt": [
+                65.19685,
+                -17.858268,
+                107.149606,
+                -8.503937
+              ],
+              "parserRef": "code",
+              "sourceRefs": [
+                {
+                  "file": "_OBR_UCET.gmx",
+                  "line": 63,
+                  "rawCommand": "|CPDATABASE(230,294,378,327,1,0,0,1,16777215,1,0,2,5,7,0,0,0,400,0,0,0,238,3,2,1,18,\"Tahoma\",0,0,1,0,\"'CISLO'\",1,0,0,0,0,0)",
+                  "expression": "CISLO"
+                }
+              ]
+            },
+            {
+              "id": "field-64",
+              "semanticName": "partnerName",
+              "rectPt": [
+                107.716535,
+                -17.858268,
+                241.511811,
+                -8.503937
+              ],
+              "parserRef": "text",
+              "sourceRefs": [
+                {
+                  "file": "_OBR_UCET.gmx",
+                  "line": 64,
+                  "rawCommand": "|CPDATABASE(380,294,852,327,1,0,0,1,16777215,1,0,2,5,7,0,0,0,400,0,0,0,238,3,2,1,18,\"Tahoma\",0,0,1,0,\"'FIRMA%32'\",1,0,0,0,0,0)",
+                  "expression": "FIRMA%32"
+                }
+              ]
+            },
+            {
+              "id": "field-65",
+              "semanticName": "invoiceNumber",
+              "rectPt": [
+                521.574803,
+                -17.858268,
+                572.031496,
+                -8.503937
+              ],
+              "parserRef": "code",
+              "sourceRefs": [
+                {
+                  "file": "_OBR_UCET.gmx",
+                  "line": 65,
+                  "rawCommand": "|CPDATABASE(1840,294,2018,327,1,0,0,1,16777215,1,0,2,5,7,0,0,0,400,0,0,0,238,3,2,1,18,\"Tahoma\",0,1,1,0,\"'FAKTC'\",1,0,0,0,0,0)",
+                  "expression": "FAKTC"
+                }
+              ]
+            },
+            {
+              "id": "field-66",
+              "semanticName": "documentNumber",
+              "rectPt": [
+                19.84252,
+                -17.858268,
+                45.070866,
+                -8.503937
+              ],
+              "parserRef": "code",
+              "sourceRefs": [
+                {
+                  "file": "_OBR_UCET.gmx",
+                  "line": 66,
+                  "rawCommand": "|CPDATABASE(70,294,159,327,0,0,0,1,0,1,16777215,2,5,7,0,0,0,400,0,0,0,238,3,2,1,34,\"Tahoma\",0,1,2,0,\"'CDOK'\",1,0,0,0,0,0)",
+                  "expression": "CDOK"
+                }
+              ]
+            },
+            {
+              "id": "field-68",
+              "semanticName": "documentType",
+              "rectPt": [
+                48.188976,
+                -17.858268,
+                60.944882,
+                -8.503937
+              ],
+              "parserRef": "code",
+              "sourceRefs": [
+                {
+                  "file": "_OBR_UCET.gmx",
+                  "line": 68,
+                  "rawCommand": "|CPDATABASE(170,294,215,327,0,0,0,1,0,1,16777215,2,5,7,0,0,0,400,0,0,0,238,3,2,1,34,\"Tahoma\",0,0,2,0,\"'DD'\",1,0,0,0,0,0)",
+                  "expression": "DD"
+                }
+              ]
+            },
+            {
+              "id": "field-70",
+              "semanticName": "counterAccount",
+              "rectPt": [
+                524.409449,
+                -9.354331,
+                557.858268,
+                0.0
+              ],
+              "parserRef": "code",
+              "sourceRefs": [
+                {
+                  "file": "_OBR_UCET.gmx",
+                  "line": 70,
+                  "rawCommand": "|CPDATABASE(1850,264,1968,297,0,0,0,1,0,1,16777215,2,5,7,0,0,0,700,0,0,0,238,3,2,1,34,\"Tahoma\",0,0,2,0,\"'PUC'\",1,0,0,0,0,0)",
+                  "expression": "PUC"
+                }
+              ]
+            }
+          ],
+          "labels": [
+            {
+              "id": "label-67",
+              "text": "/",
+              "rectPt": [
+                45.354331,
+                -17.858268,
+                48.472441,
+                -8.503937
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_OBR_UCET.gmx",
+                  "line": 67,
+                  "rawCommand": "|CPLABEL(160,294,171,327,0,0,0,1,0,1,16777215,2,5,7,0,0,0,400,0,0,0,238,3,2,1,34,\"Tahoma\",0,0,2,\"/\")"
+                }
+              ]
+            }
+          ],
+          "lines": [
+            {
+              "id": "line-45",
+              "pointsPt": [
+                [
+                  62.362205,
+                  0.0
+                ],
+                [
+                  62.362205,
+                  -19.84252
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_OBR_UCET.gmx",
+                  "line": 45,
+                  "rawCommand": "|CPLINE(220,264,220,334,1,0,0,0)"
+                }
+              ]
+            },
+            {
+              "id": "line-46",
+              "pointsPt": [
+                [
+                  17.007874,
+                  -19.84252
+                ],
+                [
+                  575.433071,
+                  -19.84252
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_OBR_UCET.gmx",
+                  "line": 46,
+                  "rawCommand": "|CPLINE(60,334,2030,334,1,1,0,0)"
+                }
+              ]
+            },
+            {
+              "id": "line-47",
+              "pointsPt": [
+                [
+                  396.850394,
+                  0.0
+                ],
+                [
+                  396.850394,
+                  -19.84252
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_OBR_UCET.gmx",
+                  "line": 47,
+                  "rawCommand": "|CPLINE(1400,264,1400,334,4,0,0,0)"
+                }
+              ]
+            },
+            {
+              "id": "line-48",
+              "pointsPt": [
+                [
+                  17.007874,
+                  0.0
+                ],
+                [
+                  17.007874,
+                  -19.84252
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_OBR_UCET.gmx",
+                  "line": 48,
+                  "rawCommand": "|CPLINE(60,264,60,334,4,0,0,0)"
+                }
+              ]
+            },
+            {
+              "id": "line-54",
+              "pointsPt": [
+                [
+                  521.574803,
+                  0.0
+                ],
+                [
+                  521.574803,
+                  -19.84252
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_OBR_UCET.gmx",
+                  "line": 54,
+                  "rawCommand": "|CPLINE(1840,264,1840,334,4,0,0,0)"
+                }
+              ]
+            },
+            {
+              "id": "line-55",
+              "pointsPt": [
+                [
+                  283.464567,
+                  0.0
+                ],
+                [
+                  283.464567,
+                  -19.84252
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_OBR_UCET.gmx",
+                  "line": 55,
+                  "rawCommand": "|CPLINE(1000,264,1000,334,1,0,0,0)"
+                }
+              ]
+            },
+            {
+              "id": "line-56",
+              "pointsPt": [
+                [
+                  340.15748,
+                  0.0
+                ],
+                [
+                  340.15748,
+                  -19.84252
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_OBR_UCET.gmx",
+                  "line": 56,
+                  "rawCommand": "|CPLINE(1200,264,1200,334,1,0,0,0)"
+                }
+              ]
+            },
+            {
+              "id": "line-60",
+              "pointsPt": [
+                [
+                  243.779528,
+                  0.0
+                ],
+                [
+                  243.779528,
+                  -19.84252
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_OBR_UCET.gmx",
+                  "line": 60,
+                  "rawCommand": "|CPLINE(860,264,860,334,4,0,0,0)"
+                }
+              ]
+            },
+            {
+              "id": "line-69",
+              "pointsPt": [
+                [
+                  575.433071,
+                  0.0
+                ],
+                [
+                  575.433071,
+                  -19.84252
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_OBR_UCET.gmx",
+                  "line": 69,
+                  "rawCommand": "|CPLINE(2030,264,2030,334,4,0,0,0)"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "foot1",
+          "kind": "reportFooter",
+          "frame": "blockLocal",
+          "sourceRefs": [
+            {
+              "file": "_OBR_UCET.gmx",
+              "rawCommand": "#FOOT1(200,1)"
+            }
+          ],
+          "nominalAdvancePt": 56.692913,
+          "emptyTemplate": false,
+          "placement": {
+            "id": "locate-foot1",
+            "op": "locateBlock",
+            "enabled": true,
+            "evidenceStatus": "sourceDerived",
+            "sourceRefs": [],
+            "reviewNotes": [],
+            "frame": "blockLocal",
+            "origin": "independentOccurrence",
+            "signals": [
+              "rulings",
+              "labels",
+              "fieldColumns",
+              "unassignedText"
+            ],
+            "combination": "union",
+            "onAmbiguous": "retainHypotheses"
+          },
+          "candidateDetection": {
+            "id": "detect-foot1",
+            "op": "detectCandidates",
+            "enabled": true,
+            "evidenceStatus": "sourceDerived",
+            "sourceRefs": [],
+            "reviewNotes": [],
+            "signals": [
+              "rulings",
+              "labels",
+              "fieldColumns",
+              "unassignedText"
+            ],
+            "combination": "union",
+            "requiresSuccessfulParsing": false
+          },
+          "fieldAssignment": {
+            "id": "assign-foot1",
+            "op": "assignFields",
+            "enabled": true,
+            "evidenceStatus": "sourceDerived",
+            "sourceRefs": [],
+            "reviewNotes": [],
+            "paddingPt": 1.5,
+            "assembly": "glyphClusters",
+            "splitAcrossFields": "requireGlyphGeometry",
+            "overlap": "retainAmbiguity",
+            "retainClippedSource": true
+          },
+          "fields": [
+            {
+              "id": "field-72",
+              "semanticName": "debit",
+              "rectPt": [
+                283.464567,
+                -9.354331,
+                339.023622,
+                0.0
+              ],
+              "parserRef": "money-dot",
+              "sourceRefs": [
+                {
+                  "file": "_OBR_UCET.gmx",
+                  "line": 72,
+                  "rawCommand": "|CPDATABASE(1000,264,1196,297,1,0,0,1,16777215,1,0,2,5,7,0,0,0,700,0,0,0,238,3,2,1,18,\"Tahoma\",0,1,2,0,\"'[=*12.2'\",1,1,156,8,32,0)",
+                  "expression": "[=*12.2"
+                }
+              ]
+            },
+            {
+              "id": "field-73",
+              "semanticName": "credit",
+              "rectPt": [
+                340.15748,
+                -9.354331,
+                395.716535,
+                0.0
+              ],
+              "parserRef": "money-dot",
+              "sourceRefs": [
+                {
+                  "file": "_OBR_UCET.gmx",
+                  "line": 73,
+                  "rawCommand": "|CPDATABASE(1200,264,1396,297,1,0,0,1,16777215,1,0,2,5,7,0,0,0,700,0,0,0,238,3,2,1,18,\"Tahoma\",0,1,2,0,\"'[=*12.2'\",1,1,156,8,32,0)",
+                  "expression": "[=*12.2"
+                }
+              ]
+            },
+            {
+              "id": "field-74",
+              "semanticName": "net",
+              "rectPt": [
+                428.031496,
+                -9.354331,
+                490.110236,
+                0.0
+              ],
+              "parserRef": "money-dot",
+              "sourceRefs": [
+                {
+                  "file": "_OBR_UCET.gmx",
+                  "line": 74,
+                  "rawCommand": "|CPDATABASE(1510,264,1729,297,1,0,0,1,16777215,1,0,2,5,7,0,0,0,700,0,0,0,238,3,2,1,18,\"Tahoma\",0,1,2,0,\"'[=*13.2'\",1,1,179,8,32,0)",
+                  "expression": "[=*13.2"
+                }
+              ]
+            },
+            {
+              "id": "field-76",
+              "semanticName": "sequenceOrCount1",
+              "rectPt": [
+                218.267717,
+                -9.354331,
+                237.543307,
+                0.0
+              ],
+              "parserRef": "integer",
+              "sourceRefs": [
+                {
+                  "file": "_OBR_UCET.gmx",
+                  "line": 76,
+                  "rawCommand": "|CPDATABASE(770,264,838,297,1,0,0,1,16777215,1,0,2,5,7,0,0,0,400,0,0,0,238,3,2,1,18,\"Tahoma\",0,2,2,0,\"'$C1'\",1,0,0,0,0,0)",
+                  "expression": "$C1"
+                }
+              ]
+            },
+            {
+              "id": "field-83",
+              "semanticName": "licensedUserText",
+              "rectPt": [
+                405.354331,
+                -68.88189,
+                572.598425,
+                -59.527559
+              ],
+              "parserRef": "text",
+              "sourceRefs": [
+                {
+                  "file": "_OBR_UCET.gmx",
+                  "line": 83,
+                  "rawCommand": "|CPDATABASE(1430,474,2020,507,1,0,0,1,16777215,1,0,2,5,7,0,0,0,400,0,0,0,238,3,2,1,18,\"Tahoma\",0,0,2,0,\"'$USER'\",1,0,0,0,0,0)",
+                  "expression": "$USER"
+                }
+              ]
+            },
+            {
+              "id": "field-90",
+              "semanticName": "source_REV",
+              "rectPt": [
+                136.062992,
+                -68.88189,
+                157.322835,
+                -59.527559
+              ],
+              "parserRef": "text",
+              "sourceRefs": [
+                {
+                  "file": "_OBR_UCET.gmx",
+                  "line": 90,
+                  "rawCommand": "|CPDATABASE(480,474,555,507,0,0,0,1,0,1,16777215,2,5,7,0,0,0,400,0,0,0,238,3,2,1,34,\"Tahoma\",0,0,2,0,\"'^REV'\",1,0,0,0,0,0)",
+                  "expression": "^REV"
+                }
+              ]
+            },
+            {
+              "id": "field-91",
+              "semanticName": "source_SP",
+              "rectPt": [
+                158.740157,
+                -68.88189,
+                180.0,
+                -59.527559
+              ],
+              "parserRef": "text",
+              "sourceRefs": [
+                {
+                  "file": "_OBR_UCET.gmx",
+                  "line": 91,
+                  "rawCommand": "|CPDATABASE(560,474,635,507,0,0,0,1,0,1,16777215,2,5,7,0,0,0,400,0,0,0,238,3,2,1,34,\"Tahoma\",0,0,2,0,\"'^SP'\",1,0,0,0,0,0)",
+                  "expression": "^SP"
+                }
+              ]
+            },
+            {
+              "id": "field-92",
+              "semanticName": "source_HMENO",
+              "rectPt": [
+                53.858268,
+                -27.779528,
+                173.480315,
+                -17.007874
+              ],
+              "parserRef": "text",
+              "sourceRefs": [
+                {
+                  "file": "_OBR_UCET.gmx",
+                  "line": 92,
+                  "rawCommand": "|CPDATABASE(190,324,612,362,0,0,0,1,0,1,16777215,2,5,8,0,0,0,400,0,0,0,238,3,2,1,34,\"Tahoma\",0,0,2,0,\"'^&HMENO'\",1,0,0,0,0,0)",
+                  "expression": "^&HMENO"
+                }
+              ]
+            },
+            {
+              "id": "field-93",
+              "semanticName": "source_IMENO",
+              "rectPt": [
+                252.283465,
+                -27.779528,
+                371.905512,
+                -17.007874
+              ],
+              "parserRef": "text",
+              "sourceRefs": [
+                {
+                  "file": "_OBR_UCET.gmx",
+                  "line": 93,
+                  "rawCommand": "|CPDATABASE(890,324,1312,362,0,0,0,1,0,1,16777215,2,5,8,0,0,0,400,0,0,0,238,3,2,1,34,\"Tahoma\",0,0,2,0,\"'^&IMENO'\",1,0,0,0,0,0)",
+                  "expression": "^&IMENO"
+                }
+              ]
+            },
+            {
+              "id": "field-94",
+              "semanticName": "source_JMENO",
+              "rectPt": [
+                430.866142,
+                -27.779528,
+                550.488189,
+                -17.007874
+              ],
+              "parserRef": "text",
+              "sourceRefs": [
+                {
+                  "file": "_OBR_UCET.gmx",
+                  "line": 94,
+                  "rawCommand": "|CPDATABASE(1520,324,1942,362,0,0,0,1,0,1,16777215,2,5,8,0,0,0,400,0,0,0,238,3,2,1,34,\"Tahoma\",0,0,2,0,\"'^&JMENO'\",1,0,0,0,0,0)",
+                  "expression": "^&JMENO"
+                }
+              ]
+            }
+          ],
+          "labels": [
+            {
+              "id": "label-80",
+              "text": ")",
+              "rectPt": [
+                238.110236,
+                -9.354331,
+                240.944882,
+                0.0
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_OBR_UCET.gmx",
+                  "line": 80,
+                  "rawCommand": "|CPLABEL(840,264,850,297,1,0,0,1,16777215,1,0,2,5,7,0,0,0,400,0,0,0,238,3,2,1,18,\"Tahoma\",0,0,2,\")\")"
+                }
+              ]
+            },
+            {
+              "id": "label-81",
+              "text": "© IFOsoft",
+              "rectPt": [
+                22.677165,
+                -68.88189,
+                60.377953,
+                -59.527559
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_OBR_UCET.gmx",
+                  "line": 81,
+                  "rawCommand": "|CPLABEL(80,474,213,507,1,0,0,1,16777215,1,0,2,5,7,0,0,0,700,1,0,0,238,3,2,1,18,\"Tahoma\",0,0,2,\"© IFOsoft\")"
+                }
+              ]
+            },
+            {
+              "id": "label-82",
+              "text": "Informačné systémy V",
+              "rectPt": [
+                62.362205,
+                -68.88189,
+                134.929134,
+                -59.527559
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_OBR_UCET.gmx",
+                  "line": 82,
+                  "rawCommand": "|CPLABEL(220,474,476,507,0,0,0,1,0,1,16777215,2,5,7,0,0,0,400,1,0,0,238,3,2,1,34,\"Tahoma\",0,0,2,\"Informačné systémy V\")"
+                }
+              ]
+            },
+            {
+              "id": "label-84",
+              "text": "Používateľ programu:",
+              "rectPt": [
+                337.322835,
+                -68.88189,
+                403.653543,
+                -59.527559
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_OBR_UCET.gmx",
+                  "line": 84,
+                  "rawCommand": "|CPLABEL(1190,474,1424,507,1,0,0,1,16777215,1,0,2,5,7,0,0,0,400,0,0,0,238,3,2,1,18,\"Tahoma\",0,1,2,\"Používateľ programu:\")"
+                }
+              ]
+            },
+            {
+              "id": "label-86",
+              "text": "Vystavil:",
+              "rectPt": [
+                22.677165,
+                -27.779528,
+                52.15748,
+                -17.007874
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_OBR_UCET.gmx",
+                  "line": 86,
+                  "rawCommand": "|CPLABEL(80,324,184,362,1,0,0,1,16777215,1,0,2,5,8,0,0,0,400,0,0,0,238,3,2,1,18,\"Tahoma\",0,0,2,\"Vystavil:\")"
+                }
+              ]
+            },
+            {
+              "id": "label-87",
+              "text": "Kontroloval:",
+              "rectPt": [
+                206.929134,
+                -27.779528,
+                248.88189,
+                -17.007874
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_OBR_UCET.gmx",
+                  "line": 87,
+                  "rawCommand": "|CPLABEL(730,324,878,362,1,0,0,1,16777215,1,0,2,5,8,0,0,0,400,0,0,0,238,3,2,1,18,\"Tahoma\",0,0,2,\"Kontroloval:\")"
+                }
+              ]
+            },
+            {
+              "id": "label-88",
+              "text": "Schválil:",
+              "rectPt": [
+                399.685039,
+                -27.779528,
+                428.88189,
+                -17.007874
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_OBR_UCET.gmx",
+                  "line": 88,
+                  "rawCommand": "|CPLABEL(1410,324,1513,362,1,0,0,1,16777215,1,0,2,5,8,0,0,0,400,0,0,0,238,3,2,1,18,\"Tahoma\",0,0,2,\"Schválil:\")"
+                }
+              ]
+            },
+            {
+              "id": "label-95",
+              "text": "CELKOM: (",
+              "rectPt": [
+                184.251969,
+                -9.354331,
+                217.700787,
+                0.0
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_OBR_UCET.gmx",
+                  "line": 95,
+                  "rawCommand": "|CPLABEL(650,264,768,297,1,0,0,1,16777215,1,0,2,5,7,0,0,0,400,0,0,0,238,3,2,1,18,\"Tahoma\",0,0,2,\"CELKOM: (\")"
+                }
+              ]
+            },
+            {
+              "id": "label-100",
+              "text": "MD-DAL",
+              "rectPt": [
+                399.685039,
+                -9.354331,
+                424.913386,
+                0.0
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_OBR_UCET.gmx",
+                  "line": 100,
+                  "rawCommand": "|CPLABEL(1410,264,1499,297,1,0,0,1,16777215,1,0,2,5,7,0,0,0,400,0,0,0,238,3,2,1,18,\"Tahoma\",0,0,2,\"MD-DAL\")"
+                }
+              ]
+            }
+          ],
+          "lines": [
+            {
+              "id": "line-75",
+              "pointsPt": [
+                [
+                  396.850394,
+                  0.0
+                ],
+                [
+                  396.850394,
+                  -14.173228
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_OBR_UCET.gmx",
+                  "line": 75,
+                  "rawCommand": "|CPLINE(1400,264,1400,314,4,0,0,0)"
+                }
+              ]
+            },
+            {
+              "id": "line-77",
+              "pointsPt": [
+                [
+                  17.007874,
+                  0.0
+                ],
+                [
+                  17.007874,
+                  -56.692913
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_OBR_UCET.gmx",
+                  "line": 77,
+                  "rawCommand": "|CPLINE(60,264,60,464,4,0,0,0)"
+                }
+              ]
+            },
+            {
+              "id": "line-78",
+              "pointsPt": [
+                [
+                  575.433071,
+                  0.0
+                ],
+                [
+                  575.433071,
+                  -56.692913
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_OBR_UCET.gmx",
+                  "line": 78,
+                  "rawCommand": "|CPLINE(2030,264,2030,464,4,0,0,0)"
+                }
+              ]
+            },
+            {
+              "id": "line-79",
+              "pointsPt": [
+                [
+                  17.007874,
+                  0.0
+                ],
+                [
+                  575.433071,
+                  0.0
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_OBR_UCET.gmx",
+                  "line": 79,
+                  "rawCommand": "|CPLINE(60,264,2030,264,4,0,0,0)"
+                }
+              ]
+            },
+            {
+              "id": "line-85",
+              "pointsPt": [
+                [
+                  340.15748,
+                  0.0
+                ],
+                [
+                  340.15748,
+                  -14.173228
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_OBR_UCET.gmx",
+                  "line": 85,
+                  "rawCommand": "|CPLINE(1200,264,1200,314,1,0,0,0)"
+                }
+              ]
+            },
+            {
+              "id": "line-89",
+              "pointsPt": [
+                [
+                  17.007874,
+                  -56.692913
+                ],
+                [
+                  575.433071,
+                  -56.692913
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_OBR_UCET.gmx",
+                  "line": 89,
+                  "rawCommand": "|CPLINE(60,464,2030,464,4,0,0,0)"
+                }
+              ]
+            },
+            {
+              "id": "line-96",
+              "pointsPt": [
+                [
+                  243.779528,
+                  0.0
+                ],
+                [
+                  243.779528,
+                  -14.173228
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_OBR_UCET.gmx",
+                  "line": 96,
+                  "rawCommand": "|CPLINE(860,264,860,314,4,0,0,0)"
+                }
+              ]
+            },
+            {
+              "id": "line-97",
+              "pointsPt": [
+                [
+                  521.574803,
+                  0.0
+                ],
+                [
+                  521.574803,
+                  -14.173228
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_OBR_UCET.gmx",
+                  "line": 97,
+                  "rawCommand": "|CPLINE(1840,264,1840,314,4,0,0,0)"
+                }
+              ]
+            },
+            {
+              "id": "line-98",
+              "pointsPt": [
+                [
+                  283.464567,
+                  0.0
+                ],
+                [
+                  283.464567,
+                  -14.173228
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_OBR_UCET.gmx",
+                  "line": 98,
+                  "rawCommand": "|CPLINE(1000,264,1000,314,1,0,0,0)"
+                }
+              ]
+            },
+            {
+              "id": "line-99",
+              "pointsPt": [
+                [
+                  17.007874,
+                  -14.173228
+                ],
+                [
+                  575.433071,
+                  -14.173228
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_OBR_UCET.gmx",
+                  "line": 99,
+                  "rawCommand": "|CPLINE(60,314,2030,314,4,0,0,0)"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "foot2",
+          "kind": "groupFooter",
+          "frame": "blockLocal",
+          "sourceRefs": [
+            {
+              "file": "_OBR_UCET.gmx",
+              "rawCommand": "#FOOT2(60,0)"
+            }
+          ],
+          "nominalAdvancePt": 17.007874,
+          "emptyTemplate": false,
+          "placement": {
+            "id": "locate-foot2",
+            "op": "locateBlock",
+            "enabled": true,
+            "evidenceStatus": "sourceDerived",
+            "sourceRefs": [],
+            "reviewNotes": [],
+            "frame": "blockLocal",
+            "origin": "independentOccurrence",
+            "signals": [
+              "rulings",
+              "labels",
+              "fieldColumns",
+              "unassignedText"
+            ],
+            "combination": "union",
+            "onAmbiguous": "retainHypotheses"
+          },
+          "candidateDetection": {
+            "id": "detect-foot2",
+            "op": "detectCandidates",
+            "enabled": true,
+            "evidenceStatus": "sourceDerived",
+            "sourceRefs": [],
+            "reviewNotes": [],
+            "signals": [
+              "rulings",
+              "labels",
+              "fieldColumns",
+              "unassignedText"
+            ],
+            "combination": "union",
+            "requiresSuccessfulParsing": false
+          },
+          "fieldAssignment": {
+            "id": "assign-foot2",
+            "op": "assignFields",
+            "enabled": true,
+            "evidenceStatus": "sourceDerived",
+            "sourceRefs": [],
+            "reviewNotes": [],
+            "paddingPt": 1.5,
+            "assembly": "glyphClusters",
+            "splitAcrossFields": "requireGlyphGeometry",
+            "overlap": "retainAmbiguity",
+            "retainClippedSource": true
+          },
+          "fields": [
+            {
+              "id": "field-102",
+              "semanticName": "debit",
+              "rectPt": [
+                283.464567,
+                -12.188976,
+                339.023622,
+                -2.834646
+              ],
+              "parserRef": "money-dot",
+              "sourceRefs": [
+                {
+                  "file": "_OBR_UCET.gmx",
+                  "line": 102,
+                  "rawCommand": "|CPDATABASE(1000,274,1196,307,1,0,0,1,16777215,1,0,2,5,7,0,0,0,700,0,0,0,238,3,2,1,18,\"Tahoma\",0,1,2,0,\"'[=*12.2'\",1,1,156,8,32,0)",
+                  "expression": "[=*12.2"
+                }
+              ]
+            },
+            {
+              "id": "field-103",
+              "semanticName": "credit",
+              "rectPt": [
+                340.15748,
+                -12.188976,
+                395.716535,
+                -2.834646
+              ],
+              "parserRef": "money-dot",
+              "sourceRefs": [
+                {
+                  "file": "_OBR_UCET.gmx",
+                  "line": 103,
+                  "rawCommand": "|CPDATABASE(1200,274,1396,307,1,0,0,1,16777215,1,0,2,5,7,0,0,0,700,0,0,0,238,3,2,1,18,\"Tahoma\",0,1,2,0,\"'[=*12.2'\",1,1,156,8,32,0)",
+                  "expression": "[=*12.2"
+                }
+              ]
+            },
+            {
+              "id": "field-104",
+              "semanticName": "net",
+              "rectPt": [
+                428.031496,
+                -12.188976,
+                490.110236,
+                -2.834646
+              ],
+              "parserRef": "money-dot",
+              "sourceRefs": [
+                {
+                  "file": "_OBR_UCET.gmx",
+                  "line": 104,
+                  "rawCommand": "|CPDATABASE(1510,274,1729,307,1,0,0,1,16777215,1,0,2,5,7,0,0,0,700,0,0,0,238,3,2,1,18,\"Tahoma\",0,1,2,0,\"'[=*13.2'\",1,1,179,8,32,0)",
+                  "expression": "[=*13.2"
+                }
+              ]
+            },
+            {
+              "id": "field-106",
+              "semanticName": "sequenceOrCount2",
+              "rectPt": [
+                218.267717,
+                -12.188976,
+                237.543307,
+                -2.834646
+              ],
+              "parserRef": "integer",
+              "sourceRefs": [
+                {
+                  "file": "_OBR_UCET.gmx",
+                  "line": 106,
+                  "rawCommand": "|CPDATABASE(770,274,838,307,1,0,0,1,16777215,1,0,2,5,7,0,0,0,400,0,0,0,238,3,2,1,18,\"Tahoma\",0,2,2,0,\"'$C2'\",1,0,0,0,0,0)",
+                  "expression": "$C2"
+                }
+              ]
+            },
+            {
+              "id": "field-114",
+              "semanticName": "accountCode",
+              "rectPt": [
+                246.614173,
+                -12.188976,
+                280.062992,
+                -2.834646
+              ],
+              "parserRef": "code",
+              "sourceRefs": [
+                {
+                  "file": "_OBR_UCET.gmx",
+                  "line": 114,
+                  "rawCommand": "|CPDATABASE(870,274,988,307,0,0,0,1,0,1,16777215,2,5,7,0,0,0,700,0,0,0,238,3,2,1,34,\"Tahoma\",0,0,1,0,\"'UCET'\",1,0,0,0,0,0)",
+                  "expression": "UCET"
+                }
+              ]
+            }
+          ],
+          "labels": [
+            {
+              "id": "label-110",
+              "text": ")",
+              "rectPt": [
+                238.110236,
+                -12.188976,
+                240.944882,
+                -2.834646
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_OBR_UCET.gmx",
+                  "line": 110,
+                  "rawCommand": "|CPLABEL(840,274,850,307,1,0,0,1,16777215,1,0,2,5,7,0,0,0,400,0,0,0,238,3,2,1,18,\"Tahoma\",0,0,2,\")\")"
+                }
+              ]
+            },
+            {
+              "id": "label-112",
+              "text": "Spolu za účet: (",
+              "rectPt": [
+                170.07874,
+                -12.188976,
+                218.834646,
+                -2.834646
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_OBR_UCET.gmx",
+                  "line": 112,
+                  "rawCommand": "|CPLABEL(600,274,772,307,1,0,0,1,16777215,1,0,2,5,7,0,0,0,400,0,0,0,238,3,2,1,18,\"Tahoma\",0,0,2,\"Spolu za účet: (\")"
+                }
+              ]
+            },
+            {
+              "id": "label-116",
+              "text": "***",
+              "rectPt": [
+                34.015748,
+                -15.023622,
+                45.637795,
+                -5.669291
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_OBR_UCET.gmx",
+                  "line": 116,
+                  "rawCommand": "|CPLABEL(120,284,161,317,1,0,0,1,16777215,1,0,2,5,7,0,0,0,400,0,0,0,238,3,2,1,18,\"Tahoma\",0,0,2,\"***\")"
+                }
+              ]
+            },
+            {
+              "id": "label-119",
+              "text": "MD-DAL",
+              "rectPt": [
+                399.685039,
+                -12.188976,
+                424.913386,
+                -2.834646
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_OBR_UCET.gmx",
+                  "line": 119,
+                  "rawCommand": "|CPLABEL(1410,274,1499,307,1,0,0,1,16777215,1,0,2,5,7,0,0,0,400,0,0,0,238,3,2,1,18,\"Tahoma\",0,0,2,\"MD-DAL\")"
+                }
+              ]
+            }
+          ],
+          "lines": [
+            {
+              "id": "line-105",
+              "pointsPt": [
+                [
+                  396.850394,
+                  0.0
+                ],
+                [
+                  396.850394,
+                  -17.007874
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_OBR_UCET.gmx",
+                  "line": 105,
+                  "rawCommand": "|CPLINE(1400,264,1400,324,4,0,0,0)"
+                }
+              ]
+            },
+            {
+              "id": "line-107",
+              "pointsPt": [
+                [
+                  17.007874,
+                  0.0
+                ],
+                [
+                  575.433071,
+                  0.0
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_OBR_UCET.gmx",
+                  "line": 107,
+                  "rawCommand": "|CPLINE(60,264,2030,264,4,0,0,0)"
+                }
+              ]
+            },
+            {
+              "id": "line-108",
+              "pointsPt": [
+                [
+                  521.574803,
+                  0.0
+                ],
+                [
+                  521.574803,
+                  -17.007874
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_OBR_UCET.gmx",
+                  "line": 108,
+                  "rawCommand": "|CPLINE(1840,264,1840,324,4,0,0,0)"
+                }
+              ]
+            },
+            {
+              "id": "line-109",
+              "pointsPt": [
+                [
+                  17.007874,
+                  0.0
+                ],
+                [
+                  17.007874,
+                  -17.007874
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_OBR_UCET.gmx",
+                  "line": 109,
+                  "rawCommand": "|CPLINE(60,264,60,324,4,0,0,0)"
+                }
+              ]
+            },
+            {
+              "id": "line-111",
+              "pointsPt": [
+                [
+                  340.15748,
+                  0.0
+                ],
+                [
+                  340.15748,
+                  -17.007874
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_OBR_UCET.gmx",
+                  "line": 111,
+                  "rawCommand": "|CPLINE(1200,264,1200,324,1,0,0,0)"
+                }
+              ]
+            },
+            {
+              "id": "line-113",
+              "pointsPt": [
+                [
+                  243.779528,
+                  0.0
+                ],
+                [
+                  243.779528,
+                  -17.007874
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_OBR_UCET.gmx",
+                  "line": 113,
+                  "rawCommand": "|CPLINE(860,264,860,324,4,0,0,0)"
+                }
+              ]
+            },
+            {
+              "id": "line-115",
+              "pointsPt": [
+                [
+                  62.362205,
+                  0.0
+                ],
+                [
+                  62.362205,
+                  -17.007874
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_OBR_UCET.gmx",
+                  "line": 115,
+                  "rawCommand": "|CPLINE(220,264,220,324,1,0,0,0)"
+                }
+              ]
+            },
+            {
+              "id": "line-117",
+              "pointsPt": [
+                [
+                  575.433071,
+                  0.0
+                ],
+                [
+                  575.433071,
+                  -17.007874
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_OBR_UCET.gmx",
+                  "line": 117,
+                  "rawCommand": "|CPLINE(2030,264,2030,324,4,0,0,0)"
+                }
+              ]
+            },
+            {
+              "id": "line-118",
+              "pointsPt": [
+                [
+                  17.007874,
+                  -17.007874
+                ],
+                [
+                  575.433071,
+                  -17.007874
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_OBR_UCET.gmx",
+                  "line": 118,
+                  "rawCommand": "|CPLINE(60,324,2030,324,4,0,0,0)"
+                }
+              ]
+            },
+            {
+              "id": "line-120",
+              "pointsPt": [
+                [
+                  283.464567,
+                  0.0
+                ],
+                [
+                  283.464567,
+                  -17.007874
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_OBR_UCET.gmx",
+                  "line": 120,
+                  "rawCommand": "|CPLINE(1000,264,1000,324,1,0,0,0)"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "pagefoot",
+          "kind": "decoration",
+          "frame": "blockLocal",
+          "sourceRefs": [
+            {
+              "file": "_OBR_UCET.gmx",
+              "rawCommand": "#PAGEFOOT(1,0)"
+            }
+          ],
+          "nominalAdvancePt": 0.283465,
+          "emptyTemplate": true,
+          "placement": {
+            "id": "locate-pagefoot",
+            "op": "locateBlock",
+            "enabled": false,
+            "evidenceStatus": "sourceDerived",
+            "sourceRefs": [],
+            "reviewNotes": [],
+            "frame": "blockLocal",
+            "origin": "independentOccurrence",
+            "signals": [
+              "rulings",
+              "labels",
+              "fieldColumns",
+              "unassignedText"
+            ],
+            "combination": "union",
+            "onAmbiguous": "retainHypotheses"
+          },
+          "candidateDetection": {
+            "id": "detect-pagefoot",
+            "op": "detectCandidates",
+            "enabled": false,
+            "evidenceStatus": "sourceDerived",
+            "sourceRefs": [],
+            "reviewNotes": [],
+            "signals": [
+              "rulings",
+              "labels",
+              "fieldColumns",
+              "unassignedText"
+            ],
+            "combination": "union",
+            "requiresSuccessfulParsing": false
+          },
+          "fieldAssignment": {
+            "id": "assign-pagefoot",
+            "op": "assignFields",
+            "enabled": false,
+            "evidenceStatus": "sourceDerived",
+            "sourceRefs": [],
+            "reviewNotes": [],
+            "paddingPt": 1.5,
+            "assembly": "glyphClusters",
+            "splitAcrossFields": "requireGlyphGeometry",
+            "overlap": "retainAmbiguity",
+            "retainClippedSource": true
+          },
+          "fields": [],
+          "labels": [],
+          "lines": []
+        }
+      ],
+      "calibration": {
+        "id": "page-calibration",
+        "op": "fitUniformScaleTranslation",
+        "enabled": true,
+        "evidenceStatus": "unverified",
+        "sourceRefs": [],
+        "reviewNotes": [
+          "Provisional thresholds retained from draft 2; require corpus tuning."
+        ],
+        "anchorRefs": [
+          "anchor-1",
+          "anchor-2",
+          "anchor-3",
+          "anchor-4",
+          "anchor-5",
+          "anchor-6",
+          "anchor-7",
+          "anchor-8",
+          "anchor-9",
+          "anchor-10",
+          "anchor-11",
+          "anchor-12",
+          "anchor-13",
+          "anchor-14",
+          "anchor-15",
+          "anchor-16"
+        ],
+        "minimumInliers": 3,
+        "minimumAnchorSeparationPt": 150,
+        "minimumSpanPt": [
+          150,
+          10
+        ],
+        "scaleRange": [
+          0.65,
+          1.4
+        ],
+        "maximumResidualPt": 1.5,
+        "maximumHypotheses": 256,
+        "onFailure": "retainUnresolvedPage",
+        "inferScaleFromPageSize": false
+      }
+    }
+  ],
+  "metadata": [
+    {
+      "id": "original.pagehead.field-26",
+      "semanticName": "printedPageLabel",
+      "locator": {
+        "kind": "blockField",
+        "variantRef": "original",
+        "blockRef": "pagehead",
+        "fieldRef": "field-26",
+        "frame": "nominalPage",
+        "pages": {
+          "selection": "all",
+          "indices": [],
+          "maximumPages": 10000
+        },
+        "assembly": "glyphClusters",
+        "cardinality": "zeroOrOne"
+      },
+      "parserRef": "integer",
+      "onAbsent": "unresolved",
+      "onConflict": "ambiguous",
+      "sourceRefs": [
+        {
+          "file": "_OBR_UCET.gmx",
+          "line": 26,
+          "rawCommand": "|CPDATABASE(1950,130,2028,168,1,0,0,1,16777215,1,0,2,5,8,0,0,0,400,0,0,0,238,3,2,1,18,\"Tahoma\",0,0,2,0,\"'$PAGENO'\",1,0,0,0,0,0)",
+          "expression": "$PAGENO"
+        }
+      ]
+    },
+    {
+      "id": "original.pagehead.field-28",
+      "semanticName": "licensedUserText",
+      "locator": {
+        "kind": "blockField",
+        "variantRef": "original",
+        "blockRef": "pagehead",
+        "fieldRef": "field-28",
+        "frame": "nominalPage",
+        "pages": {
+          "selection": "all",
+          "indices": [],
+          "maximumPages": 10000
+        },
+        "assembly": "glyphClusters",
+        "cardinality": "zeroOrOne"
+      },
+      "parserRef": "text",
+      "onAbsent": "unresolved",
+      "onConflict": "ambiguous",
+      "sourceRefs": [
+        {
+          "file": "_OBR_UCET.gmx",
+          "line": 28,
+          "rawCommand": "|CPDATABASE(1180,10,2023,48,1,0,0,1,16777215,1,0,2,5,8,0,0,0,400,0,0,0,238,3,2,1,18,\"Tahoma\",0,1,2,0,\"'$USER'\",1,0,0,0,0,0)",
+          "expression": "$USER"
+        }
+      ]
+    },
+    {
+      "id": "original.pagehead.field-29",
+      "semanticName": "period.start",
+      "locator": {
+        "kind": "blockField",
+        "variantRef": "original",
+        "blockRef": "pagehead",
+        "fieldRef": "field-29",
+        "frame": "nominalPage",
+        "pages": {
+          "selection": "all",
+          "indices": [],
+          "maximumPages": 10000
+        },
+        "assembly": "glyphClusters",
+        "cardinality": "zeroOrOne"
+      },
+      "parserRef": "period",
+      "onAbsent": "unresolved",
+      "onConflict": "ambiguous",
+      "sourceRefs": [
+        {
+          "file": "_OBR_UCET.gmx",
+          "line": 29,
+          "rawCommand": "|CPDATABASE(1280,80,1437,127,0,0,0,1,0,1,16777215,2,5,10,0,0,0,700,0,0,0,238,3,2,1,34,\"Tahoma\",0,0,2,0,\"';^ODL'\",1,0,0,0,0,0)",
+          "expression": ";^ODL"
+        }
+      ]
+    },
+    {
+      "id": "original.pagehead.field-30",
+      "semanticName": "period.end",
+      "locator": {
+        "kind": "blockField",
+        "variantRef": "original",
+        "blockRef": "pagehead",
+        "fieldRef": "field-30",
+        "frame": "nominalPage",
+        "pages": {
+          "selection": "all",
+          "indices": [],
+          "maximumPages": 10000
+        },
+        "assembly": "glyphClusters",
+        "cardinality": "zeroOrOne"
+      },
+      "parserRef": "period",
+      "onAbsent": "unresolved",
+      "onConflict": "ambiguous",
+      "sourceRefs": [
+        {
+          "file": "_OBR_UCET.gmx",
+          "line": 30,
+          "rawCommand": "|CPDATABASE(1460,80,1617,127,0,0,0,1,0,1,16777215,2,5,10,0,0,0,700,0,0,0,238,3,2,1,34,\"Tahoma\",0,0,2,0,\"';^DOL'\",1,0,0,0,0,0)",
+          "expression": ";^DOL"
+        }
+      ]
+    },
+    {
+      "id": "original.pagehead.field-34",
+      "semanticName": "reportingEntity.name",
+      "locator": {
+        "kind": "blockField",
+        "variantRef": "original",
+        "blockRef": "pagehead",
+        "fieldRef": "field-34",
+        "frame": "nominalPage",
+        "pages": {
+          "selection": "all",
+          "indices": [],
+          "maximumPages": 10000
+        },
+        "assembly": "glyphClusters",
+        "cardinality": "zeroOrOne"
+      },
+      "parserRef": "text",
+      "onAbsent": "unresolved",
+      "onConflict": "ambiguous",
+      "sourceRefs": [
+        {
+          "file": "_OBR_UCET.gmx",
+          "line": 34,
+          "rawCommand": "|CPDATABASE(60,10,566,48,0,0,0,1,0,1,16777215,2,5,8,0,0,0,400,0,0,0,238,3,2,1,34,\"Tahoma\",0,0,2,0,\"'^NAF'\",1,0,0,0,0,0)",
+          "expression": "^NAF"
+        }
+      ]
+    },
+    {
+      "id": "original.foot1.field-83",
+      "semanticName": "licensedUserText",
+      "locator": {
+        "kind": "blockField",
+        "variantRef": "original",
+        "blockRef": "foot1",
+        "fieldRef": "field-83",
+        "frame": "blockLocal",
+        "pages": {
+          "selection": "all",
+          "indices": [],
+          "maximumPages": 10000
+        },
+        "assembly": "glyphClusters",
+        "cardinality": "zeroOrOne"
+      },
+      "parserRef": "text",
+      "onAbsent": "unresolved",
+      "onConflict": "ambiguous",
+      "sourceRefs": [
+        {
+          "file": "_OBR_UCET.gmx",
+          "line": 83,
+          "rawCommand": "|CPDATABASE(1430,474,2020,507,1,0,0,1,16777215,1,0,2,5,7,0,0,0,400,0,0,0,238,3,2,1,18,\"Tahoma\",0,0,2,0,\"'$USER'\",1,0,0,0,0,0)",
+          "expression": "$USER"
+        }
+      ]
+    },
+    {
+      "id": "original.title.label-32",
+      "semanticName": "reportTitle",
+      "locator": {
+        "kind": "calibratedRegion",
+        "variantRef": "original",
+        "frame": "nominalPage",
+        "rectPt": [
+          218.267717,
+          805.889764,
+          353.76378,
+          819.212598
+        ],
+        "paddingPt": 2,
+        "pages": {
+          "selection": "all",
+          "indices": [],
+          "maximumPages": 10000
+        },
+        "assembly": "glyphClusters",
+        "cardinality": "zeroOrOne"
+      },
+      "parserRef": "text",
+      "onAbsent": "unresolved",
+      "onConflict": "ambiguous",
+      "sourceRefs": [
+        {
+          "file": "_OBR_UCET.gmx",
+          "line": 32,
+          "rawCommand": "|CPLABEL(770,80,1248,127,1,0,0,1,16777215,1,0,2,5,10,0,0,0,700,0,0,0,238,3,2,1,18,\"Tahoma\",0,0,2,\"O B R A T Y  podľa   ÚČTOV\")"
+        }
+      ]
+    }
+  ],
+  "metadataDerivations": [
+    {
+      "id": "fiscal-year",
+      "op": "deriveFiscalYear",
+      "enabled": true,
+      "evidenceStatus": "sourceDerived",
+      "sourceRefs": [],
+      "reviewNotes": [],
+      "inputMetadataNames": [
+        "period.start",
+        "period.end"
+      ],
+      "outputMetadataName": "fiscalYear",
+      "onDifferentYears": "unresolved",
+      "onMissingInput": "unresolved",
+      "origin": "derived"
+    }
+  ],
+  "classification": [
+    {
+      "id": "page-header",
+      "op": "classify",
+      "enabled": true,
+      "evidenceStatus": "sourceDerived",
+      "sourceRefs": [],
+      "reviewNotes": [],
+      "when": {
+        "op": "blockKind",
+        "blockRefs": [
+          "pagehead"
+        ]
+      },
+      "semanticClass": "pageHeader",
+      "exportEligibility": "excluded",
+      "aggregationMemberships": [],
+      "level": "any"
+    },
+    {
+      "id": "page-footer",
+      "op": "classify",
+      "enabled": true,
+      "evidenceStatus": "sourceDerived",
+      "sourceRefs": [],
+      "reviewNotes": [],
+      "when": {
+        "op": "blockKind",
+        "blockRefs": [
+          "pagefoot"
+        ]
+      },
+      "semanticClass": "pageFooter",
+      "exportEligibility": "excluded",
+      "aggregationMemberships": [],
+      "level": "any"
+    },
+    {
+      "id": "movement",
+      "op": "classify",
+      "enabled": true,
+      "evidenceStatus": "sourceDerived",
+      "sourceRefs": [],
+      "reviewNotes": [],
+      "when": {
+        "op": "blockKind",
+        "blockRefs": [
+          "record"
+        ]
+      },
+      "semanticClass": "accountMovement",
+      "exportEligibility": "review",
+      "aggregationMemberships": [
+        "exportedDetails"
+      ],
+      "level": "detail"
+    },
+    {
+      "id": "account-control",
+      "op": "classify",
+      "enabled": true,
+      "evidenceStatus": "sourceDerived",
+      "sourceRefs": [],
+      "reviewNotes": [],
+      "when": {
+        "op": "blockKind",
+        "blockRefs": [
+          "foot2"
+        ]
+      },
+      "semanticClass": "accountSubtotal",
+      "exportEligibility": "excluded",
+      "aggregationMemberships": [],
+      "level": "any"
+    },
+    {
+      "id": "report-control",
+      "op": "classify",
+      "enabled": true,
+      "evidenceStatus": "sourceDerived",
+      "sourceRefs": [],
+      "reviewNotes": [],
+      "when": {
+        "op": "blockKind",
+        "blockRefs": [
+          "foot1"
+        ]
+      },
+      "semanticClass": "reportControl",
+      "exportEligibility": "excluded",
+      "aggregationMemberships": [],
+      "level": "any"
+    }
+  ],
+  "classificationPolicy": {
+    "evaluation": "allRules",
+    "noMatch": "unrecognizedCandidate",
+    "incompatibleMatches": "ambiguous"
+  },
+  "groups": [
+    {
+      "id": "reportSection",
+      "parentRef": null,
+      "memberSelector": {
+        "semanticClasses": [],
+        "aggregationMemberships": [],
+        "level": "any",
+        "occurrences": "records"
+      },
+      "startRule": {
+        "op": "sectionStart"
+      },
+      "endRule": {
+        "op": "sectionEnd"
+      },
+      "keyFields": [],
+      "crossPagePolicy": "requireContinuityEvidence",
+      "partialInputPolicy": "retainIncomplete",
+      "repeatedHeaderResets": false,
+      "inheritance": []
+    },
+    {
+      "id": "account",
+      "parentRef": "reportSection",
+      "memberSelector": {
+        "semanticClasses": [],
+        "aggregationMemberships": [
+          "exportedDetails"
+        ],
+        "level": "any",
+        "occurrences": "records"
+      },
+      "startRule": {
+        "op": "afterPreviousClosure"
+      },
+      "endRule": {
+        "op": "match",
+        "when": {
+          "op": "blockKind",
+          "blockRefs": [
+            "foot2"
+          ]
+        }
+      },
+      "keyFields": [
+        "accountCode"
+      ],
+      "crossPagePolicy": "requireContinuityEvidence",
+      "partialInputPolicy": "retainIncomplete",
+      "repeatedHeaderResets": false,
+      "inheritance": []
+    }
+  ],
+  "completeness": [
+    {
+      "id": "movement-required",
+      "op": "requireFields",
+      "enabled": true,
+      "evidenceStatus": "sourceDerived",
+      "sourceRefs": [],
+      "reviewNotes": [],
+      "selector": {
+        "semanticClasses": [
+          "accountMovement"
+        ],
+        "aggregationMemberships": [],
+        "level": "any",
+        "occurrences": "records"
+      },
+      "fieldRefs": [
+        "accountCode",
+        "postingDate"
+      ],
+      "requiredState": "present"
+    },
+    {
+      "id": "movement-side",
+      "op": "requireAny",
+      "enabled": true,
+      "evidenceStatus": "sourceDerived",
+      "sourceRefs": [],
+      "reviewNotes": [],
+      "selector": {
+        "semanticClasses": [
+          "accountMovement"
+        ],
+        "aggregationMemberships": [],
+        "level": "any",
+        "occurrences": "records"
+      },
+      "fieldRefs": [
+        "debit",
+        "credit"
+      ],
+      "requiredState": "present"
+    },
+    {
+      "id": "all-candidates",
+      "op": "accountForCandidates",
+      "enabled": true,
+      "evidenceStatus": "sourceDerived",
+      "sourceRefs": [],
+      "reviewNotes": [],
+      "onUnrecognized": "preventCleanSuccess"
+    },
+    {
+      "id": "all-tokens",
+      "op": "accountForTokens",
+      "enabled": true,
+      "evidenceStatus": "sourceDerived",
+      "sourceRefs": [],
+      "reviewNotes": [],
+      "decorationRequiresRuleId": true
+    },
+    {
+      "id": "coverage",
+      "op": "inspectCoverage",
+      "enabled": true,
+      "evidenceStatus": "sourceDerived",
+      "sourceRefs": [],
+      "reviewNotes": [],
+      "printedPageField": "printedPageNumber",
+      "contiguousPagesProveOriginalComplete": false
+    },
+    {
+      "id": "spacing",
+      "op": "checkSpacing",
+      "enabled": true,
+      "evidenceStatus": "unverified",
+      "sourceRefs": [],
+      "reviewNotes": [],
+      "excludeExplainedBlocks": true,
+      "maximumAdvanceMultiplier": 1.5,
+      "onGap": "suspectedMissingRecord"
+    }
+  ],
+  "openQuestions": [
+    "Calibrate tolerances and glyph offsets on complete fixtures.",
+    "Confirm suppressed-zero policy per field/block.",
+    "No total reconciliation has been run for this package.",
+    "OBR_UCET account movements retained; AJ/GL domain mapping is unresolved.",
+    "No verified reportingEntity.cin locator in the supplied GMX fields. Return unresolved; do not extract arbitrary eight-digit numbers or use manifest expectations."
+  ]
+}

@@ -1,0 +1,210 @@
+{
+  "$schema": "../schemas/model.schema.json",
+  "schemaVersion": 2,
+  "definitionVersion": "2.0.0-draft.4",
+  "id": "ifosoft.model.journal-dennik1",
+  "kind": "model",
+  "status": "reviewDraft",
+  "productionApproved": false,
+  "requiresCapabilities": [
+    "positioned.v2"
+  ],
+  "sourceRefs": [],
+  "reviewNotes": [
+    "C# domain export mapping is deferred to Step 3; source fields are preserved."
+  ],
+  "category": "AJ",
+  "fields": [
+    {
+      "id": "printedPageNumber",
+      "type": "integer",
+      "domainTarget": null
+    },
+    {
+      "id": "licensedUserText",
+      "type": "text",
+      "domainTarget": null
+    },
+    {
+      "id": "periodStart",
+      "type": "accountingPeriod",
+      "domainTarget": null
+    },
+    {
+      "id": "periodEnd",
+      "type": "accountingPeriod",
+      "domainTarget": null
+    },
+    {
+      "id": "reportSubtitle",
+      "type": "text",
+      "domainTarget": null
+    },
+    {
+      "id": "entityName",
+      "type": "text",
+      "domainTarget": null
+    },
+    {
+      "id": "printingDate",
+      "type": "date",
+      "domainTarget": null
+    },
+    {
+      "id": "printingTime",
+      "type": "time",
+      "domainTarget": null
+    },
+    {
+      "id": "description",
+      "type": "text",
+      "domainTarget": null
+    },
+    {
+      "id": "amount",
+      "type": "decimal",
+      "domainTarget": null
+    },
+    {
+      "id": "creditAccount",
+      "type": "identifier",
+      "domainTarget": null
+    },
+    {
+      "id": "source_DZ",
+      "type": "text",
+      "domainTarget": null
+    },
+    {
+      "id": "source_DK",
+      "type": "text",
+      "domainTarget": null
+    },
+    {
+      "id": "source_DA",
+      "type": "text",
+      "domainTarget": null
+    },
+    {
+      "id": "source_DS",
+      "type": "text",
+      "domainTarget": null
+    },
+    {
+      "id": "source_DZAKC",
+      "type": "text",
+      "domainTarget": null
+    },
+    {
+      "id": "debitAccount",
+      "type": "identifier",
+      "domainTarget": null
+    },
+    {
+      "id": "source_MZ",
+      "type": "text",
+      "domainTarget": null
+    },
+    {
+      "id": "source_MK",
+      "type": "text",
+      "domainTarget": null
+    },
+    {
+      "id": "source_MA",
+      "type": "text",
+      "domainTarget": null
+    },
+    {
+      "id": "source_MS",
+      "type": "text",
+      "domainTarget": null
+    },
+    {
+      "id": "source_MZAKC",
+      "type": "text",
+      "domainTarget": null
+    },
+    {
+      "id": "source_PROG",
+      "type": "text",
+      "domainTarget": null
+    },
+    {
+      "id": "invoiceNumber",
+      "type": "identifier",
+      "domainTarget": null
+    },
+    {
+      "id": "partnerId",
+      "type": "identifier",
+      "domainTarget": null
+    },
+    {
+      "id": "partnerName",
+      "type": "text",
+      "domainTarget": null
+    },
+    {
+      "id": "postingDate",
+      "type": "date",
+      "domainTarget": null
+    },
+    {
+      "id": "documentNumber",
+      "type": "identifier",
+      "domainTarget": null
+    },
+    {
+      "id": "documentType",
+      "type": "identifier",
+      "domainTarget": null
+    },
+    {
+      "id": "source_DT",
+      "type": "text",
+      "domainTarget": null
+    },
+    {
+      "id": "source_MT",
+      "type": "text",
+      "domainTarget": null
+    },
+    {
+      "id": "debitControl",
+      "type": "decimal",
+      "domainTarget": null
+    },
+    {
+      "id": "creditControl",
+      "type": "decimal",
+      "domainTarget": null
+    },
+    {
+      "id": "source_REV",
+      "type": "text",
+      "domainTarget": null
+    },
+    {
+      "id": "source_SP",
+      "type": "text",
+      "domainTarget": null
+    },
+    {
+      "id": "source_HMENO",
+      "type": "text",
+      "domainTarget": null
+    },
+    {
+      "id": "source_IMENO",
+      "type": "text",
+      "domainTarget": null
+    },
+    {
+      "id": "source_JMENO",
+      "type": "text",
+      "domainTarget": null
+    }
+  ],
+  "domainMappingStatus": "pendingReview"
+}

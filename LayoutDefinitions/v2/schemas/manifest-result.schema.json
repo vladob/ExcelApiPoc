@@ -1,0 +1,219 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.excelapipoc.local/positioned/v2/manifest-result.schema.json",
+  "type": "object",
+  "properties": {
+    "manifestRowNumber": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "expected": {
+      "type": "object",
+      "properties": {
+        "FilePath": {
+          "type": "string",
+          "minLength": 1
+        },
+        "AccountingEntity": {
+          "type": "string"
+        },
+        "PerceivedCategory": {
+          "enum": [
+            "HL_KNIHA",
+            "U_DENNIK",
+            "UCT_ROZVRH"
+          ]
+        },
+        "PreviousTestResult": {
+          "type": "string"
+        },
+        "ExpectedYear": {
+          "type": "string",
+          "pattern": "^(|[0-9]{4})$"
+        }
+      },
+      "required": [
+        "FilePath",
+        "AccountingEntity",
+        "PerceivedCategory",
+        "PreviousTestResult",
+        "ExpectedYear"
+      ],
+      "additionalProperties": false
+    },
+    "actual": {
+      "type": "object",
+      "properties": {
+        "category": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "entityCin": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "entityName": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "fiscalYear": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 1000,
+              "maximum": 9999
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "category",
+        "entityCin",
+        "entityName",
+        "fiscalYear"
+      ],
+      "additionalProperties": false
+    },
+    "processingStatus": {
+      "enum": [
+        "success",
+        "incomplete",
+        "failed",
+        "unsupported",
+        "excluded"
+      ]
+    },
+    "recognitionStatus": {
+      "enum": [
+        "confirmed",
+        "tentative",
+        "ambiguous",
+        "unknown"
+      ]
+    },
+    "expectationStatus": {
+      "enum": [
+        "pass",
+        "fail",
+        "inconclusive",
+        "notEvaluated"
+      ]
+    },
+    "validationStatus": {
+      "enum": [
+        "pass",
+        "fail",
+        "inconclusive",
+        "notEvaluated"
+      ]
+    },
+    "recordCount": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "coverage": {
+      "$ref": "common.schema.json#/$defs/coverage"
+    },
+    "standardTotals": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "scopeOccurrenceId": {
+            "type": "string",
+            "minLength": 1
+          },
+          "value": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "state": {
+            "enum": [
+              "pass",
+              "fail",
+              "inconclusive",
+              "notEvaluated"
+            ]
+          }
+        },
+        "required": [
+          "name",
+          "scopeOccurrenceId",
+          "value",
+          "state"
+        ],
+        "additionalProperties": false
+      },
+      "minItems": 0
+    },
+    "explanations": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 0
+    },
+    "detailResultPath": {
+      "anyOf": [
+        {
+          "type": "string",
+          "minLength": 1
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  },
+  "required": [
+    "manifestRowNumber",
+    "expected",
+    "actual",
+    "processingStatus",
+    "recognitionStatus",
+    "expectationStatus",
+    "validationStatus",
+    "recordCount",
+    "coverage",
+    "standardTotals",
+    "explanations",
+    "detailResultPath"
+  ],
+  "additionalProperties": false
+}

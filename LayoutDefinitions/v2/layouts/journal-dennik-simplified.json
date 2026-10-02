@@ -1,0 +1,2533 @@
+{
+  "$schema": "../schemas/layout.schema.json",
+  "schemaVersion": 2,
+  "definitionVersion": "2.0.0-draft.4",
+  "id": "ifosoft.journal-dennik-simplified",
+  "kind": "layout",
+  "status": "reviewDraft",
+  "productionApproved": false,
+  "requiresCapabilities": [
+    "positioned.v2"
+  ],
+  "sourceRefs": [
+    {
+      "file": "sources/IfoSoft-v2-review.zip",
+      "sha256": "3d74f8a56bfd23fe52557f82018268612f62005cfdb1063064f211fbbb9788c0"
+    }
+  ],
+  "reviewNotes": [],
+  "formats": [
+    "PDF",
+    "XPS",
+    "OXPS"
+  ],
+  "modelRef": {
+    "id": "ifosoft.model.journal-dennik-simplified",
+    "version": "2.0.0-draft.4"
+  },
+  "identificationRefs": [
+    {
+      "id": "ifosoft.identify.dennik",
+      "version": "2.0.0-draft.4"
+    }
+  ],
+  "parserRefs": [
+    {
+      "id": "ifosoft.parsers",
+      "version": "2.0.0-draft.4"
+    }
+  ],
+  "validationRefs": [
+    {
+      "id": "ifosoft.journal-dennik-simplified.validation",
+      "version": "2.0.0-draft.4"
+    }
+  ],
+  "variants": [
+    {
+      "id": "original",
+      "evidenceStatus": "sourceDerived",
+      "sourceRefs": [
+        {
+          "file": "_DENNIK_V2.gmx",
+          "sha256": "eacb9429b79f7434d079013761bf2a71e3257cceaf2aeb04bb15542a97c3ac6a"
+        }
+      ],
+      "nominalPageSizePt": [
+        595.275591,
+        841.889764
+      ],
+      "anchors": [
+        {
+          "id": "anchor-1",
+          "feature": "rulingEndpoint",
+          "pointPt": [
+            2.834646,
+            796.535433
+          ],
+          "blockRef": "pagehead",
+          "lineRef": "line-5",
+          "endpointIndex": 0,
+          "evidenceStatus": "sourceDerived",
+          "sourceRefs": [
+            {
+              "file": "_DENNIK_V2.gmx",
+              "line": 5,
+              "rawCommand": "|CPLINE(10,160,2030,160,4,0,0,0)"
+            }
+          ]
+        },
+        {
+          "id": "anchor-2",
+          "feature": "rulingEndpoint",
+          "pointPt": [
+            575.433071,
+            796.535433
+          ],
+          "blockRef": "pagehead",
+          "lineRef": "line-5",
+          "endpointIndex": 1,
+          "evidenceStatus": "sourceDerived",
+          "sourceRefs": [
+            {
+              "file": "_DENNIK_V2.gmx",
+              "line": 5,
+              "rawCommand": "|CPLINE(10,160,2030,160,4,0,0,0)"
+            }
+          ]
+        },
+        {
+          "id": "anchor-3",
+          "feature": "rulingEndpoint",
+          "pointPt": [
+            2.834646,
+            771.023622
+          ],
+          "blockRef": "pagehead",
+          "lineRef": "line-7",
+          "endpointIndex": 1,
+          "evidenceStatus": "sourceDerived",
+          "sourceRefs": [
+            {
+              "file": "_DENNIK_V2.gmx",
+              "line": 7,
+              "rawCommand": "|CPLINE(10,160,10,250,3,0,0,0)"
+            }
+          ]
+        },
+        {
+          "id": "anchor-4",
+          "feature": "rulingEndpoint",
+          "pointPt": [
+            575.433071,
+            771.023622
+          ],
+          "blockRef": "pagehead",
+          "lineRef": "line-11",
+          "endpointIndex": 1,
+          "evidenceStatus": "sourceDerived",
+          "sourceRefs": [
+            {
+              "file": "_DENNIK_V2.gmx",
+              "line": 11,
+              "rawCommand": "|CPLINE(10,250,2030,250,4,0,0,0)"
+            }
+          ]
+        },
+        {
+          "id": "anchor-5",
+          "feature": "rulingEndpoint",
+          "pointPt": [
+            382.677165,
+            796.535433
+          ],
+          "blockRef": "pagehead",
+          "lineRef": "line-12",
+          "endpointIndex": 0,
+          "evidenceStatus": "sourceDerived",
+          "sourceRefs": [
+            {
+              "file": "_DENNIK_V2.gmx",
+              "line": 12,
+              "rawCommand": "|CPLINE(1350,160,1350,250,1,0,0,0)"
+            }
+          ]
+        },
+        {
+          "id": "anchor-6",
+          "feature": "rulingEndpoint",
+          "pointPt": [
+            382.677165,
+            771.023622
+          ],
+          "blockRef": "pagehead",
+          "lineRef": "line-12",
+          "endpointIndex": 1,
+          "evidenceStatus": "sourceDerived",
+          "sourceRefs": [
+            {
+              "file": "_DENNIK_V2.gmx",
+              "line": 12,
+              "rawCommand": "|CPLINE(1350,160,1350,250,1,0,0,0)"
+            }
+          ]
+        },
+        {
+          "id": "anchor-7",
+          "feature": "rulingEndpoint",
+          "pointPt": [
+            51.023622,
+            796.535433
+          ],
+          "blockRef": "pagehead",
+          "lineRef": "line-13",
+          "endpointIndex": 0,
+          "evidenceStatus": "sourceDerived",
+          "sourceRefs": [
+            {
+              "file": "_DENNIK_V2.gmx",
+              "line": 13,
+              "rawCommand": "|CPLINE(180,160,180,250,4,0,0,0)"
+            }
+          ]
+        },
+        {
+          "id": "anchor-8",
+          "feature": "rulingEndpoint",
+          "pointPt": [
+            51.023622,
+            771.023622
+          ],
+          "blockRef": "pagehead",
+          "lineRef": "line-13",
+          "endpointIndex": 1,
+          "evidenceStatus": "sourceDerived",
+          "sourceRefs": [
+            {
+              "file": "_DENNIK_V2.gmx",
+              "line": 13,
+              "rawCommand": "|CPLINE(180,160,180,250,4,0,0,0)"
+            }
+          ]
+        },
+        {
+          "id": "anchor-9",
+          "feature": "rulingEndpoint",
+          "pointPt": [
+            317.480315,
+            796.535433
+          ],
+          "blockRef": "pagehead",
+          "lineRef": "line-14",
+          "endpointIndex": 0,
+          "evidenceStatus": "sourceDerived",
+          "sourceRefs": [
+            {
+              "file": "_DENNIK_V2.gmx",
+              "line": 14,
+              "rawCommand": "|CPLINE(1120,160,1120,250,4,0,0,0)"
+            }
+          ]
+        },
+        {
+          "id": "anchor-10",
+          "feature": "rulingEndpoint",
+          "pointPt": [
+            317.480315,
+            771.023622
+          ],
+          "blockRef": "pagehead",
+          "lineRef": "line-14",
+          "endpointIndex": 1,
+          "evidenceStatus": "sourceDerived",
+          "sourceRefs": [
+            {
+              "file": "_DENNIK_V2.gmx",
+              "line": 14,
+              "rawCommand": "|CPLINE(1120,160,1120,250,4,0,0,0)"
+            }
+          ]
+        },
+        {
+          "id": "anchor-11",
+          "feature": "rulingEndpoint",
+          "pointPt": [
+            246.614173,
+            796.535433
+          ],
+          "blockRef": "pagehead",
+          "lineRef": "line-25",
+          "endpointIndex": 0,
+          "evidenceStatus": "sourceDerived",
+          "sourceRefs": [
+            {
+              "file": "_DENNIK_V2.gmx",
+              "line": 25,
+              "rawCommand": "|CPLINE(870,160,870,250,4,0,0,0)"
+            }
+          ]
+        },
+        {
+          "id": "anchor-12",
+          "feature": "rulingEndpoint",
+          "pointPt": [
+            246.614173,
+            771.023622
+          ],
+          "blockRef": "pagehead",
+          "lineRef": "line-25",
+          "endpointIndex": 1,
+          "evidenceStatus": "sourceDerived",
+          "sourceRefs": [
+            {
+              "file": "_DENNIK_V2.gmx",
+              "line": 25,
+              "rawCommand": "|CPLINE(870,160,870,250,4,0,0,0)"
+            }
+          ]
+        },
+        {
+          "id": "anchor-13",
+          "feature": "rulingEndpoint",
+          "pointPt": [
+            447.874016,
+            796.535433
+          ],
+          "blockRef": "pagehead",
+          "lineRef": "line-28",
+          "endpointIndex": 0,
+          "evidenceStatus": "sourceDerived",
+          "sourceRefs": [
+            {
+              "file": "_DENNIK_V2.gmx",
+              "line": 28,
+              "rawCommand": "|CPLINE(1580,160,1580,250,4,0,0,0)"
+            }
+          ]
+        },
+        {
+          "id": "anchor-14",
+          "feature": "rulingEndpoint",
+          "pointPt": [
+            447.874016,
+            771.023622
+          ],
+          "blockRef": "pagehead",
+          "lineRef": "line-28",
+          "endpointIndex": 1,
+          "evidenceStatus": "sourceDerived",
+          "sourceRefs": [
+            {
+              "file": "_DENNIK_V2.gmx",
+              "line": 28,
+              "rawCommand": "|CPLINE(1580,160,1580,250,4,0,0,0)"
+            }
+          ]
+        }
+      ],
+      "blocks": [
+        {
+          "id": "pagehead",
+          "kind": "pageHeader",
+          "frame": "nominalPage",
+          "sourceRefs": [
+            {
+              "file": "_DENNIK_V2.gmx",
+              "rawCommand": "#PAGEHEAD(90,0)"
+            }
+          ],
+          "nominalAdvancePt": 25.511811,
+          "emptyTemplate": false,
+          "placement": {
+            "id": "locate-pagehead",
+            "op": "locateBlock",
+            "enabled": true,
+            "evidenceStatus": "sourceDerived",
+            "sourceRefs": [],
+            "reviewNotes": [],
+            "frame": "nominalPage",
+            "origin": "pageCalibration",
+            "signals": [
+              "rulings",
+              "labels",
+              "fieldColumns",
+              "unassignedText"
+            ],
+            "combination": "union",
+            "onAmbiguous": "retainHypotheses"
+          },
+          "candidateDetection": {
+            "id": "detect-pagehead",
+            "op": "detectCandidates",
+            "enabled": true,
+            "evidenceStatus": "sourceDerived",
+            "sourceRefs": [],
+            "reviewNotes": [],
+            "signals": [
+              "rulings",
+              "labels",
+              "fieldColumns",
+              "unassignedText"
+            ],
+            "combination": "union",
+            "requiresSuccessfulParsing": false
+          },
+          "fieldAssignment": {
+            "id": "assign-pagehead",
+            "op": "assignFields",
+            "enabled": true,
+            "evidenceStatus": "sourceDerived",
+            "sourceRefs": [],
+            "reviewNotes": [],
+            "paddingPt": 1.5,
+            "assembly": "glyphClusters",
+            "splitAcrossFields": "requireGlyphGeometry",
+            "overlap": "retainAmbiguity",
+            "retainClippedSource": true
+          },
+          "fields": [
+            {
+              "id": "field-8",
+              "semanticName": "printedPageNumber",
+              "rectPt": [
+                552.755906,
+                802.771654,
+                574.866142,
+                813.543307
+              ],
+              "parserRef": "integer",
+              "sourceRefs": [
+                {
+                  "file": "_DENNIK_V2.gmx",
+                  "line": 8,
+                  "rawCommand": "|CPDATABASE(1950,100,2028,138,1,0,0,1,16777215,1,0,2,5,8,0,0,0,400,0,0,0,238,3,2,1,18,\"Tahoma\",0,0,2,0,\"'$PAGENO'\",1,0,0,0,0,0)",
+                  "expression": "$PAGENO"
+                }
+              ]
+            },
+            {
+              "id": "field-17",
+              "semanticName": "licensedUserText",
+              "rectPt": [
+                2.834646,
+                828.283465,
+                241.795276,
+                839.055118
+              ],
+              "parserRef": "text",
+              "sourceRefs": [
+                {
+                  "file": "_DENNIK_V2.gmx",
+                  "line": 17,
+                  "rawCommand": "|CPDATABASE(10,10,853,48,1,0,0,1,16777215,1,0,2,5,8,0,0,0,400,0,0,0,238,3,2,1,18,\"Tahoma\",0,0,2,0,\"'$USER'\",1,0,0,0,0,0)",
+                  "expression": "$USER"
+                }
+              ]
+            },
+            {
+              "id": "field-21",
+              "semanticName": "periodEnd",
+              "rectPt": [
+                368.503937,
+                812.692913,
+                408.755906,
+                824.88189
+              ],
+              "parserRef": "period",
+              "sourceRefs": [
+                {
+                  "file": "_DENNIK_V2.gmx",
+                  "line": 21,
+                  "rawCommand": "|CPDATABASE(1300,60,1442,103,0,0,0,1,0,1,16777215,2,5,9,0,0,0,700,0,0,0,238,3,2,1,34,\"Tahoma\",0,0,2,0,\"';^DOL'\",1,0,0,0,0,0)",
+                  "expression": ";^DOL"
+                }
+              ]
+            },
+            {
+              "id": "field-27",
+              "semanticName": "reportSubtitle",
+              "rectPt": [
+                130.393701,
+                801.354331,
+                495.212598,
+                813.543307
+              ],
+              "parserRef": "text",
+              "sourceRefs": [
+                {
+                  "file": "_DENNIK_V2.gmx",
+                  "line": 27,
+                  "rawCommand": "|CPDATABASE(460,100,1747,143,0,0,0,1,0,1,16777215,2,5,9,0,0,0,700,0,0,0,238,3,2,1,34,\"Tahoma\",0,0,2,0,\"'^Q0'\",1,0,0,0,0,0)",
+                  "expression": "^Q0"
+                }
+              ]
+            }
+          ],
+          "labels": [
+            {
+              "id": "label-6",
+              "text": "Strana:",
+              "rectPt": [
+                524.409449,
+                802.771654,
+                550.204724,
+                813.543307
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_DENNIK_V2.gmx",
+                  "line": 6,
+                  "rawCommand": "|CPLABEL(1850,100,1941,138,1,0,0,1,16777215,1,0,2,5,8,0,0,0,400,0,0,0,238,3,2,1,18,\"Tahoma\",0,0,2,\"Strana:\")"
+                }
+              ]
+            },
+            {
+              "id": "label-9",
+              "text": "MÁ  DAŤ",
+              "rectPt": [
+                334.488189,
+                785.76378,
+                365.385827,
+                796.535433
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_DENNIK_V2.gmx",
+                  "line": 9,
+                  "rawCommand": "|CPLABEL(1180,160,1289,198,1,0,0,1,16777215,1,0,2,5,8,0,0,0,400,0,0,0,238,3,2,1,18,\"Tahoma\",0,2,2,\"MÁ  DAŤ\")"
+                }
+              ]
+            },
+            {
+              "id": "label-10",
+              "text": "Účet",
+              "rectPt": [
+                408.188976,
+                774.425197,
+                424.062992,
+                785.19685
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_DENNIK_V2.gmx",
+                  "line": 10,
+                  "rawCommand": "|CPLABEL(1440,200,1496,238,1,0,0,1,16777215,1,0,2,5,8,0,0,0,400,0,0,0,238,3,2,1,18,\"Tahoma\",0,0,2,\"Účet\")"
+                }
+              ]
+            },
+            {
+              "id": "label-16",
+              "text": "_DENNIK.GMX",
+              "rectPt": [
+                2.834646,
+                799.653543,
+                41.385827,
+                807.874016
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_DENNIK_V2.gmx",
+                  "line": 16,
+                  "rawCommand": "|CPLABEL(10,120,146,149,1,0,0,1,16777215,1,0,2,5,6,0,0,0,400,0,0,0,238,3,2,1,18,\"Tahoma\",0,0,0,\"_DENNIK.GMX\")"
+                }
+              ]
+            },
+            {
+              "id": "label-18",
+              "text": "© IFOsoft",
+              "rectPt": [
+                530.07874,
+                828.283465,
+                572.88189,
+                839.055118
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_DENNIK_V2.gmx",
+                  "line": 18,
+                  "rawCommand": "|CPLABEL(1870,10,2021,48,1,0,0,1,16777215,1,0,2,5,8,0,0,0,700,1,0,0,238,3,2,1,18,\"Tahoma\",0,1,2,\"© IFOsoft\")"
+                }
+              ]
+            },
+            {
+              "id": "label-19",
+              "text": "Poradové \\n    číslo",
+              "rectPt": [
+                11.338583,
+                772.15748,
+                46.488189,
+                793.700787
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_DENNIK_V2.gmx",
+                  "line": 19,
+                  "rawCommand": "|CPLABEL(40,170,164,246,1,0,0,1,16777215,1,0,2,5,8,0,0,0,400,0,0,0,238,3,2,1,18,\"Tahoma\",0,0,2,\"Poradové \\n    číslo\")"
+                }
+              ]
+            },
+            {
+              "id": "label-20",
+              "text": "Suma / Rozdiel",
+              "rectPt": [
+                255.11811,
+                774.425197,
+                308.125984,
+                785.19685
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_DENNIK_V2.gmx",
+                  "line": 20,
+                  "rawCommand": "|CPLABEL(900,200,1087,238,1,0,0,1,16777215,1,0,2,5,8,0,0,0,400,0,0,0,238,3,2,1,18,\"Tahoma\",0,0,2,\"Suma / Rozdiel\")"
+                }
+              ]
+            },
+            {
+              "id": "label-22",
+              "text": "D E N N Í K  ÚČTOVNÝCH PRÍPADOV ",
+              "rectPt": [
+                263.622047,
+                825.732283,
+                485.574803,
+                841.889764
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_DENNIK_V2.gmx",
+                  "line": 22,
+                  "rawCommand": "|CPLABEL(930,0,1713,57,1,0,0,1,16777215,1,0,2,5,12,0,0,0,700,0,0,0,238,3,2,1,18,\"Tahoma\",0,0,2,\"D E N N Í K  ÚČTOVNÝCH PRÍPADOV \")"
+                }
+              ]
+            },
+            {
+              "id": "label-23",
+              "text": "DAL",
+              "rectPt": [
+                408.188976,
+                785.76378,
+                422.645669,
+                796.535433
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_DENNIK_V2.gmx",
+                  "line": 23,
+                  "rawCommand": "|CPLABEL(1440,160,1491,198,1,0,0,1,16777215,1,0,2,5,8,0,0,0,400,0,0,0,238,3,2,1,18,\"Tahoma\",0,2,2,\"DAL\")"
+                }
+              ]
+            },
+            {
+              "id": "label-24",
+              "text": "Účet",
+              "rectPt": [
+                340.15748,
+                774.425197,
+                356.031496,
+                785.19685
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_DENNIK_V2.gmx",
+                  "line": 24,
+                  "rawCommand": "|CPLABEL(1200,200,1256,238,1,0,0,1,16777215,1,0,2,5,8,0,0,0,400,0,0,0,238,3,2,1,18,\"Tahoma\",0,0,2,\"Účet\")"
+                }
+              ]
+            },
+            {
+              "id": "label-26",
+              "text": "Popis operácie",
+              "rectPt": [
+                53.858268,
+                774.425197,
+                104.598425,
+                785.19685
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_DENNIK_V2.gmx",
+                  "line": 26,
+                  "rawCommand": "|CPLABEL(190,200,369,238,1,0,0,1,16777215,1,0,2,5,8,0,0,0,400,0,0,0,238,3,2,1,18,\"Tahoma\",0,0,2,\"Popis operácie\")"
+                }
+              ]
+            },
+            {
+              "id": "label-29",
+              "text": "Organizácia",
+              "rectPt": [
+                453.543307,
+                774.425197,
+                494.645669,
+                785.19685
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_DENNIK_V2.gmx",
+                  "line": 29,
+                  "rawCommand": "|CPLABEL(1600,200,1745,238,1,0,0,1,16777215,1,0,2,5,8,0,0,0,400,0,0,0,238,3,2,1,18,\"Tahoma\",0,0,2,\"Organizácia\")"
+                }
+              ]
+            },
+            {
+              "id": "label-30",
+              "text": "Obdobie:",
+              "rectPt": [
+                328.818898,
+                812.692913,
+                365.102362,
+                824.88189
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_DENNIK_V2.gmx",
+                  "line": 30,
+                  "rawCommand": "|CPLABEL(1160,60,1288,103,1,0,0,1,16777215,1,0,2,5,9,0,0,0,400,0,0,0,238,3,2,1,18,\"Tahoma\",0,0,2,\"Obdobie:\")"
+                }
+              ]
+            }
+          ],
+          "lines": [
+            {
+              "id": "line-5",
+              "pointsPt": [
+                [
+                  2.834646,
+                  796.535433
+                ],
+                [
+                  575.433071,
+                  796.535433
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_DENNIK_V2.gmx",
+                  "line": 5,
+                  "rawCommand": "|CPLINE(10,160,2030,160,4,0,0,0)"
+                }
+              ]
+            },
+            {
+              "id": "line-7",
+              "pointsPt": [
+                [
+                  2.834646,
+                  796.535433
+                ],
+                [
+                  2.834646,
+                  771.023622
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_DENNIK_V2.gmx",
+                  "line": 7,
+                  "rawCommand": "|CPLINE(10,160,10,250,3,0,0,0)"
+                }
+              ]
+            },
+            {
+              "id": "line-11",
+              "pointsPt": [
+                [
+                  2.834646,
+                  771.023622
+                ],
+                [
+                  575.433071,
+                  771.023622
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_DENNIK_V2.gmx",
+                  "line": 11,
+                  "rawCommand": "|CPLINE(10,250,2030,250,4,0,0,0)"
+                }
+              ]
+            },
+            {
+              "id": "line-12",
+              "pointsPt": [
+                [
+                  382.677165,
+                  796.535433
+                ],
+                [
+                  382.677165,
+                  771.023622
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_DENNIK_V2.gmx",
+                  "line": 12,
+                  "rawCommand": "|CPLINE(1350,160,1350,250,1,0,0,0)"
+                }
+              ]
+            },
+            {
+              "id": "line-13",
+              "pointsPt": [
+                [
+                  51.023622,
+                  796.535433
+                ],
+                [
+                  51.023622,
+                  771.023622
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_DENNIK_V2.gmx",
+                  "line": 13,
+                  "rawCommand": "|CPLINE(180,160,180,250,4,0,0,0)"
+                }
+              ]
+            },
+            {
+              "id": "line-14",
+              "pointsPt": [
+                [
+                  317.480315,
+                  796.535433
+                ],
+                [
+                  317.480315,
+                  771.023622
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_DENNIK_V2.gmx",
+                  "line": 14,
+                  "rawCommand": "|CPLINE(1120,160,1120,250,4,0,0,0)"
+                }
+              ]
+            },
+            {
+              "id": "line-15",
+              "pointsPt": [
+                [
+                  575.433071,
+                  796.535433
+                ],
+                [
+                  575.433071,
+                  771.023622
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_DENNIK_V2.gmx",
+                  "line": 15,
+                  "rawCommand": "|CPLINE(2030,160,2030,250,3,0,0,0)"
+                }
+              ]
+            },
+            {
+              "id": "line-25",
+              "pointsPt": [
+                [
+                  246.614173,
+                  796.535433
+                ],
+                [
+                  246.614173,
+                  771.023622
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_DENNIK_V2.gmx",
+                  "line": 25,
+                  "rawCommand": "|CPLINE(870,160,870,250,4,0,0,0)"
+                }
+              ]
+            },
+            {
+              "id": "line-28",
+              "pointsPt": [
+                [
+                  447.874016,
+                  796.535433
+                ],
+                [
+                  447.874016,
+                  771.023622
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_DENNIK_V2.gmx",
+                  "line": 28,
+                  "rawCommand": "|CPLINE(1580,160,1580,250,4,0,0,0)"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "record",
+          "kind": "repeatingRecord",
+          "frame": "blockLocal",
+          "sourceRefs": [
+            {
+              "file": "_DENNIK_V2.gmx",
+              "rawCommand": "#RECORD(80,0)"
+            }
+          ],
+          "nominalAdvancePt": 22.677165,
+          "emptyTemplate": false,
+          "placement": {
+            "id": "locate-record",
+            "op": "locateBlock",
+            "enabled": true,
+            "evidenceStatus": "sourceDerived",
+            "sourceRefs": [],
+            "reviewNotes": [],
+            "frame": "blockLocal",
+            "origin": "independentOccurrence",
+            "signals": [
+              "rulings",
+              "labels",
+              "fieldColumns",
+              "unassignedText"
+            ],
+            "combination": "union",
+            "onAmbiguous": "retainHypotheses"
+          },
+          "candidateDetection": {
+            "id": "detect-record",
+            "op": "detectCandidates",
+            "enabled": true,
+            "evidenceStatus": "sourceDerived",
+            "sourceRefs": [],
+            "reviewNotes": [],
+            "signals": [
+              "rulings",
+              "labels",
+              "fieldColumns",
+              "unassignedText"
+            ],
+            "combination": "union",
+            "requiresSuccessfulParsing": false
+          },
+          "fieldAssignment": {
+            "id": "assign-record",
+            "op": "assignFields",
+            "enabled": true,
+            "evidenceStatus": "sourceDerived",
+            "sourceRefs": [],
+            "reviewNotes": [],
+            "paddingPt": 1.5,
+            "assembly": "glyphClusters",
+            "splitAcrossFields": "requireGlyphGeometry",
+            "overlap": "retainAmbiguity",
+            "retainClippedSource": true
+          },
+          "fields": [
+            {
+              "id": "field-33",
+              "semanticName": "description",
+              "rectPt": [
+                53.858268,
+                -10.771654,
+                245.19685,
+                0.0
+              ],
+              "parserRef": "text",
+              "sourceRefs": [
+                {
+                  "file": "_DENNIK_V2.gmx",
+                  "line": 33,
+                  "rawCommand": "|CPDATABASE(190,255,865,293,1,0,0,1,16777215,1,0,2,5,8,0,0,0,400,0,0,0,238,3,2,1,18,\"Tahoma\",0,0,2,0,\"'POPIS'\",1,0,0,0,0,0)",
+                  "expression": "POPIS"
+                }
+              ]
+            },
+            {
+              "id": "field-37",
+              "semanticName": "amount",
+              "rectPt": [
+                249.448819,
+                -16.440945,
+                312.944882,
+                -5.669291
+              ],
+              "parserRef": "money-comma",
+              "sourceRefs": [
+                {
+                  "file": "_DENNIK_V2.gmx",
+                  "line": 37,
+                  "rawCommand": "|CPDATABASE(880,275,1104,313,1,0,0,1,16777215,1,0,2,5,8,0,0,0,700,0,0,0,238,3,2,1,18,\"Tahoma\",0,1,2,0,\"'[SUMA'\",1,1,179,9,36,0)",
+                  "expression": "[SUMA"
+                }
+              ]
+            },
+            {
+              "id": "field-41",
+              "semanticName": "sequenceOrCount2",
+              "rectPt": [
+                28.346457,
+                -16.440945,
+                47.622047,
+                -5.669291
+              ],
+              "parserRef": "integer",
+              "sourceRefs": [
+                {
+                  "file": "_DENNIK_V2.gmx",
+                  "line": 41,
+                  "rawCommand": "|CPDATABASE(100,275,168,313,1,0,0,1,16777215,1,0,2,5,8,0,0,0,400,0,0,0,238,3,2,1,18,\"Tahoma\",0,2,2,0,\"'$C2'\",1,0,0,0,0,0)",
+                  "expression": "$C2"
+                }
+              ]
+            },
+            {
+              "id": "field-42",
+              "semanticName": "creditAccount",
+              "rectPt": [
+                394.015748,
+                -16.440945,
+                432.283465,
+                -5.669291
+              ],
+              "parserRef": "code",
+              "sourceRefs": [
+                {
+                  "file": "_DENNIK_V2.gmx",
+                  "line": 42,
+                  "rawCommand": "|CPDATABASE(1390,275,1525,313,1,0,0,1,16777215,1,0,2,5,8,0,0,0,700,0,0,0,238,3,2,1,18,\"Tahoma\",0,0,2,0,\"'DU'\",1,0,0,0,0,0)",
+                  "expression": "DU"
+                }
+              ]
+            },
+            {
+              "id": "field-43",
+              "semanticName": "sequenceOrCount1",
+              "rectPt": [
+                5.669291,
+                -16.440945,
+                24.944882,
+                -5.669291
+              ],
+              "parserRef": "integer",
+              "sourceRefs": [
+                {
+                  "file": "_DENNIK_V2.gmx",
+                  "line": 43,
+                  "rawCommand": "|CPDATABASE(20,275,88,313,1,0,0,1,16777215,1,0,2,5,8,0,0,0,400,0,0,0,238,3,2,1,18,\"Tahoma\",0,2,2,0,\"'$C1'\",1,0,0,0,0,0)",
+                  "expression": "$C1"
+                }
+              ]
+            },
+            {
+              "id": "field-44",
+              "semanticName": "debitAccount",
+              "rectPt": [
+                331.653543,
+                -16.440945,
+                369.92126,
+                -5.669291
+              ],
+              "parserRef": "code",
+              "sourceRefs": [
+                {
+                  "file": "_DENNIK_V2.gmx",
+                  "line": 44,
+                  "rawCommand": "|CPDATABASE(1170,275,1305,313,1,0,0,1,16777215,1,0,2,5,8,0,0,0,700,0,0,0,238,3,2,1,18,\"Tahoma\",0,0,2,0,\"'MU'\",1,0,0,0,0,0)",
+                  "expression": "MU"
+                }
+              ]
+            },
+            {
+              "id": "field-45",
+              "semanticName": "additionalDescription",
+              "rectPt": [
+                53.858268,
+                -22.110236,
+                245.19685,
+                -11.338583
+              ],
+              "parserRef": "text",
+              "sourceRefs": [
+                {
+                  "file": "_DENNIK_V2.gmx",
+                  "line": 45,
+                  "rawCommand": "|CPDATABASE(190,295,865,333,1,0,0,1,16777215,1,0,2,5,8,0,0,0,400,0,0,0,238,3,2,1,18,\"Tahoma\",0,0,2,0,\"'TEXT'\",1,0,0,0,0,0)",
+                  "expression": "TEXT"
+                }
+              ]
+            },
+            {
+              "id": "field-49",
+              "semanticName": "source_KOD",
+              "rectPt": [
+                453.543307,
+                -16.440945,
+                472.818898,
+                -5.669291
+              ],
+              "parserRef": "text",
+              "sourceRefs": [
+                {
+                  "file": "_DENNIK_V2.gmx",
+                  "line": 49,
+                  "rawCommand": "|CPDATABASE(1600,275,1668,313,0,0,0,1,0,1,16777215,2,5,8,0,0,0,400,0,0,0,238,3,2,1,34,\"Tahoma\",0,0,2,0,\"'KOD'\",1,0,0,0,0,0)",
+                  "expression": "KOD"
+                }
+              ]
+            },
+            {
+              "id": "field-50",
+              "semanticName": "source_CPOPIS_20",
+              "rectPt": [
+                476.220472,
+                -16.440945,
+                572.031496,
+                -5.669291
+              ],
+              "parserRef": "text",
+              "sourceRefs": [
+                {
+                  "file": "_DENNIK_V2.gmx",
+                  "line": 50,
+                  "rawCommand": "|CPDATABASE(1680,275,2018,313,0,0,0,1,0,1,16777215,2,5,8,0,0,0,400,0,0,0,238,3,2,1,34,\"Tahoma\",0,0,2,0,\"'&CPOPIS%20'\",1,0,0,0,0,0)",
+                  "expression": "&CPOPIS%20"
+                }
+              ]
+            }
+          ],
+          "labels": [],
+          "lines": [
+            {
+              "id": "line-34",
+              "pointsPt": [
+                [
+                  246.614173,
+                  0.0
+                ],
+                [
+                  246.614173,
+                  -22.677165
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_DENNIK_V2.gmx",
+                  "line": 34,
+                  "rawCommand": "|CPLINE(870,255,870,335,4,0,0,0)"
+                }
+              ]
+            },
+            {
+              "id": "line-35",
+              "pointsPt": [
+                [
+                  51.023622,
+                  0.0
+                ],
+                [
+                  51.023622,
+                  -22.677165
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_DENNIK_V2.gmx",
+                  "line": 35,
+                  "rawCommand": "|CPLINE(180,255,180,335,4,0,0,0)"
+                }
+              ]
+            },
+            {
+              "id": "line-36",
+              "pointsPt": [
+                [
+                  2.834646,
+                  0.0
+                ],
+                [
+                  2.834646,
+                  -22.677165
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_DENNIK_V2.gmx",
+                  "line": 36,
+                  "rawCommand": "|CPLINE(10,255,10,335,4,0,0,0)"
+                }
+              ]
+            },
+            {
+              "id": "line-38",
+              "pointsPt": [
+                [
+                  575.433071,
+                  0.0
+                ],
+                [
+                  575.433071,
+                  -22.677165
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_DENNIK_V2.gmx",
+                  "line": 38,
+                  "rawCommand": "|CPLINE(2030,255,2030,335,4,0,0,0)"
+                }
+              ]
+            },
+            {
+              "id": "line-39",
+              "pointsPt": [
+                [
+                  317.480315,
+                  0.0
+                ],
+                [
+                  317.480315,
+                  -22.677165
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_DENNIK_V2.gmx",
+                  "line": 39,
+                  "rawCommand": "|CPLINE(1120,255,1120,335,4,0,0,0)"
+                }
+              ]
+            },
+            {
+              "id": "line-40",
+              "pointsPt": [
+                [
+                  28.346457,
+                  0.0
+                ],
+                [
+                  28.346457,
+                  -22.677165
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_DENNIK_V2.gmx",
+                  "line": 40,
+                  "rawCommand": "|CPLINE(100,255,100,335,1,0,0,0)"
+                }
+              ]
+            },
+            {
+              "id": "line-46",
+              "pointsPt": [
+                [
+                  28.346457,
+                  -22.677165
+                ],
+                [
+                  575.433071,
+                  -22.677165
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_DENNIK_V2.gmx",
+                  "line": 46,
+                  "rawCommand": "|CPLINE(100,335,2030,335,1,0,0,0)"
+                }
+              ]
+            },
+            {
+              "id": "line-47",
+              "pointsPt": [
+                [
+                  382.677165,
+                  0.0
+                ],
+                [
+                  382.677165,
+                  -22.677165
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_DENNIK_V2.gmx",
+                  "line": 47,
+                  "rawCommand": "|CPLINE(1350,255,1350,335,1,0,0,0)"
+                }
+              ]
+            },
+            {
+              "id": "line-48",
+              "pointsPt": [
+                [
+                  447.874016,
+                  0.0
+                ],
+                [
+                  447.874016,
+                  -22.677165
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_DENNIK_V2.gmx",
+                  "line": 48,
+                  "rawCommand": "|CPLINE(1580,255,1580,335,4,0,0,0)"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "foot2",
+          "kind": "groupFooter",
+          "frame": "blockLocal",
+          "sourceRefs": [
+            {
+              "file": "_DENNIK_V2.gmx",
+              "rawCommand": "#FOOT2(60,0)"
+            }
+          ],
+          "nominalAdvancePt": 17.007874,
+          "emptyTemplate": false,
+          "placement": {
+            "id": "locate-foot2",
+            "op": "locateBlock",
+            "enabled": true,
+            "evidenceStatus": "sourceDerived",
+            "sourceRefs": [],
+            "reviewNotes": [],
+            "frame": "blockLocal",
+            "origin": "independentOccurrence",
+            "signals": [
+              "rulings",
+              "labels",
+              "fieldColumns",
+              "unassignedText"
+            ],
+            "combination": "union",
+            "onAmbiguous": "retainHypotheses"
+          },
+          "candidateDetection": {
+            "id": "detect-foot2",
+            "op": "detectCandidates",
+            "enabled": true,
+            "evidenceStatus": "sourceDerived",
+            "sourceRefs": [],
+            "reviewNotes": [],
+            "signals": [
+              "rulings",
+              "labels",
+              "fieldColumns",
+              "unassignedText"
+            ],
+            "combination": "union",
+            "requiresSuccessfulParsing": false
+          },
+          "fieldAssignment": {
+            "id": "assign-foot2",
+            "op": "assignFields",
+            "enabled": true,
+            "evidenceStatus": "sourceDerived",
+            "sourceRefs": [],
+            "reviewNotes": [],
+            "paddingPt": 1.5,
+            "assembly": "glyphClusters",
+            "splitAcrossFields": "requireGlyphGeometry",
+            "overlap": "retainAmbiguity",
+            "retainClippedSource": true
+          },
+          "fields": [
+            {
+              "id": "field-52",
+              "semanticName": "debitControl",
+              "rectPt": [
+                325.984252,
+                -13.606299,
+                377.291339,
+                -2.834646
+              ],
+              "parserRef": "money-dot",
+              "sourceRefs": [
+                {
+                  "file": "_DENNIK_V2.gmx",
+                  "line": 52,
+                  "rawCommand": "|CPDATABASE(1150,265,1331,303,1,0,0,1,16777215,1,0,2,5,8,0,0,0,400,0,0,0,238,3,2,1,18,\"Tahoma\",0,1,2,0,\"'[=*11.2'\",1,1,141,9,31,0)",
+                  "expression": "[=*11.2"
+                }
+              ]
+            },
+            {
+              "id": "field-54",
+              "semanticName": "documentNumber",
+              "rectPt": [
+                87.874016,
+                -13.606299,
+                120.755906,
+                -2.834646
+              ],
+              "parserRef": "code",
+              "sourceRefs": [
+                {
+                  "file": "_DENNIK_V2.gmx",
+                  "line": 54,
+                  "rawCommand": "|CPDATABASE(310,265,426,303,0,0,0,1,0,1,16777215,2,5,8,0,0,0,700,0,0,0,238,3,2,1,34,\"Tahoma\",0,0,2,0,\"'CDOK'\",1,0,0,0,0,0)",
+                  "expression": "CDOK"
+                }
+              ]
+            },
+            {
+              "id": "field-61",
+              "semanticName": "documentType",
+              "rectPt": [
+                130.393701,
+                -13.606299,
+                141.448819,
+                -2.834646
+              ],
+              "parserRef": "code",
+              "sourceRefs": [
+                {
+                  "file": "_DENNIK_V2.gmx",
+                  "line": 61,
+                  "rawCommand": "|CPDATABASE(460,265,499,303,0,0,0,1,0,1,16777215,2,5,8,0,0,0,700,0,0,0,238,3,2,1,34,\"Tahoma\",0,0,2,0,\"'DD'\",1,0,0,0,0,0)",
+                  "expression": "DD"
+                }
+              ]
+            },
+            {
+              "id": "field-62",
+              "semanticName": "postingDate",
+              "rectPt": [
+                144.566929,
+                -13.606299,
+                190.488189,
+                -2.834646
+              ],
+              "parserRef": "date",
+              "sourceRefs": [
+                {
+                  "file": "_DENNIK_V2.gmx",
+                  "line": 62,
+                  "rawCommand": "|CPDATABASE(510,265,672,303,0,0,0,1,0,1,16777215,2,5,8,0,0,0,700,0,0,0,238,3,2,1,34,\"Tahoma\",0,0,2,0,\"':DATUM'\",1,0,0,0,0,0)",
+                  "expression": ":DATUM"
+                }
+              ]
+            },
+            {
+              "id": "field-63",
+              "semanticName": "creditControl",
+              "rectPt": [
+                391.181102,
+                -13.606299,
+                442.488189,
+                -2.834646
+              ],
+              "parserRef": "money-dot",
+              "sourceRefs": [
+                {
+                  "file": "_DENNIK_V2.gmx",
+                  "line": 63,
+                  "rawCommand": "|CPDATABASE(1380,265,1561,303,1,0,0,1,16777215,1,0,2,5,8,0,0,0,400,0,0,0,238,3,2,1,18,\"Tahoma\",0,1,2,0,\"'[=*11.2'\",1,1,141,9,31,0)",
+                  "expression": "[=*11.2"
+                }
+              ]
+            }
+          ],
+          "labels": [
+            {
+              "id": "label-60",
+              "text": "/",
+              "rectPt": [
+                124.724409,
+                -13.606299,
+                128.125984,
+                -2.834646
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_DENNIK_V2.gmx",
+                  "line": 60,
+                  "rawCommand": "|CPLABEL(440,265,452,303,0,0,0,1,0,1,16777215,2,5,8,0,0,0,400,0,0,0,238,3,2,1,34,\"Tahoma\",0,0,2,\"/\")"
+                }
+              ]
+            },
+            {
+              "id": "label-67",
+              "text": "SPOLU:",
+              "rectPt": [
+                53.858268,
+                -13.606299,
+                80.503937,
+                -2.834646
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_DENNIK_V2.gmx",
+                  "line": 67,
+                  "rawCommand": "|CPLABEL(190,265,284,303,1,0,0,1,16777215,1,0,2,5,8,0,0,0,400,0,0,0,238,3,2,1,18,\"Tahoma\",0,0,2,\"SPOLU:\")"
+                }
+              ]
+            },
+            {
+              "id": "label-68",
+              "text": "***",
+              "rectPt": [
+                31.181102,
+                -13.606299,
+                44.503937,
+                -2.834646
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_DENNIK_V2.gmx",
+                  "line": 68,
+                  "rawCommand": "|CPLABEL(110,265,157,303,1,0,0,1,16777215,1,0,2,5,8,0,0,0,400,0,0,0,238,3,2,1,18,\"Tahoma\",0,0,2,\"***\")"
+                }
+              ]
+            }
+          ],
+          "lines": [
+            {
+              "id": "line-53",
+              "pointsPt": [
+                [
+                  2.834646,
+                  0.0
+                ],
+                [
+                  2.834646,
+                  -17.007874
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_DENNIK_V2.gmx",
+                  "line": 53,
+                  "rawCommand": "|CPLINE(10,255,10,315,4,0,0,0)"
+                }
+              ]
+            },
+            {
+              "id": "line-55",
+              "pointsPt": [
+                [
+                  2.834646,
+                  0.0
+                ],
+                [
+                  575.433071,
+                  0.0
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_DENNIK_V2.gmx",
+                  "line": 55,
+                  "rawCommand": "|CPLINE(10,255,2030,255,4,0,0,0)"
+                }
+              ]
+            },
+            {
+              "id": "line-56",
+              "pointsPt": [
+                [
+                  28.346457,
+                  0.0
+                ],
+                [
+                  28.346457,
+                  -17.007874
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_DENNIK_V2.gmx",
+                  "line": 56,
+                  "rawCommand": "|CPLINE(100,255,100,315,1,0,0,0)"
+                }
+              ]
+            },
+            {
+              "id": "line-57",
+              "pointsPt": [
+                [
+                  317.480315,
+                  0.0
+                ],
+                [
+                  317.480315,
+                  -17.007874
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_DENNIK_V2.gmx",
+                  "line": 57,
+                  "rawCommand": "|CPLINE(1120,255,1120,315,4,0,0,0)"
+                }
+              ]
+            },
+            {
+              "id": "line-58",
+              "pointsPt": [
+                [
+                  382.677165,
+                  0.0
+                ],
+                [
+                  382.677165,
+                  -17.007874
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_DENNIK_V2.gmx",
+                  "line": 58,
+                  "rawCommand": "|CPLINE(1350,255,1350,315,1,0,0,0)"
+                }
+              ]
+            },
+            {
+              "id": "line-59",
+              "pointsPt": [
+                [
+                  575.433071,
+                  0.0
+                ],
+                [
+                  575.433071,
+                  -17.007874
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_DENNIK_V2.gmx",
+                  "line": 59,
+                  "rawCommand": "|CPLINE(2030,255,2030,315,4,0,0,0)"
+                }
+              ]
+            },
+            {
+              "id": "line-64",
+              "pointsPt": [
+                [
+                  2.834646,
+                  -17.007874
+                ],
+                [
+                  575.433071,
+                  -17.007874
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_DENNIK_V2.gmx",
+                  "line": 64,
+                  "rawCommand": "|CPLINE(10,315,2030,315,4,0,0,0)"
+                }
+              ]
+            },
+            {
+              "id": "line-65",
+              "pointsPt": [
+                [
+                  246.614173,
+                  0.0
+                ],
+                [
+                  246.614173,
+                  -17.007874
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_DENNIK_V2.gmx",
+                  "line": 65,
+                  "rawCommand": "|CPLINE(870,255,870,315,4,0,0,0)"
+                }
+              ]
+            },
+            {
+              "id": "line-66",
+              "pointsPt": [
+                [
+                  51.023622,
+                  0.0
+                ],
+                [
+                  51.023622,
+                  -17.007874
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_DENNIK_V2.gmx",
+                  "line": 66,
+                  "rawCommand": "|CPLINE(180,255,180,315,4,0,0,0)"
+                }
+              ]
+            },
+            {
+              "id": "line-69",
+              "pointsPt": [
+                [
+                  447.874016,
+                  0.0
+                ],
+                [
+                  447.874016,
+                  -17.007874
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_DENNIK_V2.gmx",
+                  "line": 69,
+                  "rawCommand": "|CPLINE(1580,255,1580,315,4,0,0,0)"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "foot1",
+          "kind": "reportFooter",
+          "frame": "blockLocal",
+          "sourceRefs": [
+            {
+              "file": "_DENNIK_V2.gmx",
+              "rawCommand": "#FOOT1(60,1)"
+            }
+          ],
+          "nominalAdvancePt": 17.007874,
+          "emptyTemplate": false,
+          "placement": {
+            "id": "locate-foot1",
+            "op": "locateBlock",
+            "enabled": true,
+            "evidenceStatus": "sourceDerived",
+            "sourceRefs": [],
+            "reviewNotes": [],
+            "frame": "blockLocal",
+            "origin": "independentOccurrence",
+            "signals": [
+              "rulings",
+              "labels",
+              "fieldColumns",
+              "unassignedText"
+            ],
+            "combination": "union",
+            "onAmbiguous": "retainHypotheses"
+          },
+          "candidateDetection": {
+            "id": "detect-foot1",
+            "op": "detectCandidates",
+            "enabled": true,
+            "evidenceStatus": "sourceDerived",
+            "sourceRefs": [],
+            "reviewNotes": [],
+            "signals": [
+              "rulings",
+              "labels",
+              "fieldColumns",
+              "unassignedText"
+            ],
+            "combination": "union",
+            "requiresSuccessfulParsing": false
+          },
+          "fieldAssignment": {
+            "id": "assign-foot1",
+            "op": "assignFields",
+            "enabled": true,
+            "evidenceStatus": "sourceDerived",
+            "sourceRefs": [],
+            "reviewNotes": [],
+            "paddingPt": 1.5,
+            "assembly": "glyphClusters",
+            "splitAcrossFields": "requireGlyphGeometry",
+            "overlap": "retainAmbiguity",
+            "retainClippedSource": true
+          },
+          "fields": [
+            {
+              "id": "field-79",
+              "semanticName": "debitControl",
+              "rectPt": [
+                325.984252,
+                -13.606299,
+                377.291339,
+                -2.834646
+              ],
+              "parserRef": "money-dot",
+              "sourceRefs": [
+                {
+                  "file": "_DENNIK_V2.gmx",
+                  "line": 79,
+                  "rawCommand": "|CPDATABASE(1150,265,1331,303,1,0,0,1,16777215,1,0,2,5,8,0,0,0,400,0,0,0,238,3,2,1,18,\"Tahoma\",0,1,2,0,\"'[=*11.2'\",1,1,141,9,31,0)",
+                  "expression": "[=*11.2"
+                }
+              ]
+            },
+            {
+              "id": "field-80",
+              "semanticName": "creditControl",
+              "rectPt": [
+                391.181102,
+                -13.606299,
+                442.488189,
+                -2.834646
+              ],
+              "parserRef": "money-dot",
+              "sourceRefs": [
+                {
+                  "file": "_DENNIK_V2.gmx",
+                  "line": 80,
+                  "rawCommand": "|CPDATABASE(1380,265,1561,303,1,0,0,1,16777215,1,0,2,5,8,0,0,0,400,0,0,0,238,3,2,1,18,\"Tahoma\",0,1,2,0,\"'[=*11.2'\",1,1,141,9,31,0)",
+                  "expression": "[=*11.2"
+                }
+              ]
+            }
+          ],
+          "labels": [
+            {
+              "id": "label-77",
+              "text": "CELKOM:",
+              "rectPt": [
+                53.858268,
+                -10.771654,
+                86.456693,
+                0.0
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_DENNIK_V2.gmx",
+                  "line": 77,
+                  "rawCommand": "|CPLABEL(190,255,305,293,0,0,0,1,0,1,16777215,2,5,8,0,0,0,400,0,0,0,238,3,2,1,34,\"Tahoma\",0,0,2,\"CELKOM:\")"
+                }
+              ]
+            }
+          ],
+          "lines": [
+            {
+              "id": "line-71",
+              "pointsPt": [
+                [
+                  246.614173,
+                  0.0
+                ],
+                [
+                  246.614173,
+                  -17.007874
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_DENNIK_V2.gmx",
+                  "line": 71,
+                  "rawCommand": "|CPLINE(870,255,870,315,4,0,0,0)"
+                }
+              ]
+            },
+            {
+              "id": "line-72",
+              "pointsPt": [
+                [
+                  51.023622,
+                  0.0
+                ],
+                [
+                  51.023622,
+                  -17.007874
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_DENNIK_V2.gmx",
+                  "line": 72,
+                  "rawCommand": "|CPLINE(180,255,180,315,4,0,0,0)"
+                }
+              ]
+            },
+            {
+              "id": "line-73",
+              "pointsPt": [
+                [
+                  317.480315,
+                  0.0
+                ],
+                [
+                  317.480315,
+                  -17.007874
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_DENNIK_V2.gmx",
+                  "line": 73,
+                  "rawCommand": "|CPLINE(1120,255,1120,315,4,0,0,0)"
+                }
+              ]
+            },
+            {
+              "id": "line-74",
+              "pointsPt": [
+                [
+                  2.834646,
+                  -17.007874
+                ],
+                [
+                  575.433071,
+                  -17.007874
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_DENNIK_V2.gmx",
+                  "line": 74,
+                  "rawCommand": "|CPLINE(10,315,2030,315,4,0,0,0)"
+                }
+              ]
+            },
+            {
+              "id": "line-75",
+              "pointsPt": [
+                [
+                  575.433071,
+                  0.0
+                ],
+                [
+                  575.433071,
+                  -17.007874
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_DENNIK_V2.gmx",
+                  "line": 75,
+                  "rawCommand": "|CPLINE(2030,255,2030,315,4,0,0,0)"
+                }
+              ]
+            },
+            {
+              "id": "line-76",
+              "pointsPt": [
+                [
+                  2.834646,
+                  0.0
+                ],
+                [
+                  2.834646,
+                  -17.007874
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_DENNIK_V2.gmx",
+                  "line": 76,
+                  "rawCommand": "|CPLINE(10,255,10,315,4,0,0,0)"
+                }
+              ]
+            },
+            {
+              "id": "line-78",
+              "pointsPt": [
+                [
+                  2.834646,
+                  0.0
+                ],
+                [
+                  575.433071,
+                  0.0
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_DENNIK_V2.gmx",
+                  "line": 78,
+                  "rawCommand": "|CPLINE(10,255,2030,255,4,0,0,0)"
+                }
+              ]
+            },
+            {
+              "id": "line-81",
+              "pointsPt": [
+                [
+                  382.677165,
+                  0.0
+                ],
+                [
+                  382.677165,
+                  -17.007874
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_DENNIK_V2.gmx",
+                  "line": 81,
+                  "rawCommand": "|CPLINE(1350,255,1350,315,1,0,0,0)"
+                }
+              ]
+            },
+            {
+              "id": "line-82",
+              "pointsPt": [
+                [
+                  447.874016,
+                  0.0
+                ],
+                [
+                  447.874016,
+                  -17.007874
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_DENNIK_V2.gmx",
+                  "line": 82,
+                  "rawCommand": "|CPLINE(1580,255,1580,315,4,0,0,0)"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "pagefoot",
+          "kind": "decoration",
+          "frame": "blockLocal",
+          "sourceRefs": [
+            {
+              "file": "_DENNIK_V2.gmx",
+              "rawCommand": "#PAGEFOOT(29,0)"
+            }
+          ],
+          "nominalAdvancePt": 8.220472,
+          "emptyTemplate": false,
+          "placement": {
+            "id": "locate-pagefoot",
+            "op": "locateBlock",
+            "enabled": true,
+            "evidenceStatus": "sourceDerived",
+            "sourceRefs": [],
+            "reviewNotes": [],
+            "frame": "blockLocal",
+            "origin": "independentOccurrence",
+            "signals": [
+              "rulings",
+              "labels",
+              "fieldColumns",
+              "unassignedText"
+            ],
+            "combination": "union",
+            "onAmbiguous": "retainHypotheses"
+          },
+          "candidateDetection": {
+            "id": "detect-pagefoot",
+            "op": "detectCandidates",
+            "enabled": true,
+            "evidenceStatus": "sourceDerived",
+            "sourceRefs": [],
+            "reviewNotes": [],
+            "signals": [
+              "rulings",
+              "labels",
+              "fieldColumns",
+              "unassignedText"
+            ],
+            "combination": "union",
+            "requiresSuccessfulParsing": false
+          },
+          "fieldAssignment": {
+            "id": "assign-pagefoot",
+            "op": "assignFields",
+            "enabled": true,
+            "evidenceStatus": "sourceDerived",
+            "sourceRefs": [],
+            "reviewNotes": [],
+            "paddingPt": 1.5,
+            "assembly": "glyphClusters",
+            "splitAcrossFields": "requireGlyphGeometry",
+            "overlap": "retainAmbiguity",
+            "retainClippedSource": true
+          },
+          "fields": [],
+          "labels": [
+            {
+              "id": "label-85",
+              "text": "© IFOsoft",
+              "rectPt": [
+                5.669291,
+                -8.220472,
+                37.984252,
+                0.0
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_DENNIK_V2.gmx",
+                  "line": 85,
+                  "rawCommand": "|CPLABEL(20,255,134,284,1,0,0,1,16777215,1,0,2,5,6,0,0,0,700,1,0,0,238,3,2,1,18,\"Tahoma\",0,1,2,\"© IFOsoft\")"
+                }
+              ]
+            }
+          ],
+          "lines": [
+            {
+              "id": "line-84",
+              "pointsPt": [
+                [
+                  2.834646,
+                  0.0
+                ],
+                [
+                  575.433071,
+                  0.0
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_DENNIK_V2.gmx",
+                  "line": 84,
+                  "rawCommand": "|CPLINE(10,255,2030,255,4,0,0,0)"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "calibration": {
+        "id": "page-calibration",
+        "op": "fitUniformScaleTranslation",
+        "enabled": true,
+        "evidenceStatus": "unverified",
+        "sourceRefs": [],
+        "reviewNotes": [
+          "Provisional thresholds retained from draft 2; require corpus tuning."
+        ],
+        "anchorRefs": [
+          "anchor-1",
+          "anchor-2",
+          "anchor-3",
+          "anchor-4",
+          "anchor-5",
+          "anchor-6",
+          "anchor-7",
+          "anchor-8",
+          "anchor-9",
+          "anchor-10",
+          "anchor-11",
+          "anchor-12",
+          "anchor-13",
+          "anchor-14"
+        ],
+        "minimumInliers": 3,
+        "minimumAnchorSeparationPt": 150,
+        "minimumSpanPt": [
+          150,
+          10
+        ],
+        "scaleRange": [
+          0.65,
+          1.4
+        ],
+        "maximumResidualPt": 1.5,
+        "maximumHypotheses": 256,
+        "onFailure": "retainUnresolvedPage",
+        "inferScaleFromPageSize": false
+      }
+    }
+  ],
+  "metadata": [
+    {
+      "id": "original.pagehead.field-8",
+      "semanticName": "printedPageLabel",
+      "locator": {
+        "kind": "blockField",
+        "variantRef": "original",
+        "blockRef": "pagehead",
+        "fieldRef": "field-8",
+        "frame": "nominalPage",
+        "pages": {
+          "selection": "all",
+          "indices": [],
+          "maximumPages": 10000
+        },
+        "assembly": "glyphClusters",
+        "cardinality": "zeroOrOne"
+      },
+      "parserRef": "integer",
+      "onAbsent": "unresolved",
+      "onConflict": "ambiguous",
+      "sourceRefs": [
+        {
+          "file": "_DENNIK_V2.gmx",
+          "line": 8,
+          "rawCommand": "|CPDATABASE(1950,100,2028,138,1,0,0,1,16777215,1,0,2,5,8,0,0,0,400,0,0,0,238,3,2,1,18,\"Tahoma\",0,0,2,0,\"'$PAGENO'\",1,0,0,0,0,0)",
+          "expression": "$PAGENO"
+        }
+      ]
+    },
+    {
+      "id": "original.pagehead.field-17",
+      "semanticName": "licensedUserText",
+      "locator": {
+        "kind": "blockField",
+        "variantRef": "original",
+        "blockRef": "pagehead",
+        "fieldRef": "field-17",
+        "frame": "nominalPage",
+        "pages": {
+          "selection": "all",
+          "indices": [],
+          "maximumPages": 10000
+        },
+        "assembly": "glyphClusters",
+        "cardinality": "zeroOrOne"
+      },
+      "parserRef": "text",
+      "onAbsent": "unresolved",
+      "onConflict": "ambiguous",
+      "sourceRefs": [
+        {
+          "file": "_DENNIK_V2.gmx",
+          "line": 17,
+          "rawCommand": "|CPDATABASE(10,10,853,48,1,0,0,1,16777215,1,0,2,5,8,0,0,0,400,0,0,0,238,3,2,1,18,\"Tahoma\",0,0,2,0,\"'$USER'\",1,0,0,0,0,0)",
+          "expression": "$USER"
+        }
+      ]
+    },
+    {
+      "id": "original.pagehead.field-21",
+      "semanticName": "period.end",
+      "locator": {
+        "kind": "blockField",
+        "variantRef": "original",
+        "blockRef": "pagehead",
+        "fieldRef": "field-21",
+        "frame": "nominalPage",
+        "pages": {
+          "selection": "all",
+          "indices": [],
+          "maximumPages": 10000
+        },
+        "assembly": "glyphClusters",
+        "cardinality": "zeroOrOne"
+      },
+      "parserRef": "period",
+      "onAbsent": "unresolved",
+      "onConflict": "ambiguous",
+      "sourceRefs": [
+        {
+          "file": "_DENNIK_V2.gmx",
+          "line": 21,
+          "rawCommand": "|CPDATABASE(1300,60,1442,103,0,0,0,1,0,1,16777215,2,5,9,0,0,0,700,0,0,0,238,3,2,1,34,\"Tahoma\",0,0,2,0,\"';^DOL'\",1,0,0,0,0,0)",
+          "expression": ";^DOL"
+        }
+      ]
+    },
+    {
+      "id": "original.title.label-22",
+      "semanticName": "reportTitle",
+      "locator": {
+        "kind": "calibratedRegion",
+        "variantRef": "original",
+        "frame": "nominalPage",
+        "rectPt": [
+          263.622047,
+          825.732283,
+          485.574803,
+          841.889764
+        ],
+        "paddingPt": 2,
+        "pages": {
+          "selection": "all",
+          "indices": [],
+          "maximumPages": 10000
+        },
+        "assembly": "glyphClusters",
+        "cardinality": "zeroOrOne"
+      },
+      "parserRef": "text",
+      "onAbsent": "unresolved",
+      "onConflict": "ambiguous",
+      "sourceRefs": [
+        {
+          "file": "_DENNIK_V2.gmx",
+          "line": 22,
+          "rawCommand": "|CPLABEL(930,0,1713,57,1,0,0,1,16777215,1,0,2,5,12,0,0,0,700,0,0,0,238,3,2,1,18,\"Tahoma\",0,0,2,\"D E N N Í K  ÚČTOVNÝCH PRÍPADOV \")"
+        }
+      ]
+    }
+  ],
+  "metadataDerivations": [],
+  "classification": [
+    {
+      "id": "page-header",
+      "op": "classify",
+      "enabled": true,
+      "evidenceStatus": "sourceDerived",
+      "sourceRefs": [],
+      "reviewNotes": [],
+      "when": {
+        "op": "blockKind",
+        "blockRefs": [
+          "pagehead"
+        ]
+      },
+      "semanticClass": "pageHeader",
+      "exportEligibility": "excluded",
+      "aggregationMemberships": [],
+      "level": "any"
+    },
+    {
+      "id": "page-footer",
+      "op": "classify",
+      "enabled": true,
+      "evidenceStatus": "sourceDerived",
+      "sourceRefs": [],
+      "reviewNotes": [],
+      "when": {
+        "op": "blockKind",
+        "blockRefs": [
+          "pagefoot"
+        ]
+      },
+      "semanticClass": "pageFooter",
+      "exportEligibility": "excluded",
+      "aggregationMemberships": [],
+      "level": "any"
+    },
+    {
+      "id": "journal-entry",
+      "op": "classify",
+      "enabled": true,
+      "evidenceStatus": "sourceDerived",
+      "sourceRefs": [],
+      "reviewNotes": [],
+      "when": {
+        "op": "blockKind",
+        "blockRefs": [
+          "record"
+        ]
+      },
+      "semanticClass": "journalEntry",
+      "exportEligibility": "eligible",
+      "aggregationMemberships": [
+        "exportedDetails"
+      ],
+      "level": "detail"
+    },
+    {
+      "id": "report-control",
+      "op": "classify",
+      "enabled": true,
+      "evidenceStatus": "sourceDerived",
+      "sourceRefs": [],
+      "reviewNotes": [],
+      "when": {
+        "op": "blockKind",
+        "blockRefs": [
+          "foot1"
+        ]
+      },
+      "semanticClass": "reportControl",
+      "exportEligibility": "excluded",
+      "aggregationMemberships": [],
+      "level": "any"
+    },
+    {
+      "id": "document-control",
+      "op": "classify",
+      "enabled": true,
+      "evidenceStatus": "sourceDerived",
+      "sourceRefs": [],
+      "reviewNotes": [],
+      "when": {
+        "op": "blockKind",
+        "blockRefs": [
+          "foot2"
+        ]
+      },
+      "semanticClass": "documentSubtotal",
+      "exportEligibility": "excluded",
+      "aggregationMemberships": [],
+      "level": "any"
+    }
+  ],
+  "classificationPolicy": {
+    "evaluation": "allRules",
+    "noMatch": "unrecognizedCandidate",
+    "incompatibleMatches": "ambiguous"
+  },
+  "groups": [
+    {
+      "id": "reportSection",
+      "parentRef": null,
+      "memberSelector": {
+        "semanticClasses": [],
+        "aggregationMemberships": [],
+        "level": "any",
+        "occurrences": "records"
+      },
+      "startRule": {
+        "op": "sectionStart"
+      },
+      "endRule": {
+        "op": "sectionEnd"
+      },
+      "keyFields": [],
+      "crossPagePolicy": "requireContinuityEvidence",
+      "partialInputPolicy": "retainIncomplete",
+      "repeatedHeaderResets": false,
+      "inheritance": []
+    },
+    {
+      "id": "document",
+      "parentRef": "reportSection",
+      "memberSelector": {
+        "semanticClasses": [],
+        "aggregationMemberships": [
+          "exportedDetails"
+        ],
+        "level": "any",
+        "occurrences": "records"
+      },
+      "startRule": {
+        "op": "afterPreviousClosure"
+      },
+      "endRule": {
+        "op": "match",
+        "when": {
+          "op": "blockKind",
+          "blockRefs": [
+            "foot2"
+          ]
+        }
+      },
+      "keyFields": [
+        "documentType",
+        "documentNumber"
+      ],
+      "crossPagePolicy": "requireContinuityEvidence",
+      "partialInputPolicy": "retainIncomplete",
+      "repeatedHeaderResets": false,
+      "inheritance": [
+        {
+          "fieldRef": "documentNumber",
+          "when": "absent",
+          "onConflict": "retainBothAndDiagnose",
+          "from": "closingOccurrence"
+        },
+        {
+          "fieldRef": "documentType",
+          "when": "absent",
+          "onConflict": "retainBothAndDiagnose",
+          "from": "closingOccurrence"
+        },
+        {
+          "fieldRef": "postingDate",
+          "when": "absent",
+          "onConflict": "retainBothAndDiagnose",
+          "from": "closingOccurrence"
+        }
+      ]
+    }
+  ],
+  "completeness": [
+    {
+      "id": "entry-required",
+      "op": "requireFields",
+      "enabled": true,
+      "evidenceStatus": "sourceDerived",
+      "sourceRefs": [],
+      "reviewNotes": [],
+      "selector": {
+        "semanticClasses": [
+          "journalEntry"
+        ],
+        "aggregationMemberships": [],
+        "level": "any",
+        "occurrences": "records"
+      },
+      "fieldRefs": [
+        "postingDate",
+        "amount"
+      ],
+      "requiredState": "present"
+    },
+    {
+      "id": "entry-side",
+      "op": "requireAny",
+      "enabled": true,
+      "evidenceStatus": "sourceDerived",
+      "sourceRefs": [],
+      "reviewNotes": [],
+      "selector": {
+        "semanticClasses": [
+          "journalEntry"
+        ],
+        "aggregationMemberships": [],
+        "level": "any",
+        "occurrences": "records"
+      },
+      "fieldRefs": [
+        "debitAccount",
+        "creditAccount"
+      ],
+      "requiredState": "present"
+    },
+    {
+      "id": "all-candidates",
+      "op": "accountForCandidates",
+      "enabled": true,
+      "evidenceStatus": "sourceDerived",
+      "sourceRefs": [],
+      "reviewNotes": [],
+      "onUnrecognized": "preventCleanSuccess"
+    },
+    {
+      "id": "all-tokens",
+      "op": "accountForTokens",
+      "enabled": true,
+      "evidenceStatus": "sourceDerived",
+      "sourceRefs": [],
+      "reviewNotes": [],
+      "decorationRequiresRuleId": true
+    },
+    {
+      "id": "coverage",
+      "op": "inspectCoverage",
+      "enabled": true,
+      "evidenceStatus": "sourceDerived",
+      "sourceRefs": [],
+      "reviewNotes": [],
+      "printedPageField": "printedPageNumber",
+      "contiguousPagesProveOriginalComplete": false
+    },
+    {
+      "id": "spacing",
+      "op": "checkSpacing",
+      "enabled": true,
+      "evidenceStatus": "unverified",
+      "sourceRefs": [],
+      "reviewNotes": [],
+      "excludeExplainedBlocks": true,
+      "maximumAdvanceMultiplier": 1.5,
+      "onGap": "suspectedMissingRecord"
+    }
+  ],
+  "openQuestions": [
+    "Calibrate tolerances and glyph offsets on complete fixtures.",
+    "Confirm suppressed-zero policy per field/block.",
+    "No total reconciliation has been run for this package.",
+    "One-sided entries are preserved as printed; do not pair automatically.",
+    "No global requirement for numeric documentNumber: /PS exists.",
+    "No verified reportingEntity.cin locator in the supplied GMX fields. Return unresolved; do not extract arbitrary eight-digit numbers or use manifest expectations."
+  ]
+}

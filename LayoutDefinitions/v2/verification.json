@@ -1,0 +1,23 @@
+{
+  "schemaValidation": "pass",
+  "referenceValidation": "pass",
+  "geometryPreservedItems": 1126,
+  "definitions": 43,
+  "layouts": 11,
+  "negativeCasesPassed": [
+    "unknown executable property",
+    "unknown operation",
+    "missing reference",
+    "wrong version",
+    "duplicate IDs",
+    "unknown parser",
+    "reversed rectangle",
+    "unknown anchor",
+    "group cycle",
+    "calculation cycle",
+    "unknown metadata field",
+    "unsupported capabilities"
+  ],
+  "engineExecution": "notImplementedInStep2",
+  "corpusExecution": "notRun"
+}

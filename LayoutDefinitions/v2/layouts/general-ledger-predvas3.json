@@ -1,0 +1,3620 @@
+{
+  "$schema": "../schemas/layout.schema.json",
+  "schemaVersion": 2,
+  "definitionVersion": "2.0.0-draft.4",
+  "id": "ifosoft.general-ledger-predvas3",
+  "kind": "layout",
+  "status": "reviewDraft",
+  "productionApproved": false,
+  "requiresCapabilities": [
+    "positioned.v2"
+  ],
+  "sourceRefs": [
+    {
+      "file": "sources/IfoSoft-v2-review.zip",
+      "sha256": "3d74f8a56bfd23fe52557f82018268612f62005cfdb1063064f211fbbb9788c0"
+    }
+  ],
+  "reviewNotes": [],
+  "formats": [
+    "PDF",
+    "XPS",
+    "OXPS"
+  ],
+  "modelRef": {
+    "id": "ifosoft.model.general-ledger-predvas3",
+    "version": "2.0.0-draft.4"
+  },
+  "identificationRefs": [
+    {
+      "id": "ifosoft.identify.predvas3",
+      "version": "2.0.0-draft.4"
+    }
+  ],
+  "parserRefs": [
+    {
+      "id": "ifosoft.parsers",
+      "version": "2.0.0-draft.4"
+    }
+  ],
+  "validationRefs": [
+    {
+      "id": "ifosoft.general-ledger-predvas3.validation",
+      "version": "2.0.0-draft.4"
+    }
+  ],
+  "variants": [
+    {
+      "id": "original",
+      "evidenceStatus": "sourceDerived",
+      "sourceRefs": [
+        {
+          "file": "_PREDVAS3.GMX",
+          "sha256": "57115f9376a1d17b3dda6295fdeff06e070b7472ad40871849a00e5d2c0b3db1"
+        }
+      ],
+      "nominalPageSizePt": [
+        841.889764,
+        595.275591
+      ],
+      "anchors": [
+        {
+          "id": "anchor-1",
+          "feature": "rulingEndpoint",
+          "pointPt": [
+            45.354331,
+            578.267717
+          ],
+          "blockRef": "pagehead",
+          "lineRef": "line-5",
+          "endpointIndex": 0,
+          "evidenceStatus": "sourceDerived",
+          "sourceRefs": [
+            {
+              "file": "_PREDVAS3.GMX",
+              "line": 5,
+              "rawCommand": "|CPLINE(160,60,2820,60,3,0,0,0)"
+            }
+          ]
+        },
+        {
+          "id": "anchor-2",
+          "feature": "rulingEndpoint",
+          "pointPt": [
+            799.370079,
+            578.267717
+          ],
+          "blockRef": "pagehead",
+          "lineRef": "line-5",
+          "endpointIndex": 1,
+          "evidenceStatus": "sourceDerived",
+          "sourceRefs": [
+            {
+              "file": "_PREDVAS3.GMX",
+              "line": 5,
+              "rawCommand": "|CPLINE(160,60,2820,60,3,0,0,0)"
+            }
+          ]
+        },
+        {
+          "id": "anchor-3",
+          "feature": "rulingEndpoint",
+          "pointPt": [
+            45.354331,
+            549.92126
+          ],
+          "blockRef": "pagehead",
+          "lineRef": "line-14",
+          "endpointIndex": 0,
+          "evidenceStatus": "sourceDerived",
+          "sourceRefs": [
+            {
+              "file": "_PREDVAS3.GMX",
+              "line": 14,
+              "rawCommand": "|CPLINE(160,160,2820,160,1,0,0,0)"
+            }
+          ]
+        },
+        {
+          "id": "anchor-4",
+          "feature": "rulingEndpoint",
+          "pointPt": [
+            799.370079,
+            549.92126
+          ],
+          "blockRef": "pagehead",
+          "lineRef": "line-14",
+          "endpointIndex": 1,
+          "evidenceStatus": "sourceDerived",
+          "sourceRefs": [
+            {
+              "file": "_PREDVAS3.GMX",
+              "line": 14,
+              "rawCommand": "|CPLINE(160,160,2820,160,1,0,0,0)"
+            }
+          ]
+        },
+        {
+          "id": "anchor-5",
+          "feature": "rulingEndpoint",
+          "pointPt": [
+            45.354331,
+            527.244094
+          ],
+          "blockRef": "pagehead",
+          "lineRef": "line-15",
+          "endpointIndex": 1,
+          "evidenceStatus": "sourceDerived",
+          "sourceRefs": [
+            {
+              "file": "_PREDVAS3.GMX",
+              "line": 15,
+              "rawCommand": "|CPLINE(160,60,160,240,3,0,0,0)"
+            }
+          ]
+        },
+        {
+          "id": "anchor-6",
+          "feature": "rulingEndpoint",
+          "pointPt": [
+            799.370079,
+            527.244094
+          ],
+          "blockRef": "pagehead",
+          "lineRef": "line-16",
+          "endpointIndex": 1,
+          "evidenceStatus": "sourceDerived",
+          "sourceRefs": [
+            {
+              "file": "_PREDVAS3.GMX",
+              "line": 16,
+              "rawCommand": "|CPLINE(2820,60,2820,240,3,0,0,0)"
+            }
+          ]
+        },
+        {
+          "id": "anchor-7",
+          "feature": "rulingEndpoint",
+          "pointPt": [
+            246.614173,
+            549.92126
+          ],
+          "blockRef": "pagehead",
+          "lineRef": "line-19",
+          "endpointIndex": 0,
+          "evidenceStatus": "sourceDerived",
+          "sourceRefs": [
+            {
+              "file": "_PREDVAS3.GMX",
+              "line": 19,
+              "rawCommand": "|CPLINE(870,160,870,240,1,0,0,0)"
+            }
+          ]
+        },
+        {
+          "id": "anchor-8",
+          "feature": "rulingEndpoint",
+          "pointPt": [
+            246.614173,
+            527.244094
+          ],
+          "blockRef": "pagehead",
+          "lineRef": "line-19",
+          "endpointIndex": 1,
+          "evidenceStatus": "sourceDerived",
+          "sourceRefs": [
+            {
+              "file": "_PREDVAS3.GMX",
+              "line": 19,
+              "rawCommand": "|CPLINE(870,160,870,240,1,0,0,0)"
+            }
+          ]
+        },
+        {
+          "id": "anchor-9",
+          "feature": "rulingEndpoint",
+          "pointPt": [
+            311.811024,
+            549.92126
+          ],
+          "blockRef": "pagehead",
+          "lineRef": "line-20",
+          "endpointIndex": 0,
+          "evidenceStatus": "sourceDerived",
+          "sourceRefs": [
+            {
+              "file": "_PREDVAS3.GMX",
+              "line": 20,
+              "rawCommand": "|CPLINE(1100,160,1100,240,1,0,0,0)"
+            }
+          ]
+        },
+        {
+          "id": "anchor-10",
+          "feature": "rulingEndpoint",
+          "pointPt": [
+            311.811024,
+            527.244094
+          ],
+          "blockRef": "pagehead",
+          "lineRef": "line-20",
+          "endpointIndex": 1,
+          "evidenceStatus": "sourceDerived",
+          "sourceRefs": [
+            {
+              "file": "_PREDVAS3.GMX",
+              "line": 20,
+              "rawCommand": "|CPLINE(1100,160,1100,240,1,0,0,0)"
+            }
+          ]
+        },
+        {
+          "id": "anchor-11",
+          "feature": "rulingEndpoint",
+          "pointPt": [
+            555.590551,
+            549.92126
+          ],
+          "blockRef": "pagehead",
+          "lineRef": "line-27",
+          "endpointIndex": 0,
+          "evidenceStatus": "sourceDerived",
+          "sourceRefs": [
+            {
+              "file": "_PREDVAS3.GMX",
+              "line": 27,
+              "rawCommand": "|CPLINE(1960,160,1960,240,1,0,0,0)"
+            }
+          ]
+        },
+        {
+          "id": "anchor-12",
+          "feature": "rulingEndpoint",
+          "pointPt": [
+            555.590551,
+            527.244094
+          ],
+          "blockRef": "pagehead",
+          "lineRef": "line-27",
+          "endpointIndex": 1,
+          "evidenceStatus": "sourceDerived",
+          "sourceRefs": [
+            {
+              "file": "_PREDVAS3.GMX",
+              "line": 27,
+              "rawCommand": "|CPLINE(1960,160,1960,240,1,0,0,0)"
+            }
+          ]
+        },
+        {
+          "id": "anchor-13",
+          "feature": "rulingEndpoint",
+          "pointPt": [
+            677.480315,
+            549.92126
+          ],
+          "blockRef": "pagehead",
+          "lineRef": "line-31",
+          "endpointIndex": 0,
+          "evidenceStatus": "sourceDerived",
+          "sourceRefs": [
+            {
+              "file": "_PREDVAS3.GMX",
+              "line": 31,
+              "rawCommand": "|CPLINE(2390,160,2390,240,1,0,0,0)"
+            }
+          ]
+        },
+        {
+          "id": "anchor-14",
+          "feature": "rulingEndpoint",
+          "pointPt": [
+            677.480315,
+            527.244094
+          ],
+          "blockRef": "pagehead",
+          "lineRef": "line-31",
+          "endpointIndex": 1,
+          "evidenceStatus": "sourceDerived",
+          "sourceRefs": [
+            {
+              "file": "_PREDVAS3.GMX",
+              "line": 31,
+              "rawCommand": "|CPLINE(2390,160,2390,240,1,0,0,0)"
+            }
+          ]
+        },
+        {
+          "id": "anchor-15",
+          "feature": "rulingEndpoint",
+          "pointPt": [
+            433.700787,
+            549.92126
+          ],
+          "blockRef": "pagehead",
+          "lineRef": "line-32",
+          "endpointIndex": 0,
+          "evidenceStatus": "sourceDerived",
+          "sourceRefs": [
+            {
+              "file": "_PREDVAS3.GMX",
+              "line": 32,
+              "rawCommand": "|CPLINE(1530,160,1530,240,1,0,0,0)"
+            }
+          ]
+        },
+        {
+          "id": "anchor-16",
+          "feature": "rulingEndpoint",
+          "pointPt": [
+            433.700787,
+            527.244094
+          ],
+          "blockRef": "pagehead",
+          "lineRef": "line-32",
+          "endpointIndex": 1,
+          "evidenceStatus": "sourceDerived",
+          "sourceRefs": [
+            {
+              "file": "_PREDVAS3.GMX",
+              "line": 32,
+              "rawCommand": "|CPLINE(1530,160,1530,240,1,0,0,0)"
+            }
+          ]
+        }
+      ],
+      "blocks": [
+        {
+          "id": "pagehead",
+          "kind": "pageHeader",
+          "frame": "nominalPage",
+          "sourceRefs": [
+            {
+              "file": "_PREDVAS3.GMX",
+              "rawCommand": "#PAGEHEAD(180,0)"
+            }
+          ],
+          "nominalAdvancePt": 51.023622,
+          "emptyTemplate": false,
+          "placement": {
+            "id": "locate-pagehead",
+            "op": "locateBlock",
+            "enabled": true,
+            "evidenceStatus": "sourceDerived",
+            "sourceRefs": [],
+            "reviewNotes": [],
+            "frame": "nominalPage",
+            "origin": "pageCalibration",
+            "signals": [
+              "rulings",
+              "labels",
+              "fieldColumns",
+              "unassignedText"
+            ],
+            "combination": "union",
+            "onAmbiguous": "retainHypotheses"
+          },
+          "candidateDetection": {
+            "id": "detect-pagehead",
+            "op": "detectCandidates",
+            "enabled": true,
+            "evidenceStatus": "sourceDerived",
+            "sourceRefs": [],
+            "reviewNotes": [],
+            "signals": [
+              "rulings",
+              "labels",
+              "fieldColumns",
+              "unassignedText"
+            ],
+            "combination": "union",
+            "requiresSuccessfulParsing": false
+          },
+          "fieldAssignment": {
+            "id": "assign-pagehead",
+            "op": "assignFields",
+            "enabled": true,
+            "evidenceStatus": "sourceDerived",
+            "sourceRefs": [],
+            "reviewNotes": [],
+            "paddingPt": 1.5,
+            "assembly": "glyphClusters",
+            "splitAcrossFields": "requireGlyphGeometry",
+            "overlap": "retainAmbiguity",
+            "retainClippedSource": true
+          },
+          "fields": [
+            {
+              "id": "field-6",
+              "semanticName": "licensedUserText",
+              "rectPt": [
+                48.188976,
+                564.661417,
+                239.527559,
+                575.433071
+              ],
+              "parserRef": "text",
+              "sourceRefs": [
+                {
+                  "file": "_PREDVAS3.GMX",
+                  "line": 6,
+                  "rawCommand": "|CPDATABASE(170,70,845,108,0,0,0,1,0,1,16777215,2,5,8,0,0,0,400,0,0,0,238,3,2,1,34,\"Tahoma\",0,0,2,0,\"'$USER'\",1,0,0,0,0,0)",
+                  "expression": "$USER"
+                }
+              ]
+            },
+            {
+              "id": "field-9",
+              "semanticName": "periodStart",
+              "rectPt": [
+                473.385827,
+                550.488189,
+                514.488189,
+                561.259843
+              ],
+              "parserRef": "period",
+              "sourceRefs": [
+                {
+                  "file": "_PREDVAS3.GMX",
+                  "line": 9,
+                  "rawCommand": "|CPDATABASE(1670,120,1815,158,0,0,0,1,0,1,16777215,2,5,8,0,0,0,400,0,0,0,238,3,2,1,34,\"Tahoma\",0,0,2,0,\"'^K_OD'\",1,0,0,0,0,0)",
+                  "expression": "^K_OD"
+                }
+              ]
+            },
+            {
+              "id": "field-10",
+              "semanticName": "periodEnd",
+              "rectPt": [
+                524.409449,
+                550.488189,
+                565.511811,
+                561.259843
+              ],
+              "parserRef": "period",
+              "sourceRefs": [
+                {
+                  "file": "_PREDVAS3.GMX",
+                  "line": 10,
+                  "rawCommand": "|CPDATABASE(1850,120,1995,158,0,0,0,1,0,1,16777215,2,5,8,0,0,0,400,0,0,0,238,3,2,1,34,\"Tahoma\",0,0,2,0,\"'^K_DO'\",1,0,0,0,0,0)",
+                  "expression": "^K_DO"
+                }
+              ]
+            },
+            {
+              "id": "field-13",
+              "semanticName": "printedPageNumber",
+              "rectPt": [
+                768.188976,
+                550.488189,
+                794.551181,
+                561.259843
+              ],
+              "parserRef": "integer",
+              "sourceRefs": [
+                {
+                  "file": "_PREDVAS3.GMX",
+                  "line": 13,
+                  "rawCommand": "|CPDATABASE(2710,120,2803,158,0,0,0,1,0,1,16777215,2,5,8,0,0,0,400,0,0,0,238,3,2,1,34,\"Tahoma\",0,0,2,0,\"'$PAGENO'\",1,0,0,0,0,0)",
+                  "expression": "$PAGENO"
+                }
+              ]
+            },
+            {
+              "id": "field-43",
+              "semanticName": "printingDate",
+              "rectPt": [
+                136.062992,
+                551.905512,
+                170.929134,
+                561.259843
+              ],
+              "parserRef": "date",
+              "sourceRefs": [
+                {
+                  "file": "_PREDVAS3.GMX",
+                  "line": 43,
+                  "rawCommand": "|CPDATABASE(480,120,603,153,0,0,0,1,0,1,16777215,2,5,7,0,0,0,400,0,0,0,238,3,2,1,34,\"Tahoma\",0,0,2,0,\"':$SYSDATE'\",1,0,0,0,0,0)",
+                  "expression": ":$SYSDATE"
+                }
+              ]
+            },
+            {
+              "id": "field-44",
+              "semanticName": "printingTime",
+              "rectPt": [
+                172.913386,
+                551.905512,
+                200.976378,
+                561.259843
+              ],
+              "parserRef": "time",
+              "sourceRefs": [
+                {
+                  "file": "_PREDVAS3.GMX",
+                  "line": 44,
+                  "rawCommand": "|CPDATABASE(610,120,709,153,0,0,0,1,0,1,16777215,2,5,7,0,0,0,400,0,0,0,238,3,2,1,34,\"Tahoma\",0,0,2,0,\"'$TIME'\",1,0,0,0,0,0)",
+                  "expression": "$TIME"
+                }
+              ]
+            }
+          ],
+          "labels": [
+            {
+              "id": "label-7",
+              "text": "HLAVNÁ KNIHA  ANALYTICKÝCH  ÚČTOV",
+              "rectPt": [
+                379.84252,
+                562.110236,
+                584.220472,
+                575.433071
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_PREDVAS3.GMX",
+                  "line": 7,
+                  "rawCommand": "|CPLABEL(1340,70,2061,117,0,0,0,1,0,1,16777215,2,5,10,0,0,0,700,0,0,0,238,3,2,1,18,\"Tahoma\",0,0,2,\"HLAVNÁ KNIHA  ANALYTICKÝCH  ÚČTOV\")"
+                }
+              ]
+            },
+            {
+              "id": "label-8",
+              "text": "Účtovné obdobie",
+              "rectPt": [
+                411.023622,
+                550.488189,
+                470.267717,
+                561.259843
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_PREDVAS3.GMX",
+                  "line": 8,
+                  "rawCommand": "|CPLABEL(1450,120,1659,158,0,0,0,1,0,1,16777215,2,5,8,0,0,0,400,0,0,0,238,3,2,1,34,\"Tahoma\",0,0,2,\"Účtovné obdobie\")"
+                }
+              ]
+            },
+            {
+              "id": "label-11",
+              "text": "©IFOsoft Prešov",
+              "rectPt": [
+                737.007874,
+                564.661417,
+                796.251969,
+                575.433071
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_PREDVAS3.GMX",
+                  "line": 11,
+                  "rawCommand": "|CPLABEL(2600,70,2809,108,0,0,0,1,0,1,16777215,2,5,8,0,0,0,400,0,0,0,238,3,2,1,34,\"Tahoma\",0,0,2,\"©IFOsoft Prešov\")"
+                }
+              ]
+            },
+            {
+              "id": "label-12",
+              "text": "Strana:",
+              "rectPt": [
+                742.677165,
+                550.488189,
+                768.472441,
+                561.259843
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_PREDVAS3.GMX",
+                  "line": 12,
+                  "rawCommand": "|CPLABEL(2620,120,2711,158,0,0,0,1,0,1,16777215,2,5,8,0,0,0,400,0,0,0,238,3,2,1,34,\"Tahoma\",0,0,2,\"Strana:\")"
+                }
+              ]
+            },
+            {
+              "id": "label-17",
+              "text": "Účet",
+              "rectPt": [
+                51.023622,
+                530.645669,
+                66.897638,
+                541.417323
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_PREDVAS3.GMX",
+                  "line": 17,
+                  "rawCommand": "|CPLABEL(180,190,236,228,0,0,0,1,0,1,16777215,2,5,8,0,0,0,400,0,0,0,238,3,2,1,34,\"Tahoma\",0,0,2,\"Účet\")"
+                }
+              ]
+            },
+            {
+              "id": "label-18",
+              "text": "Názov účtu",
+              "rectPt": [
+                90.708661,
+                530.645669,
+                130.110236,
+                541.417323
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_PREDVAS3.GMX",
+                  "line": 18,
+                  "rawCommand": "|CPLABEL(320,190,459,228,0,0,0,1,0,1,16777215,2,5,8,0,0,0,400,0,0,0,238,3,2,1,34,\"Tahoma\",0,0,2,\"Názov účtu\")"
+                }
+              ]
+            },
+            {
+              "id": "label-21",
+              "text": "T",
+              "rectPt": [
+                249.448819,
+                530.645669,
+                254.267717,
+                541.417323
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_PREDVAS3.GMX",
+                  "line": 21,
+                  "rawCommand": "|CPLABEL(880,190,897,228,0,0,0,1,0,1,16777215,2,5,8,0,0,0,400,0,0,0,238,3,2,1,34,\"Tahoma\",0,0,2,\"T\")"
+                }
+              ]
+            },
+            {
+              "id": "label-22",
+              "text": "P",
+              "rectPt": [
+                260.787402,
+                530.645669,
+                265.322835,
+                541.417323
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_PREDVAS3.GMX",
+                  "line": 22,
+                  "rawCommand": "|CPLABEL(920,190,936,228,0,0,0,1,0,1,16777215,2,5,8,0,0,0,400,0,0,0,238,3,2,1,34,\"Tahoma\",0,0,2,\"P\")"
+                }
+              ]
+            },
+            {
+              "id": "label-23",
+              "text": "S",
+              "rectPt": [
+                283.464567,
+                530.645669,
+                288.0,
+                541.417323
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_PREDVAS3.GMX",
+                  "line": 23,
+                  "rawCommand": "|CPLABEL(1000,190,1016,228,0,0,0,1,0,1,16777215,2,5,8,0,0,0,400,0,0,0,238,3,2,1,34,\"Tahoma\",0,0,2,\"S\")"
+                }
+              ]
+            },
+            {
+              "id": "label-24",
+              "text": "Z",
+              "rectPt": [
+                291.968504,
+                530.645669,
+                296.503937,
+                541.417323
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_PREDVAS3.GMX",
+                  "line": 24,
+                  "rawCommand": "|CPLABEL(1030,190,1046,228,0,0,0,1,0,1,16777215,2,5,8,0,0,0,400,0,0,0,238,3,2,1,34,\"Tahoma\",0,0,2,\"Z\")"
+                }
+              ]
+            },
+            {
+              "id": "label-25",
+              "text": "K",
+              "rectPt": [
+                303.307087,
+                530.645669,
+                308.125984,
+                541.417323
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_PREDVAS3.GMX",
+                  "line": 25,
+                  "rawCommand": "|CPLABEL(1070,190,1087,228,0,0,0,1,0,1,16777215,2,5,8,0,0,0,400,0,0,0,238,3,2,1,34,\"Tahoma\",0,0,2,\"K\")"
+                }
+              ]
+            },
+            {
+              "id": "label-26",
+              "text": "Počiatočný stav",
+              "rectPt": [
+                351.496063,
+                539.149606,
+                405.92126,
+                549.92126
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_PREDVAS3.GMX",
+                  "line": 26,
+                  "rawCommand": "|CPLABEL(1240,160,1432,198,0,0,0,1,0,1,16777215,2,5,8,0,0,0,400,0,0,0,238,3,2,1,34,\"Tahoma\",0,0,2,\"Počiatočný stav\")"
+                }
+              ]
+            },
+            {
+              "id": "label-28",
+              "text": "Obrat od začiatku roka",
+              "rectPt": [
+                456.377953,
+                539.149606,
+                536.314961,
+                549.92126
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_PREDVAS3.GMX",
+                  "line": 28,
+                  "rawCommand": "|CPLABEL(1610,160,1892,198,0,0,0,1,0,1,16777215,2,5,8,0,0,0,400,0,0,0,238,3,2,1,34,\"Tahoma\",0,0,2,\"Obrat od začiatku roka\")"
+                }
+              ]
+            },
+            {
+              "id": "label-29",
+              "text": "Zostatok účtu",
+              "rectPt": [
+                728.503937,
+                539.149606,
+                776.409449,
+                549.92126
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_PREDVAS3.GMX",
+                  "line": 29,
+                  "rawCommand": "|CPLABEL(2570,160,2739,198,0,0,0,1,0,1,16777215,2,5,8,0,0,0,400,0,0,0,238,3,2,1,34,\"Tahoma\",0,0,2,\"Zostatok účtu\")"
+                }
+              ]
+            },
+            {
+              "id": "label-30",
+              "text": "Obrat za posledný mesiac",
+              "rectPt": [
+                575.433071,
+                539.149606,
+                665.858268,
+                549.92126
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_PREDVAS3.GMX",
+                  "line": 30,
+                  "rawCommand": "|CPLABEL(2030,160,2349,198,0,0,0,1,0,1,16777215,2,5,8,0,0,0,400,0,0,0,238,3,2,1,34,\"Tahoma\",0,0,2,\"Obrat za posledný mesiac\")"
+                }
+              ]
+            },
+            {
+              "id": "label-33",
+              "text": "MÁ DAŤ",
+              "rectPt": [
+                694.488189,
+                527.811024,
+                723.11811,
+                538.582677
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_PREDVAS3.GMX",
+                  "line": 33,
+                  "rawCommand": "|CPLABEL(2450,200,2551,238,0,0,0,1,0,1,16777215,2,5,8,0,0,0,400,0,0,0,238,3,2,1,34,\"Tahoma\",0,0,2,\"MÁ DAŤ\")"
+                }
+              ]
+            },
+            {
+              "id": "label-34",
+              "text": "DAL",
+              "rectPt": [
+                768.188976,
+                527.811024,
+                782.645669,
+                538.582677
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_PREDVAS3.GMX",
+                  "line": 34,
+                  "rawCommand": "|CPLABEL(2710,200,2761,238,0,0,0,1,0,1,16777215,2,5,8,0,0,0,400,0,0,0,238,3,2,1,34,\"Tahoma\",0,0,2,\"DAL\")"
+                }
+              ]
+            },
+            {
+              "id": "label-35",
+              "text": "MÁ DAŤ",
+              "rectPt": [
+                572.598425,
+                527.811024,
+                601.228346,
+                538.582677
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_PREDVAS3.GMX",
+                  "line": 35,
+                  "rawCommand": "|CPLABEL(2020,200,2121,238,0,0,0,1,0,1,16777215,2,5,8,0,0,0,400,0,0,0,238,3,2,1,34,\"Tahoma\",0,0,2,\"MÁ DAŤ\")"
+                }
+              ]
+            },
+            {
+              "id": "label-36",
+              "text": "DAL",
+              "rectPt": [
+                649.133858,
+                527.811024,
+                663.590551,
+                538.582677
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_PREDVAS3.GMX",
+                  "line": 36,
+                  "rawCommand": "|CPLABEL(2290,200,2341,238,0,0,0,1,0,1,16777215,2,5,8,0,0,0,400,0,0,0,238,3,2,1,34,\"Tahoma\",0,0,2,\"DAL\")"
+                }
+              ]
+            },
+            {
+              "id": "label-37",
+              "text": "MÁ DAŤ",
+              "rectPt": [
+                450.708661,
+                527.811024,
+                479.338583,
+                538.582677
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_PREDVAS3.GMX",
+                  "line": 37,
+                  "rawCommand": "|CPLABEL(1590,200,1691,238,0,0,0,1,0,1,16777215,2,5,8,0,0,0,400,0,0,0,238,3,2,1,34,\"Tahoma\",0,0,2,\"MÁ DAŤ\")"
+                }
+              ]
+            },
+            {
+              "id": "label-38",
+              "text": "DAL",
+              "rectPt": [
+                527.244094,
+                527.811024,
+                541.700787,
+                538.582677
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_PREDVAS3.GMX",
+                  "line": 38,
+                  "rawCommand": "|CPLABEL(1860,200,1911,238,0,0,0,1,0,1,16777215,2,5,8,0,0,0,400,0,0,0,238,3,2,1,34,\"Tahoma\",0,0,2,\"DAL\")"
+                }
+              ]
+            },
+            {
+              "id": "label-39",
+              "text": "MÁ DAŤ",
+              "rectPt": [
+                328.818898,
+                527.811024,
+                357.448819,
+                538.582677
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_PREDVAS3.GMX",
+                  "line": 39,
+                  "rawCommand": "|CPLABEL(1160,200,1261,238,0,0,0,1,0,1,16777215,2,5,8,0,0,0,400,0,0,0,238,3,2,1,34,\"Tahoma\",0,0,2,\"MÁ DAŤ\")"
+                }
+              ]
+            },
+            {
+              "id": "label-40",
+              "text": "DAL",
+              "rectPt": [
+                405.354331,
+                527.811024,
+                419.811024,
+                538.582677
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_PREDVAS3.GMX",
+                  "line": 40,
+                  "rawCommand": "|CPLABEL(1430,200,1481,238,0,0,0,1,0,1,16777215,2,5,8,0,0,0,400,0,0,0,238,3,2,1,34,\"Tahoma\",0,0,2,\"DAL\")"
+                }
+              ]
+            },
+            {
+              "id": "label-41",
+              "text": " - ",
+              "rectPt": [
+                513.070866,
+                550.488189,
+                521.007874,
+                561.259843
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_PREDVAS3.GMX",
+                  "line": 41,
+                  "rawCommand": "|CPLABEL(1810,120,1838,158,0,0,0,1,0,1,16777215,2,5,8,0,0,0,400,0,0,0,238,3,2,1,34,\"Tahoma\",0,0,2,\" - \")"
+                }
+              ]
+            },
+            {
+              "id": "label-42",
+              "text": "_PREDVAS3.GMX",
+              "rectPt": [
+                48.188976,
+                551.905512,
+                101.19685,
+                561.259843
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_PREDVAS3.GMX",
+                  "line": 42,
+                  "rawCommand": "|CPLABEL(170,120,357,153,0,0,0,1,0,1,16777215,2,5,7,0,0,0,400,0,0,0,238,3,2,1,34,\"Tahoma\",0,0,2,\"_PREDVAS3.GMX\")"
+                }
+              ]
+            },
+            {
+              "id": "label-45",
+              "text": "Tlač:",
+              "rectPt": [
+                119.055118,
+                551.905512,
+                134.362205,
+                561.259843
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_PREDVAS3.GMX",
+                  "line": 45,
+                  "rawCommand": "|CPLABEL(420,120,474,153,0,0,0,1,0,1,16777215,2,5,7,0,0,0,400,0,0,0,238,3,2,1,34,\"Tahoma\",0,0,2,\"Tlač:\")"
+                }
+              ]
+            },
+            {
+              "id": "label-47",
+              "text": "D",
+              "rectPt": [
+                272.125984,
+                530.645669,
+                277.795276,
+                541.417323
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_PREDVAS3.GMX",
+                  "line": 47,
+                  "rawCommand": "|CPLABEL(960,190,980,228,0,0,0,1,0,1,16777215,2,5,8,0,0,0,400,0,0,0,238,3,2,1,34,\"Tahoma\",0,0,2,\"D\")"
+                }
+              ]
+            }
+          ],
+          "lines": [
+            {
+              "id": "line-5",
+              "pointsPt": [
+                [
+                  45.354331,
+                  578.267717
+                ],
+                [
+                  799.370079,
+                  578.267717
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_PREDVAS3.GMX",
+                  "line": 5,
+                  "rawCommand": "|CPLINE(160,60,2820,60,3,0,0,0)"
+                }
+              ]
+            },
+            {
+              "id": "line-14",
+              "pointsPt": [
+                [
+                  45.354331,
+                  549.92126
+                ],
+                [
+                  799.370079,
+                  549.92126
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_PREDVAS3.GMX",
+                  "line": 14,
+                  "rawCommand": "|CPLINE(160,160,2820,160,1,0,0,0)"
+                }
+              ]
+            },
+            {
+              "id": "line-15",
+              "pointsPt": [
+                [
+                  45.354331,
+                  578.267717
+                ],
+                [
+                  45.354331,
+                  527.244094
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_PREDVAS3.GMX",
+                  "line": 15,
+                  "rawCommand": "|CPLINE(160,60,160,240,3,0,0,0)"
+                }
+              ]
+            },
+            {
+              "id": "line-16",
+              "pointsPt": [
+                [
+                  799.370079,
+                  578.267717
+                ],
+                [
+                  799.370079,
+                  527.244094
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_PREDVAS3.GMX",
+                  "line": 16,
+                  "rawCommand": "|CPLINE(2820,60,2820,240,3,0,0,0)"
+                }
+              ]
+            },
+            {
+              "id": "line-19",
+              "pointsPt": [
+                [
+                  246.614173,
+                  549.92126
+                ],
+                [
+                  246.614173,
+                  527.244094
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_PREDVAS3.GMX",
+                  "line": 19,
+                  "rawCommand": "|CPLINE(870,160,870,240,1,0,0,0)"
+                }
+              ]
+            },
+            {
+              "id": "line-20",
+              "pointsPt": [
+                [
+                  311.811024,
+                  549.92126
+                ],
+                [
+                  311.811024,
+                  527.244094
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_PREDVAS3.GMX",
+                  "line": 20,
+                  "rawCommand": "|CPLINE(1100,160,1100,240,1,0,0,0)"
+                }
+              ]
+            },
+            {
+              "id": "line-27",
+              "pointsPt": [
+                [
+                  555.590551,
+                  549.92126
+                ],
+                [
+                  555.590551,
+                  527.244094
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_PREDVAS3.GMX",
+                  "line": 27,
+                  "rawCommand": "|CPLINE(1960,160,1960,240,1,0,0,0)"
+                }
+              ]
+            },
+            {
+              "id": "line-31",
+              "pointsPt": [
+                [
+                  677.480315,
+                  549.92126
+                ],
+                [
+                  677.480315,
+                  527.244094
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_PREDVAS3.GMX",
+                  "line": 31,
+                  "rawCommand": "|CPLINE(2390,160,2390,240,1,0,0,0)"
+                }
+              ]
+            },
+            {
+              "id": "line-32",
+              "pointsPt": [
+                [
+                  433.700787,
+                  549.92126
+                ],
+                [
+                  433.700787,
+                  527.244094
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_PREDVAS3.GMX",
+                  "line": 32,
+                  "rawCommand": "|CPLINE(1530,160,1530,240,1,0,0,0)"
+                }
+              ]
+            },
+            {
+              "id": "line-46",
+              "pointsPt": [
+                [
+                  45.354331,
+                  527.244094
+                ],
+                [
+                  799.370079,
+                  527.244094
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_PREDVAS3.GMX",
+                  "line": 46,
+                  "rawCommand": "|CPLINE(160,240,2820,240,3,0,0,0)"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "record",
+          "kind": "repeatingRecord",
+          "frame": "blockLocal",
+          "sourceRefs": [
+            {
+              "file": "_PREDVAS3.GMX",
+              "rawCommand": "#RECORD(40,0)"
+            }
+          ],
+          "nominalAdvancePt": 11.338583,
+          "emptyTemplate": false,
+          "placement": {
+            "id": "locate-record",
+            "op": "locateBlock",
+            "enabled": true,
+            "evidenceStatus": "sourceDerived",
+            "sourceRefs": [],
+            "reviewNotes": [],
+            "frame": "blockLocal",
+            "origin": "independentOccurrence",
+            "signals": [
+              "rulings",
+              "labels",
+              "fieldColumns",
+              "unassignedText"
+            ],
+            "combination": "union",
+            "onAmbiguous": "retainHypotheses"
+          },
+          "candidateDetection": {
+            "id": "detect-record",
+            "op": "detectCandidates",
+            "enabled": true,
+            "evidenceStatus": "sourceDerived",
+            "sourceRefs": [],
+            "reviewNotes": [],
+            "signals": [
+              "rulings",
+              "labels",
+              "fieldColumns",
+              "unassignedText"
+            ],
+            "combination": "union",
+            "requiresSuccessfulParsing": false
+          },
+          "fieldAssignment": {
+            "id": "assign-record",
+            "op": "assignFields",
+            "enabled": true,
+            "evidenceStatus": "sourceDerived",
+            "sourceRefs": [],
+            "reviewNotes": [],
+            "paddingPt": 1.5,
+            "assembly": "glyphClusters",
+            "splitAcrossFields": "requireGlyphGeometry",
+            "overlap": "retainAmbiguity",
+            "retainClippedSource": true
+          },
+          "fields": [
+            {
+              "id": "field-51",
+              "semanticName": "accountCode",
+              "rectPt": [
+                51.023622,
+                -10.771654,
+                84.755906,
+                0.0
+              ],
+              "parserRef": "code",
+              "sourceRefs": [
+                {
+                  "file": "_PREDVAS3.GMX",
+                  "line": 51,
+                  "rawCommand": "|CPDATABASE(180,248,299,286,0,0,0,1,0,1,16777215,2,5,8,0,0,0,400,0,0,0,238,3,2,1,34,\"Tahoma\",0,0,2,0,\"'UCET'\",1,0,0,0,0,0)",
+                  "expression": "UCET"
+                }
+              ]
+            },
+            {
+              "id": "field-52",
+              "semanticName": "accountName",
+              "rectPt": [
+                90.708661,
+                -9.92126,
+                246.897638,
+                0.0
+              ],
+              "parserRef": "text",
+              "sourceRefs": [
+                {
+                  "file": "_PREDVAS3.GMX",
+                  "line": 52,
+                  "rawCommand": "|CPDATABASE(320,248,871,283,0,0,0,1,0,1,16777215,2,5,8,0,0,0,400,0,0,0,238,3,2,1,34,\"Tahoma\",0,0,2,0,\"'&ANAZOV'\",0,0,0,0,0,0)",
+                  "expression": "&ANAZOV"
+                }
+              ]
+            },
+            {
+              "id": "field-58",
+              "semanticName": "accountType",
+              "rectPt": [
+                249.448819,
+                -9.92126,
+                255.401575,
+                0.0
+              ],
+              "parserRef": "code",
+              "sourceRefs": [
+                {
+                  "file": "_PREDVAS3.GMX",
+                  "line": 58,
+                  "rawCommand": "|CPDATABASE(880,248,901,283,0,0,0,1,0,1,16777215,2,5,8,0,0,0,400,0,0,0,238,3,2,1,34,\"Times New Roman\",0,0,2,0,\"'&ATYP'\",1,0,0,0,0,0)",
+                  "expression": "&ATYP"
+                }
+              ]
+            },
+            {
+              "id": "field-59",
+              "semanticName": "source_AP",
+              "rectPt": [
+                260.787402,
+                -9.92126,
+                266.740157,
+                0.0
+              ],
+              "parserRef": "text",
+              "sourceRefs": [
+                {
+                  "file": "_PREDVAS3.GMX",
+                  "line": 59,
+                  "rawCommand": "|CPDATABASE(920,248,941,283,0,0,0,1,0,1,16777215,2,5,8,0,0,0,400,0,0,0,238,3,2,1,34,\"Times New Roman\",0,0,2,0,\"'&AP'\",1,0,0,0,0,0)",
+                  "expression": "&AP"
+                }
+              ]
+            },
+            {
+              "id": "field-60",
+              "semanticName": "source_AD",
+              "rectPt": [
+                272.125984,
+                -9.92126,
+                278.07874,
+                0.0
+              ],
+              "parserRef": "text",
+              "sourceRefs": [
+                {
+                  "file": "_PREDVAS3.GMX",
+                  "line": 60,
+                  "rawCommand": "|CPDATABASE(960,248,981,283,0,0,0,1,0,1,16777215,2,5,8,0,0,0,400,0,0,0,238,3,2,1,34,\"Times New Roman\",0,0,2,0,\"'&AD'\",1,0,0,0,0,0)",
+                  "expression": "&AD"
+                }
+              ]
+            },
+            {
+              "id": "field-61",
+              "semanticName": "source_AS",
+              "rectPt": [
+                283.464567,
+                -9.92126,
+                289.417323,
+                0.0
+              ],
+              "parserRef": "text",
+              "sourceRefs": [
+                {
+                  "file": "_PREDVAS3.GMX",
+                  "line": 61,
+                  "rawCommand": "|CPDATABASE(1000,248,1021,283,0,0,0,1,0,1,16777215,2,5,8,0,0,0,400,0,0,0,238,3,2,1,34,\"Times New Roman\",0,0,2,0,\"'&AS'\",1,0,0,0,0,0)",
+                  "expression": "&AS"
+                }
+              ]
+            },
+            {
+              "id": "field-62",
+              "semanticName": "source_AK",
+              "rectPt": [
+                303.307087,
+                -9.92126,
+                309.259843,
+                0.0
+              ],
+              "parserRef": "text",
+              "sourceRefs": [
+                {
+                  "file": "_PREDVAS3.GMX",
+                  "line": 62,
+                  "rawCommand": "|CPDATABASE(1070,248,1091,283,0,0,0,1,0,1,16777215,2,5,8,0,0,0,400,0,0,0,238,3,2,1,34,\"Times New Roman\",0,0,2,0,\"'&AK'\",1,0,0,0,0,0)",
+                  "expression": "&AK"
+                }
+              ]
+            },
+            {
+              "id": "field-63",
+              "semanticName": "openingDebit",
+              "rectPt": [
+                314.645669,
+                -9.92126,
+                371.338583,
+                0.0
+              ],
+              "parserRef": "money-comma",
+              "sourceRefs": [
+                {
+                  "file": "_PREDVAS3.GMX",
+                  "line": 63,
+                  "rawCommand": "|CPDATABASE(1110,248,1310,283,0,0,0,1,0,1,16777215,2,5,8,0,0,0,400,0,0,0,238,3,2,1,34,\"Times New Roman\",0,0,2,0,\"':*13.2'\",1,1,163,8,29,0)",
+                  "expression": ":*13.2"
+                }
+              ]
+            },
+            {
+              "id": "field-64",
+              "semanticName": "openingCredit",
+              "rectPt": [
+                374.173228,
+                -9.92126,
+                430.866142,
+                0.0
+              ],
+              "parserRef": "money-comma",
+              "sourceRefs": [
+                {
+                  "file": "_PREDVAS3.GMX",
+                  "line": 64,
+                  "rawCommand": "|CPDATABASE(1320,248,1520,283,0,0,0,1,0,1,16777215,2,5,8,0,0,0,400,0,0,0,238,3,2,1,34,\"Times New Roman\",0,1,2,0,\"':*13.2'\",1,1,163,8,29,0)",
+                  "expression": ":*13.2"
+                }
+              ]
+            },
+            {
+              "id": "field-65",
+              "semanticName": "turnoverDebit",
+              "rectPt": [
+                436.535433,
+                -9.92126,
+                493.228346,
+                0.0
+              ],
+              "parserRef": "money-comma",
+              "sourceRefs": [
+                {
+                  "file": "_PREDVAS3.GMX",
+                  "line": 65,
+                  "rawCommand": "|CPDATABASE(1540,248,1740,283,0,0,0,1,0,1,16777215,2,5,8,0,0,0,400,0,0,0,238,3,2,1,34,\"Times New Roman\",0,1,2,0,\"':*13.2'\",1,1,163,8,29,0)",
+                  "expression": ":*13.2"
+                }
+              ]
+            },
+            {
+              "id": "field-66",
+              "semanticName": "turnoverCredit",
+              "rectPt": [
+                496.062992,
+                -9.92126,
+                552.755906,
+                0.0
+              ],
+              "parserRef": "money-comma",
+              "sourceRefs": [
+                {
+                  "file": "_PREDVAS3.GMX",
+                  "line": 66,
+                  "rawCommand": "|CPDATABASE(1750,248,1950,283,0,0,0,1,0,1,16777215,2,5,8,0,0,0,400,0,0,0,238,3,2,1,34,\"Times New Roman\",0,1,2,0,\"':*13.2'\",1,1,163,8,29,0)",
+                  "expression": ":*13.2"
+                }
+              ]
+            },
+            {
+              "id": "field-67",
+              "semanticName": "monthDebit",
+              "rectPt": [
+                558.425197,
+                -9.92126,
+                615.11811,
+                0.0
+              ],
+              "parserRef": "money-comma",
+              "sourceRefs": [
+                {
+                  "file": "_PREDVAS3.GMX",
+                  "line": 67,
+                  "rawCommand": "|CPDATABASE(1970,248,2170,283,0,0,0,1,0,1,16777215,2,5,8,0,0,0,400,0,0,0,238,3,2,1,34,\"Times New Roman\",0,1,2,0,\"':*13.2'\",1,1,163,8,29,0)",
+                  "expression": ":*13.2"
+                }
+              ]
+            },
+            {
+              "id": "field-68",
+              "semanticName": "monthCredit",
+              "rectPt": [
+                617.952756,
+                -9.92126,
+                674.645669,
+                0.0
+              ],
+              "parserRef": "money-comma",
+              "sourceRefs": [
+                {
+                  "file": "_PREDVAS3.GMX",
+                  "line": 68,
+                  "rawCommand": "|CPDATABASE(2180,248,2380,283,0,0,0,1,0,1,16777215,2,5,8,0,0,0,400,0,0,0,238,3,2,1,34,\"Times New Roman\",0,1,2,0,\"':*13.2'\",1,1,163,8,29,0)",
+                  "expression": ":*13.2"
+                }
+              ]
+            },
+            {
+              "id": "field-69",
+              "semanticName": "closingDebit",
+              "rectPt": [
+                680.314961,
+                -9.92126,
+                737.007874,
+                0.0
+              ],
+              "parserRef": "money-comma",
+              "sourceRefs": [
+                {
+                  "file": "_PREDVAS3.GMX",
+                  "line": 69,
+                  "rawCommand": "|CPDATABASE(2400,248,2600,283,0,0,0,1,0,1,16777215,2,5,8,0,0,0,400,0,0,0,238,3,2,1,34,\"Times New Roman\",0,1,2,0,\"':*13.2'\",1,1,163,8,29,0)",
+                  "expression": ":*13.2"
+                }
+              ]
+            },
+            {
+              "id": "field-70",
+              "semanticName": "closingCredit",
+              "rectPt": [
+                739.84252,
+                -9.92126,
+                796.535433,
+                0.0
+              ],
+              "parserRef": "money-comma",
+              "sourceRefs": [
+                {
+                  "file": "_PREDVAS3.GMX",
+                  "line": 70,
+                  "rawCommand": "|CPDATABASE(2610,248,2810,283,0,0,0,1,0,1,16777215,2,5,8,0,0,0,400,0,0,0,238,3,2,1,34,\"Times New Roman\",0,1,2,0,\"':*13.2'\",1,1,163,8,29,0)",
+                  "expression": ":*13.2"
+                }
+              ]
+            },
+            {
+              "id": "field-71",
+              "semanticName": "source_AZ",
+              "rectPt": [
+                291.968504,
+                -9.92126,
+                297.92126,
+                0.0
+              ],
+              "parserRef": "text",
+              "sourceRefs": [
+                {
+                  "file": "_PREDVAS3.GMX",
+                  "line": 71,
+                  "rawCommand": "|CPDATABASE(1030,248,1051,283,0,0,0,1,0,1,16777215,2,5,8,0,0,0,400,0,0,0,238,3,2,1,34,\"Times New Roman\",0,0,2,0,\"'&AZ'\",1,0,0,0,0,0)",
+                  "expression": "&AZ"
+                }
+              ]
+            }
+          ],
+          "labels": [],
+          "lines": [
+            {
+              "id": "line-50",
+              "pointsPt": [
+                [
+                  45.354331,
+                  0.0
+                ],
+                [
+                  45.354331,
+                  -11.338583
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_PREDVAS3.GMX",
+                  "line": 50,
+                  "rawCommand": "|CPLINE(160,248,160,288,1,0,0,0)"
+                }
+              ]
+            },
+            {
+              "id": "line-53",
+              "pointsPt": [
+                [
+                  246.614173,
+                  0.0
+                ],
+                [
+                  246.614173,
+                  -11.338583
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_PREDVAS3.GMX",
+                  "line": 53,
+                  "rawCommand": "|CPLINE(870,248,870,288,1,0,0,0)"
+                }
+              ]
+            },
+            {
+              "id": "line-54",
+              "pointsPt": [
+                [
+                  311.811024,
+                  0.0
+                ],
+                [
+                  311.811024,
+                  -11.338583
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_PREDVAS3.GMX",
+                  "line": 54,
+                  "rawCommand": "|CPLINE(1100,248,1100,288,1,0,0,0)"
+                }
+              ]
+            },
+            {
+              "id": "line-55",
+              "pointsPt": [
+                [
+                  433.700787,
+                  0.0
+                ],
+                [
+                  433.700787,
+                  -11.338583
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_PREDVAS3.GMX",
+                  "line": 55,
+                  "rawCommand": "|CPLINE(1530,248,1530,288,1,0,0,0)"
+                }
+              ]
+            },
+            {
+              "id": "line-56",
+              "pointsPt": [
+                [
+                  555.590551,
+                  0.0
+                ],
+                [
+                  555.590551,
+                  -11.338583
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_PREDVAS3.GMX",
+                  "line": 56,
+                  "rawCommand": "|CPLINE(1960,248,1960,288,1,0,0,0)"
+                }
+              ]
+            },
+            {
+              "id": "line-57",
+              "pointsPt": [
+                [
+                  677.480315,
+                  0.0
+                ],
+                [
+                  677.480315,
+                  -11.338583
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_PREDVAS3.GMX",
+                  "line": 57,
+                  "rawCommand": "|CPLINE(2390,248,2390,288,1,0,0,0)"
+                }
+              ]
+            },
+            {
+              "id": "line-72",
+              "pointsPt": [
+                [
+                  799.370079,
+                  0.0
+                ],
+                [
+                  799.370079,
+                  -11.338583
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_PREDVAS3.GMX",
+                  "line": 72,
+                  "rawCommand": "|CPLINE(2820,248,2820,288,1,0,0,0)"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "foot3",
+          "kind": "groupFooter",
+          "frame": "blockLocal",
+          "sourceRefs": [
+            {
+              "file": "_PREDVAS3.GMX",
+              "rawCommand": "#FOOT3(50,0)"
+            }
+          ],
+          "nominalAdvancePt": 14.173228,
+          "emptyTemplate": false,
+          "placement": {
+            "id": "locate-foot3",
+            "op": "locateBlock",
+            "enabled": true,
+            "evidenceStatus": "sourceDerived",
+            "sourceRefs": [],
+            "reviewNotes": [],
+            "frame": "blockLocal",
+            "origin": "independentOccurrence",
+            "signals": [
+              "rulings",
+              "labels",
+              "fieldColumns",
+              "unassignedText"
+            ],
+            "combination": "union",
+            "onAmbiguous": "retainHypotheses"
+          },
+          "candidateDetection": {
+            "id": "detect-foot3",
+            "op": "detectCandidates",
+            "enabled": true,
+            "evidenceStatus": "sourceDerived",
+            "sourceRefs": [],
+            "reviewNotes": [],
+            "signals": [
+              "rulings",
+              "labels",
+              "fieldColumns",
+              "unassignedText"
+            ],
+            "combination": "union",
+            "requiresSuccessfulParsing": false
+          },
+          "fieldAssignment": {
+            "id": "assign-foot3",
+            "op": "assignFields",
+            "enabled": true,
+            "evidenceStatus": "sourceDerived",
+            "sourceRefs": [],
+            "reviewNotes": [],
+            "paddingPt": 1.5,
+            "assembly": "glyphClusters",
+            "splitAcrossFields": "requireGlyphGeometry",
+            "overlap": "retainAmbiguity",
+            "retainClippedSource": true
+          },
+          "fields": [
+            {
+              "id": "field-75",
+              "semanticName": "syntheticAccountCode",
+              "rectPt": [
+                51.023622,
+                -9.354331,
+                65.480315,
+                0.0
+              ],
+              "parserRef": "code",
+              "sourceRefs": [
+                {
+                  "file": "_PREDVAS3.GMX",
+                  "line": 75,
+                  "rawCommand": "|CPDATABASE(180,248,231,281,0,0,0,1,0,1,16777215,2,5,7,0,0,0,700,0,0,0,238,3,2,1,34,\"Tahoma\",0,0,2,0,\"'UCET%3'\",1,0,0,0,0,0)",
+                  "expression": "UCET%3"
+                }
+              ]
+            },
+            {
+              "id": "field-76",
+              "semanticName": "accountName",
+              "rectPt": [
+                76.535433,
+                -9.92126,
+                232.724409,
+                0.0
+              ],
+              "parserRef": "text",
+              "sourceRefs": [
+                {
+                  "file": "_PREDVAS3.GMX",
+                  "line": 76,
+                  "rawCommand": "|CPDATABASE(270,248,821,283,0,0,0,1,0,1,16777215,2,5,7,0,0,0,700,0,0,0,238,3,2,1,18,\"Tahoma\",0,0,2,0,\"'&BNAZOV'\",0,0,0,0,0,0)",
+                  "expression": "&BNAZOV"
+                }
+              ]
+            },
+            {
+              "id": "field-83",
+              "semanticName": "openingDebit",
+              "rectPt": [
+                314.645669,
+                -9.92126,
+                371.338583,
+                0.0
+              ],
+              "parserRef": "money-comma",
+              "sourceRefs": [
+                {
+                  "file": "_PREDVAS3.GMX",
+                  "line": 83,
+                  "rawCommand": "|CPDATABASE(1110,248,1310,283,0,0,0,1,0,1,16777215,2,5,8,0,0,0,700,0,0,0,238,3,2,1,18,\"Times New Roman\",0,1,2,0,\"':*13.2'\",1,1,163,8,29,0)",
+                  "expression": ":*13.2"
+                }
+              ]
+            },
+            {
+              "id": "field-84",
+              "semanticName": "openingCredit",
+              "rectPt": [
+                374.173228,
+                -9.92126,
+                430.866142,
+                0.0
+              ],
+              "parserRef": "money-comma",
+              "sourceRefs": [
+                {
+                  "file": "_PREDVAS3.GMX",
+                  "line": 84,
+                  "rawCommand": "|CPDATABASE(1320,248,1520,283,0,0,0,1,0,1,16777215,2,5,8,0,0,0,700,0,0,0,238,3,2,1,18,\"Times New Roman\",0,1,2,0,\"':*13.2'\",1,1,163,8,29,0)",
+                  "expression": ":*13.2"
+                }
+              ]
+            },
+            {
+              "id": "field-85",
+              "semanticName": "turnoverDebit",
+              "rectPt": [
+                436.535433,
+                -9.92126,
+                493.228346,
+                0.0
+              ],
+              "parserRef": "money-comma",
+              "sourceRefs": [
+                {
+                  "file": "_PREDVAS3.GMX",
+                  "line": 85,
+                  "rawCommand": "|CPDATABASE(1540,248,1740,283,0,0,0,1,0,1,16777215,2,5,8,0,0,0,700,0,0,0,238,3,2,1,18,\"Times New Roman\",0,1,2,0,\"':*13.2'\",1,1,163,8,29,0)",
+                  "expression": ":*13.2"
+                }
+              ]
+            },
+            {
+              "id": "field-86",
+              "semanticName": "turnoverCredit",
+              "rectPt": [
+                496.062992,
+                -9.92126,
+                552.755906,
+                0.0
+              ],
+              "parserRef": "money-comma",
+              "sourceRefs": [
+                {
+                  "file": "_PREDVAS3.GMX",
+                  "line": 86,
+                  "rawCommand": "|CPDATABASE(1750,248,1950,283,0,0,0,1,0,1,16777215,2,5,8,0,0,0,700,0,0,0,238,3,2,1,18,\"Times New Roman\",0,1,2,0,\"':*13.2'\",1,1,163,8,29,0)",
+                  "expression": ":*13.2"
+                }
+              ]
+            },
+            {
+              "id": "field-87",
+              "semanticName": "monthDebit",
+              "rectPt": [
+                558.425197,
+                -9.92126,
+                615.11811,
+                0.0
+              ],
+              "parserRef": "money-comma",
+              "sourceRefs": [
+                {
+                  "file": "_PREDVAS3.GMX",
+                  "line": 87,
+                  "rawCommand": "|CPDATABASE(1970,248,2170,283,0,0,0,1,0,1,16777215,2,5,8,0,0,0,700,0,0,0,238,3,2,1,18,\"Times New Roman\",0,1,2,0,\"':*13.2'\",1,1,163,8,29,0)",
+                  "expression": ":*13.2"
+                }
+              ]
+            },
+            {
+              "id": "field-88",
+              "semanticName": "monthCredit",
+              "rectPt": [
+                617.952756,
+                -9.92126,
+                674.645669,
+                0.0
+              ],
+              "parserRef": "money-comma",
+              "sourceRefs": [
+                {
+                  "file": "_PREDVAS3.GMX",
+                  "line": 88,
+                  "rawCommand": "|CPDATABASE(2180,248,2380,283,0,0,0,1,0,1,16777215,2,5,8,0,0,0,700,0,0,0,238,3,2,1,18,\"Times New Roman\",0,1,2,0,\"':*13.2'\",1,1,163,8,29,0)",
+                  "expression": ":*13.2"
+                }
+              ]
+            },
+            {
+              "id": "field-89",
+              "semanticName": "closingDebit",
+              "rectPt": [
+                680.314961,
+                -9.92126,
+                737.007874,
+                0.0
+              ],
+              "parserRef": "money-comma",
+              "sourceRefs": [
+                {
+                  "file": "_PREDVAS3.GMX",
+                  "line": 89,
+                  "rawCommand": "|CPDATABASE(2400,248,2600,283,0,0,0,1,0,1,16777215,2,5,8,0,0,0,700,0,0,0,238,3,2,1,18,\"Times New Roman\",0,1,2,0,\"':*13.2'\",1,1,163,8,29,0)",
+                  "expression": ":*13.2"
+                }
+              ]
+            },
+            {
+              "id": "field-90",
+              "semanticName": "closingCredit",
+              "rectPt": [
+                739.84252,
+                -9.92126,
+                796.535433,
+                0.0
+              ],
+              "parserRef": "money-comma",
+              "sourceRefs": [
+                {
+                  "file": "_PREDVAS3.GMX",
+                  "line": 90,
+                  "rawCommand": "|CPDATABASE(2610,248,2810,283,0,0,0,1,0,1,16777215,2,5,8,0,0,0,700,0,0,0,238,3,2,1,18,\"Times New Roman\",0,1,2,0,\"':*13.2'\",1,1,163,8,29,0)",
+                  "expression": ":*13.2"
+                }
+              ]
+            }
+          ],
+          "labels": [],
+          "lines": [
+            {
+              "id": "line-74",
+              "pointsPt": [
+                [
+                  45.354331,
+                  0.0
+                ],
+                [
+                  45.354331,
+                  -14.173228
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_PREDVAS3.GMX",
+                  "line": 74,
+                  "rawCommand": "|CPLINE(160,248,160,298,1,0,0,0)"
+                }
+              ]
+            },
+            {
+              "id": "line-77",
+              "pointsPt": [
+                [
+                  246.614173,
+                  0.0
+                ],
+                [
+                  246.614173,
+                  -14.173228
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_PREDVAS3.GMX",
+                  "line": 77,
+                  "rawCommand": "|CPLINE(870,248,870,298,1,0,0,0)"
+                }
+              ]
+            },
+            {
+              "id": "line-78",
+              "pointsPt": [
+                [
+                  311.811024,
+                  0.0
+                ],
+                [
+                  311.811024,
+                  -14.173228
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_PREDVAS3.GMX",
+                  "line": 78,
+                  "rawCommand": "|CPLINE(1100,248,1100,298,1,0,0,0)"
+                }
+              ]
+            },
+            {
+              "id": "line-79",
+              "pointsPt": [
+                [
+                  433.700787,
+                  0.0
+                ],
+                [
+                  433.700787,
+                  -14.173228
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_PREDVAS3.GMX",
+                  "line": 79,
+                  "rawCommand": "|CPLINE(1530,248,1530,298,1,0,0,0)"
+                }
+              ]
+            },
+            {
+              "id": "line-80",
+              "pointsPt": [
+                [
+                  555.590551,
+                  0.0
+                ],
+                [
+                  555.590551,
+                  -14.173228
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_PREDVAS3.GMX",
+                  "line": 80,
+                  "rawCommand": "|CPLINE(1960,248,1960,298,1,0,0,0)"
+                }
+              ]
+            },
+            {
+              "id": "line-81",
+              "pointsPt": [
+                [
+                  677.480315,
+                  0.0
+                ],
+                [
+                  677.480315,
+                  -14.173228
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_PREDVAS3.GMX",
+                  "line": 81,
+                  "rawCommand": "|CPLINE(2390,248,2390,298,1,0,0,0)"
+                }
+              ]
+            },
+            {
+              "id": "line-82",
+              "pointsPt": [
+                [
+                  799.370079,
+                  0.0
+                ],
+                [
+                  799.370079,
+                  -14.173228
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_PREDVAS3.GMX",
+                  "line": 82,
+                  "rawCommand": "|CPLINE(2820,248,2820,298,1,0,0,0)"
+                }
+              ]
+            },
+            {
+              "id": "line-91",
+              "pointsPt": [
+                [
+                  45.354331,
+                  -14.173228
+                ],
+                [
+                  799.370079,
+                  -14.173228
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_PREDVAS3.GMX",
+                  "line": 91,
+                  "rawCommand": "|CPLINE(160,298,2820,298,1,0,0,0)"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "foot2",
+          "kind": "groupFooter",
+          "frame": "blockLocal",
+          "sourceRefs": [
+            {
+              "file": "_PREDVAS3.GMX",
+              "rawCommand": "#FOOT2(60,0)"
+            }
+          ],
+          "nominalAdvancePt": 17.007874,
+          "emptyTemplate": false,
+          "placement": {
+            "id": "locate-foot2",
+            "op": "locateBlock",
+            "enabled": true,
+            "evidenceStatus": "sourceDerived",
+            "sourceRefs": [],
+            "reviewNotes": [],
+            "frame": "blockLocal",
+            "origin": "independentOccurrence",
+            "signals": [
+              "rulings",
+              "labels",
+              "fieldColumns",
+              "unassignedText"
+            ],
+            "combination": "union",
+            "onAmbiguous": "retainHypotheses"
+          },
+          "candidateDetection": {
+            "id": "detect-foot2",
+            "op": "detectCandidates",
+            "enabled": true,
+            "evidenceStatus": "sourceDerived",
+            "sourceRefs": [],
+            "reviewNotes": [],
+            "signals": [
+              "rulings",
+              "labels",
+              "fieldColumns",
+              "unassignedText"
+            ],
+            "combination": "union",
+            "requiresSuccessfulParsing": false
+          },
+          "fieldAssignment": {
+            "id": "assign-foot2",
+            "op": "assignFields",
+            "enabled": true,
+            "evidenceStatus": "sourceDerived",
+            "sourceRefs": [],
+            "reviewNotes": [],
+            "paddingPt": 1.5,
+            "assembly": "glyphClusters",
+            "splitAcrossFields": "requireGlyphGeometry",
+            "overlap": "retainAmbiguity",
+            "retainClippedSource": true
+          },
+          "fields": [
+            {
+              "id": "field-99",
+              "semanticName": "openingDebit",
+              "rectPt": [
+                314.645669,
+                -12.755906,
+                371.338583,
+                -2.834646
+              ],
+              "parserRef": "money-comma",
+              "sourceRefs": [
+                {
+                  "file": "_PREDVAS3.GMX",
+                  "line": 99,
+                  "rawCommand": "|CPDATABASE(1110,258,1310,293,0,0,0,1,0,1,16777215,2,5,8,0,0,0,700,0,0,0,238,3,2,1,18,\"Times New Roman\",0,1,2,0,\"':*13.2'\",1,1,163,8,29,0)",
+                  "expression": ":*13.2"
+                }
+              ]
+            },
+            {
+              "id": "field-100",
+              "semanticName": "openingCredit",
+              "rectPt": [
+                374.173228,
+                -12.755906,
+                430.866142,
+                -2.834646
+              ],
+              "parserRef": "money-comma",
+              "sourceRefs": [
+                {
+                  "file": "_PREDVAS3.GMX",
+                  "line": 100,
+                  "rawCommand": "|CPDATABASE(1320,258,1520,293,0,0,0,1,0,1,16777215,2,5,8,0,0,0,700,0,0,0,238,3,2,1,18,\"Times New Roman\",0,0,2,0,\"':*13.2'\",1,1,163,8,29,0)",
+                  "expression": ":*13.2"
+                }
+              ]
+            },
+            {
+              "id": "field-101",
+              "semanticName": "turnoverDebit",
+              "rectPt": [
+                436.535433,
+                -12.755906,
+                493.228346,
+                -2.834646
+              ],
+              "parserRef": "money-comma",
+              "sourceRefs": [
+                {
+                  "file": "_PREDVAS3.GMX",
+                  "line": 101,
+                  "rawCommand": "|CPDATABASE(1540,258,1740,293,0,0,0,1,0,1,16777215,2,5,8,0,0,0,700,0,0,0,238,3,2,1,18,\"Times New Roman\",0,1,2,0,\"':*13.2'\",1,1,163,8,29,0)",
+                  "expression": ":*13.2"
+                }
+              ]
+            },
+            {
+              "id": "field-102",
+              "semanticName": "turnoverCredit",
+              "rectPt": [
+                496.062992,
+                -12.755906,
+                552.755906,
+                -2.834646
+              ],
+              "parserRef": "money-comma",
+              "sourceRefs": [
+                {
+                  "file": "_PREDVAS3.GMX",
+                  "line": 102,
+                  "rawCommand": "|CPDATABASE(1750,258,1950,293,0,0,0,1,0,1,16777215,2,5,8,0,0,0,700,0,0,0,238,3,2,1,18,\"Times New Roman\",0,1,2,0,\"':*13.2'\",1,1,163,8,29,0)",
+                  "expression": ":*13.2"
+                }
+              ]
+            },
+            {
+              "id": "field-103",
+              "semanticName": "monthDebit",
+              "rectPt": [
+                558.425197,
+                -12.755906,
+                615.11811,
+                -2.834646
+              ],
+              "parserRef": "money-comma",
+              "sourceRefs": [
+                {
+                  "file": "_PREDVAS3.GMX",
+                  "line": 103,
+                  "rawCommand": "|CPDATABASE(1970,258,2170,293,0,0,0,1,0,1,16777215,2,5,8,0,0,0,700,0,0,0,238,3,2,1,18,\"Times New Roman\",0,1,2,0,\"':*13.2'\",1,1,163,8,29,0)",
+                  "expression": ":*13.2"
+                }
+              ]
+            },
+            {
+              "id": "field-104",
+              "semanticName": "monthCredit",
+              "rectPt": [
+                617.952756,
+                -12.755906,
+                674.645669,
+                -2.834646
+              ],
+              "parserRef": "money-comma",
+              "sourceRefs": [
+                {
+                  "file": "_PREDVAS3.GMX",
+                  "line": 104,
+                  "rawCommand": "|CPDATABASE(2180,258,2380,293,0,0,0,1,0,1,16777215,2,5,8,0,0,0,700,0,0,0,238,3,2,1,18,\"Times New Roman\",0,1,2,0,\"':*13.2'\",1,1,163,8,29,0)",
+                  "expression": ":*13.2"
+                }
+              ]
+            },
+            {
+              "id": "field-105",
+              "semanticName": "closingDebit",
+              "rectPt": [
+                680.314961,
+                -12.755906,
+                737.007874,
+                -2.834646
+              ],
+              "parserRef": "money-comma",
+              "sourceRefs": [
+                {
+                  "file": "_PREDVAS3.GMX",
+                  "line": 105,
+                  "rawCommand": "|CPDATABASE(2400,258,2600,293,0,0,0,1,0,1,16777215,2,5,8,0,0,0,700,0,0,0,238,3,2,1,18,\"Times New Roman\",0,1,2,0,\"':*13.2'\",1,1,163,8,29,0)",
+                  "expression": ":*13.2"
+                }
+              ]
+            },
+            {
+              "id": "field-106",
+              "semanticName": "closingCredit",
+              "rectPt": [
+                739.84252,
+                -12.755906,
+                796.535433,
+                -2.834646
+              ],
+              "parserRef": "money-comma",
+              "sourceRefs": [
+                {
+                  "file": "_PREDVAS3.GMX",
+                  "line": 106,
+                  "rawCommand": "|CPDATABASE(2610,258,2810,293,0,0,0,1,0,1,16777215,2,5,8,0,0,0,700,0,0,0,238,3,2,1,18,\"Times New Roman\",0,1,2,0,\"':*13.2'\",1,1,163,8,29,0)",
+                  "expression": ":*13.2"
+                }
+              ]
+            },
+            {
+              "id": "field-107",
+              "semanticName": "accountClassCode",
+              "rectPt": [
+                51.023622,
+                -12.188976,
+                56.125984,
+                -2.834646
+              ],
+              "parserRef": "code",
+              "sourceRefs": [
+                {
+                  "file": "_PREDVAS3.GMX",
+                  "line": 107,
+                  "rawCommand": "|CPDATABASE(180,258,198,291,0,0,0,1,0,1,16777215,2,5,7,0,0,0,700,0,0,0,238,3,2,1,18,\"Tahoma\",0,0,2,0,\"'UCET%1'\",1,0,0,0,0,0)",
+                  "expression": "UCET%1"
+                }
+              ]
+            }
+          ],
+          "labels": [
+            {
+              "id": "label-109",
+              "text": "MEDZISÚČET ZA TRIEDU",
+              "rectPt": [
+                76.535433,
+                -12.188976,
+                154.771654,
+                -2.834646
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_PREDVAS3.GMX",
+                  "line": 109,
+                  "rawCommand": "|CPLABEL(270,258,546,291,0,0,0,1,0,1,16777215,2,5,7,0,0,0,400,0,0,0,238,3,2,1,18,\"Tahoma\",0,0,2,\"MEDZISÚČET ZA TRIEDU\")"
+                }
+              ]
+            },
+            {
+              "id": "label-110",
+              "text": "**",
+              "rectPt": [
+                56.692913,
+                -12.188976,
+                64.346457,
+                -2.834646
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_PREDVAS3.GMX",
+                  "line": 110,
+                  "rawCommand": "|CPLABEL(200,258,227,291,0,0,0,1,0,1,16777215,2,5,7,0,0,0,400,0,0,0,238,3,2,1,18,\"Tahoma\",0,0,2,\"**\")"
+                }
+              ]
+            }
+          ],
+          "lines": [
+            {
+              "id": "line-93",
+              "pointsPt": [
+                [
+                  246.614173,
+                  0.0
+                ],
+                [
+                  246.614173,
+                  -17.007874
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_PREDVAS3.GMX",
+                  "line": 93,
+                  "rawCommand": "|CPLINE(870,248,870,308,1,0,0,0)"
+                }
+              ]
+            },
+            {
+              "id": "line-94",
+              "pointsPt": [
+                [
+                  311.811024,
+                  0.0
+                ],
+                [
+                  311.811024,
+                  -17.007874
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_PREDVAS3.GMX",
+                  "line": 94,
+                  "rawCommand": "|CPLINE(1100,248,1100,308,1,0,0,0)"
+                }
+              ]
+            },
+            {
+              "id": "line-95",
+              "pointsPt": [
+                [
+                  433.700787,
+                  0.0
+                ],
+                [
+                  433.700787,
+                  -17.007874
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_PREDVAS3.GMX",
+                  "line": 95,
+                  "rawCommand": "|CPLINE(1530,248,1530,308,1,0,0,0)"
+                }
+              ]
+            },
+            {
+              "id": "line-96",
+              "pointsPt": [
+                [
+                  555.590551,
+                  0.0
+                ],
+                [
+                  555.590551,
+                  -17.007874
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_PREDVAS3.GMX",
+                  "line": 96,
+                  "rawCommand": "|CPLINE(1960,248,1960,308,1,0,0,0)"
+                }
+              ]
+            },
+            {
+              "id": "line-97",
+              "pointsPt": [
+                [
+                  677.480315,
+                  0.0
+                ],
+                [
+                  677.480315,
+                  -17.007874
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_PREDVAS3.GMX",
+                  "line": 97,
+                  "rawCommand": "|CPLINE(2390,248,2390,308,1,0,0,0)"
+                }
+              ]
+            },
+            {
+              "id": "line-98",
+              "pointsPt": [
+                [
+                  799.370079,
+                  0.0
+                ],
+                [
+                  799.370079,
+                  -17.007874
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_PREDVAS3.GMX",
+                  "line": 98,
+                  "rawCommand": "|CPLINE(2820,248,2820,308,1,0,0,0)"
+                }
+              ]
+            },
+            {
+              "id": "line-108",
+              "pointsPt": [
+                [
+                  45.354331,
+                  0.0
+                ],
+                [
+                  45.354331,
+                  -17.007874
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_PREDVAS3.GMX",
+                  "line": 108,
+                  "rawCommand": "|CPLINE(160,248,160,308,1,0,0,0)"
+                }
+              ]
+            },
+            {
+              "id": "line-111",
+              "pointsPt": [
+                [
+                  45.354331,
+                  -17.007874
+                ],
+                [
+                  799.370079,
+                  -17.007874
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_PREDVAS3.GMX",
+                  "line": 111,
+                  "rawCommand": "|CPLINE(160,308,2820,308,1,0,0,0)"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "foot1",
+          "kind": "reportFooter",
+          "frame": "blockLocal",
+          "sourceRefs": [
+            {
+              "file": "_PREDVAS3.GMX",
+              "rawCommand": "#FOOT1(60,1)"
+            }
+          ],
+          "nominalAdvancePt": 17.007874,
+          "emptyTemplate": false,
+          "placement": {
+            "id": "locate-foot1",
+            "op": "locateBlock",
+            "enabled": true,
+            "evidenceStatus": "sourceDerived",
+            "sourceRefs": [],
+            "reviewNotes": [],
+            "frame": "blockLocal",
+            "origin": "independentOccurrence",
+            "signals": [
+              "rulings",
+              "labels",
+              "fieldColumns",
+              "unassignedText"
+            ],
+            "combination": "union",
+            "onAmbiguous": "retainHypotheses"
+          },
+          "candidateDetection": {
+            "id": "detect-foot1",
+            "op": "detectCandidates",
+            "enabled": true,
+            "evidenceStatus": "sourceDerived",
+            "sourceRefs": [],
+            "reviewNotes": [],
+            "signals": [
+              "rulings",
+              "labels",
+              "fieldColumns",
+              "unassignedText"
+            ],
+            "combination": "union",
+            "requiresSuccessfulParsing": false
+          },
+          "fieldAssignment": {
+            "id": "assign-foot1",
+            "op": "assignFields",
+            "enabled": true,
+            "evidenceStatus": "sourceDerived",
+            "sourceRefs": [],
+            "reviewNotes": [],
+            "paddingPt": 1.5,
+            "assembly": "glyphClusters",
+            "splitAcrossFields": "requireGlyphGeometry",
+            "overlap": "retainAmbiguity",
+            "retainClippedSource": true
+          },
+          "fields": [
+            {
+              "id": "field-119",
+              "semanticName": "openingDebit",
+              "rectPt": [
+                314.645669,
+                -15.590551,
+                371.338583,
+                -5.669291
+              ],
+              "parserRef": "money-comma",
+              "sourceRefs": [
+                {
+                  "file": "_PREDVAS3.GMX",
+                  "line": 119,
+                  "rawCommand": "|CPDATABASE(1110,268,1310,303,0,0,0,1,0,1,16777215,2,5,8,0,0,0,700,0,0,0,238,3,2,1,18,\"Times New Roman\",0,1,2,0,\"':*13.2'\",1,1,163,8,29,0)",
+                  "expression": ":*13.2"
+                }
+              ]
+            },
+            {
+              "id": "field-120",
+              "semanticName": "openingCredit",
+              "rectPt": [
+                374.173228,
+                -15.590551,
+                430.866142,
+                -5.669291
+              ],
+              "parserRef": "money-comma",
+              "sourceRefs": [
+                {
+                  "file": "_PREDVAS3.GMX",
+                  "line": 120,
+                  "rawCommand": "|CPDATABASE(1320,268,1520,303,0,0,0,1,0,1,16777215,2,5,8,0,0,0,700,0,0,0,238,3,2,1,18,\"Times New Roman\",0,1,2,0,\"':*13.2'\",1,1,163,8,29,0)",
+                  "expression": ":*13.2"
+                }
+              ]
+            },
+            {
+              "id": "field-121",
+              "semanticName": "turnoverDebit",
+              "rectPt": [
+                436.535433,
+                -15.590551,
+                493.228346,
+                -5.669291
+              ],
+              "parserRef": "money-comma",
+              "sourceRefs": [
+                {
+                  "file": "_PREDVAS3.GMX",
+                  "line": 121,
+                  "rawCommand": "|CPDATABASE(1540,268,1740,303,0,0,0,1,0,1,16777215,2,5,8,0,0,0,700,0,0,0,238,3,2,1,18,\"Times New Roman\",0,1,2,0,\"':*13.2'\",1,1,163,8,29,0)",
+                  "expression": ":*13.2"
+                }
+              ]
+            },
+            {
+              "id": "field-122",
+              "semanticName": "turnoverCredit",
+              "rectPt": [
+                496.062992,
+                -15.590551,
+                552.755906,
+                -5.669291
+              ],
+              "parserRef": "money-comma",
+              "sourceRefs": [
+                {
+                  "file": "_PREDVAS3.GMX",
+                  "line": 122,
+                  "rawCommand": "|CPDATABASE(1750,268,1950,303,0,0,0,1,0,1,16777215,2,5,8,0,0,0,700,0,0,0,238,3,2,1,18,\"Times New Roman\",0,1,2,0,\"':*13.2'\",1,1,163,8,29,0)",
+                  "expression": ":*13.2"
+                }
+              ]
+            },
+            {
+              "id": "field-123",
+              "semanticName": "monthDebit",
+              "rectPt": [
+                558.425197,
+                -15.590551,
+                615.11811,
+                -5.669291
+              ],
+              "parserRef": "money-comma",
+              "sourceRefs": [
+                {
+                  "file": "_PREDVAS3.GMX",
+                  "line": 123,
+                  "rawCommand": "|CPDATABASE(1970,268,2170,303,0,0,0,1,0,1,16777215,2,5,8,0,0,0,700,0,0,0,238,3,2,1,18,\"Times New Roman\",0,1,2,0,\"':*13.2'\",1,1,163,8,29,0)",
+                  "expression": ":*13.2"
+                }
+              ]
+            },
+            {
+              "id": "field-124",
+              "semanticName": "monthCredit",
+              "rectPt": [
+                617.952756,
+                -15.590551,
+                674.645669,
+                -5.669291
+              ],
+              "parserRef": "money-comma",
+              "sourceRefs": [
+                {
+                  "file": "_PREDVAS3.GMX",
+                  "line": 124,
+                  "rawCommand": "|CPDATABASE(2180,268,2380,303,0,0,0,1,0,1,16777215,2,5,8,0,0,0,700,0,0,0,238,3,2,1,18,\"Times New Roman\",0,1,2,0,\"':*13.2'\",1,1,163,8,29,0)",
+                  "expression": ":*13.2"
+                }
+              ]
+            },
+            {
+              "id": "field-125",
+              "semanticName": "closingDebit",
+              "rectPt": [
+                680.314961,
+                -15.590551,
+                737.007874,
+                -5.669291
+              ],
+              "parserRef": "money-comma",
+              "sourceRefs": [
+                {
+                  "file": "_PREDVAS3.GMX",
+                  "line": 125,
+                  "rawCommand": "|CPDATABASE(2400,268,2600,303,0,0,0,1,0,1,16777215,2,5,8,0,0,0,700,0,0,0,238,3,2,1,18,\"Times New Roman\",0,1,2,0,\"':*13.2'\",1,1,163,8,29,0)",
+                  "expression": ":*13.2"
+                }
+              ]
+            },
+            {
+              "id": "field-126",
+              "semanticName": "closingCredit",
+              "rectPt": [
+                739.84252,
+                -15.590551,
+                796.535433,
+                -5.669291
+              ],
+              "parserRef": "money-comma",
+              "sourceRefs": [
+                {
+                  "file": "_PREDVAS3.GMX",
+                  "line": 126,
+                  "rawCommand": "|CPDATABASE(2610,268,2810,303,0,0,0,1,0,1,16777215,2,5,8,0,0,0,700,0,0,0,238,3,2,1,18,\"Times New Roman\",0,1,2,0,\"':*13.2'\",1,1,163,8,29,0)",
+                  "expression": ":*13.2"
+                }
+              ]
+            }
+          ],
+          "labels": [
+            {
+              "id": "label-128",
+              "text": "KONTROLNÝ SÚČET",
+              "rectPt": [
+                68.031496,
+                -15.023622,
+                130.393701,
+                -5.669291
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_PREDVAS3.GMX",
+                  "line": 128,
+                  "rawCommand": "|CPLABEL(240,268,460,301,0,0,0,1,0,1,16777215,2,5,7,0,0,0,400,0,0,0,238,3,2,1,18,\"Tahoma\",0,0,2,\"KONTROLNÝ SÚČET\")"
+                }
+              ]
+            },
+            {
+              "id": "label-131",
+              "text": "***",
+              "rectPt": [
+                48.188976,
+                -15.023622,
+                59.811024,
+                -5.669291
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_PREDVAS3.GMX",
+                  "line": 131,
+                  "rawCommand": "|CPLABEL(170,268,211,301,0,0,0,1,0,1,16777215,2,5,7,0,0,0,400,0,0,0,238,3,2,1,18,\"Tahoma\",0,0,2,\"***\")"
+                }
+              ]
+            }
+          ],
+          "lines": [
+            {
+              "id": "line-113",
+              "pointsPt": [
+                [
+                  246.614173,
+                  -2.834646
+                ],
+                [
+                  246.614173,
+                  -19.84252
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_PREDVAS3.GMX",
+                  "line": 113,
+                  "rawCommand": "|CPLINE(870,258,870,318,1,0,0,0)"
+                }
+              ]
+            },
+            {
+              "id": "line-114",
+              "pointsPt": [
+                [
+                  311.811024,
+                  -2.834646
+                ],
+                [
+                  311.811024,
+                  -19.84252
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_PREDVAS3.GMX",
+                  "line": 114,
+                  "rawCommand": "|CPLINE(1100,258,1100,318,1,0,0,0)"
+                }
+              ]
+            },
+            {
+              "id": "line-115",
+              "pointsPt": [
+                [
+                  433.700787,
+                  -2.834646
+                ],
+                [
+                  433.700787,
+                  -19.84252
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_PREDVAS3.GMX",
+                  "line": 115,
+                  "rawCommand": "|CPLINE(1530,258,1530,318,1,0,0,0)"
+                }
+              ]
+            },
+            {
+              "id": "line-116",
+              "pointsPt": [
+                [
+                  555.590551,
+                  -2.834646
+                ],
+                [
+                  555.590551,
+                  -19.84252
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_PREDVAS3.GMX",
+                  "line": 116,
+                  "rawCommand": "|CPLINE(1960,258,1960,318,1,0,0,0)"
+                }
+              ]
+            },
+            {
+              "id": "line-117",
+              "pointsPt": [
+                [
+                  677.480315,
+                  -2.834646
+                ],
+                [
+                  677.480315,
+                  -19.84252
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_PREDVAS3.GMX",
+                  "line": 117,
+                  "rawCommand": "|CPLINE(2390,258,2390,318,1,0,0,0)"
+                }
+              ]
+            },
+            {
+              "id": "line-118",
+              "pointsPt": [
+                [
+                  799.370079,
+                  -2.834646
+                ],
+                [
+                  799.370079,
+                  -19.84252
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_PREDVAS3.GMX",
+                  "line": 118,
+                  "rawCommand": "|CPLINE(2820,258,2820,318,3,0,0,0)"
+                }
+              ]
+            },
+            {
+              "id": "line-127",
+              "pointsPt": [
+                [
+                  45.354331,
+                  -2.834646
+                ],
+                [
+                  45.354331,
+                  -19.84252
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_PREDVAS3.GMX",
+                  "line": 127,
+                  "rawCommand": "|CPLINE(160,258,160,318,3,0,0,0)"
+                }
+              ]
+            },
+            {
+              "id": "line-129",
+              "pointsPt": [
+                [
+                  45.354331,
+                  -2.834646
+                ],
+                [
+                  799.370079,
+                  -2.834646
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_PREDVAS3.GMX",
+                  "line": 129,
+                  "rawCommand": "|CPLINE(160,258,2820,258,3,0,0,0)"
+                }
+              ]
+            },
+            {
+              "id": "line-130",
+              "pointsPt": [
+                [
+                  45.354331,
+                  -19.84252
+                ],
+                [
+                  799.370079,
+                  -19.84252
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_PREDVAS3.GMX",
+                  "line": 130,
+                  "rawCommand": "|CPLINE(160,318,2820,318,3,0,0,0)"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "pagefoot",
+          "kind": "decoration",
+          "frame": "blockLocal",
+          "sourceRefs": [
+            {
+              "file": "_PREDVAS3.GMX",
+              "rawCommand": "#PAGEFOOT(1,0)"
+            }
+          ],
+          "nominalAdvancePt": 0.283465,
+          "emptyTemplate": false,
+          "placement": {
+            "id": "locate-pagefoot",
+            "op": "locateBlock",
+            "enabled": true,
+            "evidenceStatus": "sourceDerived",
+            "sourceRefs": [],
+            "reviewNotes": [],
+            "frame": "blockLocal",
+            "origin": "independentOccurrence",
+            "signals": [
+              "rulings",
+              "labels",
+              "fieldColumns",
+              "unassignedText"
+            ],
+            "combination": "union",
+            "onAmbiguous": "retainHypotheses"
+          },
+          "candidateDetection": {
+            "id": "detect-pagefoot",
+            "op": "detectCandidates",
+            "enabled": true,
+            "evidenceStatus": "sourceDerived",
+            "sourceRefs": [],
+            "reviewNotes": [],
+            "signals": [
+              "rulings",
+              "labels",
+              "fieldColumns",
+              "unassignedText"
+            ],
+            "combination": "union",
+            "requiresSuccessfulParsing": false
+          },
+          "fieldAssignment": {
+            "id": "assign-pagefoot",
+            "op": "assignFields",
+            "enabled": true,
+            "evidenceStatus": "sourceDerived",
+            "sourceRefs": [],
+            "reviewNotes": [],
+            "paddingPt": 1.5,
+            "assembly": "glyphClusters",
+            "splitAcrossFields": "requireGlyphGeometry",
+            "overlap": "retainAmbiguity",
+            "retainClippedSource": true
+          },
+          "fields": [],
+          "labels": [],
+          "lines": [
+            {
+              "id": "line-133",
+              "pointsPt": [
+                [
+                  45.354331,
+                  0.0
+                ],
+                [
+                  799.370079,
+                  0.0
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_PREDVAS3.GMX",
+                  "line": 133,
+                  "rawCommand": "|CPLINE(160,248,2820,248,3,0,0,0)"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "calibration": {
+        "id": "page-calibration",
+        "op": "fitUniformScaleTranslation",
+        "enabled": true,
+        "evidenceStatus": "unverified",
+        "sourceRefs": [],
+        "reviewNotes": [
+          "Provisional thresholds retained from draft 2; require corpus tuning."
+        ],
+        "anchorRefs": [
+          "anchor-1",
+          "anchor-2",
+          "anchor-3",
+          "anchor-4",
+          "anchor-5",
+          "anchor-6",
+          "anchor-7",
+          "anchor-8",
+          "anchor-9",
+          "anchor-10",
+          "anchor-11",
+          "anchor-12",
+          "anchor-13",
+          "anchor-14",
+          "anchor-15",
+          "anchor-16"
+        ],
+        "minimumInliers": 3,
+        "minimumAnchorSeparationPt": 150,
+        "minimumSpanPt": [
+          150,
+          10
+        ],
+        "scaleRange": [
+          0.65,
+          1.4
+        ],
+        "maximumResidualPt": 1.5,
+        "maximumHypotheses": 256,
+        "onFailure": "retainUnresolvedPage",
+        "inferScaleFromPageSize": false
+      }
+    }
+  ],
+  "metadata": [
+    {
+      "id": "original.pagehead.field-6",
+      "semanticName": "licensedUserText",
+      "locator": {
+        "kind": "blockField",
+        "variantRef": "original",
+        "blockRef": "pagehead",
+        "fieldRef": "field-6",
+        "frame": "nominalPage",
+        "pages": {
+          "selection": "all",
+          "indices": [],
+          "maximumPages": 10000
+        },
+        "assembly": "glyphClusters",
+        "cardinality": "zeroOrOne"
+      },
+      "parserRef": "text",
+      "onAbsent": "unresolved",
+      "onConflict": "ambiguous",
+      "sourceRefs": [
+        {
+          "file": "_PREDVAS3.GMX",
+          "line": 6,
+          "rawCommand": "|CPDATABASE(170,70,845,108,0,0,0,1,0,1,16777215,2,5,8,0,0,0,400,0,0,0,238,3,2,1,34,\"Tahoma\",0,0,2,0,\"'$USER'\",1,0,0,0,0,0)",
+          "expression": "$USER"
+        }
+      ]
+    },
+    {
+      "id": "original.pagehead.field-9",
+      "semanticName": "period.start",
+      "locator": {
+        "kind": "blockField",
+        "variantRef": "original",
+        "blockRef": "pagehead",
+        "fieldRef": "field-9",
+        "frame": "nominalPage",
+        "pages": {
+          "selection": "all",
+          "indices": [],
+          "maximumPages": 10000
+        },
+        "assembly": "glyphClusters",
+        "cardinality": "zeroOrOne"
+      },
+      "parserRef": "period",
+      "onAbsent": "unresolved",
+      "onConflict": "ambiguous",
+      "sourceRefs": [
+        {
+          "file": "_PREDVAS3.GMX",
+          "line": 9,
+          "rawCommand": "|CPDATABASE(1670,120,1815,158,0,0,0,1,0,1,16777215,2,5,8,0,0,0,400,0,0,0,238,3,2,1,34,\"Tahoma\",0,0,2,0,\"'^K_OD'\",1,0,0,0,0,0)",
+          "expression": "^K_OD"
+        }
+      ]
+    },
+    {
+      "id": "original.pagehead.field-10",
+      "semanticName": "period.end",
+      "locator": {
+        "kind": "blockField",
+        "variantRef": "original",
+        "blockRef": "pagehead",
+        "fieldRef": "field-10",
+        "frame": "nominalPage",
+        "pages": {
+          "selection": "all",
+          "indices": [],
+          "maximumPages": 10000
+        },
+        "assembly": "glyphClusters",
+        "cardinality": "zeroOrOne"
+      },
+      "parserRef": "period",
+      "onAbsent": "unresolved",
+      "onConflict": "ambiguous",
+      "sourceRefs": [
+        {
+          "file": "_PREDVAS3.GMX",
+          "line": 10,
+          "rawCommand": "|CPDATABASE(1850,120,1995,158,0,0,0,1,0,1,16777215,2,5,8,0,0,0,400,0,0,0,238,3,2,1,34,\"Tahoma\",0,0,2,0,\"'^K_DO'\",1,0,0,0,0,0)",
+          "expression": "^K_DO"
+        }
+      ]
+    },
+    {
+      "id": "original.pagehead.field-13",
+      "semanticName": "printedPageLabel",
+      "locator": {
+        "kind": "blockField",
+        "variantRef": "original",
+        "blockRef": "pagehead",
+        "fieldRef": "field-13",
+        "frame": "nominalPage",
+        "pages": {
+          "selection": "all",
+          "indices": [],
+          "maximumPages": 10000
+        },
+        "assembly": "glyphClusters",
+        "cardinality": "zeroOrOne"
+      },
+      "parserRef": "integer",
+      "onAbsent": "unresolved",
+      "onConflict": "ambiguous",
+      "sourceRefs": [
+        {
+          "file": "_PREDVAS3.GMX",
+          "line": 13,
+          "rawCommand": "|CPDATABASE(2710,120,2803,158,0,0,0,1,0,1,16777215,2,5,8,0,0,0,400,0,0,0,238,3,2,1,34,\"Tahoma\",0,0,2,0,\"'$PAGENO'\",1,0,0,0,0,0)",
+          "expression": "$PAGENO"
+        }
+      ]
+    },
+    {
+      "id": "original.pagehead.field-43",
+      "semanticName": "printingDate",
+      "locator": {
+        "kind": "blockField",
+        "variantRef": "original",
+        "blockRef": "pagehead",
+        "fieldRef": "field-43",
+        "frame": "nominalPage",
+        "pages": {
+          "selection": "all",
+          "indices": [],
+          "maximumPages": 10000
+        },
+        "assembly": "glyphClusters",
+        "cardinality": "zeroOrOne"
+      },
+      "parserRef": "date",
+      "onAbsent": "unresolved",
+      "onConflict": "ambiguous",
+      "sourceRefs": [
+        {
+          "file": "_PREDVAS3.GMX",
+          "line": 43,
+          "rawCommand": "|CPDATABASE(480,120,603,153,0,0,0,1,0,1,16777215,2,5,7,0,0,0,400,0,0,0,238,3,2,1,34,\"Tahoma\",0,0,2,0,\"':$SYSDATE'\",1,0,0,0,0,0)",
+          "expression": ":$SYSDATE"
+        }
+      ]
+    },
+    {
+      "id": "original.pagehead.field-44",
+      "semanticName": "printingTime",
+      "locator": {
+        "kind": "blockField",
+        "variantRef": "original",
+        "blockRef": "pagehead",
+        "fieldRef": "field-44",
+        "frame": "nominalPage",
+        "pages": {
+          "selection": "all",
+          "indices": [],
+          "maximumPages": 10000
+        },
+        "assembly": "glyphClusters",
+        "cardinality": "zeroOrOne"
+      },
+      "parserRef": "time",
+      "onAbsent": "unresolved",
+      "onConflict": "ambiguous",
+      "sourceRefs": [
+        {
+          "file": "_PREDVAS3.GMX",
+          "line": 44,
+          "rawCommand": "|CPDATABASE(610,120,709,153,0,0,0,1,0,1,16777215,2,5,7,0,0,0,400,0,0,0,238,3,2,1,34,\"Tahoma\",0,0,2,0,\"'$TIME'\",1,0,0,0,0,0)",
+          "expression": "$TIME"
+        }
+      ]
+    },
+    {
+      "id": "original.title.label-7",
+      "semanticName": "reportTitle",
+      "locator": {
+        "kind": "calibratedRegion",
+        "variantRef": "original",
+        "frame": "nominalPage",
+        "rectPt": [
+          379.84252,
+          562.110236,
+          584.220472,
+          575.433071
+        ],
+        "paddingPt": 2,
+        "pages": {
+          "selection": "all",
+          "indices": [],
+          "maximumPages": 10000
+        },
+        "assembly": "glyphClusters",
+        "cardinality": "zeroOrOne"
+      },
+      "parserRef": "text",
+      "onAbsent": "unresolved",
+      "onConflict": "ambiguous",
+      "sourceRefs": [
+        {
+          "file": "_PREDVAS3.GMX",
+          "line": 7,
+          "rawCommand": "|CPLABEL(1340,70,2061,117,0,0,0,1,0,1,16777215,2,5,10,0,0,0,700,0,0,0,238,3,2,1,18,\"Tahoma\",0,0,2,\"HLAVNÁ KNIHA  ANALYTICKÝCH  ÚČTOV\")"
+        }
+      ]
+    }
+  ],
+  "metadataDerivations": [
+    {
+      "id": "fiscal-year",
+      "op": "deriveFiscalYear",
+      "enabled": true,
+      "evidenceStatus": "sourceDerived",
+      "sourceRefs": [],
+      "reviewNotes": [],
+      "inputMetadataNames": [
+        "period.start",
+        "period.end"
+      ],
+      "outputMetadataName": "fiscalYear",
+      "onDifferentYears": "unresolved",
+      "onMissingInput": "unresolved",
+      "origin": "derived"
+    }
+  ],
+  "classification": [
+    {
+      "id": "page-header",
+      "op": "classify",
+      "enabled": true,
+      "evidenceStatus": "sourceDerived",
+      "sourceRefs": [],
+      "reviewNotes": [],
+      "when": {
+        "op": "blockKind",
+        "blockRefs": [
+          "pagehead"
+        ]
+      },
+      "semanticClass": "pageHeader",
+      "exportEligibility": "excluded",
+      "aggregationMemberships": [],
+      "level": "any"
+    },
+    {
+      "id": "page-footer",
+      "op": "classify",
+      "enabled": true,
+      "evidenceStatus": "sourceDerived",
+      "sourceRefs": [],
+      "reviewNotes": [],
+      "when": {
+        "op": "blockKind",
+        "blockRefs": [
+          "pagefoot"
+        ]
+      },
+      "semanticClass": "pageFooter",
+      "exportEligibility": "excluded",
+      "aggregationMemberships": [],
+      "level": "any"
+    },
+    {
+      "id": "account-detail",
+      "op": "classify",
+      "enabled": true,
+      "evidenceStatus": "sourceDerived",
+      "sourceRefs": [],
+      "reviewNotes": [],
+      "when": {
+        "op": "blockKind",
+        "blockRefs": [
+          "record"
+        ]
+      },
+      "semanticClass": "accountBalance",
+      "exportEligibility": "eligible",
+      "aggregationMemberships": [
+        "exportedDetails"
+      ],
+      "level": "detail"
+    },
+    {
+      "id": "synthetic-summary",
+      "op": "classify",
+      "enabled": true,
+      "evidenceStatus": "sourceDerived",
+      "sourceRefs": [],
+      "reviewNotes": [],
+      "when": {
+        "op": "blockKind",
+        "blockRefs": [
+          "foot3"
+        ]
+      },
+      "semanticClass": "accountSubtotal",
+      "exportEligibility": "excluded",
+      "aggregationMemberships": [
+        "syntheticSummaries"
+      ],
+      "level": "synthetic"
+    },
+    {
+      "id": "class-summary",
+      "op": "classify",
+      "enabled": true,
+      "evidenceStatus": "sourceDerived",
+      "sourceRefs": [],
+      "reviewNotes": [],
+      "when": {
+        "op": "blockKind",
+        "blockRefs": [
+          "foot2"
+        ]
+      },
+      "semanticClass": "classSubtotal",
+      "exportEligibility": "excluded",
+      "aggregationMemberships": [],
+      "level": "any"
+    },
+    {
+      "id": "report-control",
+      "op": "classify",
+      "enabled": true,
+      "evidenceStatus": "sourceDerived",
+      "sourceRefs": [],
+      "reviewNotes": [],
+      "when": {
+        "op": "blockKind",
+        "blockRefs": [
+          "foot1"
+        ]
+      },
+      "semanticClass": "reportControl",
+      "exportEligibility": "excluded",
+      "aggregationMemberships": [],
+      "level": "any"
+    }
+  ],
+  "classificationPolicy": {
+    "evaluation": "allRules",
+    "noMatch": "unrecognizedCandidate",
+    "incompatibleMatches": "ambiguous"
+  },
+  "groups": [
+    {
+      "id": "reportSection",
+      "parentRef": null,
+      "memberSelector": {
+        "semanticClasses": [],
+        "aggregationMemberships": [],
+        "level": "any",
+        "occurrences": "records"
+      },
+      "startRule": {
+        "op": "sectionStart"
+      },
+      "endRule": {
+        "op": "sectionEnd"
+      },
+      "keyFields": [],
+      "crossPagePolicy": "requireContinuityEvidence",
+      "partialInputPolicy": "retainIncomplete",
+      "repeatedHeaderResets": false,
+      "inheritance": []
+    },
+    {
+      "id": "synthetic",
+      "parentRef": "accountClass",
+      "memberSelector": {
+        "semanticClasses": [],
+        "aggregationMemberships": [
+          "exportedDetails"
+        ],
+        "level": "any",
+        "occurrences": "records"
+      },
+      "startRule": {
+        "op": "afterPreviousClosure"
+      },
+      "endRule": {
+        "op": "match",
+        "when": {
+          "op": "blockKind",
+          "blockRefs": [
+            "foot3"
+          ]
+        }
+      },
+      "keyFields": [
+        "syntheticAccountCode"
+      ],
+      "crossPagePolicy": "requireContinuityEvidence",
+      "partialInputPolicy": "retainIncomplete",
+      "repeatedHeaderResets": false,
+      "inheritance": []
+    },
+    {
+      "id": "accountClass",
+      "parentRef": "reportSection",
+      "memberSelector": {
+        "semanticClasses": [],
+        "aggregationMemberships": [
+          "syntheticSummaries"
+        ],
+        "level": "any",
+        "occurrences": "records"
+      },
+      "startRule": {
+        "op": "afterPreviousClosure"
+      },
+      "endRule": {
+        "op": "match",
+        "when": {
+          "op": "blockKind",
+          "blockRefs": [
+            "foot2"
+          ]
+        }
+      },
+      "keyFields": [
+        "accountClassCode"
+      ],
+      "crossPagePolicy": "requireContinuityEvidence",
+      "partialInputPolicy": "retainIncomplete",
+      "repeatedHeaderResets": false,
+      "inheritance": []
+    }
+  ],
+  "completeness": [
+    {
+      "id": "account-required",
+      "op": "requireFields",
+      "enabled": true,
+      "evidenceStatus": "sourceDerived",
+      "sourceRefs": [],
+      "reviewNotes": [],
+      "selector": {
+        "semanticClasses": [
+          "accountBalance"
+        ],
+        "aggregationMemberships": [],
+        "level": "any",
+        "occurrences": "records"
+      },
+      "fieldRefs": [
+        "accountCode"
+      ],
+      "requiredState": "present"
+    },
+    {
+      "id": "all-candidates",
+      "op": "accountForCandidates",
+      "enabled": true,
+      "evidenceStatus": "sourceDerived",
+      "sourceRefs": [],
+      "reviewNotes": [],
+      "onUnrecognized": "preventCleanSuccess"
+    },
+    {
+      "id": "all-tokens",
+      "op": "accountForTokens",
+      "enabled": true,
+      "evidenceStatus": "sourceDerived",
+      "sourceRefs": [],
+      "reviewNotes": [],
+      "decorationRequiresRuleId": true
+    },
+    {
+      "id": "coverage",
+      "op": "inspectCoverage",
+      "enabled": true,
+      "evidenceStatus": "sourceDerived",
+      "sourceRefs": [],
+      "reviewNotes": [],
+      "printedPageField": "printedPageNumber",
+      "contiguousPagesProveOriginalComplete": false
+    },
+    {
+      "id": "spacing",
+      "op": "checkSpacing",
+      "enabled": true,
+      "evidenceStatus": "unverified",
+      "sourceRefs": [],
+      "reviewNotes": [],
+      "excludeExplainedBlocks": true,
+      "maximumAdvanceMultiplier": 1.5,
+      "onGap": "suspectedMissingRecord"
+    }
+  ],
+  "openQuestions": [
+    "Calibrate tolerances and glyph offsets on complete fixtures.",
+    "Confirm suppressed-zero policy per field/block.",
+    "No total reconciliation has been run for this package.",
+    "No verified reportingEntity.cin locator in the supplied GMX fields. Return unresolved; do not extract arbitrary eight-digit numbers or use manifest expectations."
+  ]
+}

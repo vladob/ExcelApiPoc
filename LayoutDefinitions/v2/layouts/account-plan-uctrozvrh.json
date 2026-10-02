@@ -1,0 +1,3207 @@
+{
+  "$schema": "../schemas/layout.schema.json",
+  "schemaVersion": 2,
+  "definitionVersion": "2.0.0-draft.4",
+  "id": "ifosoft.account-plan-uctrozvrh",
+  "kind": "layout",
+  "status": "reviewDraft",
+  "productionApproved": false,
+  "requiresCapabilities": [
+    "positioned.v2"
+  ],
+  "sourceRefs": [
+    {
+      "file": "sources/IfoSoft-v2-review.zip",
+      "sha256": "3d74f8a56bfd23fe52557f82018268612f62005cfdb1063064f211fbbb9788c0"
+    }
+  ],
+  "reviewNotes": [],
+  "formats": [
+    "PDF",
+    "XPS",
+    "OXPS"
+  ],
+  "modelRef": {
+    "id": "ifosoft.model.account-plan-uctrozvrh",
+    "version": "2.0.0-draft.4"
+  },
+  "identificationRefs": [
+    {
+      "id": "ifosoft.identify.uctrozvrh",
+      "version": "2.0.0-draft.4"
+    }
+  ],
+  "parserRefs": [
+    {
+      "id": "ifosoft.parsers",
+      "version": "2.0.0-draft.4"
+    }
+  ],
+  "validationRefs": [
+    {
+      "id": "ifosoft.account-plan-uctrozvrh.validation",
+      "version": "2.0.0-draft.4"
+    }
+  ],
+  "variants": [
+    {
+      "id": "urozvrh",
+      "evidenceStatus": "sourceDerived",
+      "sourceRefs": [
+        {
+          "file": "_UROZVRH.gmx",
+          "sha256": "4a8baf51814fed11941fc01e191989d44f7f064afba65b5542c6cdefcff05c27"
+        }
+      ],
+      "nominalPageSizePt": [
+        595.275591,
+        841.889764
+      ],
+      "anchors": [
+        {
+          "id": "line-9-0",
+          "feature": "rulingEndpoint",
+          "pointPt": [
+            19.84252,
+            802.204724
+          ],
+          "blockRef": "pagehead",
+          "lineRef": "line-9",
+          "endpointIndex": 0,
+          "evidenceStatus": "sourceDerived",
+          "sourceRefs": [
+            {
+              "file": "_UROZVRH.gmx",
+              "line": 9,
+              "rawCommand": "|CPLINE(70,140,2030,140,4,0,0,0)"
+            }
+          ]
+        },
+        {
+          "id": "line-9-1",
+          "feature": "rulingEndpoint",
+          "pointPt": [
+            575.433071,
+            802.204724
+          ],
+          "blockRef": "pagehead",
+          "lineRef": "line-9",
+          "endpointIndex": 1,
+          "evidenceStatus": "sourceDerived",
+          "sourceRefs": [
+            {
+              "file": "_UROZVRH.gmx",
+              "line": 9,
+              "rawCommand": "|CPLINE(70,140,2030,140,4,0,0,0)"
+            }
+          ]
+        },
+        {
+          "id": "line-12-0",
+          "feature": "rulingEndpoint",
+          "pointPt": [
+            19.84252,
+            782.362205
+          ],
+          "blockRef": "pagehead",
+          "lineRef": "line-12",
+          "endpointIndex": 0,
+          "evidenceStatus": "sourceDerived",
+          "sourceRefs": [
+            {
+              "file": "_UROZVRH.gmx",
+              "line": 12,
+              "rawCommand": "|CPLINE(70,210,2030,210,4,0,0,0)"
+            }
+          ]
+        },
+        {
+          "id": "line-12-1",
+          "feature": "rulingEndpoint",
+          "pointPt": [
+            575.433071,
+            782.362205
+          ],
+          "blockRef": "pagehead",
+          "lineRef": "line-12",
+          "endpointIndex": 1,
+          "evidenceStatus": "sourceDerived",
+          "sourceRefs": [
+            {
+              "file": "_UROZVRH.gmx",
+              "line": 12,
+              "rawCommand": "|CPLINE(70,210,2030,210,4,0,0,0)"
+            }
+          ]
+        }
+      ],
+      "blocks": [
+        {
+          "id": "pagehead",
+          "kind": "pageHeader",
+          "frame": "nominalPage",
+          "sourceRefs": [
+            {
+              "file": "_UROZVRH.gmx",
+              "rawCommand": "#PAGEHEAD(57,0)"
+            }
+          ],
+          "nominalAdvancePt": 16.15748,
+          "emptyTemplate": false,
+          "placement": {
+            "id": "locate-pagehead",
+            "op": "locateBlock",
+            "enabled": true,
+            "evidenceStatus": "sourceDerived",
+            "sourceRefs": [],
+            "reviewNotes": [],
+            "frame": "nominalPage",
+            "origin": "pageCalibration",
+            "signals": [
+              "rulings",
+              "labels",
+              "fieldColumns",
+              "unassignedText"
+            ],
+            "combination": "union",
+            "onAmbiguous": "retainHypotheses"
+          },
+          "candidateDetection": {
+            "id": "detect-pagehead",
+            "op": "detectCandidates",
+            "enabled": true,
+            "evidenceStatus": "sourceDerived",
+            "sourceRefs": [],
+            "reviewNotes": [],
+            "signals": [
+              "rulings",
+              "labels",
+              "fieldColumns",
+              "unassignedText"
+            ],
+            "combination": "union",
+            "requiresSuccessfulParsing": false
+          },
+          "fieldAssignment": {
+            "id": "assign-pagehead",
+            "op": "assignFields",
+            "enabled": true,
+            "evidenceStatus": "sourceDerived",
+            "sourceRefs": [],
+            "reviewNotes": [],
+            "paddingPt": 1.5,
+            "assembly": "glyphClusters",
+            "splitAcrossFields": "requireGlyphGeometry",
+            "overlap": "retainAmbiguity",
+            "retainClippedSource": true
+          },
+          "fields": [
+            {
+              "id": "field-5",
+              "semanticName": "licensedUserText",
+              "rectPt": [
+                382.677165,
+                828.283465,
+                574.015748,
+                839.055118
+              ],
+              "parserRef": "text",
+              "sourceRefs": [
+                {
+                  "file": "_UROZVRH.gmx",
+                  "line": 5,
+                  "rawCommand": "|CPDATABASE(1350,10,2025,48,1,0,0,1,16777215,1,0,2,5,8,0,0,0,400,0,0,0,238,3,2,1,18,\"Tahoma\",0,1,2,0,\"'$USER'\",1,0,0,0,0,0)",
+                  "expression": "$USER"
+                }
+              ]
+            },
+            {
+              "id": "field-7",
+              "semanticName": "printedPageNumber",
+              "rectPt": [
+                558.425197,
+                805.606299,
+                576.0,
+                816.377953
+              ],
+              "parserRef": "integer",
+              "sourceRefs": [
+                {
+                  "file": "_UROZVRH.gmx",
+                  "line": 7,
+                  "rawCommand": "|CPDATABASE(1970,90,2032,128,1,0,0,1,16777215,1,0,2,5,8,0,0,0,400,0,0,0,238,3,2,1,18,\"Tahoma\",0,1,2,0,\"'$PAGENO'\",1,0,0,0,0,0)",
+                  "expression": "$PAGENO"
+                }
+              ]
+            }
+          ],
+          "labels": [
+            {
+              "id": "label-6",
+              "text": "Strana:",
+              "rectPt": [
+                532.913386,
+                805.606299,
+                558.708661,
+                816.377953
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_UROZVRH.gmx",
+                  "line": 6,
+                  "rawCommand": "|CPLABEL(1880,90,1971,128,1,0,0,1,16777215,1,0,2,5,8,0,0,0,400,0,0,0,238,3,2,1,18,\"Tahoma\",0,0,2,\"Strana:\")"
+                }
+              ]
+            },
+            {
+              "id": "label-8",
+              "text": "ÚČTOVÝ  ROZVRH  ANALYTICKÝCH  ÚČTOV",
+              "rectPt": [
+                167.244094,
+                805.889764,
+                426.614173,
+                822.047244
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_UROZVRH.gmx",
+                  "line": 8,
+                  "rawCommand": "|CPLABEL(590,70,1505,127,0,0,0,1,0,1,16777215,2,5,12,0,0,0,700,0,0,0,238,3,2,1,34,\"Tahoma\",0,0,2,\"ÚČTOVÝ  ROZVRH  ANALYTICKÝCH  ÚČTOV\")"
+                }
+              ]
+            },
+            {
+              "id": "label-10",
+              "text": "SYN",
+              "rectPt": [
+                48.188976,
+                785.76378,
+                62.645669,
+                796.535433
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_UROZVRH.gmx",
+                  "line": 10,
+                  "rawCommand": "|CPLABEL(170,160,221,198,1,0,0,1,16777215,1,0,2,5,8,0,0,0,400,0,0,0,238,3,2,1,18,\"Tahoma\",0,0,2,\"SYN\")"
+                }
+              ]
+            },
+            {
+              "id": "label-11",
+              "text": "Názov účtu",
+              "rectPt": [
+                96.377953,
+                785.76378,
+                135.779528,
+                796.535433
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_UROZVRH.gmx",
+                  "line": 11,
+                  "rawCommand": "|CPLABEL(340,160,479,198,1,0,0,1,16777215,1,0,2,5,8,0,0,0,400,0,0,0,238,3,2,1,18,\"Tahoma\",0,0,2,\"Názov účtu\")"
+                }
+              ]
+            },
+            {
+              "id": "label-13",
+              "text": "ANA",
+              "rectPt": [
+                70.866142,
+                785.76378,
+                86.173228,
+                796.535433
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_UROZVRH.gmx",
+                  "line": 13,
+                  "rawCommand": "|CPLABEL(250,160,304,198,1,0,0,1,16777215,1,0,2,5,8,0,0,0,400,0,0,0,238,3,2,1,18,\"Tahoma\",0,0,2,\"ANA\")"
+                }
+              ]
+            },
+            {
+              "id": "label-14",
+              "text": "TYP",
+              "rectPt": [
+                430.866142,
+                785.76378,
+                444.472441,
+                796.535433
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_UROZVRH.gmx",
+                  "line": 14,
+                  "rawCommand": "|CPLABEL(1520,160,1568,198,0,0,0,1,0,1,16777215,2,5,8,0,0,0,400,0,0,0,238,3,2,1,34,\"Tahoma\",0,0,2,\"TYP\")"
+                }
+              ]
+            },
+            {
+              "id": "label-15",
+              "text": "POD",
+              "rectPt": [
+                558.425197,
+                785.76378,
+                574.015748,
+                796.535433
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_UROZVRH.gmx",
+                  "line": 15,
+                  "rawCommand": "|CPLABEL(1970,160,2025,198,0,0,0,1,0,1,16777215,2,5,8,0,0,0,400,0,0,0,238,3,2,1,34,\"Tahoma\",0,0,2,\"POD\")"
+                }
+              ]
+            },
+            {
+              "id": "label-16",
+              "text": "DAŇ",
+              "rectPt": [
+                521.574803,
+                785.76378,
+                537.165354,
+                796.535433
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_UROZVRH.gmx",
+                  "line": 16,
+                  "rawCommand": "|CPLABEL(1840,160,1895,198,0,0,0,1,0,1,16777215,2,5,8,0,0,0,400,0,0,0,238,3,2,1,34,\"Tahoma\",0,0,2,\"DAŇ\")"
+                }
+              ]
+            },
+            {
+              "id": "label-17",
+              "text": "STR",
+              "rectPt": [
+                450.708661,
+                785.76378,
+                465.165354,
+                796.535433
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_UROZVRH.gmx",
+                  "line": 17,
+                  "rawCommand": "|CPLABEL(1590,160,1641,198,0,0,0,1,0,1,16777215,2,5,8,0,0,0,400,0,0,0,238,3,2,1,34,\"Tahoma\",0,0,2,\"STR\")"
+                }
+              ]
+            },
+            {
+              "id": "label-18",
+              "text": "ODD",
+              "rectPt": [
+                467.716535,
+                785.76378,
+                484.440945,
+                796.535433
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_UROZVRH.gmx",
+                  "line": 18,
+                  "rawCommand": "|CPLABEL(1650,160,1709,198,0,0,0,1,0,1,16777215,2,5,8,0,0,0,400,0,0,0,238,3,2,1,34,\"Tahoma\",0,0,2,\"ODD\")"
+                }
+              ]
+            },
+            {
+              "id": "label-19",
+              "text": "POL",
+              "rectPt": [
+                487.559055,
+                785.76378,
+                501.732283,
+                796.535433
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_UROZVRH.gmx",
+                  "line": 19,
+                  "rawCommand": "|CPLABEL(1720,160,1770,198,0,0,0,1,0,1,16777215,2,5,8,0,0,0,400,0,0,0,238,3,2,1,34,\"Tahoma\",0,0,2,\"POL\")"
+                }
+              ]
+            },
+            {
+              "id": "label-20",
+              "text": "SAL",
+              "rectPt": [
+                504.566929,
+                785.76378,
+                517.889764,
+                796.535433
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_UROZVRH.gmx",
+                  "line": 20,
+                  "rawCommand": "|CPLABEL(1780,160,1827,198,0,0,0,1,0,1,16777215,2,5,8,0,0,0,400,0,0,0,238,3,2,1,34,\"Tahoma\",0,0,2,\"SAL\")"
+                }
+              ]
+            },
+            {
+              "id": "label-21",
+              "text": "DPH",
+              "rectPt": [
+                541.417323,
+                785.76378,
+                556.724409,
+                796.535433
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_UROZVRH.gmx",
+                  "line": 21,
+                  "rawCommand": "|CPLABEL(1910,160,1964,198,0,0,0,1,0,1,16777215,2,5,8,0,0,0,400,0,0,0,238,3,2,1,34,\"Tahoma\",0,0,2,\"DPH\")"
+                }
+              ]
+            },
+            {
+              "id": "label-22",
+              "text": "Por.č.",
+              "rectPt": [
+                22.677165,
+                785.76378,
+                41.669291,
+                796.535433
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_UROZVRH.gmx",
+                  "line": 22,
+                  "rawCommand": "|CPLABEL(80,160,147,198,1,0,0,1,16777215,1,0,2,5,8,0,0,0,400,0,0,0,238,3,2,1,18,\"Tahoma\",0,0,2,\"Por.č.\")"
+                }
+              ]
+            }
+          ],
+          "lines": [
+            {
+              "id": "line-9",
+              "pointsPt": [
+                [
+                  19.84252,
+                  802.204724
+                ],
+                [
+                  575.433071,
+                  802.204724
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_UROZVRH.gmx",
+                  "line": 9,
+                  "rawCommand": "|CPLINE(70,140,2030,140,4,0,0,0)"
+                }
+              ]
+            },
+            {
+              "id": "line-12",
+              "pointsPt": [
+                [
+                  19.84252,
+                  782.362205
+                ],
+                [
+                  575.433071,
+                  782.362205
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_UROZVRH.gmx",
+                  "line": 12,
+                  "rawCommand": "|CPLINE(70,210,2030,210,4,0,0,0)"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "record",
+          "kind": "repeatingRecord",
+          "frame": "blockLocal",
+          "sourceRefs": [
+            {
+              "file": "_UROZVRH.gmx",
+              "rawCommand": "#RECORD(38,0)"
+            }
+          ],
+          "nominalAdvancePt": 10.771654,
+          "emptyTemplate": false,
+          "placement": {
+            "id": "locate-record",
+            "op": "locateBlock",
+            "enabled": true,
+            "evidenceStatus": "sourceDerived",
+            "sourceRefs": [],
+            "reviewNotes": [],
+            "frame": "blockLocal",
+            "origin": "independentOccurrence",
+            "signals": [
+              "rulings",
+              "labels",
+              "fieldColumns",
+              "unassignedText"
+            ],
+            "combination": "union",
+            "onAmbiguous": "retainHypotheses"
+          },
+          "candidateDetection": {
+            "id": "detect-record",
+            "op": "detectCandidates",
+            "enabled": true,
+            "evidenceStatus": "sourceDerived",
+            "sourceRefs": [],
+            "reviewNotes": [],
+            "signals": [
+              "rulings",
+              "labels",
+              "fieldColumns",
+              "unassignedText"
+            ],
+            "combination": "union",
+            "requiresSuccessfulParsing": false
+          },
+          "fieldAssignment": {
+            "id": "assign-record",
+            "op": "assignFields",
+            "enabled": true,
+            "evidenceStatus": "sourceDerived",
+            "sourceRefs": [],
+            "reviewNotes": [],
+            "paddingPt": 1.5,
+            "assembly": "glyphClusters",
+            "splitAcrossFields": "requireGlyphGeometry",
+            "overlap": "retainAmbiguity",
+            "retainClippedSource": true
+          },
+          "fields": [
+            {
+              "id": "field-25",
+              "semanticName": "syntheticComponent",
+              "rectPt": [
+                48.188976,
+                -10.771654,
+                62.645669,
+                0.0
+              ],
+              "parserRef": "code",
+              "sourceRefs": [
+                {
+                  "file": "_UROZVRH.gmx",
+                  "line": 25,
+                  "rawCommand": "|CPDATABASE(170,214,221,252,1,0,0,1,16777215,1,0,2,5,8,0,0,0,400,0,0,0,238,0,0,0,0,\"Tahoma\",0,0,2,0,\"'SYN'\",1,0,0,0,0,0)",
+                  "expression": "SYN"
+                }
+              ]
+            },
+            {
+              "id": "field-26",
+              "semanticName": "accountName",
+              "rectPt": [
+                96.377953,
+                -10.771654,
+                382.96063,
+                0.0
+              ],
+              "parserRef": "text",
+              "sourceRefs": [
+                {
+                  "file": "_UROZVRH.gmx",
+                  "line": 26,
+                  "rawCommand": "|CPDATABASE(340,214,1351,252,1,0,0,1,16777215,1,0,2,5,8,0,0,0,400,0,0,0,238,0,0,0,0,\"Tahoma\",0,0,2,0,\"'NAZOV'\",1,0,0,0,0,0)",
+                  "expression": "NAZOV"
+                }
+              ]
+            },
+            {
+              "id": "field-27",
+              "semanticName": "analyticalComponent",
+              "rectPt": [
+                70.866142,
+                -10.771654,
+                90.141732,
+                0.0
+              ],
+              "parserRef": "code",
+              "sourceRefs": [
+                {
+                  "file": "_UROZVRH.gmx",
+                  "line": 27,
+                  "rawCommand": "|CPDATABASE(250,214,318,252,0,0,0,1,0,1,16777215,2,5,8,0,0,0,400,0,0,0,238,3,2,1,34,\"Tahoma\",0,0,2,0,\"'ANA'\",1,0,0,0,0,0)",
+                  "expression": "ANA"
+                }
+              ]
+            },
+            {
+              "id": "field-28",
+              "semanticName": "accountType",
+              "rectPt": [
+                433.700787,
+                -10.771654,
+                443.622047,
+                0.0
+              ],
+              "parserRef": "code",
+              "sourceRefs": [
+                {
+                  "file": "_UROZVRH.gmx",
+                  "line": 28,
+                  "rawCommand": "|CPDATABASE(1530,214,1565,252,0,0,0,1,0,1,16777215,2,5,8,0,0,0,400,0,0,0,238,3,2,1,34,\"Tahoma\",0,0,2,0,\"'TYP'\",1,0,0,0,0,0)",
+                  "expression": "TYP"
+                }
+              ]
+            },
+            {
+              "id": "field-29",
+              "semanticName": "POD",
+              "rectPt": [
+                564.094488,
+                -10.771654,
+                569.19685,
+                0.0
+              ],
+              "parserRef": "code",
+              "sourceRefs": [
+                {
+                  "file": "_UROZVRH.gmx",
+                  "line": 29,
+                  "rawCommand": "|CPDATABASE(1990,214,2008,252,0,0,0,1,0,1,16777215,2,5,8,0,0,0,400,0,0,0,238,3,2,1,34,\"Tahoma\",0,0,2,0,\"'P'\",1,0,0,0,0,0)",
+                  "expression": "P"
+                }
+              ]
+            },
+            {
+              "id": "field-30",
+              "semanticName": "DAN",
+              "rectPt": [
+                527.244094,
+                -10.771654,
+                532.346457,
+                0.0
+              ],
+              "parserRef": "code",
+              "sourceRefs": [
+                {
+                  "file": "_UROZVRH.gmx",
+                  "line": 30,
+                  "rawCommand": "|CPDATABASE(1860,214,1878,252,0,0,0,1,0,1,16777215,2,5,8,0,0,0,400,0,0,0,238,3,2,1,34,\"Tahoma\",0,0,2,0,\"'D'\",1,0,0,0,0,0)",
+                  "expression": "D"
+                }
+              ]
+            },
+            {
+              "id": "field-31",
+              "semanticName": "STR",
+              "rectPt": [
+                456.377953,
+                -10.771654,
+                461.480315,
+                0.0
+              ],
+              "parserRef": "code",
+              "sourceRefs": [
+                {
+                  "file": "_UROZVRH.gmx",
+                  "line": 31,
+                  "rawCommand": "|CPDATABASE(1610,214,1628,252,0,0,0,1,0,1,16777215,2,5,8,0,0,0,400,0,0,0,238,3,2,1,34,\"Tahoma\",0,0,2,0,\"'S'\",1,0,0,0,0,0)",
+                  "expression": "S"
+                }
+              ]
+            },
+            {
+              "id": "field-32",
+              "semanticName": "ODD",
+              "rectPt": [
+                473.385827,
+                -10.771654,
+                478.488189,
+                0.0
+              ],
+              "parserRef": "code",
+              "sourceRefs": [
+                {
+                  "file": "_UROZVRH.gmx",
+                  "line": 32,
+                  "rawCommand": "|CPDATABASE(1670,214,1688,252,0,0,0,1,0,1,16777215,2,5,8,0,0,0,400,0,0,0,238,3,2,1,34,\"Tahoma\",0,0,2,0,\"'Z'\",1,0,0,0,0,0)",
+                  "expression": "Z"
+                }
+              ]
+            },
+            {
+              "id": "field-33",
+              "semanticName": "POL",
+              "rectPt": [
+                493.228346,
+                -10.771654,
+                498.330709,
+                0.0
+              ],
+              "parserRef": "code",
+              "sourceRefs": [
+                {
+                  "file": "_UROZVRH.gmx",
+                  "line": 33,
+                  "rawCommand": "|CPDATABASE(1740,214,1758,252,0,0,0,1,0,1,16777215,2,5,8,0,0,0,400,0,0,0,238,3,2,1,34,\"Tahoma\",0,0,2,0,\"'K'\",1,0,0,0,0,0)",
+                  "expression": "K"
+                }
+              ]
+            },
+            {
+              "id": "field-34",
+              "semanticName": "SAL",
+              "rectPt": [
+                510.23622,
+                -10.771654,
+                515.338583,
+                0.0
+              ],
+              "parserRef": "code",
+              "sourceRefs": [
+                {
+                  "file": "_UROZVRH.gmx",
+                  "line": 34,
+                  "rawCommand": "|CPDATABASE(1800,214,1818,252,0,0,0,1,0,1,16777215,2,5,8,0,0,0,400,0,0,0,238,3,2,1,34,\"Tahoma\",0,0,2,0,\"'SALDO'\",1,0,0,0,0,0)",
+                  "expression": "SALDO"
+                }
+              ]
+            },
+            {
+              "id": "field-35",
+              "semanticName": "DPH",
+              "rectPt": [
+                547.086614,
+                -10.771654,
+                552.188976,
+                0.0
+              ],
+              "parserRef": "code",
+              "sourceRefs": [
+                {
+                  "file": "_UROZVRH.gmx",
+                  "line": 35,
+                  "rawCommand": "|CPDATABASE(1930,214,1948,252,0,0,0,1,0,1,16777215,2,5,8,0,0,0,400,0,0,0,238,3,2,1,34,\"Tahoma\",0,0,2,0,\"'DPH'\",1,0,0,0,0,0)",
+                  "expression": "DPH"
+                }
+              ]
+            },
+            {
+              "id": "field-36",
+              "semanticName": "ordinal",
+              "rectPt": [
+                22.677165,
+                -10.771654,
+                40.251969,
+                0.0
+              ],
+              "parserRef": "integer",
+              "sourceRefs": [
+                {
+                  "file": "_UROZVRH.gmx",
+                  "line": 36,
+                  "rawCommand": "|CPDATABASE(80,214,142,252,1,0,0,1,16777215,1,0,2,5,8,0,0,0,400,0,0,0,238,0,0,0,0,\"Tahoma\",0,1,2,0,\"'$RECNO'\",1,0,0,0,0,0)",
+                  "expression": "$RECNO"
+                }
+              ]
+            }
+          ],
+          "labels": [
+            {
+              "id": "label-37",
+              "text": ".",
+              "rectPt": [
+                39.685039,
+                -10.771654,
+                42.23622,
+                0.0
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_UROZVRH.gmx",
+                  "line": 37,
+                  "rawCommand": "|CPLABEL(140,214,149,252,1,0,0,1,16777215,1,0,2,5,8,0,0,0,400,0,0,0,238,3,2,1,18,\"Tahoma\",0,0,2,\".\")"
+                }
+              ]
+            }
+          ],
+          "lines": []
+        },
+        {
+          "id": "foot1",
+          "kind": "reportFooter",
+          "frame": "blockLocal",
+          "sourceRefs": [
+            {
+              "file": "_UROZVRH.gmx",
+              "rawCommand": "#FOOT1(33,1)"
+            }
+          ],
+          "nominalAdvancePt": 9.354331,
+          "emptyTemplate": false,
+          "placement": {
+            "id": "locate-foot1",
+            "op": "locateBlock",
+            "enabled": true,
+            "evidenceStatus": "sourceDerived",
+            "sourceRefs": [],
+            "reviewNotes": [],
+            "frame": "blockLocal",
+            "origin": "independentOccurrence",
+            "signals": [
+              "rulings",
+              "labels",
+              "fieldColumns",
+              "unassignedText"
+            ],
+            "combination": "union",
+            "onAmbiguous": "retainHypotheses"
+          },
+          "candidateDetection": {
+            "id": "detect-foot1",
+            "op": "detectCandidates",
+            "enabled": true,
+            "evidenceStatus": "sourceDerived",
+            "sourceRefs": [],
+            "reviewNotes": [],
+            "signals": [
+              "rulings",
+              "labels",
+              "fieldColumns",
+              "unassignedText"
+            ],
+            "combination": "union",
+            "requiresSuccessfulParsing": false
+          },
+          "fieldAssignment": {
+            "id": "assign-foot1",
+            "op": "assignFields",
+            "enabled": true,
+            "evidenceStatus": "sourceDerived",
+            "sourceRefs": [],
+            "reviewNotes": [],
+            "paddingPt": 1.5,
+            "assembly": "glyphClusters",
+            "splitAcrossFields": "requireGlyphGeometry",
+            "overlap": "retainAmbiguity",
+            "retainClippedSource": true
+          },
+          "fields": [
+            {
+              "id": "field-41",
+              "semanticName": "licensedUserText",
+              "rectPt": [
+                334.488189,
+                -9.354331,
+                501.732283,
+                0.0
+              ],
+              "parserRef": "text",
+              "sourceRefs": [
+                {
+                  "file": "_UROZVRH.gmx",
+                  "line": 41,
+                  "rawCommand": "|CPDATABASE(1180,214,1770,247,1,0,0,1,16777215,1,0,2,5,7,0,0,0,400,0,0,0,238,3,2,1,18,\"Tahoma\",0,0,2,0,\"'$USER'\",1,0,0,0,0,0)",
+                  "expression": "$USER"
+                }
+              ]
+            }
+          ],
+          "labels": [
+            {
+              "id": "label-39",
+              "text": "© IFOsoft",
+              "rectPt": [
+                22.677165,
+                -9.354331,
+                60.377953,
+                0.0
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_UROZVRH.gmx",
+                  "line": 39,
+                  "rawCommand": "|CPLABEL(80,214,213,247,1,0,0,1,16777215,1,0,2,5,7,0,0,0,700,1,0,0,238,3,2,1,18,\"Tahoma\",0,0,2,\"© IFOsoft\")"
+                }
+              ]
+            },
+            {
+              "id": "label-40",
+              "text": "Informačné systémy",
+              "rectPt": [
+                62.362205,
+                -9.354331,
+                127.559055,
+                0.0
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_UROZVRH.gmx",
+                  "line": 40,
+                  "rawCommand": "|CPLABEL(220,214,450,247,0,0,0,1,0,1,16777215,2,5,7,0,0,0,400,1,0,0,238,3,2,1,34,\"Tahoma\",0,0,2,\"Informačné systémy\")"
+                }
+              ]
+            },
+            {
+              "id": "label-42",
+              "text": "Používateľ programu:",
+              "rectPt": [
+                266.456693,
+                -9.354331,
+                332.787402,
+                0.0
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_UROZVRH.gmx",
+                  "line": 42,
+                  "rawCommand": "|CPLABEL(940,214,1174,247,1,0,0,1,16777215,1,0,2,5,7,0,0,0,400,0,0,0,238,3,2,1,18,\"Tahoma\",0,1,2,\"Používateľ programu:\")"
+                }
+              ]
+            }
+          ],
+          "lines": []
+        },
+        {
+          "id": "foot2",
+          "kind": "groupFooter",
+          "frame": "blockLocal",
+          "sourceRefs": [
+            {
+              "file": "_UROZVRH.gmx",
+              "rawCommand": "#FOOT2(38,0)"
+            }
+          ],
+          "nominalAdvancePt": 10.771654,
+          "emptyTemplate": false,
+          "placement": {
+            "id": "locate-foot2",
+            "op": "locateBlock",
+            "enabled": true,
+            "evidenceStatus": "sourceDerived",
+            "sourceRefs": [],
+            "reviewNotes": [],
+            "frame": "blockLocal",
+            "origin": "independentOccurrence",
+            "signals": [
+              "rulings",
+              "labels",
+              "fieldColumns",
+              "unassignedText"
+            ],
+            "combination": "union",
+            "onAmbiguous": "retainHypotheses"
+          },
+          "candidateDetection": {
+            "id": "detect-foot2",
+            "op": "detectCandidates",
+            "enabled": true,
+            "evidenceStatus": "sourceDerived",
+            "sourceRefs": [],
+            "reviewNotes": [],
+            "signals": [
+              "rulings",
+              "labels",
+              "fieldColumns",
+              "unassignedText"
+            ],
+            "combination": "union",
+            "requiresSuccessfulParsing": false
+          },
+          "fieldAssignment": {
+            "id": "assign-foot2",
+            "op": "assignFields",
+            "enabled": true,
+            "evidenceStatus": "sourceDerived",
+            "sourceRefs": [],
+            "reviewNotes": [],
+            "paddingPt": 1.5,
+            "assembly": "glyphClusters",
+            "splitAcrossFields": "requireGlyphGeometry",
+            "overlap": "retainAmbiguity",
+            "retainClippedSource": true
+          },
+          "fields": [
+            {
+              "id": "field-44",
+              "semanticName": "accountClassCode",
+              "rectPt": [
+                48.188976,
+                -10.771654,
+                53.858268,
+                0.0
+              ],
+              "parserRef": "code",
+              "sourceRefs": [
+                {
+                  "file": "_UROZVRH.gmx",
+                  "line": 44,
+                  "rawCommand": "|CPDATABASE(170,214,190,252,0,0,0,1,0,1,16777215,2,5,8,0,0,0,700,0,0,0,238,3,2,1,34,\"Tahoma\",0,0,2,0,\"'SYN%1%1'\",1,0,0,0,0,0)",
+                  "expression": "SYN%1%1"
+                }
+              ]
+            },
+            {
+              "id": "field-45",
+              "semanticName": "printedCount",
+              "rectPt": [
+                170.07874,
+                -10.771654,
+                192.188976,
+                0.0
+              ],
+              "parserRef": "integer",
+              "sourceRefs": [
+                {
+                  "file": "_UROZVRH.gmx",
+                  "line": 45,
+                  "rawCommand": "|CPDATABASE(600,214,678,252,0,0,0,1,0,1,16777215,2,5,8,0,0,0,400,0,0,0,238,3,2,1,34,\"Tahoma\",0,0,2,0,\"'$C2'\",1,0,0,0,0,0)",
+                  "expression": "$C2"
+                }
+              ]
+            }
+          ],
+          "labels": [
+            {
+              "id": "label-46",
+              "text": "Počet účtov v triede:",
+              "rectPt": [
+                96.377953,
+                -10.771654,
+                169.228346,
+                0.0
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_UROZVRH.gmx",
+                  "line": 46,
+                  "rawCommand": "|CPLABEL(340,214,597,252,0,0,0,1,0,1,16777215,2,5,8,0,0,0,400,0,0,0,238,3,2,1,34,\"Tahoma\",0,0,2,\"Počet účtov v triede:\")"
+                }
+              ]
+            }
+          ],
+          "lines": [
+            {
+              "id": "line-47",
+              "pointsPt": [
+                [
+                  19.84252,
+                  -14.173228
+                ],
+                [
+                  575.433071,
+                  -14.173228
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_UROZVRH.gmx",
+                  "line": 47,
+                  "rawCommand": "|CPLINE(70,264,2030,264,1,0,0,0)"
+                }
+              ]
+            },
+            {
+              "id": "line-48",
+              "pointsPt": [
+                [
+                  19.84252,
+                  -17.007874
+                ],
+                [
+                  575.433071,
+                  -17.007874
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_UROZVRH.gmx",
+                  "line": 48,
+                  "rawCommand": "|CPLINE(70,274,2030,274,1,0,0,0)"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "foot3",
+          "kind": "groupFooter",
+          "frame": "blockLocal",
+          "sourceRefs": [
+            {
+              "file": "_UROZVRH.gmx",
+              "rawCommand": "#FOOT3(38,0)"
+            }
+          ],
+          "nominalAdvancePt": 10.771654,
+          "emptyTemplate": false,
+          "placement": {
+            "id": "locate-foot3",
+            "op": "locateBlock",
+            "enabled": true,
+            "evidenceStatus": "sourceDerived",
+            "sourceRefs": [],
+            "reviewNotes": [],
+            "frame": "blockLocal",
+            "origin": "independentOccurrence",
+            "signals": [
+              "rulings",
+              "labels",
+              "fieldColumns",
+              "unassignedText"
+            ],
+            "combination": "union",
+            "onAmbiguous": "retainHypotheses"
+          },
+          "candidateDetection": {
+            "id": "detect-foot3",
+            "op": "detectCandidates",
+            "enabled": true,
+            "evidenceStatus": "sourceDerived",
+            "sourceRefs": [],
+            "reviewNotes": [],
+            "signals": [
+              "rulings",
+              "labels",
+              "fieldColumns",
+              "unassignedText"
+            ],
+            "combination": "union",
+            "requiresSuccessfulParsing": false
+          },
+          "fieldAssignment": {
+            "id": "assign-foot3",
+            "op": "assignFields",
+            "enabled": true,
+            "evidenceStatus": "sourceDerived",
+            "sourceRefs": [],
+            "reviewNotes": [],
+            "paddingPt": 1.5,
+            "assembly": "glyphClusters",
+            "splitAcrossFields": "requireGlyphGeometry",
+            "overlap": "retainAmbiguity",
+            "retainClippedSource": true
+          },
+          "fields": [
+            {
+              "id": "field-50",
+              "semanticName": "accountGroupCode",
+              "rectPt": [
+                48.188976,
+                -13.606299,
+                59.244094,
+                -2.834646
+              ],
+              "parserRef": "code",
+              "sourceRefs": [
+                {
+                  "file": "_UROZVRH.gmx",
+                  "line": 50,
+                  "rawCommand": "|CPDATABASE(170,224,209,262,0,0,0,1,0,1,16777215,2,5,8,0,0,0,700,0,0,0,238,3,2,1,34,\"Tahoma\",0,0,2,0,\"'SYN%2'\",1,0,0,0,0,0)",
+                  "expression": "SYN%2"
+                }
+              ]
+            },
+            {
+              "id": "field-51",
+              "semanticName": "printedCount",
+              "rectPt": [
+                178.582677,
+                -13.606299,
+                200.692913,
+                -2.834646
+              ],
+              "parserRef": "integer",
+              "sourceRefs": [
+                {
+                  "file": "_UROZVRH.gmx",
+                  "line": 51,
+                  "rawCommand": "|CPDATABASE(630,224,708,262,0,0,0,1,0,1,16777215,2,5,8,0,0,0,400,0,0,0,238,3,2,1,34,\"Tahoma\",0,0,2,0,\"'$C3'\",1,0,0,0,0,0)",
+                  "expression": "$C3"
+                }
+              ]
+            }
+          ],
+          "labels": [
+            {
+              "id": "label-52",
+              "text": "Počet účtov v skupine: ",
+              "rectPt": [
+                96.377953,
+                -13.606299,
+                178.582677,
+                -2.834646
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_UROZVRH.gmx",
+                  "line": 52,
+                  "rawCommand": "|CPLABEL(340,224,630,262,0,0,0,1,0,1,16777215,2,5,8,0,0,0,400,0,0,0,238,3,2,1,34,\"Tahoma\",0,0,2,\"Počet účtov v skupine: \")"
+                }
+              ]
+            }
+          ],
+          "lines": [
+            {
+              "id": "line-53",
+              "pointsPt": [
+                [
+                  19.84252,
+                  -17.007874
+                ],
+                [
+                  575.433071,
+                  -17.007874
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_UROZVRH.gmx",
+                  "line": 53,
+                  "rawCommand": "|CPLINE(70,274,2030,274,1,0,0,0)"
+                }
+              ]
+            },
+            {
+              "id": "line-54",
+              "pointsPt": [
+                [
+                  19.84252,
+                  0.0
+                ],
+                [
+                  575.433071,
+                  0.0
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_UROZVRH.gmx",
+                  "line": 54,
+                  "rawCommand": "|CPLINE(70,214,2030,214,1,0,0,0)"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "calibration": {
+        "id": "page-calibration",
+        "op": "fitUniformScaleTranslation",
+        "enabled": true,
+        "evidenceStatus": "unverified",
+        "sourceRefs": [],
+        "reviewNotes": [
+          "Provisional thresholds retained from draft 2; require corpus tuning."
+        ],
+        "anchorRefs": [
+          "line-9-0",
+          "line-9-1",
+          "line-12-0",
+          "line-12-1"
+        ],
+        "minimumInliers": 3,
+        "minimumAnchorSeparationPt": 150,
+        "minimumSpanPt": [
+          150,
+          10
+        ],
+        "scaleRange": [
+          0.65,
+          1.4
+        ],
+        "maximumResidualPt": 1.5,
+        "maximumHypotheses": 256,
+        "onFailure": "retainUnresolvedPage",
+        "inferScaleFromPageSize": false
+      }
+    },
+    {
+      "id": "urozvrh-v2-unverified",
+      "evidenceStatus": "unverified",
+      "sourceRefs": [
+        {
+          "file": "_UROZVRH_V2.gmx",
+          "sha256": "a799982860fba1aa7f7dec262f05a7333bba15bd12a185d48da5aee6301e1763"
+        }
+      ],
+      "nominalPageSizePt": [
+        595.275591,
+        841.889764
+      ],
+      "anchors": [
+        {
+          "id": "line-32-0",
+          "feature": "rulingEndpoint",
+          "pointPt": [
+            14.173228,
+            802.204724
+          ],
+          "blockRef": "pagehead",
+          "lineRef": "line-32",
+          "endpointIndex": 0,
+          "evidenceStatus": "unverified",
+          "sourceRefs": [
+            {
+              "file": "_UROZVRH_V2.gmx",
+              "line": 32,
+              "rawCommand": "|CPLINE(50,140,2010,140,2,0,0,1)"
+            }
+          ]
+        },
+        {
+          "id": "line-32-1",
+          "feature": "rulingEndpoint",
+          "pointPt": [
+            569.76378,
+            802.204724
+          ],
+          "blockRef": "pagehead",
+          "lineRef": "line-32",
+          "endpointIndex": 1,
+          "evidenceStatus": "unverified",
+          "sourceRefs": [
+            {
+              "file": "_UROZVRH_V2.gmx",
+              "line": 32,
+              "rawCommand": "|CPLINE(50,140,2010,140,2,0,0,1)"
+            }
+          ]
+        },
+        {
+          "id": "line-35-0",
+          "feature": "rulingEndpoint",
+          "pointPt": [
+            14.173228,
+            788.031496
+          ],
+          "blockRef": "pagehead",
+          "lineRef": "line-35",
+          "endpointIndex": 0,
+          "evidenceStatus": "unverified",
+          "sourceRefs": [
+            {
+              "file": "_UROZVRH_V2.gmx",
+              "line": 35,
+              "rawCommand": "|CPLINE(50,190,2010,190,4,0,0,0)"
+            }
+          ]
+        },
+        {
+          "id": "line-35-1",
+          "feature": "rulingEndpoint",
+          "pointPt": [
+            569.76378,
+            788.031496
+          ],
+          "blockRef": "pagehead",
+          "lineRef": "line-35",
+          "endpointIndex": 1,
+          "evidenceStatus": "unverified",
+          "sourceRefs": [
+            {
+              "file": "_UROZVRH_V2.gmx",
+              "line": 35,
+              "rawCommand": "|CPLINE(50,190,2010,190,4,0,0,0)"
+            }
+          ]
+        },
+        {
+          "id": "line-45-0",
+          "feature": "rulingEndpoint",
+          "pointPt": [
+            14.173228,
+            839.055118
+          ],
+          "blockRef": "pagehead",
+          "lineRef": "line-45",
+          "endpointIndex": 0,
+          "evidenceStatus": "unverified",
+          "sourceRefs": [
+            {
+              "file": "_UROZVRH_V2.gmx",
+              "line": 45,
+              "rawCommand": "|CPLINE(50,10,2010,10,4,0,0,0)"
+            }
+          ]
+        },
+        {
+          "id": "line-45-1",
+          "feature": "rulingEndpoint",
+          "pointPt": [
+            569.76378,
+            839.055118
+          ],
+          "blockRef": "pagehead",
+          "lineRef": "line-45",
+          "endpointIndex": 1,
+          "evidenceStatus": "unverified",
+          "sourceRefs": [
+            {
+              "file": "_UROZVRH_V2.gmx",
+              "line": 45,
+              "rawCommand": "|CPLINE(50,10,2010,10,4,0,0,0)"
+            }
+          ]
+        }
+      ],
+      "blocks": [
+        {
+          "id": "record",
+          "kind": "repeatingRecord",
+          "frame": "blockLocal",
+          "sourceRefs": [
+            {
+              "file": "_UROZVRH_V2.gmx",
+              "rawCommand": "#RECORD(43,0)"
+            }
+          ],
+          "nominalAdvancePt": 12.188976,
+          "emptyTemplate": false,
+          "placement": {
+            "id": "locate-record",
+            "op": "locateBlock",
+            "enabled": true,
+            "evidenceStatus": "sourceDerived",
+            "sourceRefs": [],
+            "reviewNotes": [],
+            "frame": "blockLocal",
+            "origin": "independentOccurrence",
+            "signals": [
+              "rulings",
+              "labels",
+              "fieldColumns",
+              "unassignedText"
+            ],
+            "combination": "union",
+            "onAmbiguous": "retainHypotheses"
+          },
+          "candidateDetection": {
+            "id": "detect-record",
+            "op": "detectCandidates",
+            "enabled": true,
+            "evidenceStatus": "sourceDerived",
+            "sourceRefs": [],
+            "reviewNotes": [],
+            "signals": [
+              "rulings",
+              "labels",
+              "fieldColumns",
+              "unassignedText"
+            ],
+            "combination": "union",
+            "requiresSuccessfulParsing": false
+          },
+          "fieldAssignment": {
+            "id": "assign-record",
+            "op": "assignFields",
+            "enabled": true,
+            "evidenceStatus": "sourceDerived",
+            "sourceRefs": [],
+            "reviewNotes": [],
+            "paddingPt": 1.5,
+            "assembly": "glyphClusters",
+            "splitAcrossFields": "requireGlyphGeometry",
+            "overlap": "retainAmbiguity",
+            "retainClippedSource": true
+          },
+          "fields": [
+            {
+              "id": "field-5",
+              "semanticName": "syntheticComponent",
+              "rectPt": [
+                17.007874,
+                -12.188976,
+                33.448819,
+                0.0
+              ],
+              "parserRef": "code",
+              "sourceRefs": [
+                {
+                  "file": "_UROZVRH_V2.gmx",
+                  "line": 5,
+                  "rawCommand": "|CPDATABASE(60,0,118,43,1,0,0,1,16777215,1,0,2,5,9,0,0,0,400,0,0,0,238,0,0,0,0,\"Tahoma\",0,0,2,0,\"'SYN'\",1,0,0,0,0,0)",
+                  "expression": "SYN"
+                }
+              ]
+            },
+            {
+              "id": "field-6",
+              "semanticName": "accountName",
+              "rectPt": [
+                62.362205,
+                -12.188976,
+                384.944882,
+                0.0
+              ],
+              "parserRef": "text",
+              "sourceRefs": [
+                {
+                  "file": "_UROZVRH_V2.gmx",
+                  "line": 6,
+                  "rawCommand": "|CPDATABASE(220,0,1358,43,1,0,0,1,16777215,1,0,2,5,9,0,0,0,400,0,0,0,238,0,0,0,0,\"Tahoma\",0,0,2,0,\"'NAZOV'\",1,0,0,0,0,0)",
+                  "expression": "NAZOV"
+                }
+              ]
+            },
+            {
+              "id": "field-7",
+              "semanticName": "analyticalComponent",
+              "rectPt": [
+                36.850394,
+                -12.188976,
+                58.677165,
+                0.0
+              ],
+              "parserRef": "code",
+              "sourceRefs": [
+                {
+                  "file": "_UROZVRH_V2.gmx",
+                  "line": 7,
+                  "rawCommand": "|CPDATABASE(130,0,207,43,0,0,0,1,0,1,16777215,2,5,9,0,0,0,400,0,0,0,238,3,2,1,34,\"Tahoma\",0,0,2,0,\"'ANA'\",1,0,0,0,0,0)",
+                  "expression": "ANA"
+                }
+              ]
+            },
+            {
+              "id": "field-8",
+              "semanticName": "accountType",
+              "rectPt": [
+                428.031496,
+                -12.188976,
+                439.086614,
+                0.0
+              ],
+              "parserRef": "code",
+              "sourceRefs": [
+                {
+                  "file": "_UROZVRH_V2.gmx",
+                  "line": 8,
+                  "rawCommand": "|CPDATABASE(1510,0,1549,43,0,0,0,1,0,1,16777215,2,5,9,0,0,0,400,0,0,0,238,3,2,1,34,\"Tahoma\",0,0,2,0,\"'TYP'\",1,0,0,0,0,0)",
+                  "expression": "TYP"
+                }
+              ]
+            },
+            {
+              "id": "field-9",
+              "semanticName": "POD",
+              "rectPt": [
+                558.425197,
+                -12.188976,
+                564.094488,
+                0.0
+              ],
+              "parserRef": "code",
+              "sourceRefs": [
+                {
+                  "file": "_UROZVRH_V2.gmx",
+                  "line": 9,
+                  "rawCommand": "|CPDATABASE(1970,0,1990,43,0,0,0,1,0,1,16777215,2,5,9,0,0,0,400,0,0,0,238,3,2,1,34,\"Tahoma\",0,0,2,0,\"'P'\",1,0,0,0,0,0)",
+                  "expression": "P"
+                }
+              ]
+            },
+            {
+              "id": "field-10",
+              "semanticName": "DAN",
+              "rectPt": [
+                521.574803,
+                -12.188976,
+                527.244094,
+                0.0
+              ],
+              "parserRef": "code",
+              "sourceRefs": [
+                {
+                  "file": "_UROZVRH_V2.gmx",
+                  "line": 10,
+                  "rawCommand": "|CPDATABASE(1840,0,1860,43,0,0,0,1,0,1,16777215,2,5,9,0,0,0,400,0,0,0,238,3,2,1,34,\"Tahoma\",0,0,2,0,\"'D'\",1,0,0,0,0,0)",
+                  "expression": "D"
+                }
+              ]
+            },
+            {
+              "id": "field-11",
+              "semanticName": "STR",
+              "rectPt": [
+                445.03937,
+                -12.188976,
+                450.708661,
+                0.0
+              ],
+              "parserRef": "code",
+              "sourceRefs": [
+                {
+                  "file": "_UROZVRH_V2.gmx",
+                  "line": 11,
+                  "rawCommand": "|CPDATABASE(1570,0,1590,43,0,0,0,1,0,1,16777215,2,5,9,0,0,0,400,0,0,0,238,3,2,1,34,\"Tahoma\",0,0,2,0,\"'S'\",1,0,0,0,0,0)",
+                  "expression": "S"
+                }
+              ]
+            },
+            {
+              "id": "field-12",
+              "semanticName": "ODD",
+              "rectPt": [
+                464.88189,
+                -12.188976,
+                470.551181,
+                0.0
+              ],
+              "parserRef": "code",
+              "sourceRefs": [
+                {
+                  "file": "_UROZVRH_V2.gmx",
+                  "line": 12,
+                  "rawCommand": "|CPDATABASE(1640,0,1660,43,0,0,0,1,0,1,16777215,2,5,9,0,0,0,400,0,0,0,238,3,2,1,34,\"Tahoma\",0,0,2,0,\"'Z'\",1,0,0,0,0,0)",
+                  "expression": "Z"
+                }
+              ]
+            },
+            {
+              "id": "field-13",
+              "semanticName": "POL",
+              "rectPt": [
+                484.724409,
+                -12.188976,
+                490.393701,
+                0.0
+              ],
+              "parserRef": "code",
+              "sourceRefs": [
+                {
+                  "file": "_UROZVRH_V2.gmx",
+                  "line": 13,
+                  "rawCommand": "|CPDATABASE(1710,0,1730,43,0,0,0,1,0,1,16777215,2,5,9,0,0,0,400,0,0,0,238,3,2,1,34,\"Tahoma\",0,0,2,0,\"'K'\",1,0,0,0,0,0)",
+                  "expression": "K"
+                }
+              ]
+            },
+            {
+              "id": "field-14",
+              "semanticName": "SAL",
+              "rectPt": [
+                504.566929,
+                -12.188976,
+                510.23622,
+                0.0
+              ],
+              "parserRef": "code",
+              "sourceRefs": [
+                {
+                  "file": "_UROZVRH_V2.gmx",
+                  "line": 14,
+                  "rawCommand": "|CPDATABASE(1780,0,1800,43,0,0,0,1,0,1,16777215,2,5,9,0,0,0,400,0,0,0,238,3,2,1,34,\"Tahoma\",0,0,2,0,\"'SALDO'\",1,0,0,0,0,0)",
+                  "expression": "SALDO"
+                }
+              ]
+            },
+            {
+              "id": "field-15",
+              "semanticName": "DPH",
+              "rectPt": [
+                544.251969,
+                -12.188976,
+                549.92126,
+                0.0
+              ],
+              "parserRef": "code",
+              "sourceRefs": [
+                {
+                  "file": "_UROZVRH_V2.gmx",
+                  "line": 15,
+                  "rawCommand": "|CPDATABASE(1920,0,1940,43,0,0,0,1,0,1,16777215,2,5,9,0,0,0,400,0,0,0,238,3,2,1,34,\"Tahoma\",0,0,2,0,\"'DPH'\",1,0,0,0,0,0)",
+                  "expression": "DPH"
+                }
+              ]
+            }
+          ],
+          "labels": [],
+          "lines": []
+        },
+        {
+          "id": "foot1",
+          "kind": "reportFooter",
+          "frame": "blockLocal",
+          "sourceRefs": [
+            {
+              "file": "_UROZVRH_V2.gmx",
+              "rawCommand": "#FOOT1(38,1)"
+            }
+          ],
+          "nominalAdvancePt": 10.771654,
+          "emptyTemplate": false,
+          "placement": {
+            "id": "locate-foot1",
+            "op": "locateBlock",
+            "enabled": true,
+            "evidenceStatus": "sourceDerived",
+            "sourceRefs": [],
+            "reviewNotes": [],
+            "frame": "blockLocal",
+            "origin": "independentOccurrence",
+            "signals": [
+              "rulings",
+              "labels",
+              "fieldColumns",
+              "unassignedText"
+            ],
+            "combination": "union",
+            "onAmbiguous": "retainHypotheses"
+          },
+          "candidateDetection": {
+            "id": "detect-foot1",
+            "op": "detectCandidates",
+            "enabled": true,
+            "evidenceStatus": "sourceDerived",
+            "sourceRefs": [],
+            "reviewNotes": [],
+            "signals": [
+              "rulings",
+              "labels",
+              "fieldColumns",
+              "unassignedText"
+            ],
+            "combination": "union",
+            "requiresSuccessfulParsing": false
+          },
+          "fieldAssignment": {
+            "id": "assign-foot1",
+            "op": "assignFields",
+            "enabled": true,
+            "evidenceStatus": "sourceDerived",
+            "sourceRefs": [],
+            "reviewNotes": [],
+            "paddingPt": 1.5,
+            "assembly": "glyphClusters",
+            "splitAcrossFields": "requireGlyphGeometry",
+            "overlap": "retainAmbiguity",
+            "retainClippedSource": true
+          },
+          "fields": [
+            {
+              "id": "field-18",
+              "semanticName": "printedCount",
+              "rectPt": [
+                87.874016,
+                -10.771654,
+                109.984252,
+                0.0
+              ],
+              "parserRef": "integer",
+              "sourceRefs": [
+                {
+                  "file": "_UROZVRH_V2.gmx",
+                  "line": 18,
+                  "rawCommand": "|CPDATABASE(310,0,388,38,0,0,0,1,0,1,16777215,2,5,8,0,0,0,400,0,0,0,238,3,2,1,34,\"Tahoma\",0,0,2,0,\"'$C1'\",1,0,0,0,0,0)",
+                  "expression": "$C1"
+                }
+              ]
+            }
+          ],
+          "labels": [
+            {
+              "id": "label-17",
+              "text": "Celkový počet účtov",
+              "rectPt": [
+                14.173228,
+                -10.771654,
+                84.755906,
+                0.0
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_UROZVRH_V2.gmx",
+                  "line": 17,
+                  "rawCommand": "|CPLABEL(50,0,299,38,0,0,0,1,0,1,16777215,2,5,8,0,0,0,400,0,0,0,238,3,2,1,34,\"Tahoma\",0,0,2,\"Celkový počet účtov\")"
+                }
+              ]
+            }
+          ],
+          "lines": []
+        },
+        {
+          "id": "foot2",
+          "kind": "groupFooter",
+          "frame": "blockLocal",
+          "sourceRefs": [
+            {
+              "file": "_UROZVRH_V2.gmx",
+              "rawCommand": "#FOOT2(38,0)"
+            }
+          ],
+          "nominalAdvancePt": 10.771654,
+          "emptyTemplate": false,
+          "placement": {
+            "id": "locate-foot2",
+            "op": "locateBlock",
+            "enabled": true,
+            "evidenceStatus": "sourceDerived",
+            "sourceRefs": [],
+            "reviewNotes": [],
+            "frame": "blockLocal",
+            "origin": "independentOccurrence",
+            "signals": [
+              "rulings",
+              "labels",
+              "fieldColumns",
+              "unassignedText"
+            ],
+            "combination": "union",
+            "onAmbiguous": "retainHypotheses"
+          },
+          "candidateDetection": {
+            "id": "detect-foot2",
+            "op": "detectCandidates",
+            "enabled": true,
+            "evidenceStatus": "sourceDerived",
+            "sourceRefs": [],
+            "reviewNotes": [],
+            "signals": [
+              "rulings",
+              "labels",
+              "fieldColumns",
+              "unassignedText"
+            ],
+            "combination": "union",
+            "requiresSuccessfulParsing": false
+          },
+          "fieldAssignment": {
+            "id": "assign-foot2",
+            "op": "assignFields",
+            "enabled": true,
+            "evidenceStatus": "sourceDerived",
+            "sourceRefs": [],
+            "reviewNotes": [],
+            "paddingPt": 1.5,
+            "assembly": "glyphClusters",
+            "splitAcrossFields": "requireGlyphGeometry",
+            "overlap": "retainAmbiguity",
+            "retainClippedSource": true
+          },
+          "fields": [
+            {
+              "id": "field-20",
+              "semanticName": "accountClassCode",
+              "rectPt": [
+                53.858268,
+                -13.606299,
+                58.96063,
+                -2.834646
+              ],
+              "parserRef": "code",
+              "sourceRefs": [
+                {
+                  "file": "_UROZVRH_V2.gmx",
+                  "line": 20,
+                  "rawCommand": "|CPDATABASE(190,10,208,48,0,0,0,1,0,1,16777215,2,5,8,0,0,0,400,0,0,0,238,3,2,1,34,\"Tahoma\",0,0,2,0,\"'SYN%1%1'\",1,0,0,0,0,0)",
+                  "expression": "SYN%1%1"
+                }
+              ]
+            },
+            {
+              "id": "field-21",
+              "semanticName": "printedCount",
+              "rectPt": [
+                164.409449,
+                -13.606299,
+                186.519685,
+                -2.834646
+              ],
+              "parserRef": "integer",
+              "sourceRefs": [
+                {
+                  "file": "_UROZVRH_V2.gmx",
+                  "line": 21,
+                  "rawCommand": "|CPDATABASE(580,10,658,48,0,0,0,1,0,1,16777215,2,5,8,0,0,0,400,0,0,0,238,3,2,1,34,\"Tahoma\",0,1,2,0,\"'$C2'\",1,0,0,0,0,0)",
+                  "expression": "$C2"
+                }
+              ]
+            }
+          ],
+          "labels": [
+            {
+              "id": "label-22",
+              "text": "v triede:",
+              "rectPt": [
+                133.228346,
+                -13.606299,
+                162.992126,
+                -2.834646
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_UROZVRH_V2.gmx",
+                  "line": 22,
+                  "rawCommand": "|CPLABEL(470,10,575,48,0,0,0,1,0,1,16777215,2,5,8,0,0,0,400,0,0,0,238,3,2,1,34,\"Tahoma\",0,0,2,\"v triede:\")"
+                }
+              ]
+            },
+            {
+              "id": "label-23",
+              "text": "Trieda:",
+              "rectPt": [
+                17.007874,
+                -13.606299,
+                41.385827,
+                -2.834646
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_UROZVRH_V2.gmx",
+                  "line": 23,
+                  "rawCommand": "|CPLABEL(60,10,146,48,0,0,0,1,0,1,16777215,2,5,8,0,0,0,400,0,0,0,238,3,2,1,34,\"Tahoma\",0,0,2,\"Trieda:\")"
+                }
+              ]
+            }
+          ],
+          "lines": [
+            {
+              "id": "line-24",
+              "pointsPt": [
+                [
+                  14.173228,
+                  -17.007874
+                ],
+                [
+                  569.76378,
+                  -17.007874
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_UROZVRH_V2.gmx",
+                  "line": 24,
+                  "rawCommand": "|CPLINE(50,60,2010,60,1,0,0,0)"
+                }
+              ]
+            },
+            {
+              "id": "line-25",
+              "pointsPt": [
+                [
+                  14.173228,
+                  -19.84252
+                ],
+                [
+                  569.76378,
+                  -19.84252
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_UROZVRH_V2.gmx",
+                  "line": 25,
+                  "rawCommand": "|CPLINE(50,70,2010,70,1,0,0,0)"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "pagehead",
+          "kind": "pageHeader",
+          "frame": "nominalPage",
+          "sourceRefs": [
+            {
+              "file": "_UROZVRH_V2.gmx",
+              "rawCommand": "#PAGEHEAD(52,0)"
+            }
+          ],
+          "nominalAdvancePt": 14.740157,
+          "emptyTemplate": false,
+          "placement": {
+            "id": "locate-pagehead",
+            "op": "locateBlock",
+            "enabled": true,
+            "evidenceStatus": "sourceDerived",
+            "sourceRefs": [],
+            "reviewNotes": [],
+            "frame": "nominalPage",
+            "origin": "pageCalibration",
+            "signals": [
+              "rulings",
+              "labels",
+              "fieldColumns",
+              "unassignedText"
+            ],
+            "combination": "union",
+            "onAmbiguous": "retainHypotheses"
+          },
+          "candidateDetection": {
+            "id": "detect-pagehead",
+            "op": "detectCandidates",
+            "enabled": true,
+            "evidenceStatus": "sourceDerived",
+            "sourceRefs": [],
+            "reviewNotes": [],
+            "signals": [
+              "rulings",
+              "labels",
+              "fieldColumns",
+              "unassignedText"
+            ],
+            "combination": "union",
+            "requiresSuccessfulParsing": false
+          },
+          "fieldAssignment": {
+            "id": "assign-pagehead",
+            "op": "assignFields",
+            "enabled": true,
+            "evidenceStatus": "sourceDerived",
+            "sourceRefs": [],
+            "reviewNotes": [],
+            "paddingPt": 1.5,
+            "assembly": "glyphClusters",
+            "splitAcrossFields": "requireGlyphGeometry",
+            "overlap": "retainAmbiguity",
+            "retainClippedSource": true
+          },
+          "fields": [
+            {
+              "id": "field-27",
+              "semanticName": "licensedUserText",
+              "rectPt": [
+                14.173228,
+                825.165354,
+                253.133858,
+                838.488189
+              ],
+              "parserRef": "text",
+              "sourceRefs": [
+                {
+                  "file": "_UROZVRH_V2.gmx",
+                  "line": 27,
+                  "rawCommand": "|CPDATABASE(50,12,893,59,1,0,0,1,16777215,1,0,2,5,10,0,0,0,400,0,0,0,238,3,2,1,18,\"Tahoma\",0,0,2,0,\"'$USER'\",1,0,0,0,0,0)",
+                  "expression": "$USER"
+                }
+              ]
+            },
+            {
+              "id": "field-30",
+              "semanticName": "printedPageNumber",
+              "rectPt": [
+                547.086614,
+                804.188976,
+                566.929134,
+                816.377953
+              ],
+              "parserRef": "integer",
+              "sourceRefs": [
+                {
+                  "file": "_UROZVRH_V2.gmx",
+                  "line": 30,
+                  "rawCommand": "|CPDATABASE(1930,90,2000,133,1,0,0,1,16777215,1,0,2,5,9,0,0,0,400,0,0,0,238,3,2,1,18,\"Tahoma\",0,1,2,0,\"'$PAGENO'\",1,0,0,0,0,0)",
+                  "expression": "$PAGENO"
+                }
+              ]
+            }
+          ],
+          "labels": [
+            {
+              "id": "label-28",
+              "text": "© IFOsoft",
+              "rectPt": [
+                518.740157,
+                826.866142,
+                566.929134,
+                839.055118
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_UROZVRH_V2.gmx",
+                  "line": 28,
+                  "rawCommand": "|CPLABEL(1830,10,2000,53,1,0,0,1,16777215,1,0,2,5,9,0,0,0,700,1,0,0,238,3,2,1,18,\"Tahoma\",0,1,2,\"© IFOsoft\")"
+                }
+              ]
+            },
+            {
+              "id": "label-29",
+              "text": "Strana:",
+              "rectPt": [
+                515.905512,
+                804.188976,
+                544.535433,
+                816.377953
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_UROZVRH_V2.gmx",
+                  "line": 29,
+                  "rawCommand": "|CPLABEL(1820,90,1921,133,1,0,0,1,16777215,1,0,2,5,9,0,0,0,400,0,0,0,238,3,2,1,18,\"Tahoma\",0,0,2,\"Strana:\")"
+                }
+              ]
+            },
+            {
+              "id": "label-31",
+              "text": "Opis účtovného rozvrhu analytických účtov",
+              "rectPt": [
+                209.76378,
+                807.307087,
+                416.976378,
+                822.047244
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_UROZVRH_V2.gmx",
+                  "line": 31,
+                  "rawCommand": "|CPLABEL(740,70,1471,122,0,0,0,1,0,1,16777215,2,5,11,0,0,0,400,0,0,0,238,3,2,1,34,\"Tahoma\",0,0,2,\"Opis účtovného rozvrhu analytických účtov\")"
+                }
+              ]
+            },
+            {
+              "id": "label-33",
+              "text": "SYN",
+              "rectPt": [
+                17.007874,
+                790.015748,
+                33.448819,
+                802.204724
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_UROZVRH_V2.gmx",
+                  "line": 33,
+                  "rawCommand": "|CPLABEL(60,140,118,183,1,0,0,1,16777215,1,0,2,5,9,0,0,0,400,0,0,0,238,3,2,1,18,\"Tahoma\",0,0,2,\"SYN\")"
+                }
+              ]
+            },
+            {
+              "id": "label-34",
+              "text": "Názov ",
+              "rectPt": [
+                62.362205,
+                790.015748,
+                89.291339,
+                802.204724
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_UROZVRH_V2.gmx",
+                  "line": 34,
+                  "rawCommand": "|CPLABEL(220,140,315,183,1,0,0,1,16777215,1,0,2,5,9,0,0,0,400,0,0,0,238,3,2,1,18,\"Tahoma\",0,0,2,\"Názov \")"
+                }
+              ]
+            },
+            {
+              "id": "label-36",
+              "text": "ANA ",
+              "rectPt": [
+                36.850394,
+                790.015748,
+                56.692913,
+                802.204724
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_UROZVRH_V2.gmx",
+                  "line": 36,
+                  "rawCommand": "|CPLABEL(130,140,200,183,1,0,0,1,16777215,1,0,2,5,9,0,0,0,400,0,0,0,238,3,2,1,18,\"Tahoma\",0,0,2,\"ANA \")"
+                }
+              ]
+            },
+            {
+              "id": "label-37",
+              "text": "TYP",
+              "rectPt": [
+                422.362205,
+                790.015748,
+                437.669291,
+                802.204724
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_UROZVRH_V2.gmx",
+                  "line": 37,
+                  "rawCommand": "|CPLABEL(1490,140,1544,183,0,0,0,1,0,1,16777215,2,5,9,0,0,0,400,0,0,0,238,3,2,1,34,\"Tahoma\",0,0,2,\"TYP\")"
+                }
+              ]
+            },
+            {
+              "id": "label-38",
+              "text": "POD",
+              "rectPt": [
+                552.755906,
+                790.015748,
+                570.330709,
+                802.204724
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_UROZVRH_V2.gmx",
+                  "line": 38,
+                  "rawCommand": "|CPLABEL(1950,140,2012,183,0,0,0,1,0,1,16777215,2,5,9,0,0,0,400,0,0,0,238,3,2,1,34,\"Tahoma\",0,0,2,\"POD\")"
+                }
+              ]
+            },
+            {
+              "id": "label-39",
+              "text": "DAŇ",
+              "rectPt": [
+                513.070866,
+                790.015748,
+                530.645669,
+                802.204724
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_UROZVRH_V2.gmx",
+                  "line": 39,
+                  "rawCommand": "|CPLABEL(1810,140,1872,183,0,0,0,1,0,1,16777215,2,5,9,0,0,0,400,0,0,0,238,3,2,1,34,\"Tahoma\",0,0,2,\"DAŇ\")"
+                }
+              ]
+            },
+            {
+              "id": "label-40",
+              "text": "STR",
+              "rectPt": [
+                439.370079,
+                790.015748,
+                455.527559,
+                802.204724
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_UROZVRH_V2.gmx",
+                  "line": 40,
+                  "rawCommand": "|CPLABEL(1550,140,1607,183,0,0,0,1,0,1,16777215,2,5,9,0,0,0,400,0,0,0,238,3,2,1,34,\"Tahoma\",0,0,2,\"STR\")"
+                }
+              ]
+            },
+            {
+              "id": "label-41",
+              "text": "ODD",
+              "rectPt": [
+                456.377953,
+                790.015748,
+                475.086614,
+                802.204724
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_UROZVRH_V2.gmx",
+                  "line": 41,
+                  "rawCommand": "|CPLABEL(1610,140,1676,183,0,0,0,1,0,1,16777215,2,5,9,0,0,0,400,0,0,0,238,3,2,1,34,\"Tahoma\",0,0,2,\"ODD\")"
+                }
+              ]
+            },
+            {
+              "id": "label-42",
+              "text": "POL",
+              "rectPt": [
+                476.220472,
+                790.015748,
+                492.094488,
+                802.204724
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_UROZVRH_V2.gmx",
+                  "line": 42,
+                  "rawCommand": "|CPLABEL(1680,140,1736,183,0,0,0,1,0,1,16777215,2,5,9,0,0,0,400,0,0,0,238,3,2,1,34,\"Tahoma\",0,0,2,\"POL\")"
+                }
+              ]
+            },
+            {
+              "id": "label-43",
+              "text": "SAL",
+              "rectPt": [
+                496.062992,
+                790.015748,
+                511.086614,
+                802.204724
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_UROZVRH_V2.gmx",
+                  "line": 43,
+                  "rawCommand": "|CPLABEL(1750,140,1803,183,0,0,0,1,0,1,16777215,2,5,9,0,0,0,400,0,0,0,238,3,2,1,34,\"Tahoma\",0,0,2,\"SAL\")"
+                }
+              ]
+            },
+            {
+              "id": "label-44",
+              "text": "DPH",
+              "rectPt": [
+                532.913386,
+                790.015748,
+                550.204724,
+                802.204724
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_UROZVRH_V2.gmx",
+                  "line": 44,
+                  "rawCommand": "|CPLABEL(1880,140,1941,183,0,0,0,1,0,1,16777215,2,5,9,0,0,0,400,0,0,0,238,3,2,1,34,\"Tahoma\",0,0,2,\"DPH\")"
+                }
+              ]
+            }
+          ],
+          "lines": [
+            {
+              "id": "line-32",
+              "pointsPt": [
+                [
+                  14.173228,
+                  802.204724
+                ],
+                [
+                  569.76378,
+                  802.204724
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_UROZVRH_V2.gmx",
+                  "line": 32,
+                  "rawCommand": "|CPLINE(50,140,2010,140,2,0,0,1)"
+                }
+              ]
+            },
+            {
+              "id": "line-35",
+              "pointsPt": [
+                [
+                  14.173228,
+                  788.031496
+                ],
+                [
+                  569.76378,
+                  788.031496
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_UROZVRH_V2.gmx",
+                  "line": 35,
+                  "rawCommand": "|CPLINE(50,190,2010,190,4,0,0,0)"
+                }
+              ]
+            },
+            {
+              "id": "line-45",
+              "pointsPt": [
+                [
+                  14.173228,
+                  839.055118
+                ],
+                [
+                  569.76378,
+                  839.055118
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_UROZVRH_V2.gmx",
+                  "line": 45,
+                  "rawCommand": "|CPLINE(50,10,2010,10,4,0,0,0)"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "foot3",
+          "kind": "groupFooter",
+          "frame": "blockLocal",
+          "sourceRefs": [
+            {
+              "file": "_UROZVRH_V2.gmx",
+              "rawCommand": "#FOOT3(38,0)"
+            }
+          ],
+          "nominalAdvancePt": 10.771654,
+          "emptyTemplate": false,
+          "placement": {
+            "id": "locate-foot3",
+            "op": "locateBlock",
+            "enabled": true,
+            "evidenceStatus": "sourceDerived",
+            "sourceRefs": [],
+            "reviewNotes": [],
+            "frame": "blockLocal",
+            "origin": "independentOccurrence",
+            "signals": [
+              "rulings",
+              "labels",
+              "fieldColumns",
+              "unassignedText"
+            ],
+            "combination": "union",
+            "onAmbiguous": "retainHypotheses"
+          },
+          "candidateDetection": {
+            "id": "detect-foot3",
+            "op": "detectCandidates",
+            "enabled": true,
+            "evidenceStatus": "sourceDerived",
+            "sourceRefs": [],
+            "reviewNotes": [],
+            "signals": [
+              "rulings",
+              "labels",
+              "fieldColumns",
+              "unassignedText"
+            ],
+            "combination": "union",
+            "requiresSuccessfulParsing": false
+          },
+          "fieldAssignment": {
+            "id": "assign-foot3",
+            "op": "assignFields",
+            "enabled": true,
+            "evidenceStatus": "sourceDerived",
+            "sourceRefs": [],
+            "reviewNotes": [],
+            "paddingPt": 1.5,
+            "assembly": "glyphClusters",
+            "splitAcrossFields": "requireGlyphGeometry",
+            "overlap": "retainAmbiguity",
+            "retainClippedSource": true
+          },
+          "fields": [
+            {
+              "id": "field-48",
+              "semanticName": "accountGroupCode",
+              "rectPt": [
+                53.858268,
+                -13.606299,
+                63.779528,
+                -2.834646
+              ],
+              "parserRef": "code",
+              "sourceRefs": [
+                {
+                  "file": "_UROZVRH_V2.gmx",
+                  "line": 48,
+                  "rawCommand": "|CPDATABASE(190,10,225,48,0,0,0,1,0,1,16777215,2,5,8,0,0,0,400,0,0,0,238,3,2,1,34,\"Tahoma\",0,0,2,0,\"'SYN%2'\",1,0,0,0,0,0)",
+                  "expression": "SYN%2"
+                }
+              ]
+            },
+            {
+              "id": "field-49",
+              "semanticName": "printedCount",
+              "rectPt": [
+                164.409449,
+                -13.606299,
+                186.519685,
+                -2.834646
+              ],
+              "parserRef": "integer",
+              "sourceRefs": [
+                {
+                  "file": "_UROZVRH_V2.gmx",
+                  "line": 49,
+                  "rawCommand": "|CPDATABASE(580,10,658,48,0,0,0,1,0,1,16777215,2,5,8,0,0,0,400,0,0,0,238,3,2,1,34,\"Tahoma\",0,1,2,0,\"'$C3'\",1,0,0,0,0,0)",
+                  "expression": "$C3"
+                }
+              ]
+            }
+          ],
+          "labels": [
+            {
+              "id": "label-47",
+              "text": "Skupina:",
+              "rectPt": [
+                17.007874,
+                -13.606299,
+                47.905512,
+                -2.834646
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_UROZVRH_V2.gmx",
+                  "line": 47,
+                  "rawCommand": "|CPLABEL(60,10,169,48,0,0,0,1,0,1,16777215,2,5,8,0,0,0,400,0,0,0,238,3,2,1,34,\"Tahoma\",0,0,2,\"Skupina:\")"
+                }
+              ]
+            },
+            {
+              "id": "label-50",
+              "text": "Počet účtov v skupine: ",
+              "rectPt": [
+                79.370079,
+                -13.606299,
+                161.574803,
+                -2.834646
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_UROZVRH_V2.gmx",
+                  "line": 50,
+                  "rawCommand": "|CPLABEL(280,10,570,48,0,0,0,1,0,1,16777215,2,5,8,0,0,0,400,0,0,0,238,3,2,1,34,\"Tahoma\",0,0,2,\"Počet účtov v skupine: \")"
+                }
+              ]
+            }
+          ],
+          "lines": [
+            {
+              "id": "line-51",
+              "pointsPt": [
+                [
+                  14.173228,
+                  0.0
+                ],
+                [
+                  569.76378,
+                  0.0
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_UROZVRH_V2.gmx",
+                  "line": 51,
+                  "rawCommand": "|CPLINE(50,0,2010,0,1,0,0,0)"
+                }
+              ]
+            },
+            {
+              "id": "line-52",
+              "pointsPt": [
+                [
+                  14.173228,
+                  -17.007874
+                ],
+                [
+                  569.76378,
+                  -17.007874
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_UROZVRH_V2.gmx",
+                  "line": 52,
+                  "rawCommand": "|CPLINE(50,60,2010,60,1,0,0,0)"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "calibration": {
+        "id": "page-calibration",
+        "op": "fitUniformScaleTranslation",
+        "enabled": true,
+        "evidenceStatus": "unverified",
+        "sourceRefs": [],
+        "reviewNotes": [
+          "Provisional thresholds retained from draft 2; require corpus tuning."
+        ],
+        "anchorRefs": [
+          "line-32-0",
+          "line-32-1",
+          "line-35-0",
+          "line-35-1",
+          "line-45-0",
+          "line-45-1"
+        ],
+        "minimumInliers": 3,
+        "minimumAnchorSeparationPt": 150,
+        "minimumSpanPt": [
+          150,
+          10
+        ],
+        "scaleRange": [
+          0.65,
+          1.4
+        ],
+        "maximumResidualPt": 1.5,
+        "maximumHypotheses": 256,
+        "onFailure": "retainUnresolvedPage",
+        "inferScaleFromPageSize": false
+      }
+    }
+  ],
+  "metadata": [
+    {
+      "id": "urozvrh.pagehead.field-5",
+      "semanticName": "licensedUserText",
+      "locator": {
+        "kind": "blockField",
+        "variantRef": "urozvrh",
+        "blockRef": "pagehead",
+        "fieldRef": "field-5",
+        "frame": "nominalPage",
+        "pages": {
+          "selection": "all",
+          "indices": [],
+          "maximumPages": 10000
+        },
+        "assembly": "glyphClusters",
+        "cardinality": "zeroOrOne"
+      },
+      "parserRef": "text",
+      "onAbsent": "unresolved",
+      "onConflict": "ambiguous",
+      "sourceRefs": [
+        {
+          "file": "_UROZVRH.gmx",
+          "line": 5,
+          "rawCommand": "|CPDATABASE(1350,10,2025,48,1,0,0,1,16777215,1,0,2,5,8,0,0,0,400,0,0,0,238,3,2,1,18,\"Tahoma\",0,1,2,0,\"'$USER'\",1,0,0,0,0,0)",
+          "expression": "$USER"
+        }
+      ]
+    },
+    {
+      "id": "urozvrh.pagehead.field-7",
+      "semanticName": "printedPageLabel",
+      "locator": {
+        "kind": "blockField",
+        "variantRef": "urozvrh",
+        "blockRef": "pagehead",
+        "fieldRef": "field-7",
+        "frame": "nominalPage",
+        "pages": {
+          "selection": "all",
+          "indices": [],
+          "maximumPages": 10000
+        },
+        "assembly": "glyphClusters",
+        "cardinality": "zeroOrOne"
+      },
+      "parserRef": "integer",
+      "onAbsent": "unresolved",
+      "onConflict": "ambiguous",
+      "sourceRefs": [
+        {
+          "file": "_UROZVRH.gmx",
+          "line": 7,
+          "rawCommand": "|CPDATABASE(1970,90,2032,128,1,0,0,1,16777215,1,0,2,5,8,0,0,0,400,0,0,0,238,3,2,1,18,\"Tahoma\",0,1,2,0,\"'$PAGENO'\",1,0,0,0,0,0)",
+          "expression": "$PAGENO"
+        }
+      ]
+    },
+    {
+      "id": "urozvrh.foot1.field-41",
+      "semanticName": "licensedUserText",
+      "locator": {
+        "kind": "blockField",
+        "variantRef": "urozvrh",
+        "blockRef": "foot1",
+        "fieldRef": "field-41",
+        "frame": "blockLocal",
+        "pages": {
+          "selection": "all",
+          "indices": [],
+          "maximumPages": 10000
+        },
+        "assembly": "glyphClusters",
+        "cardinality": "zeroOrOne"
+      },
+      "parserRef": "text",
+      "onAbsent": "unresolved",
+      "onConflict": "ambiguous",
+      "sourceRefs": [
+        {
+          "file": "_UROZVRH.gmx",
+          "line": 41,
+          "rawCommand": "|CPDATABASE(1180,214,1770,247,1,0,0,1,16777215,1,0,2,5,7,0,0,0,400,0,0,0,238,3,2,1,18,\"Tahoma\",0,0,2,0,\"'$USER'\",1,0,0,0,0,0)",
+          "expression": "$USER"
+        }
+      ]
+    },
+    {
+      "id": "urozvrh-v2-unverified.pagehead.field-27",
+      "semanticName": "licensedUserText",
+      "locator": {
+        "kind": "blockField",
+        "variantRef": "urozvrh-v2-unverified",
+        "blockRef": "pagehead",
+        "fieldRef": "field-27",
+        "frame": "nominalPage",
+        "pages": {
+          "selection": "all",
+          "indices": [],
+          "maximumPages": 10000
+        },
+        "assembly": "glyphClusters",
+        "cardinality": "zeroOrOne"
+      },
+      "parserRef": "text",
+      "onAbsent": "unresolved",
+      "onConflict": "ambiguous",
+      "sourceRefs": [
+        {
+          "file": "_UROZVRH_V2.gmx",
+          "line": 27,
+          "rawCommand": "|CPDATABASE(50,12,893,59,1,0,0,1,16777215,1,0,2,5,10,0,0,0,400,0,0,0,238,3,2,1,18,\"Tahoma\",0,0,2,0,\"'$USER'\",1,0,0,0,0,0)",
+          "expression": "$USER"
+        }
+      ]
+    },
+    {
+      "id": "urozvrh-v2-unverified.pagehead.field-30",
+      "semanticName": "printedPageLabel",
+      "locator": {
+        "kind": "blockField",
+        "variantRef": "urozvrh-v2-unverified",
+        "blockRef": "pagehead",
+        "fieldRef": "field-30",
+        "frame": "nominalPage",
+        "pages": {
+          "selection": "all",
+          "indices": [],
+          "maximumPages": 10000
+        },
+        "assembly": "glyphClusters",
+        "cardinality": "zeroOrOne"
+      },
+      "parserRef": "integer",
+      "onAbsent": "unresolved",
+      "onConflict": "ambiguous",
+      "sourceRefs": [
+        {
+          "file": "_UROZVRH_V2.gmx",
+          "line": 30,
+          "rawCommand": "|CPDATABASE(1930,90,2000,133,1,0,0,1,16777215,1,0,2,5,9,0,0,0,400,0,0,0,238,3,2,1,18,\"Tahoma\",0,1,2,0,\"'$PAGENO'\",1,0,0,0,0,0)",
+          "expression": "$PAGENO"
+        }
+      ]
+    },
+    {
+      "id": "urozvrh.title.label-8",
+      "semanticName": "reportTitle",
+      "locator": {
+        "kind": "calibratedRegion",
+        "variantRef": "urozvrh",
+        "frame": "nominalPage",
+        "rectPt": [
+          167.244094,
+          805.889764,
+          426.614173,
+          822.047244
+        ],
+        "paddingPt": 2,
+        "pages": {
+          "selection": "all",
+          "indices": [],
+          "maximumPages": 10000
+        },
+        "assembly": "glyphClusters",
+        "cardinality": "zeroOrOne"
+      },
+      "parserRef": "text",
+      "onAbsent": "unresolved",
+      "onConflict": "ambiguous",
+      "sourceRefs": [
+        {
+          "file": "_UROZVRH.gmx",
+          "line": 8,
+          "rawCommand": "|CPLABEL(590,70,1505,127,0,0,0,1,0,1,16777215,2,5,12,0,0,0,700,0,0,0,238,3,2,1,34,\"Tahoma\",0,0,2,\"ÚČTOVÝ  ROZVRH  ANALYTICKÝCH  ÚČTOV\")"
+        }
+      ]
+    },
+    {
+      "id": "urozvrh-v2-unverified.title.label-31",
+      "semanticName": "reportTitle",
+      "locator": {
+        "kind": "calibratedRegion",
+        "variantRef": "urozvrh-v2-unverified",
+        "frame": "nominalPage",
+        "rectPt": [
+          209.76378,
+          807.307087,
+          416.976378,
+          822.047244
+        ],
+        "paddingPt": 2,
+        "pages": {
+          "selection": "all",
+          "indices": [],
+          "maximumPages": 10000
+        },
+        "assembly": "glyphClusters",
+        "cardinality": "zeroOrOne"
+      },
+      "parserRef": "text",
+      "onAbsent": "unresolved",
+      "onConflict": "ambiguous",
+      "sourceRefs": [
+        {
+          "file": "_UROZVRH_V2.gmx",
+          "line": 31,
+          "rawCommand": "|CPLABEL(740,70,1471,122,0,0,0,1,0,1,16777215,2,5,11,0,0,0,400,0,0,0,238,3,2,1,34,\"Tahoma\",0,0,2,\"Opis účtovného rozvrhu analytických účtov\")"
+        }
+      ]
+    }
+  ],
+  "metadataDerivations": [],
+  "classification": [
+    {
+      "id": "pageHeader",
+      "op": "classify",
+      "enabled": true,
+      "evidenceStatus": "sourceDerived",
+      "sourceRefs": [],
+      "reviewNotes": [],
+      "when": {
+        "op": "blockKind",
+        "blockRefs": [
+          "pagehead"
+        ]
+      },
+      "semanticClass": "pageHeader",
+      "exportEligibility": "excluded",
+      "aggregationMemberships": [],
+      "level": "any"
+    },
+    {
+      "id": "reportControl",
+      "op": "classify",
+      "enabled": true,
+      "evidenceStatus": "sourceDerived",
+      "sourceRefs": [],
+      "reviewNotes": [],
+      "when": {
+        "op": "blockKind",
+        "blockRefs": [
+          "foot1"
+        ]
+      },
+      "semanticClass": "reportControl",
+      "exportEligibility": "excluded",
+      "aggregationMemberships": [],
+      "level": "any"
+    },
+    {
+      "id": "classCount",
+      "op": "classify",
+      "enabled": true,
+      "evidenceStatus": "sourceDerived",
+      "sourceRefs": [],
+      "reviewNotes": [],
+      "when": {
+        "op": "blockKind",
+        "blockRefs": [
+          "foot2"
+        ]
+      },
+      "semanticClass": "classCount",
+      "exportEligibility": "excluded",
+      "aggregationMemberships": [],
+      "level": "any"
+    },
+    {
+      "id": "groupCount",
+      "op": "classify",
+      "enabled": true,
+      "evidenceStatus": "sourceDerived",
+      "sourceRefs": [],
+      "reviewNotes": [],
+      "when": {
+        "op": "blockKind",
+        "blockRefs": [
+          "foot3"
+        ]
+      },
+      "semanticClass": "groupCount",
+      "exportEligibility": "excluded",
+      "aggregationMemberships": [],
+      "level": "any"
+    },
+    {
+      "id": "heading",
+      "op": "classify",
+      "enabled": true,
+      "evidenceStatus": "sourceDerived",
+      "sourceRefs": [],
+      "reviewNotes": [],
+      "when": {
+        "op": "all",
+        "conditions": [
+          {
+            "op": "blockKind",
+            "blockRefs": [
+              "record"
+            ]
+          },
+          {
+            "op": "textMatch",
+            "fieldRef": "analyticalComponent",
+            "match": {
+              "mode": "exact",
+              "value": "****",
+              "ignoreCase": true,
+              "whitespace": "collapse",
+              "unicodeNormalization": "NFC",
+              "regexTimeoutMs": 100
+            }
+          }
+        ]
+      },
+      "semanticClass": "accountGroupHeading",
+      "exportEligibility": "excluded",
+      "aggregationMemberships": [
+        "numberedRows"
+      ],
+      "level": "detail"
+    },
+    {
+      "id": "account",
+      "op": "classify",
+      "enabled": true,
+      "evidenceStatus": "sourceDerived",
+      "sourceRefs": [],
+      "reviewNotes": [],
+      "when": {
+        "op": "all",
+        "conditions": [
+          {
+            "op": "blockKind",
+            "blockRefs": [
+              "record"
+            ]
+          },
+          {
+            "op": "fieldState",
+            "fieldRef": "syntheticComponent",
+            "states": [
+              "present"
+            ]
+          },
+          {
+            "op": "not",
+            "condition": {
+              "op": "textMatch",
+              "fieldRef": "analyticalComponent",
+              "match": {
+                "mode": "exact",
+                "value": "****",
+                "ignoreCase": true,
+                "whitespace": "collapse",
+                "unicodeNormalization": "NFC",
+                "regexTimeoutMs": 100
+              }
+            }
+          }
+        ]
+      },
+      "semanticClass": "accountDefinition",
+      "exportEligibility": "eligible",
+      "aggregationMemberships": [
+        "numberedRows"
+      ],
+      "level": "detail"
+    },
+    {
+      "id": "numbered-blank",
+      "op": "classify",
+      "enabled": true,
+      "evidenceStatus": "sourceDerived",
+      "sourceRefs": [],
+      "reviewNotes": [],
+      "when": {
+        "op": "all",
+        "conditions": [
+          {
+            "op": "blockKind",
+            "blockRefs": [
+              "record"
+            ]
+          },
+          {
+            "op": "fieldState",
+            "fieldRef": "ordinal",
+            "states": [
+              "present"
+            ]
+          },
+          {
+            "op": "fieldState",
+            "fieldRef": "syntheticComponent",
+            "states": [
+              "blank"
+            ]
+          },
+          {
+            "op": "fieldState",
+            "fieldRef": "analyticalComponent",
+            "states": [
+              "blank"
+            ]
+          }
+        ]
+      },
+      "semanticClass": "numberedBlankRow",
+      "exportEligibility": "review",
+      "aggregationMemberships": [
+        "numberedRows"
+      ],
+      "level": "detail"
+    }
+  ],
+  "classificationPolicy": {
+    "evaluation": "allRules",
+    "noMatch": "unrecognizedCandidate",
+    "incompatibleMatches": "ambiguous"
+  },
+  "groups": [
+    {
+      "id": "reportSection",
+      "parentRef": null,
+      "memberSelector": {
+        "semanticClasses": [],
+        "aggregationMemberships": [],
+        "level": "any",
+        "occurrences": "records"
+      },
+      "startRule": {
+        "op": "sectionStart"
+      },
+      "endRule": {
+        "op": "sectionEnd"
+      },
+      "keyFields": [],
+      "crossPagePolicy": "requireContinuityEvidence",
+      "partialInputPolicy": "retainIncomplete",
+      "repeatedHeaderResets": false,
+      "inheritance": []
+    },
+    {
+      "id": "accountGroup",
+      "parentRef": "accountClass",
+      "memberSelector": {
+        "semanticClasses": [],
+        "aggregationMemberships": [
+          "numberedRows"
+        ],
+        "level": "any",
+        "occurrences": "records"
+      },
+      "startRule": {
+        "op": "afterPreviousClosure"
+      },
+      "endRule": {
+        "op": "match",
+        "when": {
+          "op": "blockKind",
+          "blockRefs": [
+            "foot3"
+          ]
+        }
+      },
+      "keyFields": [
+        "accountGroupCode"
+      ],
+      "crossPagePolicy": "requireContinuityEvidence",
+      "partialInputPolicy": "retainIncomplete",
+      "repeatedHeaderResets": false,
+      "inheritance": []
+    },
+    {
+      "id": "accountClass",
+      "parentRef": "reportSection",
+      "memberSelector": {
+        "semanticClasses": [],
+        "aggregationMemberships": [
+          "numberedRows"
+        ],
+        "level": "any",
+        "occurrences": "records"
+      },
+      "startRule": {
+        "op": "afterPreviousClosure"
+      },
+      "endRule": {
+        "op": "match",
+        "when": {
+          "op": "blockKind",
+          "blockRefs": [
+            "foot2"
+          ]
+        }
+      },
+      "keyFields": [
+        "accountClassCode"
+      ],
+      "crossPagePolicy": "requireContinuityEvidence",
+      "partialInputPolicy": "retainIncomplete",
+      "repeatedHeaderResets": false,
+      "inheritance": []
+    }
+  ],
+  "completeness": [
+    {
+      "id": "account-code",
+      "op": "requireFields",
+      "enabled": true,
+      "evidenceStatus": "sourceDerived",
+      "sourceRefs": [],
+      "reviewNotes": [],
+      "selector": {
+        "semanticClasses": [
+          "accountDefinition"
+        ],
+        "aggregationMemberships": [],
+        "level": "any",
+        "occurrences": "records"
+      },
+      "fieldRefs": [
+        "syntheticComponent"
+      ],
+      "requiredState": "present"
+    },
+    {
+      "id": "all-candidates",
+      "op": "accountForCandidates",
+      "enabled": true,
+      "evidenceStatus": "sourceDerived",
+      "sourceRefs": [],
+      "reviewNotes": [],
+      "onUnrecognized": "preventCleanSuccess"
+    },
+    {
+      "id": "all-tokens",
+      "op": "accountForTokens",
+      "enabled": true,
+      "evidenceStatus": "sourceDerived",
+      "sourceRefs": [],
+      "reviewNotes": [],
+      "decorationRequiresRuleId": true
+    },
+    {
+      "id": "coverage",
+      "op": "inspectCoverage",
+      "enabled": true,
+      "evidenceStatus": "sourceDerived",
+      "sourceRefs": [],
+      "reviewNotes": [],
+      "printedPageField": "printedPageNumber",
+      "contiguousPagesProveOriginalComplete": false
+    },
+    {
+      "id": "spacing",
+      "op": "checkSpacing",
+      "enabled": true,
+      "evidenceStatus": "unverified",
+      "sourceRefs": [],
+      "reviewNotes": [],
+      "excludeExplainedBlocks": true,
+      "maximumAdvanceMultiplier": 1.5,
+      "onGap": "suspectedMissingRecord"
+    },
+    {
+      "id": "ordinal",
+      "op": "sequence",
+      "enabled": true,
+      "evidenceStatus": "sourceDerived",
+      "sourceRefs": [],
+      "reviewNotes": [],
+      "fieldRef": "ordinal",
+      "scope": {
+        "kind": "document",
+        "groupRef": null
+      },
+      "increment": 1,
+      "onGap": "diagnosticOnly"
+    }
+  ],
+  "openQuestions": [
+    "GMX replaces prior empirical geometry. UROZVRH_V2 is unverified against print samples.",
+    "Count membership, blank numbered rows and heading rows require full-file reconciliation.",
+    "Reporting entity CIN/name and fiscal year have no verified printed locators; licensed user is not reporting entity.",
+    "No verified reportingEntity.cin locator in the supplied GMX fields. Return unresolved; do not extract arbitrary eight-digit numbers or use manifest expectations."
+  ]
+}

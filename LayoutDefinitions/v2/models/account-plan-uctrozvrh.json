@@ -1,0 +1,105 @@
+{
+  "$schema": "../schemas/model.schema.json",
+  "schemaVersion": 2,
+  "definitionVersion": "2.0.0-draft.4",
+  "id": "ifosoft.model.account-plan-uctrozvrh",
+  "kind": "model",
+  "status": "reviewDraft",
+  "productionApproved": false,
+  "requiresCapabilities": [
+    "positioned.v2"
+  ],
+  "sourceRefs": [],
+  "reviewNotes": [
+    "C# domain export mapping is deferred to Step 3; source fields are preserved."
+  ],
+  "category": "AF",
+  "fields": [
+    {
+      "id": "licensedUserText",
+      "type": "text",
+      "domainTarget": null
+    },
+    {
+      "id": "printedPageNumber",
+      "type": "integer",
+      "domainTarget": null
+    },
+    {
+      "id": "syntheticComponent",
+      "type": "identifier",
+      "domainTarget": null
+    },
+    {
+      "id": "accountName",
+      "type": "text",
+      "domainTarget": null
+    },
+    {
+      "id": "analyticalComponent",
+      "type": "identifier",
+      "domainTarget": null
+    },
+    {
+      "id": "accountType",
+      "type": "identifier",
+      "domainTarget": null
+    },
+    {
+      "id": "POD",
+      "type": "identifier",
+      "domainTarget": null
+    },
+    {
+      "id": "DAN",
+      "type": "identifier",
+      "domainTarget": null
+    },
+    {
+      "id": "STR",
+      "type": "identifier",
+      "domainTarget": null
+    },
+    {
+      "id": "ODD",
+      "type": "identifier",
+      "domainTarget": null
+    },
+    {
+      "id": "POL",
+      "type": "identifier",
+      "domainTarget": null
+    },
+    {
+      "id": "SAL",
+      "type": "identifier",
+      "domainTarget": null
+    },
+    {
+      "id": "DPH",
+      "type": "identifier",
+      "domainTarget": null
+    },
+    {
+      "id": "ordinal",
+      "type": "integer",
+      "domainTarget": null
+    },
+    {
+      "id": "accountClassCode",
+      "type": "identifier",
+      "domainTarget": null
+    },
+    {
+      "id": "printedCount",
+      "type": "integer",
+      "domainTarget": null
+    },
+    {
+      "id": "accountGroupCode",
+      "type": "identifier",
+      "domainTarget": null
+    }
+  ],
+  "domainMappingStatus": "pendingReview"
+}

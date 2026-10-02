@@ -1,0 +1,3157 @@
+{
+  "$schema": "../schemas/layout.schema.json",
+  "schemaVersion": 2,
+  "definitionVersion": "2.0.0-draft.4",
+  "id": "ifosoft.general-ledger-hlknia4c",
+  "kind": "layout",
+  "status": "reviewDraft",
+  "productionApproved": false,
+  "requiresCapabilities": [
+    "positioned.v2"
+  ],
+  "sourceRefs": [
+    {
+      "file": "sources/IfoSoft-v2-review.zip",
+      "sha256": "3d74f8a56bfd23fe52557f82018268612f62005cfdb1063064f211fbbb9788c0"
+    }
+  ],
+  "reviewNotes": [],
+  "formats": [
+    "PDF",
+    "XPS",
+    "OXPS"
+  ],
+  "modelRef": {
+    "id": "ifosoft.model.general-ledger-hlknia4c",
+    "version": "2.0.0-draft.4"
+  },
+  "identificationRefs": [
+    {
+      "id": "ifosoft.identify.hlknia4c",
+      "version": "2.0.0-draft.4"
+    }
+  ],
+  "parserRefs": [
+    {
+      "id": "ifosoft.parsers",
+      "version": "2.0.0-draft.4"
+    }
+  ],
+  "validationRefs": [
+    {
+      "id": "ifosoft.general-ledger-hlknia4c.validation",
+      "version": "2.0.0-draft.4"
+    }
+  ],
+  "variants": [
+    {
+      "id": "original",
+      "evidenceStatus": "sourceDerived",
+      "sourceRefs": [
+        {
+          "file": "_HLKNIA4C.gmx",
+          "sha256": "e9054c2ce475be6137348767d07fa83d4ba3503d034c4221c1bc88bf5342fc18"
+        }
+      ],
+      "nominalPageSizePt": [
+        595.275591,
+        841.889764
+      ],
+      "anchors": [
+        {
+          "id": "anchor-1",
+          "feature": "rulingEndpoint",
+          "pointPt": [
+            93.543307,
+            796.535433
+          ],
+          "blockRef": "pagehead",
+          "lineRef": "line-6",
+          "endpointIndex": 0,
+          "evidenceStatus": "sourceDerived",
+          "sourceRefs": [
+            {
+              "file": "_HLKNIA4C.gmx",
+              "line": 6,
+              "rawCommand": "|CPLINE(330,160,330,230,1,0,0,0)"
+            }
+          ]
+        },
+        {
+          "id": "anchor-2",
+          "feature": "rulingEndpoint",
+          "pointPt": [
+            93.543307,
+            776.692913
+          ],
+          "blockRef": "pagehead",
+          "lineRef": "line-6",
+          "endpointIndex": 1,
+          "evidenceStatus": "sourceDerived",
+          "sourceRefs": [
+            {
+              "file": "_HLKNIA4C.gmx",
+              "line": 6,
+              "rawCommand": "|CPLINE(330,160,330,230,1,0,0,0)"
+            }
+          ]
+        },
+        {
+          "id": "anchor-3",
+          "feature": "rulingEndpoint",
+          "pointPt": [
+            42.519685,
+            833.385827
+          ],
+          "blockRef": "pagehead",
+          "lineRef": "line-7",
+          "endpointIndex": 0,
+          "evidenceStatus": "sourceDerived",
+          "sourceRefs": [
+            {
+              "file": "_HLKNIA4C.gmx",
+              "line": 7,
+              "rawCommand": "|CPLINE(150,30,2040,30,4,0,0,0)"
+            }
+          ]
+        },
+        {
+          "id": "anchor-4",
+          "feature": "rulingEndpoint",
+          "pointPt": [
+            578.267717,
+            833.385827
+          ],
+          "blockRef": "pagehead",
+          "lineRef": "line-7",
+          "endpointIndex": 1,
+          "evidenceStatus": "sourceDerived",
+          "sourceRefs": [
+            {
+              "file": "_HLKNIA4C.gmx",
+              "line": 7,
+              "rawCommand": "|CPLINE(150,30,2040,30,4,0,0,0)"
+            }
+          ]
+        },
+        {
+          "id": "anchor-5",
+          "feature": "rulingEndpoint",
+          "pointPt": [
+            42.519685,
+            796.535433
+          ],
+          "blockRef": "pagehead",
+          "lineRef": "line-15",
+          "endpointIndex": 0,
+          "evidenceStatus": "sourceDerived",
+          "sourceRefs": [
+            {
+              "file": "_HLKNIA4C.gmx",
+              "line": 15,
+              "rawCommand": "|CPLINE(150,160,2040,160,1,0,0,0)"
+            }
+          ]
+        },
+        {
+          "id": "anchor-6",
+          "feature": "rulingEndpoint",
+          "pointPt": [
+            578.267717,
+            796.535433
+          ],
+          "blockRef": "pagehead",
+          "lineRef": "line-15",
+          "endpointIndex": 1,
+          "evidenceStatus": "sourceDerived",
+          "sourceRefs": [
+            {
+              "file": "_HLKNIA4C.gmx",
+              "line": 15,
+              "rawCommand": "|CPLINE(150,160,2040,160,1,0,0,0)"
+            }
+          ]
+        },
+        {
+          "id": "anchor-7",
+          "feature": "rulingEndpoint",
+          "pointPt": [
+            42.519685,
+            776.692913
+          ],
+          "blockRef": "pagehead",
+          "lineRef": "line-16",
+          "endpointIndex": 1,
+          "evidenceStatus": "sourceDerived",
+          "sourceRefs": [
+            {
+              "file": "_HLKNIA4C.gmx",
+              "line": 16,
+              "rawCommand": "|CPLINE(150,30,150,230,4,0,0,0)"
+            }
+          ]
+        },
+        {
+          "id": "anchor-8",
+          "feature": "rulingEndpoint",
+          "pointPt": [
+            578.267717,
+            776.692913
+          ],
+          "blockRef": "pagehead",
+          "lineRef": "line-18",
+          "endpointIndex": 1,
+          "evidenceStatus": "sourceDerived",
+          "sourceRefs": [
+            {
+              "file": "_HLKNIA4C.gmx",
+              "line": 18,
+              "rawCommand": "|CPLINE(150,230,2040,230,4,0,0,0)"
+            }
+          ]
+        },
+        {
+          "id": "anchor-9",
+          "feature": "rulingEndpoint",
+          "pointPt": [
+            308.976378,
+            796.535433
+          ],
+          "blockRef": "pagehead",
+          "lineRef": "line-19",
+          "endpointIndex": 0,
+          "evidenceStatus": "sourceDerived",
+          "sourceRefs": [
+            {
+              "file": "_HLKNIA4C.gmx",
+              "line": 19,
+              "rawCommand": "|CPLINE(1090,160,1090,230,1,0,0,0)"
+            }
+          ]
+        },
+        {
+          "id": "anchor-10",
+          "feature": "rulingEndpoint",
+          "pointPt": [
+            308.976378,
+            776.692913
+          ],
+          "blockRef": "pagehead",
+          "lineRef": "line-19",
+          "endpointIndex": 1,
+          "evidenceStatus": "sourceDerived",
+          "sourceRefs": [
+            {
+              "file": "_HLKNIA4C.gmx",
+              "line": 19,
+              "rawCommand": "|CPLINE(1090,160,1090,230,1,0,0,0)"
+            }
+          ]
+        },
+        {
+          "id": "anchor-11",
+          "feature": "rulingEndpoint",
+          "pointPt": [
+            510.23622,
+            796.535433
+          ],
+          "blockRef": "pagehead",
+          "lineRef": "line-21",
+          "endpointIndex": 0,
+          "evidenceStatus": "sourceDerived",
+          "sourceRefs": [
+            {
+              "file": "_HLKNIA4C.gmx",
+              "line": 21,
+              "rawCommand": "|CPLINE(1800,160,1800,230,1,0,0,0)"
+            }
+          ]
+        },
+        {
+          "id": "anchor-12",
+          "feature": "rulingEndpoint",
+          "pointPt": [
+            510.23622,
+            776.692913
+          ],
+          "blockRef": "pagehead",
+          "lineRef": "line-21",
+          "endpointIndex": 1,
+          "evidenceStatus": "sourceDerived",
+          "sourceRefs": [
+            {
+              "file": "_HLKNIA4C.gmx",
+              "line": 21,
+              "rawCommand": "|CPLINE(1800,160,1800,230,1,0,0,0)"
+            }
+          ]
+        },
+        {
+          "id": "anchor-13",
+          "feature": "rulingEndpoint",
+          "pointPt": [
+            377.007874,
+            796.535433
+          ],
+          "blockRef": "pagehead",
+          "lineRef": "line-25",
+          "endpointIndex": 0,
+          "evidenceStatus": "sourceDerived",
+          "sourceRefs": [
+            {
+              "file": "_HLKNIA4C.gmx",
+              "line": 25,
+              "rawCommand": "|CPLINE(1330,160,1330,230,1,0,0,0)"
+            }
+          ]
+        },
+        {
+          "id": "anchor-14",
+          "feature": "rulingEndpoint",
+          "pointPt": [
+            377.007874,
+            776.692913
+          ],
+          "blockRef": "pagehead",
+          "lineRef": "line-25",
+          "endpointIndex": 1,
+          "evidenceStatus": "sourceDerived",
+          "sourceRefs": [
+            {
+              "file": "_HLKNIA4C.gmx",
+              "line": 25,
+              "rawCommand": "|CPLINE(1330,160,1330,230,1,0,0,0)"
+            }
+          ]
+        }
+      ],
+      "blocks": [
+        {
+          "id": "pagehead",
+          "kind": "pageHeader",
+          "frame": "nominalPage",
+          "sourceRefs": [
+            {
+              "file": "_HLKNIA4C.gmx",
+              "rawCommand": "#PAGEHEAD(200,0)"
+            }
+          ],
+          "nominalAdvancePt": 56.692913,
+          "emptyTemplate": false,
+          "placement": {
+            "id": "locate-pagehead",
+            "op": "locateBlock",
+            "enabled": true,
+            "evidenceStatus": "sourceDerived",
+            "sourceRefs": [],
+            "reviewNotes": [],
+            "frame": "nominalPage",
+            "origin": "pageCalibration",
+            "signals": [
+              "rulings",
+              "labels",
+              "fieldColumns",
+              "unassignedText"
+            ],
+            "combination": "union",
+            "onAmbiguous": "retainHypotheses"
+          },
+          "candidateDetection": {
+            "id": "detect-pagehead",
+            "op": "detectCandidates",
+            "enabled": true,
+            "evidenceStatus": "sourceDerived",
+            "sourceRefs": [],
+            "reviewNotes": [],
+            "signals": [
+              "rulings",
+              "labels",
+              "fieldColumns",
+              "unassignedText"
+            ],
+            "combination": "union",
+            "requiresSuccessfulParsing": false
+          },
+          "fieldAssignment": {
+            "id": "assign-pagehead",
+            "op": "assignFields",
+            "enabled": true,
+            "evidenceStatus": "sourceDerived",
+            "sourceRefs": [],
+            "reviewNotes": [],
+            "paddingPt": 1.5,
+            "assembly": "glyphClusters",
+            "splitAcrossFields": "requireGlyphGeometry",
+            "overlap": "retainAmbiguity",
+            "retainClippedSource": true
+          },
+          "fields": [
+            {
+              "id": "field-8",
+              "semanticName": "licensedUserText",
+              "rectPt": [
+                382.677165,
+                819.779528,
+                574.015748,
+                830.551181
+              ],
+              "parserRef": "text",
+              "sourceRefs": [
+                {
+                  "file": "_HLKNIA4C.gmx",
+                  "line": 8,
+                  "rawCommand": "|CPDATABASE(1350,40,2025,78,0,0,0,1,0,1,16777215,2,5,8,0,0,0,400,0,0,0,238,3,2,1,34,\"Tahoma\",0,1,2,0,\"'$USER'\",1,0,0,0,0,0)",
+                  "expression": "$USER"
+                }
+              ]
+            },
+            {
+              "id": "field-11",
+              "semanticName": "periodStart",
+              "rectPt": [
+                425.19685,
+                808.440945,
+                458.929134,
+                819.212598
+              ],
+              "parserRef": "period",
+              "sourceRefs": [
+                {
+                  "file": "_HLKNIA4C.gmx",
+                  "line": 11,
+                  "rawCommand": "|CPDATABASE(1500,80,1619,118,0,0,0,1,0,1,16777215,2,5,8,0,0,0,400,0,0,0,238,3,2,1,34,\"Tahoma\",0,0,2,0,\"'^K_OD'\",1,0,0,0,0,0)",
+                  "expression": "^K_OD"
+                }
+              ]
+            },
+            {
+              "id": "field-12",
+              "semanticName": "periodEnd",
+              "rectPt": [
+                473.385827,
+                808.440945,
+                507.11811,
+                819.212598
+              ],
+              "parserRef": "period",
+              "sourceRefs": [
+                {
+                  "file": "_HLKNIA4C.gmx",
+                  "line": 12,
+                  "rawCommand": "|CPDATABASE(1670,80,1789,118,0,0,0,1,0,1,16777215,2,5,8,0,0,0,400,0,0,0,238,3,2,1,34,\"Tahoma\",0,0,2,0,\"'^K_DO'\",1,0,0,0,0,0)",
+                  "expression": "^K_DO"
+                }
+              ]
+            },
+            {
+              "id": "field-14",
+              "semanticName": "printedPageNumber",
+              "rectPt": [
+                558.425197,
+                798.519685,
+                573.732283,
+                807.874016
+              ],
+              "parserRef": "integer",
+              "sourceRefs": [
+                {
+                  "file": "_HLKNIA4C.gmx",
+                  "line": 14,
+                  "rawCommand": "|CPDATABASE(1970,120,2024,153,0,0,0,1,0,1,16777215,2,5,7,0,0,0,400,0,0,0,238,3,2,1,34,\"Tahoma\",0,0,2,0,\"'$PAGENO'\",1,0,0,0,0,0)",
+                  "expression": "$PAGENO"
+                }
+              ]
+            },
+            {
+              "id": "field-32",
+              "semanticName": "reportSubtitle",
+              "rectPt": [
+                167.244094,
+                797.102362,
+                453.826772,
+                807.874016
+              ],
+              "parserRef": "text",
+              "sourceRefs": [
+                {
+                  "file": "_HLKNIA4C.gmx",
+                  "line": 32,
+                  "rawCommand": "|CPDATABASE(590,120,1601,158,0,0,0,1,0,1,16777215,2,5,8,0,0,0,400,0,0,0,238,3,2,1,34,\"Tahoma\",0,2,2,0,\"'^Q0'\",1,0,0,0,0,0)",
+                  "expression": "^Q0"
+                }
+              ]
+            },
+            {
+              "id": "field-33",
+              "semanticName": "entityName",
+              "rectPt": [
+                45.354331,
+                819.779528,
+                188.787402,
+                830.551181
+              ],
+              "parserRef": "text",
+              "sourceRefs": [
+                {
+                  "file": "_HLKNIA4C.gmx",
+                  "line": 33,
+                  "rawCommand": "|CPDATABASE(160,40,666,78,0,0,0,1,0,1,16777215,2,5,8,0,0,0,400,0,0,0,238,3,2,1,34,\"Tahoma\",0,0,2,0,\"'^NAF'\",1,0,0,0,0,0)",
+                  "expression": "^NAF"
+                }
+              ]
+            }
+          ],
+          "labels": [
+            {
+              "id": "label-5",
+              "text": "Typ",
+              "rectPt": [
+                79.370079,
+                780.094488,
+                91.84252,
+                790.866142
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_HLKNIA4C.gmx",
+                  "line": 5,
+                  "rawCommand": "|CPLABEL(280,180,324,218,0,0,0,1,0,1,16777215,2,5,8,0,0,0,400,0,0,0,238,3,2,1,34,\"Tahoma\",0,0,2,\"Typ\")"
+                }
+              ]
+            },
+            {
+              "id": "label-9",
+              "text": "HLAVNÁ KNIHA -  PODĽA ÚČTOV",
+              "rectPt": [
+                189.92126,
+                808.724409,
+                353.76378,
+                822.047244
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_HLKNIA4C.gmx",
+                  "line": 9,
+                  "rawCommand": "|CPLABEL(670,70,1248,117,0,0,0,1,0,1,16777215,2,5,10,0,0,0,700,0,0,0,238,3,2,1,18,\"Tahoma\",0,0,1,\"HLAVNÁ KNIHA -  PODĽA ÚČTOV\")"
+                }
+              ]
+            },
+            {
+              "id": "label-10",
+              "text": "Účtovné obdobie",
+              "rectPt": [
+                362.834646,
+                808.440945,
+                422.07874,
+                819.212598
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_HLKNIA4C.gmx",
+                  "line": 10,
+                  "rawCommand": "|CPLABEL(1280,80,1489,118,0,0,0,1,0,1,16777215,2,5,8,0,0,0,400,0,0,0,238,3,2,1,34,\"Tahoma\",0,0,2,\"Účtovné obdobie\")"
+                }
+              ]
+            },
+            {
+              "id": "label-13",
+              "text": "Strana:",
+              "rectPt": [
+                535.748031,
+                798.519685,
+                558.141732,
+                807.874016
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_HLKNIA4C.gmx",
+                  "line": 13,
+                  "rawCommand": "|CPLABEL(1890,120,1969,153,0,0,0,1,0,1,16777215,2,5,7,0,0,0,400,0,0,0,238,3,2,1,34,\"Tahoma\",0,0,2,\"Strana:\")"
+                }
+              ]
+            },
+            {
+              "id": "label-17",
+              "text": "Účet ",
+              "rectPt": [
+                45.354331,
+                780.094488,
+                63.779528,
+                790.866142
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_HLKNIA4C.gmx",
+                  "line": 17,
+                  "rawCommand": "|CPLABEL(160,180,225,218,0,0,0,1,0,1,16777215,2,5,8,0,0,0,400,0,0,0,238,3,2,1,34,\"Tahoma\",0,0,2,\"Účet \")"
+                }
+              ]
+            },
+            {
+              "id": "label-20",
+              "text": "Počiatočný stav",
+              "rectPt": [
+                314.645669,
+                785.76378,
+                369.070866,
+                796.535433
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_HLKNIA4C.gmx",
+                  "line": 20,
+                  "rawCommand": "|CPLABEL(1110,160,1302,198,0,0,0,1,0,1,16777215,2,5,8,0,0,0,400,0,0,0,238,3,2,1,34,\"Tahoma\",0,0,2,\"Počiatočný stav\")"
+                }
+              ]
+            },
+            {
+              "id": "label-22",
+              "text": "Obrat od začiatku roka",
+              "rectPt": [
+                405.354331,
+                785.76378,
+                485.291339,
+                796.535433
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_HLKNIA4C.gmx",
+                  "line": 22,
+                  "rawCommand": "|CPLABEL(1430,160,1712,198,0,0,0,1,0,1,16777215,2,5,8,0,0,0,400,0,0,0,238,3,2,1,34,\"Tahoma\",0,0,2,\"Obrat od začiatku roka\")"
+                }
+              ]
+            },
+            {
+              "id": "label-23",
+              "text": "Zostatok účtu",
+              "rectPt": [
+                521.574803,
+                785.76378,
+                569.480315,
+                796.535433
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_HLKNIA4C.gmx",
+                  "line": 23,
+                  "rawCommand": "|CPLABEL(1840,160,2009,198,0,0,0,1,0,1,16777215,2,5,8,0,0,0,400,0,0,0,238,3,2,1,34,\"Tahoma\",0,0,2,\"Zostatok účtu\")"
+                }
+              ]
+            },
+            {
+              "id": "label-26",
+              "text": "MÁ DAŤ                         DAL",
+              "rectPt": [
+                405.354331,
+                776.976378,
+                484.15748,
+                785.19685
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_HLKNIA4C.gmx",
+                  "line": 26,
+                  "rawCommand": "|CPLABEL(1430,200,1708,229,0,0,0,1,0,1,16777215,2,5,6,0,0,0,400,0,0,0,238,3,2,1,34,\"Tahoma\",0,0,2,\"MÁ DAŤ                         DAL\")"
+                }
+              ]
+            },
+            {
+              "id": "label-27",
+              "text": "MÁ DAŤ - DAL",
+              "rectPt": [
+                325.984252,
+                776.976378,
+                363.968504,
+                785.19685
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_HLKNIA4C.gmx",
+                  "line": 27,
+                  "rawCommand": "|CPLABEL(1150,200,1284,229,0,0,0,1,0,1,16777215,2,5,6,0,0,0,400,0,0,0,238,3,2,1,34,\"Tahoma\",0,0,2,\"MÁ DAŤ - DAL\")"
+                }
+              ]
+            },
+            {
+              "id": "label-28",
+              "text": " - ",
+              "rectPt": [
+                462.047244,
+                808.440945,
+                469.984252,
+                819.212598
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_HLKNIA4C.gmx",
+                  "line": 28,
+                  "rawCommand": "|CPLABEL(1630,80,1658,118,0,0,0,1,0,1,16777215,2,5,8,0,0,0,400,0,0,0,238,3,2,1,34,\"Tahoma\",0,0,2,\" - \")"
+                }
+              ]
+            },
+            {
+              "id": "label-29",
+              "text": "_HLKNIA4C.GMX",
+              "rectPt": [
+                45.354331,
+                798.519685,
+                97.511811,
+                807.874016
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_HLKNIA4C.gmx",
+                  "line": 29,
+                  "rawCommand": "|CPLABEL(160,120,344,153,0,0,0,1,0,1,16777215,2,5,7,0,0,0,400,0,0,0,238,3,2,1,34,\"Tahoma\",0,0,2,\"_HLKNIA4C.GMX\")"
+                }
+              ]
+            },
+            {
+              "id": "label-30",
+              "text": "MÁ DAŤ - DAL",
+              "rectPt": [
+                527.244094,
+                776.976378,
+                565.228346,
+                785.19685
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_HLKNIA4C.gmx",
+                  "line": 30,
+                  "rawCommand": "|CPLABEL(1860,200,1994,229,0,0,0,1,0,1,16777215,2,5,6,0,0,0,400,0,0,0,238,3,2,1,34,\"Tahoma\",0,0,2,\"MÁ DAŤ - DAL\")"
+                }
+              ]
+            },
+            {
+              "id": "label-31",
+              "text": "Názov účtu",
+              "rectPt": [
+                96.377953,
+                780.094488,
+                135.779528,
+                790.866142
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_HLKNIA4C.gmx",
+                  "line": 31,
+                  "rawCommand": "|CPLABEL(340,180,479,218,0,0,0,1,0,1,16777215,2,5,8,0,0,0,400,0,0,0,238,3,2,1,34,\"Tahoma\",0,0,2,\"Názov účtu\")"
+                }
+              ]
+            }
+          ],
+          "lines": [
+            {
+              "id": "line-6",
+              "pointsPt": [
+                [
+                  93.543307,
+                  796.535433
+                ],
+                [
+                  93.543307,
+                  776.692913
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_HLKNIA4C.gmx",
+                  "line": 6,
+                  "rawCommand": "|CPLINE(330,160,330,230,1,0,0,0)"
+                }
+              ]
+            },
+            {
+              "id": "line-7",
+              "pointsPt": [
+                [
+                  42.519685,
+                  833.385827
+                ],
+                [
+                  578.267717,
+                  833.385827
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_HLKNIA4C.gmx",
+                  "line": 7,
+                  "rawCommand": "|CPLINE(150,30,2040,30,4,0,0,0)"
+                }
+              ]
+            },
+            {
+              "id": "line-15",
+              "pointsPt": [
+                [
+                  42.519685,
+                  796.535433
+                ],
+                [
+                  578.267717,
+                  796.535433
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_HLKNIA4C.gmx",
+                  "line": 15,
+                  "rawCommand": "|CPLINE(150,160,2040,160,1,0,0,0)"
+                }
+              ]
+            },
+            {
+              "id": "line-16",
+              "pointsPt": [
+                [
+                  42.519685,
+                  833.385827
+                ],
+                [
+                  42.519685,
+                  776.692913
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_HLKNIA4C.gmx",
+                  "line": 16,
+                  "rawCommand": "|CPLINE(150,30,150,230,4,0,0,0)"
+                }
+              ]
+            },
+            {
+              "id": "line-18",
+              "pointsPt": [
+                [
+                  42.519685,
+                  776.692913
+                ],
+                [
+                  578.267717,
+                  776.692913
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_HLKNIA4C.gmx",
+                  "line": 18,
+                  "rawCommand": "|CPLINE(150,230,2040,230,4,0,0,0)"
+                }
+              ]
+            },
+            {
+              "id": "line-19",
+              "pointsPt": [
+                [
+                  308.976378,
+                  796.535433
+                ],
+                [
+                  308.976378,
+                  776.692913
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_HLKNIA4C.gmx",
+                  "line": 19,
+                  "rawCommand": "|CPLINE(1090,160,1090,230,1,0,0,0)"
+                }
+              ]
+            },
+            {
+              "id": "line-21",
+              "pointsPt": [
+                [
+                  510.23622,
+                  796.535433
+                ],
+                [
+                  510.23622,
+                  776.692913
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_HLKNIA4C.gmx",
+                  "line": 21,
+                  "rawCommand": "|CPLINE(1800,160,1800,230,1,0,0,0)"
+                }
+              ]
+            },
+            {
+              "id": "line-24",
+              "pointsPt": [
+                [
+                  578.267717,
+                  833.385827
+                ],
+                [
+                  578.267717,
+                  776.692913
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_HLKNIA4C.gmx",
+                  "line": 24,
+                  "rawCommand": "|CPLINE(2040,30,2040,230,4,0,0,0)"
+                }
+              ]
+            },
+            {
+              "id": "line-25",
+              "pointsPt": [
+                [
+                  377.007874,
+                  796.535433
+                ],
+                [
+                  377.007874,
+                  776.692913
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_HLKNIA4C.gmx",
+                  "line": 25,
+                  "rawCommand": "|CPLINE(1330,160,1330,230,1,0,0,0)"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "record",
+          "kind": "repeatingRecord",
+          "frame": "blockLocal",
+          "sourceRefs": [
+            {
+              "file": "_HLKNIA4C.gmx",
+              "rawCommand": "#RECORD(40,0)"
+            }
+          ],
+          "nominalAdvancePt": 11.338583,
+          "emptyTemplate": false,
+          "placement": {
+            "id": "locate-record",
+            "op": "locateBlock",
+            "enabled": true,
+            "evidenceStatus": "sourceDerived",
+            "sourceRefs": [],
+            "reviewNotes": [],
+            "frame": "blockLocal",
+            "origin": "independentOccurrence",
+            "signals": [
+              "rulings",
+              "labels",
+              "fieldColumns",
+              "unassignedText"
+            ],
+            "combination": "union",
+            "onAmbiguous": "retainHypotheses"
+          },
+          "candidateDetection": {
+            "id": "detect-record",
+            "op": "detectCandidates",
+            "enabled": true,
+            "evidenceStatus": "sourceDerived",
+            "sourceRefs": [],
+            "reviewNotes": [],
+            "signals": [
+              "rulings",
+              "labels",
+              "fieldColumns",
+              "unassignedText"
+            ],
+            "combination": "union",
+            "requiresSuccessfulParsing": false
+          },
+          "fieldAssignment": {
+            "id": "assign-record",
+            "op": "assignFields",
+            "enabled": true,
+            "evidenceStatus": "sourceDerived",
+            "sourceRefs": [],
+            "reviewNotes": [],
+            "paddingPt": 1.5,
+            "assembly": "glyphClusters",
+            "splitAcrossFields": "requireGlyphGeometry",
+            "overlap": "retainAmbiguity",
+            "retainClippedSource": true
+          },
+          "fields": [
+            {
+              "id": "field-35",
+              "semanticName": "openingNet",
+              "rectPt": [
+                311.811024,
+                -10.771654,
+                374.173228,
+                0.0
+              ],
+              "parserRef": "money-comma",
+              "sourceRefs": [
+                {
+                  "file": "_HLKNIA4C.gmx",
+                  "line": 35,
+                  "rawCommand": "|CPDATABASE(1100,0,1320,38,0,0,0,1,0,1,16777215,2,5,8,0,0,0,400,0,0,0,238,3,2,1,18,\"Tahoma\",0,1,2,0,\"':*13.2'\",1,1,180,9,31,0)",
+                  "expression": ":*13.2"
+                }
+              ]
+            },
+            {
+              "id": "field-36",
+              "semanticName": "turnoverDebit",
+              "rectPt": [
+                379.84252,
+                -10.771654,
+                442.204724,
+                0.0
+              ],
+              "parserRef": "money-comma",
+              "sourceRefs": [
+                {
+                  "file": "_HLKNIA4C.gmx",
+                  "line": 36,
+                  "rawCommand": "|CPDATABASE(1340,0,1560,38,0,0,0,1,0,1,16777215,2,5,8,0,0,0,400,0,0,0,238,3,2,1,18,\"Tahoma\",0,1,2,0,\"':*13.2'\",1,1,180,9,31,0)",
+                  "expression": ":*13.2"
+                }
+              ]
+            },
+            {
+              "id": "field-37",
+              "semanticName": "turnoverCredit",
+              "rectPt": [
+                445.03937,
+                -10.771654,
+                507.401575,
+                0.0
+              ],
+              "parserRef": "money-comma",
+              "sourceRefs": [
+                {
+                  "file": "_HLKNIA4C.gmx",
+                  "line": 37,
+                  "rawCommand": "|CPDATABASE(1570,0,1790,38,0,0,0,1,0,1,16777215,2,5,8,0,0,0,400,0,0,0,238,3,2,1,18,\"Tahoma\",0,1,2,0,\"':*13.2'\",1,1,180,9,31,0)",
+                  "expression": ":*13.2"
+                }
+              ]
+            },
+            {
+              "id": "field-38",
+              "semanticName": "closingNet",
+              "rectPt": [
+                513.070866,
+                -10.771654,
+                575.433071,
+                0.0
+              ],
+              "parserRef": "money-comma",
+              "sourceRefs": [
+                {
+                  "file": "_HLKNIA4C.gmx",
+                  "line": 38,
+                  "rawCommand": "|CPDATABASE(1810,0,2030,38,0,0,0,1,0,1,16777215,2,5,8,0,0,0,400,0,0,0,238,3,2,1,18,\"Tahoma\",0,1,2,0,\"':*13.2'\",1,1,180,9,31,0)",
+                  "expression": ":*13.2"
+                }
+              ]
+            },
+            {
+              "id": "field-39",
+              "semanticName": "description",
+              "rectPt": [
+                96.377953,
+                -10.771654,
+                287.716535,
+                0.0
+              ],
+              "parserRef": "text",
+              "sourceRefs": [
+                {
+                  "file": "_HLKNIA4C.gmx",
+                  "line": 39,
+                  "rawCommand": "|CPDATABASE(340,0,1015,38,0,0,0,1,0,1,16777215,2,5,8,0,0,0,400,0,0,0,238,3,2,1,34,\"Tahoma\",0,0,2,0,\"'POPIS'\",1,0,0,0,0,0)",
+                  "expression": "POPIS"
+                }
+              ]
+            },
+            {
+              "id": "field-40",
+              "semanticName": "accountCode",
+              "rectPt": [
+                45.354331,
+                -10.771654,
+                79.086614,
+                0.0
+              ],
+              "parserRef": "code",
+              "sourceRefs": [
+                {
+                  "file": "_HLKNIA4C.gmx",
+                  "line": 40,
+                  "rawCommand": "|CPDATABASE(160,0,279,38,0,0,0,1,0,1,16777215,2,5,8,0,0,0,400,0,0,0,238,3,2,1,34,\"Tahoma\",0,0,2,0,\"'UCET'\",1,0,0,0,0,0)",
+                  "expression": "UCET"
+                }
+              ]
+            },
+            {
+              "id": "field-46",
+              "semanticName": "accountType",
+              "rectPt": [
+                82.204724,
+                -10.771654,
+                92.125984,
+                0.0
+              ],
+              "parserRef": "code",
+              "sourceRefs": [
+                {
+                  "file": "_HLKNIA4C.gmx",
+                  "line": 46,
+                  "rawCommand": "|CPDATABASE(290,0,325,38,0,0,0,1,0,1,16777215,2,5,8,0,0,0,400,0,0,0,238,3,2,1,34,\"Tahoma\",0,2,2,0,\"'TYP'\",1,0,0,0,0,0)",
+                  "expression": "TYP"
+                }
+              ]
+            }
+          ],
+          "labels": [],
+          "lines": [
+            {
+              "id": "line-41",
+              "pointsPt": [
+                [
+                  42.519685,
+                  -11.338583
+                ],
+                [
+                  578.267717,
+                  -11.338583
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_HLKNIA4C.gmx",
+                  "line": 41,
+                  "rawCommand": "|CPLINE(150,40,2040,40,1,1,0,0)"
+                }
+              ]
+            },
+            {
+              "id": "line-42",
+              "pointsPt": [
+                [
+                  510.23622,
+                  0.0
+                ],
+                [
+                  510.23622,
+                  -11.338583
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_HLKNIA4C.gmx",
+                  "line": 42,
+                  "rawCommand": "|CPLINE(1800,0,1800,40,1,0,0,0)"
+                }
+              ]
+            },
+            {
+              "id": "line-43",
+              "pointsPt": [
+                [
+                  578.267717,
+                  0.0
+                ],
+                [
+                  578.267717,
+                  -11.338583
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_HLKNIA4C.gmx",
+                  "line": 43,
+                  "rawCommand": "|CPLINE(2040,0,2040,40,4,0,0,0)"
+                }
+              ]
+            },
+            {
+              "id": "line-44",
+              "pointsPt": [
+                [
+                  377.007874,
+                  0.0
+                ],
+                [
+                  377.007874,
+                  -11.338583
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_HLKNIA4C.gmx",
+                  "line": 44,
+                  "rawCommand": "|CPLINE(1330,0,1330,40,1,0,0,0)"
+                }
+              ]
+            },
+            {
+              "id": "line-45",
+              "pointsPt": [
+                [
+                  308.976378,
+                  0.0
+                ],
+                [
+                  308.976378,
+                  -11.338583
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_HLKNIA4C.gmx",
+                  "line": 45,
+                  "rawCommand": "|CPLINE(1090,0,1090,40,1,0,0,0)"
+                }
+              ]
+            },
+            {
+              "id": "line-47",
+              "pointsPt": [
+                [
+                  42.519685,
+                  0.0
+                ],
+                [
+                  42.519685,
+                  -11.338583
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_HLKNIA4C.gmx",
+                  "line": 47,
+                  "rawCommand": "|CPLINE(150,0,150,40,4,0,0,0)"
+                }
+              ]
+            },
+            {
+              "id": "line-48",
+              "pointsPt": [
+                [
+                  93.543307,
+                  0.0
+                ],
+                [
+                  93.543307,
+                  -11.338583
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_HLKNIA4C.gmx",
+                  "line": 48,
+                  "rawCommand": "|CPLINE(330,0,330,40,1,0,0,0)"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "foot3",
+          "kind": "groupFooter",
+          "frame": "blockLocal",
+          "sourceRefs": [
+            {
+              "file": "_HLKNIA4C.gmx",
+              "rawCommand": "#FOOT3(40,0)"
+            }
+          ],
+          "nominalAdvancePt": 11.338583,
+          "emptyTemplate": false,
+          "placement": {
+            "id": "locate-foot3",
+            "op": "locateBlock",
+            "enabled": true,
+            "evidenceStatus": "sourceDerived",
+            "sourceRefs": [],
+            "reviewNotes": [],
+            "frame": "blockLocal",
+            "origin": "independentOccurrence",
+            "signals": [
+              "rulings",
+              "labels",
+              "fieldColumns",
+              "unassignedText"
+            ],
+            "combination": "union",
+            "onAmbiguous": "retainHypotheses"
+          },
+          "candidateDetection": {
+            "id": "detect-foot3",
+            "op": "detectCandidates",
+            "enabled": true,
+            "evidenceStatus": "sourceDerived",
+            "sourceRefs": [],
+            "reviewNotes": [],
+            "signals": [
+              "rulings",
+              "labels",
+              "fieldColumns",
+              "unassignedText"
+            ],
+            "combination": "union",
+            "requiresSuccessfulParsing": false
+          },
+          "fieldAssignment": {
+            "id": "assign-foot3",
+            "op": "assignFields",
+            "enabled": true,
+            "evidenceStatus": "sourceDerived",
+            "sourceRefs": [],
+            "reviewNotes": [],
+            "paddingPt": 1.5,
+            "assembly": "glyphClusters",
+            "splitAcrossFields": "requireGlyphGeometry",
+            "overlap": "retainAmbiguity",
+            "retainClippedSource": true
+          },
+          "fields": [
+            {
+              "id": "field-50",
+              "semanticName": "openingNet",
+              "rectPt": [
+                311.811024,
+                -9.354331,
+                374.456693,
+                0.0
+              ],
+              "parserRef": "money-comma",
+              "sourceRefs": [
+                {
+                  "file": "_HLKNIA4C.gmx",
+                  "line": 50,
+                  "rawCommand": "|CPDATABASE(1100,0,1321,33,0,0,0,1,0,1,16777215,2,5,7,0,0,0,700,0,0,0,238,3,2,1,18,\"Tahoma\",0,1,2,0,\"':*13.2'\",1,1,181,8,32,0)",
+                  "expression": ":*13.2"
+                }
+              ]
+            },
+            {
+              "id": "field-52",
+              "semanticName": "accountName",
+              "rectPt": [
+                96.377953,
+                -9.354331,
+                285.732283,
+                0.0
+              ],
+              "parserRef": "text",
+              "sourceRefs": [
+                {
+                  "file": "_HLKNIA4C.gmx",
+                  "line": 52,
+                  "rawCommand": "|CPDATABASE(340,0,1008,33,0,0,0,1,0,1,16777215,2,5,7,0,0,0,700,0,0,0,238,3,2,1,18,\"Tahoma\",0,0,2,0,\"'&BNAZOV'\",1,0,0,0,0,0)",
+                  "expression": "&BNAZOV"
+                }
+              ]
+            },
+            {
+              "id": "field-53",
+              "semanticName": "syntheticAccountCode",
+              "rectPt": [
+                45.354331,
+                -9.354331,
+                59.811024,
+                0.0
+              ],
+              "parserRef": "code",
+              "sourceRefs": [
+                {
+                  "file": "_HLKNIA4C.gmx",
+                  "line": 53,
+                  "rawCommand": "|CPDATABASE(160,0,211,33,0,0,0,1,0,1,16777215,2,5,7,0,0,0,700,0,0,0,238,3,2,1,34,\"Tahoma\",0,0,2,0,\"'UCET%3'\",1,0,0,0,0,0)",
+                  "expression": "UCET%3"
+                }
+              ]
+            },
+            {
+              "id": "field-55",
+              "semanticName": "turnoverDebit",
+              "rectPt": [
+                379.84252,
+                -9.354331,
+                442.488189,
+                0.0
+              ],
+              "parserRef": "money-comma",
+              "sourceRefs": [
+                {
+                  "file": "_HLKNIA4C.gmx",
+                  "line": 55,
+                  "rawCommand": "|CPDATABASE(1340,0,1561,33,0,0,0,1,0,1,16777215,2,5,7,0,0,0,700,0,0,0,238,3,2,1,18,\"Tahoma\",0,1,2,0,\"':*13.2'\",1,1,181,8,32,0)",
+                  "expression": ":*13.2"
+                }
+              ]
+            },
+            {
+              "id": "field-56",
+              "semanticName": "turnoverCredit",
+              "rectPt": [
+                445.03937,
+                -9.354331,
+                507.685039,
+                0.0
+              ],
+              "parserRef": "money-comma",
+              "sourceRefs": [
+                {
+                  "file": "_HLKNIA4C.gmx",
+                  "line": 56,
+                  "rawCommand": "|CPDATABASE(1570,0,1791,33,0,0,0,1,0,1,16777215,2,5,7,0,0,0,700,0,0,0,238,3,2,1,18,\"Tahoma\",0,1,2,0,\"':*13.2'\",1,1,181,8,32,0)",
+                  "expression": ":*13.2"
+                }
+              ]
+            },
+            {
+              "id": "field-57",
+              "semanticName": "closingNet",
+              "rectPt": [
+                513.070866,
+                -9.354331,
+                575.716535,
+                0.0
+              ],
+              "parserRef": "money-comma",
+              "sourceRefs": [
+                {
+                  "file": "_HLKNIA4C.gmx",
+                  "line": 57,
+                  "rawCommand": "|CPDATABASE(1810,0,2031,33,0,0,0,1,0,1,16777215,2,5,7,0,0,0,700,0,0,0,238,3,2,1,18,\"Tahoma\",0,1,2,0,\"':*13.2'\",1,1,181,8,32,0)",
+                  "expression": ":*13.2"
+                }
+              ]
+            }
+          ],
+          "labels": [
+            {
+              "id": "label-54",
+              "text": "****",
+              "rectPt": [
+                62.362205,
+                -9.354331,
+                80.220472,
+                0.0
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_HLKNIA4C.gmx",
+                  "line": 54,
+                  "rawCommand": "|CPLABEL(220,0,283,33,0,0,0,1,0,1,16777215,2,5,7,0,0,0,700,0,0,0,238,3,2,1,34,\"Tahoma\",0,0,2,\"****\")"
+                }
+              ]
+            }
+          ],
+          "lines": [
+            {
+              "id": "line-51",
+              "pointsPt": [
+                [
+                  42.519685,
+                  -11.338583
+                ],
+                [
+                  578.267717,
+                  -11.338583
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_HLKNIA4C.gmx",
+                  "line": 51,
+                  "rawCommand": "|CPLINE(150,40,2040,40,1,0,0,0)"
+                }
+              ]
+            },
+            {
+              "id": "line-58",
+              "pointsPt": [
+                [
+                  510.23622,
+                  0.0
+                ],
+                [
+                  510.23622,
+                  -11.338583
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_HLKNIA4C.gmx",
+                  "line": 58,
+                  "rawCommand": "|CPLINE(1800,0,1800,40,1,0,0,0)"
+                }
+              ]
+            },
+            {
+              "id": "line-59",
+              "pointsPt": [
+                [
+                  377.007874,
+                  0.0
+                ],
+                [
+                  377.007874,
+                  -11.338583
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_HLKNIA4C.gmx",
+                  "line": 59,
+                  "rawCommand": "|CPLINE(1330,0,1330,40,1,0,0,0)"
+                }
+              ]
+            },
+            {
+              "id": "line-60",
+              "pointsPt": [
+                [
+                  308.976378,
+                  0.0
+                ],
+                [
+                  308.976378,
+                  -11.338583
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_HLKNIA4C.gmx",
+                  "line": 60,
+                  "rawCommand": "|CPLINE(1090,0,1090,40,1,0,0,0)"
+                }
+              ]
+            },
+            {
+              "id": "line-61",
+              "pointsPt": [
+                [
+                  42.519685,
+                  0.0
+                ],
+                [
+                  42.519685,
+                  -11.338583
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_HLKNIA4C.gmx",
+                  "line": 61,
+                  "rawCommand": "|CPLINE(150,0,150,40,4,0,0,0)"
+                }
+              ]
+            },
+            {
+              "id": "line-62",
+              "pointsPt": [
+                [
+                  93.543307,
+                  0.0
+                ],
+                [
+                  93.543307,
+                  -11.338583
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_HLKNIA4C.gmx",
+                  "line": 62,
+                  "rawCommand": "|CPLINE(330,0,330,40,1,0,0,0)"
+                }
+              ]
+            },
+            {
+              "id": "line-63",
+              "pointsPt": [
+                [
+                  578.267717,
+                  0.0
+                ],
+                [
+                  578.267717,
+                  -11.338583
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_HLKNIA4C.gmx",
+                  "line": 63,
+                  "rawCommand": "|CPLINE(2040,0,2040,40,4,0,0,0)"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "foot2",
+          "kind": "groupFooter",
+          "frame": "blockLocal",
+          "sourceRefs": [
+            {
+              "file": "_HLKNIA4C.gmx",
+              "rawCommand": "#FOOT2(60,0)"
+            }
+          ],
+          "nominalAdvancePt": 17.007874,
+          "emptyTemplate": false,
+          "placement": {
+            "id": "locate-foot2",
+            "op": "locateBlock",
+            "enabled": true,
+            "evidenceStatus": "sourceDerived",
+            "sourceRefs": [],
+            "reviewNotes": [],
+            "frame": "blockLocal",
+            "origin": "independentOccurrence",
+            "signals": [
+              "rulings",
+              "labels",
+              "fieldColumns",
+              "unassignedText"
+            ],
+            "combination": "union",
+            "onAmbiguous": "retainHypotheses"
+          },
+          "candidateDetection": {
+            "id": "detect-foot2",
+            "op": "detectCandidates",
+            "enabled": true,
+            "evidenceStatus": "sourceDerived",
+            "sourceRefs": [],
+            "reviewNotes": [],
+            "signals": [
+              "rulings",
+              "labels",
+              "fieldColumns",
+              "unassignedText"
+            ],
+            "combination": "union",
+            "requiresSuccessfulParsing": false
+          },
+          "fieldAssignment": {
+            "id": "assign-foot2",
+            "op": "assignFields",
+            "enabled": true,
+            "evidenceStatus": "sourceDerived",
+            "sourceRefs": [],
+            "reviewNotes": [],
+            "paddingPt": 1.5,
+            "assembly": "glyphClusters",
+            "splitAcrossFields": "requireGlyphGeometry",
+            "overlap": "retainAmbiguity",
+            "retainClippedSource": true
+          },
+          "fields": [
+            {
+              "id": "field-65",
+              "semanticName": "accountClassCode",
+              "rectPt": [
+                45.354331,
+                -12.755906,
+                50.740157,
+                -2.834646
+              ],
+              "parserRef": "code",
+              "sourceRefs": [
+                {
+                  "file": "_HLKNIA4C.gmx",
+                  "line": 65,
+                  "rawCommand": "|CPDATABASE(160,10,179,45,0,0,0,1,0,1,16777215,2,5,8,0,0,0,700,0,0,0,238,3,2,1,18,\"Arial\",0,0,2,0,\"'UCET%1'\",1,0,0,0,0,0)",
+                  "expression": "UCET%1"
+                }
+              ]
+            },
+            {
+              "id": "field-76",
+              "semanticName": "openingNet",
+              "rectPt": [
+                311.811024,
+                -12.188976,
+                374.456693,
+                -2.834646
+              ],
+              "parserRef": "money-comma",
+              "sourceRefs": [
+                {
+                  "file": "_HLKNIA4C.gmx",
+                  "line": 76,
+                  "rawCommand": "|CPDATABASE(1100,10,1321,43,0,0,0,1,0,1,16777215,2,5,7,0,0,0,700,0,0,0,238,3,2,1,18,\"Tahoma\",0,1,2,0,\"':*13.2'\",1,1,181,8,32,0)",
+                  "expression": ":*13.2"
+                }
+              ]
+            },
+            {
+              "id": "field-77",
+              "semanticName": "turnoverDebit",
+              "rectPt": [
+                379.84252,
+                -12.188976,
+                442.488189,
+                -2.834646
+              ],
+              "parserRef": "money-comma",
+              "sourceRefs": [
+                {
+                  "file": "_HLKNIA4C.gmx",
+                  "line": 77,
+                  "rawCommand": "|CPDATABASE(1340,10,1561,43,0,0,0,1,0,1,16777215,2,5,7,0,0,0,700,0,0,0,238,3,2,1,18,\"Tahoma\",0,1,2,0,\"':*13.2'\",1,1,181,8,32,0)",
+                  "expression": ":*13.2"
+                }
+              ]
+            },
+            {
+              "id": "field-78",
+              "semanticName": "turnoverCredit",
+              "rectPt": [
+                445.03937,
+                -12.188976,
+                507.685039,
+                -2.834646
+              ],
+              "parserRef": "money-comma",
+              "sourceRefs": [
+                {
+                  "file": "_HLKNIA4C.gmx",
+                  "line": 78,
+                  "rawCommand": "|CPDATABASE(1570,10,1791,43,0,0,0,1,0,1,16777215,2,5,7,0,0,0,700,0,0,0,238,3,2,1,18,\"Tahoma\",0,1,2,0,\"':*13.2'\",1,1,181,8,32,0)",
+                  "expression": ":*13.2"
+                }
+              ]
+            },
+            {
+              "id": "field-79",
+              "semanticName": "closingNet",
+              "rectPt": [
+                513.070866,
+                -12.188976,
+                575.716535,
+                -2.834646
+              ],
+              "parserRef": "money-comma",
+              "sourceRefs": [
+                {
+                  "file": "_HLKNIA4C.gmx",
+                  "line": 79,
+                  "rawCommand": "|CPDATABASE(1810,10,2031,43,0,0,0,1,0,1,16777215,2,5,7,0,0,0,700,0,0,0,238,3,2,1,18,\"Tahoma\",0,1,2,0,\"':*13.2'\",1,1,181,8,32,0)",
+                  "expression": ":*13.2"
+                }
+              ]
+            }
+          ],
+          "labels": [
+            {
+              "id": "label-67",
+              "text": "MEDZISÚČET ZA TRIEDU",
+              "rectPt": [
+                96.377953,
+                -12.755906,
+                192.188976,
+                -2.834646
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_HLKNIA4C.gmx",
+                  "line": 67,
+                  "rawCommand": "|CPLABEL(340,10,678,45,0,0,0,1,0,1,16777215,2,5,8,0,0,0,400,0,0,0,238,3,2,1,18,\"Arial\",0,0,2,\"MEDZISÚČET ZA TRIEDU\")"
+                }
+              ]
+            },
+            {
+              "id": "label-68",
+              "text": "**",
+              "rectPt": [
+                51.023622,
+                -12.755906,
+                57.259843,
+                -2.834646
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_HLKNIA4C.gmx",
+                  "line": 68,
+                  "rawCommand": "|CPLABEL(180,10,202,45,0,0,0,1,0,1,16777215,2,5,8,0,0,0,400,0,0,0,238,3,2,1,18,\"Arial\",0,0,2,\"**\")"
+                }
+              ]
+            }
+          ],
+          "lines": [
+            {
+              "id": "line-66",
+              "pointsPt": [
+                [
+                  42.519685,
+                  0.0
+                ],
+                [
+                  42.519685,
+                  -17.007874
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_HLKNIA4C.gmx",
+                  "line": 66,
+                  "rawCommand": "|CPLINE(150,0,150,60,4,0,0,0)"
+                }
+              ]
+            },
+            {
+              "id": "line-69",
+              "pointsPt": [
+                [
+                  308.976378,
+                  0.0
+                ],
+                [
+                  308.976378,
+                  -17.007874
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_HLKNIA4C.gmx",
+                  "line": 69,
+                  "rawCommand": "|CPLINE(1090,0,1090,60,1,0,0,0)"
+                }
+              ]
+            },
+            {
+              "id": "line-70",
+              "pointsPt": [
+                [
+                  578.267717,
+                  0.0
+                ],
+                [
+                  578.267717,
+                  -17.007874
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_HLKNIA4C.gmx",
+                  "line": 70,
+                  "rawCommand": "|CPLINE(2040,0,2040,60,4,0,0,0)"
+                }
+              ]
+            },
+            {
+              "id": "line-71",
+              "pointsPt": [
+                [
+                  510.23622,
+                  0.0
+                ],
+                [
+                  510.23622,
+                  -17.007874
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_HLKNIA4C.gmx",
+                  "line": 71,
+                  "rawCommand": "|CPLINE(1800,0,1800,60,1,0,0,0)"
+                }
+              ]
+            },
+            {
+              "id": "line-72",
+              "pointsPt": [
+                [
+                  377.007874,
+                  0.0
+                ],
+                [
+                  377.007874,
+                  -17.007874
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_HLKNIA4C.gmx",
+                  "line": 72,
+                  "rawCommand": "|CPLINE(1330,0,1330,60,1,0,0,0)"
+                }
+              ]
+            },
+            {
+              "id": "line-73",
+              "pointsPt": [
+                [
+                  42.519685,
+                  -17.007874
+                ],
+                [
+                  578.267717,
+                  -17.007874
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_HLKNIA4C.gmx",
+                  "line": 73,
+                  "rawCommand": "|CPLINE(150,60,2040,60,4,0,0,0)"
+                }
+              ]
+            },
+            {
+              "id": "line-74",
+              "pointsPt": [
+                [
+                  42.519685,
+                  0.0
+                ],
+                [
+                  578.267717,
+                  0.0
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_HLKNIA4C.gmx",
+                  "line": 74,
+                  "rawCommand": "|CPLINE(150,0,2040,0,4,0,0,0)"
+                }
+              ]
+            },
+            {
+              "id": "line-75",
+              "pointsPt": [
+                [
+                  93.543307,
+                  0.0
+                ],
+                [
+                  93.543307,
+                  -17.007874
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_HLKNIA4C.gmx",
+                  "line": 75,
+                  "rawCommand": "|CPLINE(330,0,330,60,1,0,0,0)"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "foot1",
+          "kind": "reportFooter",
+          "frame": "blockLocal",
+          "sourceRefs": [
+            {
+              "file": "_HLKNIA4C.gmx",
+              "rawCommand": "#FOOT1(210,1)"
+            }
+          ],
+          "nominalAdvancePt": 59.527559,
+          "emptyTemplate": false,
+          "placement": {
+            "id": "locate-foot1",
+            "op": "locateBlock",
+            "enabled": true,
+            "evidenceStatus": "sourceDerived",
+            "sourceRefs": [],
+            "reviewNotes": [],
+            "frame": "blockLocal",
+            "origin": "independentOccurrence",
+            "signals": [
+              "rulings",
+              "labels",
+              "fieldColumns",
+              "unassignedText"
+            ],
+            "combination": "union",
+            "onAmbiguous": "retainHypotheses"
+          },
+          "candidateDetection": {
+            "id": "detect-foot1",
+            "op": "detectCandidates",
+            "enabled": true,
+            "evidenceStatus": "sourceDerived",
+            "sourceRefs": [],
+            "reviewNotes": [],
+            "signals": [
+              "rulings",
+              "labels",
+              "fieldColumns",
+              "unassignedText"
+            ],
+            "combination": "union",
+            "requiresSuccessfulParsing": false
+          },
+          "fieldAssignment": {
+            "id": "assign-foot1",
+            "op": "assignFields",
+            "enabled": true,
+            "evidenceStatus": "sourceDerived",
+            "sourceRefs": [],
+            "reviewNotes": [],
+            "paddingPt": 1.5,
+            "assembly": "glyphClusters",
+            "splitAcrossFields": "requireGlyphGeometry",
+            "overlap": "retainAmbiguity",
+            "retainClippedSource": true
+          },
+          "fields": [
+            {
+              "id": "field-94",
+              "semanticName": "licensedUserText",
+              "rectPt": [
+                357.165354,
+                -71.716535,
+                524.409449,
+                -62.362205
+              ],
+              "parserRef": "text",
+              "sourceRefs": [
+                {
+                  "file": "_HLKNIA4C.gmx",
+                  "line": 94,
+                  "rawCommand": "|CPDATABASE(1260,220,1850,253,1,0,0,1,16777215,1,0,2,5,7,0,0,0,400,0,0,0,238,3,2,1,18,\"Tahoma\",0,0,2,0,\"'$USER'\",1,0,0,0,0,0)",
+                  "expression": "$USER"
+                }
+              ]
+            },
+            {
+              "id": "field-98",
+              "semanticName": "source_REV",
+              "rectPt": [
+                158.740157,
+                -71.716535,
+                180.0,
+                -62.362205
+              ],
+              "parserRef": "text",
+              "sourceRefs": [
+                {
+                  "file": "_HLKNIA4C.gmx",
+                  "line": 98,
+                  "rawCommand": "|CPDATABASE(560,220,635,253,0,0,0,1,0,1,16777215,2,5,7,0,0,0,400,0,0,0,238,3,2,1,34,\"Tahoma\",0,0,2,0,\"'^REV'\",1,0,0,0,0,0)",
+                  "expression": "^REV"
+                }
+              ]
+            },
+            {
+              "id": "field-99",
+              "semanticName": "source_SP",
+              "rectPt": [
+                181.417323,
+                -71.716535,
+                202.677165,
+                -62.362205
+              ],
+              "parserRef": "text",
+              "sourceRefs": [
+                {
+                  "file": "_HLKNIA4C.gmx",
+                  "line": 99,
+                  "rawCommand": "|CPDATABASE(640,220,715,253,0,0,0,1,0,1,16777215,2,5,7,0,0,0,400,0,0,0,238,3,2,1,34,\"Tahoma\",0,0,2,0,\"'^SP'\",1,0,0,0,0,0)",
+                  "expression": "^SP"
+                }
+              ]
+            },
+            {
+              "id": "field-100",
+              "semanticName": "source_HMENO",
+              "rectPt": [
+                79.370079,
+                -30.614173,
+                198.992126,
+                -19.84252
+              ],
+              "parserRef": "text",
+              "sourceRefs": [
+                {
+                  "file": "_HLKNIA4C.gmx",
+                  "line": 100,
+                  "rawCommand": "|CPDATABASE(280,70,702,108,0,0,0,1,0,1,16777215,2,5,8,0,0,0,400,0,0,0,238,3,2,1,34,\"Tahoma\",0,0,2,0,\"'^&HMENO'\",1,0,0,0,0,0)",
+                  "expression": "^&HMENO"
+                }
+              ]
+            },
+            {
+              "id": "field-101",
+              "semanticName": "source_IMENO",
+              "rectPt": [
+                277.795276,
+                -30.614173,
+                397.417323,
+                -19.84252
+              ],
+              "parserRef": "text",
+              "sourceRefs": [
+                {
+                  "file": "_HLKNIA4C.gmx",
+                  "line": 101,
+                  "rawCommand": "|CPDATABASE(980,70,1402,108,0,0,0,1,0,1,16777215,2,5,8,0,0,0,400,0,0,0,238,3,2,1,34,\"Tahoma\",0,0,2,0,\"'^&IMENO'\",1,0,0,0,0,0)",
+                  "expression": "^&IMENO"
+                }
+              ]
+            },
+            {
+              "id": "field-102",
+              "semanticName": "source_JMENO",
+              "rectPt": [
+                456.377953,
+                -30.614173,
+                576.0,
+                -19.84252
+              ],
+              "parserRef": "text",
+              "sourceRefs": [
+                {
+                  "file": "_HLKNIA4C.gmx",
+                  "line": 102,
+                  "rawCommand": "|CPDATABASE(1610,70,2032,108,0,0,0,1,0,1,16777215,2,5,8,0,0,0,400,0,0,0,238,3,2,1,34,\"Tahoma\",0,0,2,0,\"'^&JMENO'\",1,0,0,0,0,0)",
+                  "expression": "^&JMENO"
+                }
+              ]
+            },
+            {
+              "id": "field-104",
+              "semanticName": "openingNet",
+              "rectPt": [
+                311.811024,
+                -12.188976,
+                374.456693,
+                -2.834646
+              ],
+              "parserRef": "money-comma",
+              "sourceRefs": [
+                {
+                  "file": "_HLKNIA4C.gmx",
+                  "line": 104,
+                  "rawCommand": "|CPDATABASE(1100,10,1321,43,0,0,0,1,0,1,16777215,2,5,7,0,0,0,700,0,0,0,238,3,2,1,18,\"Tahoma\",0,1,2,0,\"':*13.2'\",1,1,181,8,32,0)",
+                  "expression": ":*13.2"
+                }
+              ]
+            },
+            {
+              "id": "field-105",
+              "semanticName": "turnoverDebit",
+              "rectPt": [
+                379.84252,
+                -12.188976,
+                442.488189,
+                -2.834646
+              ],
+              "parserRef": "money-comma",
+              "sourceRefs": [
+                {
+                  "file": "_HLKNIA4C.gmx",
+                  "line": 105,
+                  "rawCommand": "|CPDATABASE(1340,10,1561,43,0,0,0,1,0,1,16777215,2,5,7,0,0,0,700,0,0,0,238,3,2,1,18,\"Tahoma\",0,1,2,0,\"':*13.2'\",1,1,181,8,32,0)",
+                  "expression": ":*13.2"
+                }
+              ]
+            },
+            {
+              "id": "field-106",
+              "semanticName": "turnoverCredit",
+              "rectPt": [
+                445.03937,
+                -12.188976,
+                507.685039,
+                -2.834646
+              ],
+              "parserRef": "money-comma",
+              "sourceRefs": [
+                {
+                  "file": "_HLKNIA4C.gmx",
+                  "line": 106,
+                  "rawCommand": "|CPDATABASE(1570,10,1791,43,0,0,0,1,0,1,16777215,2,5,7,0,0,0,700,0,0,0,238,3,2,1,18,\"Tahoma\",0,1,2,0,\"':*13.2'\",1,1,181,8,32,0)",
+                  "expression": ":*13.2"
+                }
+              ]
+            },
+            {
+              "id": "field-107",
+              "semanticName": "closingNet",
+              "rectPt": [
+                513.070866,
+                -12.188976,
+                575.716535,
+                -2.834646
+              ],
+              "parserRef": "money-comma",
+              "sourceRefs": [
+                {
+                  "file": "_HLKNIA4C.gmx",
+                  "line": 107,
+                  "rawCommand": "|CPDATABASE(1810,10,2031,43,0,0,0,1,0,1,16777215,2,5,7,0,0,0,700,0,0,0,238,3,2,1,18,\"Tahoma\",0,1,2,0,\"':*13.2'\",1,1,181,8,32,0)",
+                  "expression": ":*13.2"
+                }
+              ]
+            }
+          ],
+          "labels": [
+            {
+              "id": "label-81",
+              "text": "***",
+              "rectPt": [
+                45.354331,
+                -13.606299,
+                58.677165,
+                -2.834646
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_HLKNIA4C.gmx",
+                  "line": 81,
+                  "rawCommand": "|CPLABEL(160,10,207,48,0,0,0,1,0,1,16777215,2,5,8,0,0,0,400,0,0,0,238,3,2,1,18,\"Tahoma\",0,0,2,\"***\")"
+                }
+              ]
+            },
+            {
+              "id": "label-88",
+              "text": "KONTROLNÝ SÚČET",
+              "rectPt": [
+                96.377953,
+                -12.755906,
+                175.748031,
+                -2.834646
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_HLKNIA4C.gmx",
+                  "line": 88,
+                  "rawCommand": "|CPLABEL(340,10,620,45,0,0,0,1,0,1,16777215,2,5,8,0,0,0,400,0,0,0,238,3,2,1,18,\"Arial\",0,0,2,\"KONTROLNÝ SÚČET\")"
+                }
+              ]
+            },
+            {
+              "id": "label-92",
+              "text": "© IFOsoft",
+              "rectPt": [
+                45.354331,
+                -71.716535,
+                83.055118,
+                -62.362205
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_HLKNIA4C.gmx",
+                  "line": 92,
+                  "rawCommand": "|CPLABEL(160,220,293,253,1,0,0,1,16777215,1,0,2,5,7,0,0,0,700,1,0,0,238,3,2,1,18,\"Tahoma\",0,0,2,\"© IFOsoft\")"
+                }
+              ]
+            },
+            {
+              "id": "label-93",
+              "text": "Informačné systémy V",
+              "rectPt": [
+                85.03937,
+                -71.716535,
+                157.606299,
+                -62.362205
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_HLKNIA4C.gmx",
+                  "line": 93,
+                  "rawCommand": "|CPLABEL(300,220,556,253,0,0,0,1,0,1,16777215,2,5,7,0,0,0,400,1,0,0,238,3,2,1,34,\"Tahoma\",0,0,2,\"Informačné systémy V\")"
+                }
+              ]
+            },
+            {
+              "id": "label-95",
+              "text": "Používateľ programu:",
+              "rectPt": [
+                289.133858,
+                -71.716535,
+                355.464567,
+                -62.362205
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_HLKNIA4C.gmx",
+                  "line": 95,
+                  "rawCommand": "|CPLABEL(1020,220,1254,253,1,0,0,1,16777215,1,0,2,5,7,0,0,0,400,0,0,0,238,3,2,1,18,\"Tahoma\",0,1,2,\"Používateľ programu:\")"
+                }
+              ]
+            },
+            {
+              "id": "label-96",
+              "text": "Kontroloval:",
+              "rectPt": [
+                232.440945,
+                -30.614173,
+                274.393701,
+                -19.84252
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_HLKNIA4C.gmx",
+                  "line": 96,
+                  "rawCommand": "|CPLABEL(820,70,968,108,1,0,0,1,16777215,1,0,2,5,8,0,0,0,400,0,0,0,238,3,2,1,18,\"Tahoma\",0,0,2,\"Kontroloval:\")"
+                }
+              ]
+            },
+            {
+              "id": "label-97",
+              "text": "Schválil:",
+              "rectPt": [
+                425.19685,
+                -30.614173,
+                454.393701,
+                -19.84252
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_HLKNIA4C.gmx",
+                  "line": 97,
+                  "rawCommand": "|CPLABEL(1500,70,1603,108,1,0,0,1,16777215,1,0,2,5,8,0,0,0,400,0,0,0,238,3,2,1,18,\"Tahoma\",0,0,2,\"Schválil:\")"
+                }
+              ]
+            }
+          ],
+          "lines": [
+            {
+              "id": "line-82",
+              "pointsPt": [
+                [
+                  510.23622,
+                  0.0
+                ],
+                [
+                  510.23622,
+                  -17.007874
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_HLKNIA4C.gmx",
+                  "line": 82,
+                  "rawCommand": "|CPLINE(1800,0,1800,60,1,0,0,0)"
+                }
+              ]
+            },
+            {
+              "id": "line-83",
+              "pointsPt": [
+                [
+                  578.267717,
+                  0.0
+                ],
+                [
+                  578.267717,
+                  -59.527559
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_HLKNIA4C.gmx",
+                  "line": 83,
+                  "rawCommand": "|CPLINE(2040,0,2040,210,4,0,0,0)"
+                }
+              ]
+            },
+            {
+              "id": "line-84",
+              "pointsPt": [
+                [
+                  308.976378,
+                  0.0
+                ],
+                [
+                  308.976378,
+                  -17.007874
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_HLKNIA4C.gmx",
+                  "line": 84,
+                  "rawCommand": "|CPLINE(1090,0,1090,60,1,0,0,0)"
+                }
+              ]
+            },
+            {
+              "id": "line-85",
+              "pointsPt": [
+                [
+                  377.007874,
+                  0.0
+                ],
+                [
+                  377.007874,
+                  -17.007874
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_HLKNIA4C.gmx",
+                  "line": 85,
+                  "rawCommand": "|CPLINE(1330,0,1330,60,1,0,0,0)"
+                }
+              ]
+            },
+            {
+              "id": "line-86",
+              "pointsPt": [
+                [
+                  42.519685,
+                  -17.007874
+                ],
+                [
+                  578.267717,
+                  -17.007874
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_HLKNIA4C.gmx",
+                  "line": 86,
+                  "rawCommand": "|CPLINE(150,60,2040,60,4,0,0,0)"
+                }
+              ]
+            },
+            {
+              "id": "line-87",
+              "pointsPt": [
+                [
+                  42.519685,
+                  0.0
+                ],
+                [
+                  578.267717,
+                  0.0
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_HLKNIA4C.gmx",
+                  "line": 87,
+                  "rawCommand": "|CPLINE(150,0,2040,0,4,0,0,0)"
+                }
+              ]
+            },
+            {
+              "id": "line-89",
+              "pointsPt": [
+                [
+                  42.519685,
+                  0.0
+                ],
+                [
+                  42.519685,
+                  -59.527559
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_HLKNIA4C.gmx",
+                  "line": 89,
+                  "rawCommand": "|CPLINE(150,0,150,210,4,0,0,0)"
+                }
+              ]
+            },
+            {
+              "id": "line-90",
+              "pointsPt": [
+                [
+                  578.267717,
+                  0.0
+                ],
+                [
+                  578.267717,
+                  -59.527559
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_HLKNIA4C.gmx",
+                  "line": 90,
+                  "rawCommand": "|CPLINE(2040,0,2040,210,4,0,0,0)"
+                }
+              ]
+            },
+            {
+              "id": "line-91",
+              "pointsPt": [
+                [
+                  93.543307,
+                  0.0
+                ],
+                [
+                  93.543307,
+                  -17.007874
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_HLKNIA4C.gmx",
+                  "line": 91,
+                  "rawCommand": "|CPLINE(330,0,330,60,1,0,0,0)"
+                }
+              ]
+            },
+            {
+              "id": "line-103",
+              "pointsPt": [
+                [
+                  42.519685,
+                  -59.527559
+                ],
+                [
+                  578.267717,
+                  -59.527559
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_HLKNIA4C.gmx",
+                  "line": 103,
+                  "rawCommand": "|CPLINE(150,210,2040,210,4,0,0,0)"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "pagefoot",
+          "kind": "decoration",
+          "frame": "blockLocal",
+          "sourceRefs": [
+            {
+              "file": "_HLKNIA4C.gmx",
+              "rawCommand": "#PAGEFOOT(1,0)"
+            }
+          ],
+          "nominalAdvancePt": 0.283465,
+          "emptyTemplate": false,
+          "placement": {
+            "id": "locate-pagefoot",
+            "op": "locateBlock",
+            "enabled": true,
+            "evidenceStatus": "sourceDerived",
+            "sourceRefs": [],
+            "reviewNotes": [],
+            "frame": "blockLocal",
+            "origin": "independentOccurrence",
+            "signals": [
+              "rulings",
+              "labels",
+              "fieldColumns",
+              "unassignedText"
+            ],
+            "combination": "union",
+            "onAmbiguous": "retainHypotheses"
+          },
+          "candidateDetection": {
+            "id": "detect-pagefoot",
+            "op": "detectCandidates",
+            "enabled": true,
+            "evidenceStatus": "sourceDerived",
+            "sourceRefs": [],
+            "reviewNotes": [],
+            "signals": [
+              "rulings",
+              "labels",
+              "fieldColumns",
+              "unassignedText"
+            ],
+            "combination": "union",
+            "requiresSuccessfulParsing": false
+          },
+          "fieldAssignment": {
+            "id": "assign-pagefoot",
+            "op": "assignFields",
+            "enabled": true,
+            "evidenceStatus": "sourceDerived",
+            "sourceRefs": [],
+            "reviewNotes": [],
+            "paddingPt": 1.5,
+            "assembly": "glyphClusters",
+            "splitAcrossFields": "requireGlyphGeometry",
+            "overlap": "retainAmbiguity",
+            "retainClippedSource": true
+          },
+          "fields": [],
+          "labels": [],
+          "lines": [
+            {
+              "id": "line-109",
+              "pointsPt": [
+                [
+                  42.519685,
+                  0.0
+                ],
+                [
+                  578.267717,
+                  0.0
+                ]
+              ],
+              "sourceRefs": [
+                {
+                  "file": "_HLKNIA4C.gmx",
+                  "line": 109,
+                  "rawCommand": "|CPLINE(150,0,2040,0,4,0,0,0)"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "calibration": {
+        "id": "page-calibration",
+        "op": "fitUniformScaleTranslation",
+        "enabled": true,
+        "evidenceStatus": "unverified",
+        "sourceRefs": [],
+        "reviewNotes": [
+          "Provisional thresholds retained from draft 2; require corpus tuning."
+        ],
+        "anchorRefs": [
+          "anchor-1",
+          "anchor-2",
+          "anchor-3",
+          "anchor-4",
+          "anchor-5",
+          "anchor-6",
+          "anchor-7",
+          "anchor-8",
+          "anchor-9",
+          "anchor-10",
+          "anchor-11",
+          "anchor-12",
+          "anchor-13",
+          "anchor-14"
+        ],
+        "minimumInliers": 3,
+        "minimumAnchorSeparationPt": 150,
+        "minimumSpanPt": [
+          150,
+          10
+        ],
+        "scaleRange": [
+          0.65,
+          1.4
+        ],
+        "maximumResidualPt": 1.5,
+        "maximumHypotheses": 256,
+        "onFailure": "retainUnresolvedPage",
+        "inferScaleFromPageSize": false
+      }
+    }
+  ],
+  "metadata": [
+    {
+      "id": "original.pagehead.field-8",
+      "semanticName": "licensedUserText",
+      "locator": {
+        "kind": "blockField",
+        "variantRef": "original",
+        "blockRef": "pagehead",
+        "fieldRef": "field-8",
+        "frame": "nominalPage",
+        "pages": {
+          "selection": "all",
+          "indices": [],
+          "maximumPages": 10000
+        },
+        "assembly": "glyphClusters",
+        "cardinality": "zeroOrOne"
+      },
+      "parserRef": "text",
+      "onAbsent": "unresolved",
+      "onConflict": "ambiguous",
+      "sourceRefs": [
+        {
+          "file": "_HLKNIA4C.gmx",
+          "line": 8,
+          "rawCommand": "|CPDATABASE(1350,40,2025,78,0,0,0,1,0,1,16777215,2,5,8,0,0,0,400,0,0,0,238,3,2,1,34,\"Tahoma\",0,1,2,0,\"'$USER'\",1,0,0,0,0,0)",
+          "expression": "$USER"
+        }
+      ]
+    },
+    {
+      "id": "original.pagehead.field-11",
+      "semanticName": "period.start",
+      "locator": {
+        "kind": "blockField",
+        "variantRef": "original",
+        "blockRef": "pagehead",
+        "fieldRef": "field-11",
+        "frame": "nominalPage",
+        "pages": {
+          "selection": "all",
+          "indices": [],
+          "maximumPages": 10000
+        },
+        "assembly": "glyphClusters",
+        "cardinality": "zeroOrOne"
+      },
+      "parserRef": "period",
+      "onAbsent": "unresolved",
+      "onConflict": "ambiguous",
+      "sourceRefs": [
+        {
+          "file": "_HLKNIA4C.gmx",
+          "line": 11,
+          "rawCommand": "|CPDATABASE(1500,80,1619,118,0,0,0,1,0,1,16777215,2,5,8,0,0,0,400,0,0,0,238,3,2,1,34,\"Tahoma\",0,0,2,0,\"'^K_OD'\",1,0,0,0,0,0)",
+          "expression": "^K_OD"
+        }
+      ]
+    },
+    {
+      "id": "original.pagehead.field-12",
+      "semanticName": "period.end",
+      "locator": {
+        "kind": "blockField",
+        "variantRef": "original",
+        "blockRef": "pagehead",
+        "fieldRef": "field-12",
+        "frame": "nominalPage",
+        "pages": {
+          "selection": "all",
+          "indices": [],
+          "maximumPages": 10000
+        },
+        "assembly": "glyphClusters",
+        "cardinality": "zeroOrOne"
+      },
+      "parserRef": "period",
+      "onAbsent": "unresolved",
+      "onConflict": "ambiguous",
+      "sourceRefs": [
+        {
+          "file": "_HLKNIA4C.gmx",
+          "line": 12,
+          "rawCommand": "|CPDATABASE(1670,80,1789,118,0,0,0,1,0,1,16777215,2,5,8,0,0,0,400,0,0,0,238,3,2,1,34,\"Tahoma\",0,0,2,0,\"'^K_DO'\",1,0,0,0,0,0)",
+          "expression": "^K_DO"
+        }
+      ]
+    },
+    {
+      "id": "original.pagehead.field-14",
+      "semanticName": "printedPageLabel",
+      "locator": {
+        "kind": "blockField",
+        "variantRef": "original",
+        "blockRef": "pagehead",
+        "fieldRef": "field-14",
+        "frame": "nominalPage",
+        "pages": {
+          "selection": "all",
+          "indices": [],
+          "maximumPages": 10000
+        },
+        "assembly": "glyphClusters",
+        "cardinality": "zeroOrOne"
+      },
+      "parserRef": "integer",
+      "onAbsent": "unresolved",
+      "onConflict": "ambiguous",
+      "sourceRefs": [
+        {
+          "file": "_HLKNIA4C.gmx",
+          "line": 14,
+          "rawCommand": "|CPDATABASE(1970,120,2024,153,0,0,0,1,0,1,16777215,2,5,7,0,0,0,400,0,0,0,238,3,2,1,34,\"Tahoma\",0,0,2,0,\"'$PAGENO'\",1,0,0,0,0,0)",
+          "expression": "$PAGENO"
+        }
+      ]
+    },
+    {
+      "id": "original.pagehead.field-33",
+      "semanticName": "reportingEntity.name",
+      "locator": {
+        "kind": "blockField",
+        "variantRef": "original",
+        "blockRef": "pagehead",
+        "fieldRef": "field-33",
+        "frame": "nominalPage",
+        "pages": {
+          "selection": "all",
+          "indices": [],
+          "maximumPages": 10000
+        },
+        "assembly": "glyphClusters",
+        "cardinality": "zeroOrOne"
+      },
+      "parserRef": "text",
+      "onAbsent": "unresolved",
+      "onConflict": "ambiguous",
+      "sourceRefs": [
+        {
+          "file": "_HLKNIA4C.gmx",
+          "line": 33,
+          "rawCommand": "|CPDATABASE(160,40,666,78,0,0,0,1,0,1,16777215,2,5,8,0,0,0,400,0,0,0,238,3,2,1,34,\"Tahoma\",0,0,2,0,\"'^NAF'\",1,0,0,0,0,0)",
+          "expression": "^NAF"
+        }
+      ]
+    },
+    {
+      "id": "original.foot1.field-94",
+      "semanticName": "licensedUserText",
+      "locator": {
+        "kind": "blockField",
+        "variantRef": "original",
+        "blockRef": "foot1",
+        "fieldRef": "field-94",
+        "frame": "blockLocal",
+        "pages": {
+          "selection": "all",
+          "indices": [],
+          "maximumPages": 10000
+        },
+        "assembly": "glyphClusters",
+        "cardinality": "zeroOrOne"
+      },
+      "parserRef": "text",
+      "onAbsent": "unresolved",
+      "onConflict": "ambiguous",
+      "sourceRefs": [
+        {
+          "file": "_HLKNIA4C.gmx",
+          "line": 94,
+          "rawCommand": "|CPDATABASE(1260,220,1850,253,1,0,0,1,16777215,1,0,2,5,7,0,0,0,400,0,0,0,238,3,2,1,18,\"Tahoma\",0,0,2,0,\"'$USER'\",1,0,0,0,0,0)",
+          "expression": "$USER"
+        }
+      ]
+    },
+    {
+      "id": "original.title.label-9",
+      "semanticName": "reportTitle",
+      "locator": {
+        "kind": "calibratedRegion",
+        "variantRef": "original",
+        "frame": "nominalPage",
+        "rectPt": [
+          189.92126,
+          808.724409,
+          353.76378,
+          822.047244
+        ],
+        "paddingPt": 2,
+        "pages": {
+          "selection": "all",
+          "indices": [],
+          "maximumPages": 10000
+        },
+        "assembly": "glyphClusters",
+        "cardinality": "zeroOrOne"
+      },
+      "parserRef": "text",
+      "onAbsent": "unresolved",
+      "onConflict": "ambiguous",
+      "sourceRefs": [
+        {
+          "file": "_HLKNIA4C.gmx",
+          "line": 9,
+          "rawCommand": "|CPLABEL(670,70,1248,117,0,0,0,1,0,1,16777215,2,5,10,0,0,0,700,0,0,0,238,3,2,1,18,\"Tahoma\",0,0,1,\"HLAVNÁ KNIHA -  PODĽA ÚČTOV\")"
+        }
+      ]
+    }
+  ],
+  "metadataDerivations": [
+    {
+      "id": "fiscal-year",
+      "op": "deriveFiscalYear",
+      "enabled": true,
+      "evidenceStatus": "sourceDerived",
+      "sourceRefs": [],
+      "reviewNotes": [],
+      "inputMetadataNames": [
+        "period.start",
+        "period.end"
+      ],
+      "outputMetadataName": "fiscalYear",
+      "onDifferentYears": "unresolved",
+      "onMissingInput": "unresolved",
+      "origin": "derived"
+    }
+  ],
+  "classification": [
+    {
+      "id": "page-header",
+      "op": "classify",
+      "enabled": true,
+      "evidenceStatus": "sourceDerived",
+      "sourceRefs": [],
+      "reviewNotes": [],
+      "when": {
+        "op": "blockKind",
+        "blockRefs": [
+          "pagehead"
+        ]
+      },
+      "semanticClass": "pageHeader",
+      "exportEligibility": "excluded",
+      "aggregationMemberships": [],
+      "level": "any"
+    },
+    {
+      "id": "page-footer",
+      "op": "classify",
+      "enabled": true,
+      "evidenceStatus": "sourceDerived",
+      "sourceRefs": [],
+      "reviewNotes": [],
+      "when": {
+        "op": "blockKind",
+        "blockRefs": [
+          "pagefoot"
+        ]
+      },
+      "semanticClass": "pageFooter",
+      "exportEligibility": "excluded",
+      "aggregationMemberships": [],
+      "level": "any"
+    },
+    {
+      "id": "account-detail",
+      "op": "classify",
+      "enabled": true,
+      "evidenceStatus": "sourceDerived",
+      "sourceRefs": [],
+      "reviewNotes": [],
+      "when": {
+        "op": "blockKind",
+        "blockRefs": [
+          "record"
+        ]
+      },
+      "semanticClass": "accountBalance",
+      "exportEligibility": "eligible",
+      "aggregationMemberships": [
+        "exportedDetails"
+      ],
+      "level": "detail"
+    },
+    {
+      "id": "synthetic-summary",
+      "op": "classify",
+      "enabled": true,
+      "evidenceStatus": "sourceDerived",
+      "sourceRefs": [],
+      "reviewNotes": [],
+      "when": {
+        "op": "blockKind",
+        "blockRefs": [
+          "foot3"
+        ]
+      },
+      "semanticClass": "accountSubtotal",
+      "exportEligibility": "excluded",
+      "aggregationMemberships": [
+        "syntheticSummaries"
+      ],
+      "level": "synthetic"
+    },
+    {
+      "id": "class-summary",
+      "op": "classify",
+      "enabled": true,
+      "evidenceStatus": "sourceDerived",
+      "sourceRefs": [],
+      "reviewNotes": [],
+      "when": {
+        "op": "blockKind",
+        "blockRefs": [
+          "foot2"
+        ]
+      },
+      "semanticClass": "classSubtotal",
+      "exportEligibility": "excluded",
+      "aggregationMemberships": [],
+      "level": "any"
+    },
+    {
+      "id": "report-control",
+      "op": "classify",
+      "enabled": true,
+      "evidenceStatus": "sourceDerived",
+      "sourceRefs": [],
+      "reviewNotes": [],
+      "when": {
+        "op": "blockKind",
+        "blockRefs": [
+          "foot1"
+        ]
+      },
+      "semanticClass": "reportControl",
+      "exportEligibility": "excluded",
+      "aggregationMemberships": [],
+      "level": "any"
+    }
+  ],
+  "classificationPolicy": {
+    "evaluation": "allRules",
+    "noMatch": "unrecognizedCandidate",
+    "incompatibleMatches": "ambiguous"
+  },
+  "groups": [
+    {
+      "id": "reportSection",
+      "parentRef": null,
+      "memberSelector": {
+        "semanticClasses": [],
+        "aggregationMemberships": [],
+        "level": "any",
+        "occurrences": "records"
+      },
+      "startRule": {
+        "op": "sectionStart"
+      },
+      "endRule": {
+        "op": "sectionEnd"
+      },
+      "keyFields": [],
+      "crossPagePolicy": "requireContinuityEvidence",
+      "partialInputPolicy": "retainIncomplete",
+      "repeatedHeaderResets": false,
+      "inheritance": []
+    },
+    {
+      "id": "synthetic",
+      "parentRef": "accountClass",
+      "memberSelector": {
+        "semanticClasses": [],
+        "aggregationMemberships": [
+          "exportedDetails"
+        ],
+        "level": "any",
+        "occurrences": "records"
+      },
+      "startRule": {
+        "op": "afterPreviousClosure"
+      },
+      "endRule": {
+        "op": "match",
+        "when": {
+          "op": "blockKind",
+          "blockRefs": [
+            "foot3"
+          ]
+        }
+      },
+      "keyFields": [
+        "syntheticAccountCode"
+      ],
+      "crossPagePolicy": "requireContinuityEvidence",
+      "partialInputPolicy": "retainIncomplete",
+      "repeatedHeaderResets": false,
+      "inheritance": []
+    },
+    {
+      "id": "accountClass",
+      "parentRef": "reportSection",
+      "memberSelector": {
+        "semanticClasses": [],
+        "aggregationMemberships": [
+          "syntheticSummaries"
+        ],
+        "level": "any",
+        "occurrences": "records"
+      },
+      "startRule": {
+        "op": "afterPreviousClosure"
+      },
+      "endRule": {
+        "op": "match",
+        "when": {
+          "op": "blockKind",
+          "blockRefs": [
+            "foot2"
+          ]
+        }
+      },
+      "keyFields": [
+        "accountClassCode"
+      ],
+      "crossPagePolicy": "requireContinuityEvidence",
+      "partialInputPolicy": "retainIncomplete",
+      "repeatedHeaderResets": false,
+      "inheritance": []
+    }
+  ],
+  "completeness": [
+    {
+      "id": "account-required",
+      "op": "requireFields",
+      "enabled": true,
+      "evidenceStatus": "sourceDerived",
+      "sourceRefs": [],
+      "reviewNotes": [],
+      "selector": {
+        "semanticClasses": [
+          "accountBalance"
+        ],
+        "aggregationMemberships": [],
+        "level": "any",
+        "occurrences": "records"
+      },
+      "fieldRefs": [
+        "accountCode"
+      ],
+      "requiredState": "present"
+    },
+    {
+      "id": "all-candidates",
+      "op": "accountForCandidates",
+      "enabled": true,
+      "evidenceStatus": "sourceDerived",
+      "sourceRefs": [],
+      "reviewNotes": [],
+      "onUnrecognized": "preventCleanSuccess"
+    },
+    {
+      "id": "all-tokens",
+      "op": "accountForTokens",
+      "enabled": true,
+      "evidenceStatus": "sourceDerived",
+      "sourceRefs": [],
+      "reviewNotes": [],
+      "decorationRequiresRuleId": true
+    },
+    {
+      "id": "coverage",
+      "op": "inspectCoverage",
+      "enabled": true,
+      "evidenceStatus": "sourceDerived",
+      "sourceRefs": [],
+      "reviewNotes": [],
+      "printedPageField": "printedPageNumber",
+      "contiguousPagesProveOriginalComplete": false
+    },
+    {
+      "id": "spacing",
+      "op": "checkSpacing",
+      "enabled": true,
+      "evidenceStatus": "unverified",
+      "sourceRefs": [],
+      "reviewNotes": [],
+      "excludeExplainedBlocks": true,
+      "maximumAdvanceMultiplier": 1.5,
+      "onGap": "suspectedMissingRecord"
+    }
+  ],
+  "openQuestions": [
+    "Calibrate tolerances and glyph offsets on complete fixtures.",
+    "Confirm suppressed-zero policy per field/block.",
+    "No total reconciliation has been run for this package.",
+    "No verified reportingEntity.cin locator in the supplied GMX fields. Return unresolved; do not extract arbitrary eight-digit numbers or use manifest expectations."
+  ]
+}

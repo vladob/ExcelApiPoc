@@ -1,0 +1,160 @@
+{
+  "$schema": "../schemas/parsers.schema.json",
+  "schemaVersion": 2,
+  "definitionVersion": "2.0.0-draft.4",
+  "id": "ifosoft.parsers",
+  "kind": "parsers",
+  "status": "reviewDraft",
+  "productionApproved": false,
+  "requiresCapabilities": [
+    "positioned.v2"
+  ],
+  "sourceRefs": [],
+  "reviewNotes": [],
+  "profiles": [
+    {
+      "id": "text",
+      "op": "text",
+      "enabled": true,
+      "evidenceStatus": "sourceDerived",
+      "sourceRefs": [],
+      "reviewNotes": [],
+      "trim": true,
+      "normalizeNbsp": true
+    },
+    {
+      "id": "code",
+      "op": "identifier",
+      "enabled": true,
+      "evidenceStatus": "sourceDerived",
+      "sourceRefs": [],
+      "reviewNotes": [],
+      "trimOuterWhitespace": true,
+      "unicodeNormalization": "NFC",
+      "preserveLeadingZeros": true,
+      "preserveInternalSpaces": true,
+      "allowLettersAndDiacritics": true
+    },
+    {
+      "id": "integer",
+      "op": "integer",
+      "enabled": true,
+      "evidenceStatus": "sourceDerived",
+      "sourceRefs": [],
+      "reviewNotes": [],
+      "allowGrouping": false,
+      "allowTrailingDot": true
+    },
+    {
+      "id": "date",
+      "op": "exactDate",
+      "enabled": true,
+      "evidenceStatus": "sourceDerived",
+      "sourceRefs": [],
+      "reviewNotes": [],
+      "formats": [
+        "d.M.yyyy",
+        "dd.MM.yyyy",
+        "d.M.yy",
+        "dd.MM.yy"
+      ],
+      "twoDigitYear": "uniqueExplicitContextOrAmbiguous",
+      "repairInvalidDate": false
+    },
+    {
+      "id": "period",
+      "op": "accountingPeriod",
+      "enabled": true,
+      "evidenceStatus": "sourceDerived",
+      "sourceRefs": [],
+      "reviewNotes": [],
+      "pattern": "^(?<code>[0-9]{1,2})/(?<year>[0-9]{4})$",
+      "codeGroup": "code",
+      "yearGroup": "year",
+      "observedCodes": [
+        "00",
+        "01",
+        "02",
+        "03",
+        "04",
+        "05",
+        "06",
+        "07",
+        "08",
+        "09",
+        "10",
+        "11",
+        "12",
+        "13",
+        "14"
+      ],
+      "unknownCode": "retainWithDiagnostic",
+      "calendarDateConversion": false
+    },
+    {
+      "id": "money-comma",
+      "op": "decimal",
+      "enabled": true,
+      "evidenceStatus": "sourceDerived",
+      "sourceRefs": [],
+      "reviewNotes": [],
+      "formats": [
+        {
+          "decimalSeparator": ",",
+          "groupingSeparators": [
+            ".",
+            " ",
+            " ",
+            " "
+          ],
+          "wholeAmountSuffix": ",-"
+        }
+      ],
+      "groupingSize": 3,
+      "oneGroupingConventionPerValue": true,
+      "allowLeadingSign": true,
+      "allowSpaceAfterSign": true,
+      "fractionDigits": 2,
+      "blankState": "blank",
+      "distinctSuccessfulValues": "ambiguous"
+    },
+    {
+      "id": "money-dot",
+      "op": "decimal",
+      "enabled": true,
+      "evidenceStatus": "sourceDerived",
+      "sourceRefs": [],
+      "reviewNotes": [],
+      "formats": [
+        {
+          "decimalSeparator": ".",
+          "groupingSeparators": [
+            " ",
+            " ",
+            " "
+          ],
+          "wholeAmountSuffix": null
+        }
+      ],
+      "groupingSize": 3,
+      "oneGroupingConventionPerValue": true,
+      "allowLeadingSign": true,
+      "allowSpaceAfterSign": true,
+      "fractionDigits": 2,
+      "blankState": "blank",
+      "distinctSuccessfulValues": "ambiguous"
+    },
+    {
+      "id": "time",
+      "op": "exactTime",
+      "enabled": true,
+      "evidenceStatus": "sourceDerived",
+      "sourceRefs": [],
+      "reviewNotes": [],
+      "formats": [
+        "H:mm:ss",
+        "HH:mm:ss"
+      ]
+    }
+  ]
+}
