@@ -201,7 +201,22 @@ namespace ExcelApiPoc.AccountingImport.Services.IfoSoft
             using (var reader = new StreamReader(path, Encoding.GetEncoding(1250), true))
             {
                 int line = 0;
-                while (!reader.EndOfStream) { line++; yield return new CsvRecord { Fields = ParseFields(reader.ReadLine()), StartLineNumber = line }; }
+                while (!reader.EndOfStream)
+                {
+                    line++;
+                    string record = reader.ReadLine();
+                    string[] fields;
+                    try
+                    {
+                        fields = ParseFields(record);
+                    }
+                    catch (InvalidDataException exception)
+                    {
+                        throw new InvalidDataException(
+                            $"CSV '{Path.GetFileName(path)}', line {line}: {exception.Message}", exception);
+                    }
+                    yield return new CsvRecord { Fields = fields, StartLineNumber = line };
+                }
             }
         }
 

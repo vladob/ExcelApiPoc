@@ -26,6 +26,36 @@ public sealed class IfoSoftPdfLedgerAndFrameworkTests
     }
 
     [Fact]
+    public void Stakcinska_roztoka_2022_ledger_preserves_spaced_numeric_accounts()
+    {
+        string? path = Environment.GetEnvironmentVariable("IFOSOFT_PDF_GL_STAKCINSKA_ROZTOKA_2022_TEST_FILE");
+        if (string.IsNullOrWhiteSpace(path)) return;
+        Assert.True(File.Exists(path), "Missing Stakčínska Roztoka ledger: " + path);
+        GeneralLedgerImport result = new IfoSoftPdfGeneralLedgerImporter().Import(path);
+        Assert.Contains(result.Rows, row => row.AccountCode == "75005" && row.AnnualDebitTurnover == 985.80m);
+        Assert.Contains(result.Rows, row => row.AccountCode == "79005" && row.AnnualCreditTurnover == 985.80m);
+        Assert.DoesNotContain(result.Rows, row => row.AccountCode == "005");
+        Assert.Equal(800060.40m, result.Rows.Sum(row => row.AnnualDebitTurnover));
+        Assert.Equal(800060.40m, result.Rows.Sum(row => row.AnnualCreditTurnover));
+    }
+
+    [Fact]
+    public void Nizna_jablonka_2023_ledger_preserves_dotted_accounts()
+    {
+        string? path = Environment.GetEnvironmentVariable("IFOSOFT_PDF_GL_NIZNA_JABLONKA_2023_TEST_FILE");
+        if (string.IsNullOrWhiteSpace(path)) return;
+        Assert.True(File.Exists(path), "Missing Nižná Jablonka ledger: " + path);
+        GeneralLedgerImport result = new IfoSoftPdfGeneralLedgerImporter().Import(path);
+        Assert.Equal(2023, result.FiscalYear);
+        Assert.Contains(result.Rows, row => row.AccountCode == "357VOĽ." &&
+            row.AnnualDebitTurnover == 2696.38m && row.AnnualCreditTurnover == 2021.81m);
+        Assert.Contains(result.Rows, row => row.AccountCode == "357REG." &&
+            row.AnnualDebitTurnover == 64.20m && row.AnnualCreditTurnover == 64.20m);
+        Assert.Equal(314233.76m, result.Rows.Sum(row => row.AnnualDebitTurnover));
+        Assert.Equal(314233.76m, result.Rows.Sum(row => row.AnnualCreditTurnover));
+    }
+
+    [Fact]
     public void Two_2024_layouts_agree_by_account()
     {
         var importer = new IfoSoftPdfGeneralLedgerImporter();
@@ -53,6 +83,37 @@ public sealed class IfoSoftPdfLedgerAndFrameworkTests
         Assert.Contains(result.Rows, r => r.AccountCode == "081" && r.OpeningCredit == 820560.87m);
         Assert.Equal(1090180.74m, result.Rows.Sum(r => r.AnnualDebitTurnover));
         Assert.Equal(1090180.74m, result.Rows.Sum(r => r.AnnualCreditTurnover));
+    }
+
+    [Fact]
+    public void Medzilaborce_2025_hlknia4b_imports_analytical_cards_without_synthetic_subtotals()
+    {
+        string? path = Environment.GetEnvironmentVariable("IFOSOFT_PDF_GL_MEDZILABORCE_2025_TEST_FILE");
+        Assert.True(!string.IsNullOrWhiteSpace(path) && File.Exists(path),
+            "Set IFOSOFT_PDF_GL_MEDZILABORCE_2025_TEST_FILE to HL_KNIHA_00323233_2025.pdf.");
+        GeneralLedgerImport result = new IfoSoftPdfGeneralLedgerImporter().Import(path!);
+        Assert.Equal("00323233", result.Ico);
+        Assert.Equal(2025, result.FiscalYear);
+        Assert.Equal(12, result.ThroughMonth);
+        Assert.Contains(result.Rows, row => row.AccountCode == "021101" &&
+            row.OpeningDebit == 15640744.63m && row.AnnualDebitTurnover == 214292.68m);
+        Assert.DoesNotContain(result.Rows, row => row.AccountCode == "021");
+        Assert.Equal(41556263.19m, result.Rows.Sum(row => row.AnnualDebitTurnover));
+        Assert.Equal(41556263.19m, result.Rows.Sum(row => row.AnnualCreditTurnover));
+    }
+
+    [Fact]
+    public void Medzilaborce_2025_framework_retains_unlabelled_placeholder_without_an_account_code()
+    {
+        string? path = Environment.GetEnvironmentVariable("IFOSOFT_PDF_AF_MEDZILABORCE_2025_TEST_FILE");
+        Assert.True(!string.IsNullOrWhiteSpace(path) && File.Exists(path),
+            "Set IFOSOFT_PDF_AF_MEDZILABORCE_2025_TEST_FILE to UCT_ROZVRH_00323233_2025.pdf.");
+        AccountingFrameworkImport result = new IfoSoftPdfAccountingFrameworkImporter().Import(path!);
+        Assert.Equal("00323233", result.Ico);
+        Assert.Equal(2025, result.FiscalYear);
+        Assert.Contains(result.Rows, row => row.SourceRecordNumber == 424 &&
+            row.SourceSyntheticCode == "108" && row.SourceAnalyticalCode == "/23" &&
+            row.AccountCode == "" && row.RowKind == AccountingFrameworkRowKind.Empty);
     }
 
     [Fact]

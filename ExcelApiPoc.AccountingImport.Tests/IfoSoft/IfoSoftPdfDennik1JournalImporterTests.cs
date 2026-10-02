@@ -8,6 +8,23 @@ namespace ExcelApiPoc.AccountingImport.Tests.IfoSoft;
 public sealed class IfoSoftPdfDennik1JournalImporterTests
 {
     [Fact]
+    public void Imports_nizna_jablonka_2023_letter_size_journal()
+    {
+        string? path = Environment.GetEnvironmentVariable("IFOSOFT_PDF_JOURNAL_NIZNA_JABLONKA_2023_TEST_FILE");
+        if (string.IsNullOrWhiteSpace(path)) return;
+        Assert.True(File.Exists(path), "Missing Nižná Jablonka PDF: " + path);
+        JournalImport import = new IfoSoftPdfDennik1JournalImporter().Import(path);
+        Assert.Equal(2023, import.FiscalYear);
+        Assert.Equal(1565, import.Rows.Count);
+        Assert.Contains(import.Rows, row => row.DebitAccount == "357VOĽ." &&
+            row.CreditAccount == "701" && row.DebitAmount == -674.57m);
+        Assert.Contains(import.Rows, row => row.CreditAccount == "357REG." &&
+            row.CreditAmount == 46.20m);
+        Assert.Equal(1184688.84m, import.Rows.Sum(row => row.DebitAmount ?? 0m));
+        Assert.Equal(1184688.84m, import.Rows.Sum(row => row.CreditAmount ?? 0m));
+    }
+
+    [Fact]
     public void Imports_ladomirov_2025_pdf_without_dropping_undated_entry()
     {
         string? path = Environment.GetEnvironmentVariable("IFOSOFT_PDF_JOURNAL_LADOMIROV_2025_TEST_FILE");

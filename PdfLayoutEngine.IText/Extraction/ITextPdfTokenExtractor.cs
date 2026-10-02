@@ -47,7 +47,7 @@ public sealed class ITextPdfTokenExtractor
 
     // Importers that need fixed columns can request individual words. The default
     // extraction stays unchanged for layout detection and existing journal imports.
-    public LayoutDocument ExtractWords(string filePath)
+    public LayoutDocument ExtractWords(string filePath, double[]? columnBoundaries = null)
     {
         if (filePath == null) throw new ArgumentNullException(nameof(filePath));
         using var stream = File.OpenRead(filePath);
@@ -58,7 +58,7 @@ public sealed class ITextPdfTokenExtractor
         {
             var page = pdf.GetPage(pageNumber);
             var listener = new TextTokenEventListener(pageNumber, page.GetRotation(),
-                page.GetPageSize().GetWidth(), page.GetPageSize().GetHeight(), true);
+                page.GetPageSize().GetWidth(), page.GetPageSize().GetHeight(), true, columnBoundaries);
             new PdfCanvasProcessor(listener).ProcessPageContent(page);
             pages.Add(new LayoutPage(pageNumber, listener.Tokens));
         }
@@ -66,7 +66,7 @@ public sealed class ITextPdfTokenExtractor
     }
 
     private sealed class TextTokenEventListener(int pageNumber, int rotation, double pageWidth, double pageHeight,
-        bool splitWords = false) : IEventListener
+        bool splitWords = false, double[]? columnBoundaries = null) : IEventListener
     {
         private static readonly ICollection<EventType> SupportedEvents = [EventType.RENDER_TEXT];
         private readonly int _pageNumber = pageNumber;
@@ -76,7 +76,7 @@ public sealed class ITextPdfTokenExtractor
         private readonly List<PdfTextToken> _tokens = [];
 
         public IReadOnlyList<PdfTextToken> Tokens => splitWords
-            ? AssembleWords(_tokens, _rotation == 90 || _rotation == 270)
+            ? AssembleWords(_tokens, _rotation == 90 || _rotation == 270, columnBoundaries)
             : JoinSplitGmxMarkers(AssembleCharacterRuns(_tokens, _rotation == 90 || _rotation == 270));
 
         public void EventOccurred(IEventData data, EventType type)
@@ -134,7 +134,7 @@ public sealed class ITextPdfTokenExtractor
 
         public ICollection<EventType> GetSupportedEvents() => SupportedEvents;
 
-        private static IReadOnlyList<PdfTextToken> AssembleWords(List<PdfTextToken> glyphs, bool rotated)
+        private static IReadOnlyList<PdfTextToken> AssembleWords(List<PdfTextToken> glyphs, bool rotated, double[]? columnBoundaries)
         {
             var words = new List<PdfTextToken>();
             var letters = new StringBuilder();
@@ -153,7 +153,9 @@ public sealed class ITextPdfTokenExtractor
                 if (string.IsNullOrWhiteSpace(glyph.OriginalText)) { Flush(); continue; }
                 double gap = first == null ? 0 : glyph.Left - right;
                 if (first != null && (Math.Abs(glyph.Baseline - first.Baseline) > 0.75 ||
-                    gap < -1.5 || gap > (rotated ? 10 : 2))) Flush();
+                    gap < -1.5 || gap > (rotated ? 10 : 2) ||
+                    (columnBoundaries != null && columnBoundaries.Any(boundary =>
+                        first.Left < boundary && glyph.Left >= boundary)))) Flush();
                 if (first == null) first = glyph;
                 letters.Append(glyph.OriginalText);
                 right = glyph.Right;

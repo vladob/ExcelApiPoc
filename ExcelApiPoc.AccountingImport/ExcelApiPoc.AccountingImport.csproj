@@ -31,10 +31,6 @@
       <Link>PdfLayouts\Ives\accounting-framework.v1.json</Link>
       <LogicalName>ExcelApiPoc.AccountingImport.PdfLayouts.Ives.accounting-framework.v1.json</LogicalName>
     </EmbeddedResource>
-    <EmbeddedResource Include="..\PdfLayouts\IfoSoft\journal-dennik1.v1.json">
-      <Link>PdfLayouts\IfoSoft\journal-dennik1.v1.json</Link>
-      <LogicalName>ExcelApiPoc.AccountingImport.PdfLayouts.IfoSoft.journal-dennik1.v1.json</LogicalName>
-    </EmbeddedResource>
   </ItemGroup>
 
 </Project>

@@ -25,7 +25,7 @@ namespace ExcelApiPoc.AccountingImport.Services.IfoSoft
         private static readonly Regex Name = new Regex(@"^U_DENNIK_(?<ico>\d{8})_(?<year>\d{4})\.xml$", RegexOptions.IgnoreCase);
         // Some IfoSoft exports use the two-digit 75/79 account pair for asset-register entries.
         // Preserve those source codes rather than inventing a leading zero.
-        private static readonly Regex Account = new Regex(@"^(?:\d{3}[\p{L}\d.]*(?:-[\p{L}\d.]+)*|(?:75|79)[\p{L}][\p{L}\d.]*)$");
+        private static readonly Regex Account = new Regex(@"^(?:\d{3}[\p{L}\d.§]*(?:-[\p{L}\d.§]+)*|(?:75|79)[\p{L}][\p{L}\d.]*)$");
         private static readonly CultureInfo Sk = CultureInfo.GetCultureInfo("sk-SK");
 
         public bool CanImport(string filePath, string accountingFormat) =>
@@ -206,7 +206,10 @@ namespace ExcelApiPoc.AccountingImport.Services.IfoSoft
                 throw new InvalidDataException(location + ": exactly one amount side is required.");
             string rawAccount = Value(record, "ucSuv") + Value(record, "ucAnl");
             string account = Regex.Replace(rawAccount, @"\s+", string.Empty);
-            if (!Account.IsMatch(account)) throw new InvalidDataException(location + ": invalid account code '" + account + "'.");
+            // Asterisks can be literal analytical codes on actual journal postings.
+            bool asteriskAccount = Regex.IsMatch(account, @"^\d{3}\*{2,4}$");
+            if (!Account.IsMatch(account) && !asteriskAccount)
+                throw new InvalidDataException(location + ": invalid account code '" + account + "'.");
             string sourceDate = Value(record, "ucPripDat");
             string sourceYear = Value(record, "rok");
             bool mistypedYear = year == 2022 && sourceDate == "28.02.0222" && sourceYear == "0222";

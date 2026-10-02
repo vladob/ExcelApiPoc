@@ -45,10 +45,7 @@ namespace ExcelApiPoc.AddIn.Services
             {
                 List<YearlyReport> reports = group
                     .GroupBy(x => x.FiscalYear)
-                    .Select(year => year
-                        .OrderByDescending(x => x.SortDate)
-                        .ThenByDescending(x => x.Report.Report.Id)
-                        .First())
+                    .Select(SelectYearlyReport)
                     .OrderByDescending(x => x.FiscalYear)
                     .ToList();
 
@@ -57,6 +54,47 @@ namespace ExcelApiPoc.AddIn.Services
             }
 
             return result;
+        }
+
+        private static YearlyReport SelectYearlyReport(
+            IGrouping<int, YearlyReport> year)
+        {
+            YearlyReport[] reports = year.ToArray();
+            // Keep all filings in RegisterUZ Reports. For the multi-year
+            // worksheet, use the uniquely approved statement when one exists.
+            YearlyReport[] approved = reports.Where(report =>
+                report.Report.FinancialStatement?.ApprovalDate.HasValue == true).ToArray();
+            if (approved.Length == 1)
+                return approved[0];
+
+            if (reports.Length > 1 && reports.Skip(1).All(report =>
+                HaveEquivalentValues(reports[0].Report, report.Report)))
+                return reports.OrderByDescending(report =>
+                        report.Report.FinancialStatement?.SubmissionDate ??
+                        report.Report.AnnualReport?.SubmissionDate)
+                    .ThenByDescending(report => report.Report.Report.Id)
+                    .First();
+
+            return reports.OrderByDescending(report => report.SortDate)
+                .ThenByDescending(report => report.Report.Report.Id)
+                .First();
+        }
+
+        private static bool HaveEquivalentValues(
+            FinancialReportEnvelope first, FinancialReportEnvelope second)
+        {
+            if (!string.Equals(first.Report.CurrencyCode, second.Report.CurrencyCode,
+                    StringComparison.Ordinal) ||
+                !first.Tables.Select(table => table.Table.TableOrdinal).OrderBy(value => value)
+                    .SequenceEqual(second.Tables.Select(table => table.Table.TableOrdinal)
+                        .OrderBy(value => value)))
+                return false;
+
+            IReadOnlyDictionary<string, decimal> firstValues = BuildValueIndex(first);
+            IReadOnlyDictionary<string, decimal> secondValues = BuildValueIndex(second);
+            return firstValues.Count > 0 && firstValues.Count == secondValues.Count &&
+                firstValues.All(value => secondValues.TryGetValue(value.Key, out decimal other) &&
+                    value.Value == other);
         }
 
         private static MultiYearBalanceSheet Build(
