@@ -1,7 +1,7 @@
 {
   "$schema": "../schemas/layout.schema.json",
   "schemaVersion": 2,
-  "definitionVersion": "2.0.0-draft.4",
+  "definitionVersion": "2.0.0-draft.5",
   "id": "ifosoft.general-ledger-predvas3",
   "kind": "layout",
   "status": "reviewDraft",
@@ -23,24 +23,24 @@
   ],
   "modelRef": {
     "id": "ifosoft.model.general-ledger-predvas3",
-    "version": "2.0.0-draft.4"
+    "version": "2.0.0-draft.5"
   },
   "identificationRefs": [
     {
       "id": "ifosoft.identify.predvas3",
-      "version": "2.0.0-draft.4"
+      "version": "2.0.0-draft.5"
     }
   ],
   "parserRefs": [
     {
       "id": "ifosoft.parsers",
-      "version": "2.0.0-draft.4"
+      "version": "2.0.0-draft.5"
     }
   ],
   "validationRefs": [
     {
       "id": "ifosoft.general-ledger-predvas3.validation",
-      "version": "2.0.0-draft.4"
+      "version": "2.0.0-draft.5"
     }
   ],
   "variants": [

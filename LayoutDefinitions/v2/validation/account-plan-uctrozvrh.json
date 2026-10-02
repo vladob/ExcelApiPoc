@@ -1,7 +1,7 @@
 {
   "$schema": "../schemas/validation.schema.json",
   "schemaVersion": 2,
-  "definitionVersion": "2.0.0-draft.4",
+  "definitionVersion": "2.0.0-draft.5",
   "id": "ifosoft.account-plan-uctrozvrh.validation",
   "kind": "validation",
   "status": "reviewDraft",
@@ -17,7 +17,7 @@
   ],
   "layoutRef": {
     "id": "ifosoft.account-plan-uctrozvrh",
-    "version": "2.0.0-draft.4"
+    "version": "2.0.0-draft.5"
   },
   "printedControls": [
     {

@@ -18,6 +18,6 @@
     "unknown metadata field",
     "unsupported capabilities"
   ],
-  "engineExecution": "notImplementedInStep2",
+  "engineExecution": "notRunByDefinitionValidator",
   "corpusExecution": "notRun"
 }

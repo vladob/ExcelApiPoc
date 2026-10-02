@@ -168,6 +168,6 @@ def main():
    tests.append(name)
   blocked,_=check(capabilities=set())
   assert any('unsupported capability' in e for e in blocked);tests.append('unsupported capabilities')
- report={'schemaValidation':'pass','referenceValidation':'pass','geometryPreservedItems':count,'definitions':len(docs),'layouts':sum(d['kind']=='layout' for d in docs.values()),'negativeCasesPassed':tests,'engineExecution':'notImplementedInStep2','corpusExecution':'notRun'}
+ report={'schemaValidation':'pass','referenceValidation':'pass','geometryPreservedItems':count,'definitions':len(docs),'layouts':sum(d['kind']=='layout' for d in docs.values()),'negativeCasesPassed':tests,'engineExecution':'notRunByDefinitionValidator','corpusExecution':'notRun'}
  (R/'verification.json').write_text(json.dumps(report,indent=2)+'\n',encoding='utf-8',newline='\n');print(json.dumps(report,indent=2))
 if __name__=='__main__':main()

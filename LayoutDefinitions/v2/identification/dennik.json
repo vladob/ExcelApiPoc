@@ -1,7 +1,7 @@
 {
   "$schema": "../schemas/identification.schema.json",
   "schemaVersion": 2,
-  "definitionVersion": "2.0.0-draft.4",
+  "definitionVersion": "2.0.0-draft.5",
   "id": "ifosoft.identify.dennik",
   "kind": "identification",
   "status": "reviewDraft",
@@ -11,6 +11,7 @@
   ],
   "sourceRefs": [],
   "reviewNotes": [
+    "Step 3: literal GMX title punctuation and capped layout-marker evidence added after PDF/OXPS sample checks.",
     "Scores and thresholds are provisional, not probabilities. Missing markers are neutral. Geometry is required for layout selection.",
     "Scan budgets count physical available pages; test expectations and filenames are never recognition inputs."
   ],
@@ -232,11 +233,49 @@
       "missing": "neutral",
       "layoutRef": {
         "id": "ifosoft.journal-dennik-simplified",
-        "version": "2.0.0-draft.4"
+        "version": "2.0.0-draft.5"
       },
       "variantRefs": [
         "original"
       ]
+    },
+    {
+      "id": "layout-marker-0",
+      "op": "markerMatch",
+      "enabled": true,
+      "evidenceStatus": "sourceDerived",
+      "sourceRefs": [],
+      "reviewNotes": [],
+      "locator": {
+        "kind": "normalizedPage",
+        "pages": {
+          "selection": "all",
+          "indices": [],
+          "maximumPages": 10000
+        },
+        "assembly": "readingOrder",
+        "cardinality": "many",
+        "regionFraction": [
+          0,
+          0,
+          1,
+          1
+        ]
+      },
+      "target": "layout",
+      "candidate": "ifosoft.journal-dennik-simplified",
+      "weight": 20,
+      "evidenceGroup": "layout-marker",
+      "polarity": "support",
+      "missing": "neutral",
+      "match": {
+        "mode": "contains",
+        "value": "_DENNIK.GMX",
+        "ignoreCase": true,
+        "whitespace": "remove",
+        "unicodeNormalization": "NFC",
+        "regexTimeoutMs": 100
+      }
     },
     {
       "id": "geometry-1",
@@ -269,11 +308,49 @@
       "missing": "neutral",
       "layoutRef": {
         "id": "ifosoft.journal-dennik",
-        "version": "2.0.0-draft.4"
+        "version": "2.0.0-draft.5"
       },
       "variantRefs": [
         "original"
       ]
+    },
+    {
+      "id": "layout-marker-1",
+      "op": "markerMatch",
+      "enabled": true,
+      "evidenceStatus": "sourceDerived",
+      "sourceRefs": [],
+      "reviewNotes": [],
+      "locator": {
+        "kind": "normalizedPage",
+        "pages": {
+          "selection": "all",
+          "indices": [],
+          "maximumPages": 10000
+        },
+        "assembly": "readingOrder",
+        "cardinality": "many",
+        "regionFraction": [
+          0,
+          0,
+          1,
+          1
+        ]
+      },
+      "target": "layout",
+      "candidate": "ifosoft.journal-dennik",
+      "weight": 20,
+      "evidenceGroup": "layout-marker",
+      "polarity": "support",
+      "missing": "neutral",
+      "match": {
+        "mode": "contains",
+        "value": "_DENNIK.GMX",
+        "ignoreCase": true,
+        "whitespace": "remove",
+        "unicodeNormalization": "NFC",
+        "regexTimeoutMs": 100
+      }
     }
   ],
   "evidenceGroups": [
@@ -295,6 +372,11 @@
     {
       "id": "geometry",
       "scoreCap": 50,
+      "repeatedOccurrences": "maximumOnce"
+    },
+    {
+      "id": "layout-marker",
+      "scoreCap": 20,
       "repeatedOccurrences": "maximumOnce"
     }
   ],
@@ -361,11 +443,11 @@
   "layoutCandidates": [
     {
       "id": "ifosoft.journal-dennik-simplified",
-      "version": "2.0.0-draft.4"
+      "version": "2.0.0-draft.5"
     },
     {
       "id": "ifosoft.journal-dennik",
-      "version": "2.0.0-draft.4"
+      "version": "2.0.0-draft.5"
     }
   ],
   "onTie": "retainCandidates",

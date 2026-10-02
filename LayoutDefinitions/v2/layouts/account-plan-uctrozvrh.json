@@ -1,7 +1,7 @@
 {
   "$schema": "../schemas/layout.schema.json",
   "schemaVersion": 2,
-  "definitionVersion": "2.0.0-draft.4",
+  "definitionVersion": "2.0.0-draft.5",
   "id": "ifosoft.account-plan-uctrozvrh",
   "kind": "layout",
   "status": "reviewDraft",
@@ -23,24 +23,24 @@
   ],
   "modelRef": {
     "id": "ifosoft.model.account-plan-uctrozvrh",
-    "version": "2.0.0-draft.4"
+    "version": "2.0.0-draft.5"
   },
   "identificationRefs": [
     {
       "id": "ifosoft.identify.uctrozvrh",
-      "version": "2.0.0-draft.4"
+      "version": "2.0.0-draft.5"
     }
   ],
   "parserRefs": [
     {
       "id": "ifosoft.parsers",
-      "version": "2.0.0-draft.4"
+      "version": "2.0.0-draft.5"
     }
   ],
   "validationRefs": [
     {
       "id": "ifosoft.account-plan-uctrozvrh.validation",
-      "version": "2.0.0-draft.4"
+      "version": "2.0.0-draft.5"
     }
   ],
   "variants": [
@@ -50,7 +50,7 @@
       "sourceRefs": [
         {
           "file": "_UROZVRH.gmx",
-          "sha256": "4a8baf51814fed11941fc01e191989d44f7f064afba65b5542c6cdefcff05c27"
+          "sha256": "e01464ce3e95158fe8226fd9a135a5ec09e4aa7a069e4d8e359c6b5cae0e6392"
         }
       ],
       "nominalPageSizePt": [
@@ -1323,7 +1323,7 @@
       "sourceRefs": [
         {
           "file": "_UROZVRH_V2.gmx",
-          "sha256": "a799982860fba1aa7f7dec262f05a7333bba15bd12a185d48da5aee6301e1763"
+          "sha256": "3650c6b1d1caf176631dd71fc50475da0e7c554fddbe92ed133f26d52e1dddb4"
         }
       ],
       "nominalPageSizePt": [

@@ -1,7 +1,7 @@
 """Rebuild the isolated v2 package from preserved review sources; never edits v1."""
 import csv,hashlib,io,json,re,zipfile
 from pathlib import Path
-R=Path(__file__).resolve().parents[1];V='2.0.0-draft.4'
+R=Path(__file__).resolve().parents[1];V='2.0.0-draft.5'
 Z=zipfile.ZipFile(R/'sources/IfoSoft-v2-review.zip')
 def old(path):return json.loads(Z.read('IfoSoft-v2-review/'+path))
 def sha(b):return hashlib.sha256(b).hexdigest()
@@ -185,8 +185,16 @@ for id,ls in family_layouts.items():
  n['decisions'] += [decision('category',cat,50),decision('producer','IfoSoft',40)]
  for index,l in enumerate(ls):
   sid='geometry-'+str(index);n['signals'].append(rule(sid,'geometryFit',evidence='unverified',locator=loc(),target='layout',candidate=l['id'],weight=50,evidenceGroup='geometry',polarity='support',missing='neutral',layoutRef=reference(l['id']),variantRefs=[v['id'] for v in l['variants']]))
+  # Printed layout markers disambiguate templates sharing identical table geometry.
+  if marker:
+   n['signals'].append(rule('layout-marker-'+str(index),'markerMatch',locator=loc(),target='layout',candidate=l['id'],weight=20,evidenceGroup='layout-marker',polarity='support',missing='neutral',match=match(marker['text'],ws='remove')))
   n['decisions'].append(decision('layout',l['id'],50,[sid],[dict(target='producer',candidate='IfoSoft'),dict(target='category',candidate=cat)]))
- n['reviewNotes']=['Scores and thresholds are provisional, not probabilities. Missing markers are neutral. Geometry is required for layout selection.','Scan budgets count physical available pages; test expectations and filenames are never recognition inputs.'];write('identification/'+family+'.json',n)
+ n['evidenceGroups'].append(dict(id='layout-marker',scoreCap=20,repeatedOccurrences='maximumOnce'))
+ # Preserve literal punctuation from the migrated GMX title, in addition to older titles.
+ titles=sorted(set(label['text'].replace('\\n',' ') for l in ls for v in l['variants'] for b in v['blocks'] if b['kind']=='pageHeader' for label in b['labels'] if 'HLAVNÁ KNIHA' in label['text']))
+ for ti,title in enumerate(titles):
+  n['signals'].append(rule('printed-title-'+str(ti),'textMatch',locator=loc(),target='category',candidate=cat,weight=35,evidenceGroup='title',polarity='support',missing='neutral',match=match(title,ws='remove')))
+ n['reviewNotes']=['Step 3: literal GMX title punctuation and capped layout-marker evidence added after PDF/OXPS sample checks.','Scores and thresholds are provisional, not probabilities. Missing markers are neutral. Geometry is required for layout selection.','Scan budgets count physical available pages; test expectations and filenames are never recognition inputs.'];write('identification/'+family+'.json',n)
 cat=envelope('ifosoft.catalog','catalog');cat['$schema']='schemas/catalog.schema.json';cat.update(definitions=[],geometry=dict(unit='pt',origin='lowerLeft',frame='uprightCropLocal',rectangleOrder=['left','bottom','right','top']),limits=dict(fileBytes=268435456,pageCount=10000,decompressedPackageBytes=1073741824,regexTimeoutMs=100,predicateDepth=32,candidateHypotheses=256,calibrationHypotheses=256,executionTimeMs=120000))
 for folder in ['layouts','identification','models','parsers','validation']:
  for path in sorted((R/folder).glob('*.json')):
