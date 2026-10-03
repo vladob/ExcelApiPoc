@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup><TargetFramework>net8.0</TargetFramework><ImplicitUsings>enable</ImplicitUsings><Nullable>enable</Nullable><IsPackable>false</IsPackable><IsTestProject>true</IsTestProject></PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
+    <PackageReference Include="xunit" Version="2.9.2" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.8.2"><PrivateAssets>all</PrivateAssets></PackageReference>
+    <ProjectReference Include="../ExcelApiPoc.AccountingImport/ExcelApiPoc.AccountingImport.csproj" />
+    <None Include="../PdfLayouts/IfoSoft/Simple/hlknia4.json" Link="hlknia4.json" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="../PdfLayouts/IfoSoft/Compact/*.json" Link="Compact/%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+    <Using Include="Xunit" />
+  </ItemGroup>
+</Project>

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using ExcelApiPoc.AccountingImport.Models.Reporting;
 
@@ -25,6 +25,13 @@ namespace ExcelApiPoc.AccountingImport.Models
 
     public sealed class GeneralLedgerRow
     {
+        // Printed net balances cannot reconstruct gross debit and credit balances.
+        public string[] SourceAvailableAmountFields { get; set; } = Array.Empty<string>();
+        public decimal? SourceOpeningNet { get; set; }
+        public decimal? SourceClosingNet { get; set; }
+        public int? SourcePageNumber { get; set; }
+        public string SourceRowKind { get; set; }
+        public Dictionary<string, string> SourceDimensions { get; set; } = new Dictionary<string, string>();
         public int SequenceNumber { get; set; }
         public int SourceRecordNumber { get; set; }
         public string SyntheticCode { get; set; }

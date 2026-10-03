@@ -1,0 +1,59 @@
+{
+  "version": 1,
+  "id": "ifosoft-hlknia4",
+  "category": "GL",
+  "marker": "_HLKNIA4.GMX",
+  "title": "HLAVNÁ KNIHA",
+  "unitsPerInch": 254,
+  "origin": "topLeft",
+  "headerFrame": [10, 10, 2020, 210],
+  "fonts": {
+    "regularAccount": { "family": "Tahoma", "size": 8, "weight": 400 },
+    "subtotalAccount": { "family": "Tahoma", "size": 7, "weight": 700 },
+    "regularAmount": { "family": "Times New Roman", "size": 8, "weight": 400 },
+    "totalAmount": { "family": "Times New Roman", "size": 8, "weight": 700 }
+  },
+  "header": {
+    "entityName": [20, 20, 526, 58],
+    "licensedUser": [1330, 20, 2005, 58],
+    "periodFrom": [1480, 60, 1599, 98],
+    "periodTo": [1650, 60, 1769, 98],
+    "pageNumber": [1950, 100, 2004, 133]
+  },
+  "amountColumns": {
+    "openingNet": [760, 960],
+    "turnoverDebit": [970, 1170],
+    "turnoverCredit": [1180, 1380],
+    "periodDebit": [1390, 1590],
+    "periodCredit": [1600, 1800],
+    "closingNet": [1810, 2010]
+  },
+  "rows": [
+    { "kind": "ReportLevel", "section": "FOOT1", "anchorY": 230,
+      "labels": ["KONTROLNÝ SÚČET", "***"], "labelRange": [20, 318],
+      "amountY": [230, 265], "amountFont": "totalAmount" },
+    { "kind": "AccountClassRow", "section": "FOOT2", "anchorY": 230,
+      "labels": ["MEDZISÚČET ZA TRIEDU", "**"], "labelRange": [40, 318],
+      "account": [20, 230, 38, 263], "accountFont": "subtotalAccount",
+      "amountY": [230, 265], "amountFont": "totalAmount" },
+    { "kind": "SyntheticRow", "section": "FOOT3", "anchorY": 220,
+      "account": [20, 220, 71, 253], "accountFont": "subtotalAccount",
+      "name": [90, 222, 758, 255],
+      "amountY": [220, 255], "amountFont": "totalAmount" },
+    { "kind": "AnalyticalRow", "section": "RECORD", "anchorY": 220,
+      "account": [20, 220, 139, 258], "accountFont": "regularAccount",
+      "itemKind": "ItemRow",
+      "itemFields": {
+        "ZAKC": [150, 220, 235, 258], "KP": [240, 220, 342, 258],
+        "KZ": [350, 220, 418, 258], "T": [420, 220, 438, 258],
+        "STR": [450, 220, 569, 258], "ZAK": [580, 220, 749, 258]
+      },
+      "amountY": [220, 255], "amountFont": "regularAmount" }
+  ],
+  "reportFooter": {
+    "issuedBy": [200, 290, 622, 328], "controlledBy": [900, 290, 1322, 328],
+    "approvedBy": [1530, 290, 1952, 328], "softwareVersion": [430, 440, 505, 473],
+    "servicePack": [510, 440, 585, 473], "licensedUser": [1130, 440, 1720, 473]
+  },
+  "formats": { "amount": "decimalComma", "blankAmount": "zero", "period": "MM/yyyy", "maximumPeriod": 14 }
+}

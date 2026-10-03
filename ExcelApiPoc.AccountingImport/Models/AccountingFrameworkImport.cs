@@ -31,6 +31,7 @@ namespace ExcelApiPoc.AccountingImport.Models
 
     public sealed class AccountingFrameworkRow
     {
+        public System.Collections.Generic.Dictionary<string,string> SourceFields { get; set; } = new System.Collections.Generic.Dictionary<string,string>();
         public int SequenceNumber { get; set; }
         public int SourceRecordNumber { get; set; }
 

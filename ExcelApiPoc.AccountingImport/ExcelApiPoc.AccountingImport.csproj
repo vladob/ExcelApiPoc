@@ -11,6 +11,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\PdfLayoutEngine\PdfLayoutEngine.csproj" />
+    <ProjectReference Include="..\PdfLayoutEngine.Xps\PdfLayoutEngine.Xps.csproj" />
     <ProjectReference Include="..\PdfLayoutEngine.IText\PdfLayoutEngine.IText.csproj" />
   </ItemGroup>
 

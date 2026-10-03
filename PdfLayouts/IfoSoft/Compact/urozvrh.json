@@ -1,0 +1,68 @@
+{
+  "version": 1,
+  "id": "ifosoft_urozvrh",
+  "category": "AF",
+  "unitsPerInch": 254,
+  "header": {"AccountingEntityUserName": [1350, 10, 2025, 48], "PageNumber": [1970, 90, 2032, 128]},
+  "anchors": [
+    {"text": "ÚČTOVÝ  ROZVRH  ANALYTICKÝCH  ÚČTOV", "rect": [590, 70, 1505, 127], "size": 12},
+    {"text": "Strana:", "rect": [1880, 90, 1971, 128], "size": 8},
+    {"text": "Por.č.", "rect": [80, 160, 147, 198], "size": 8},
+    {"text": "SYN", "rect": [170, 160, 221, 198], "size": 8},
+    {"text": "ANA", "rect": [250, 160, 304, 198], "size": 8},
+    {"text": "Názov účtu", "rect": [340, 160, 479, 198], "size": 8},
+    {"text": "TYP", "rect": [1520, 160, 1568, 198], "size": 8},
+    {"text": "STR", "rect": [1590, 160, 1641, 198], "size": 8},
+    {"text": "ODD", "rect": [1650, 160, 1709, 198], "size": 8},
+    {"text": "POL", "rect": [1720, 160, 1770, 198], "size": 8},
+    {"text": "SAL", "rect": [1780, 160, 1827, 198], "size": 8},
+    {"text": "DAŇ", "rect": [1840, 160, 1895, 198], "size": 8},
+    {"text": "DPH", "rect": [1910, 160, 1964, 198], "size": 8},
+    {"text": "POD", "rect": [1970, 160, 2025, 198], "size": 8}
+  ],
+  "sections": [
+    {
+      "kind": "AnalythicAccount",
+      "sourceSection": "RECORD",
+      "anchor": {"rect": [80, 214, 142, 252], "size": 8, "weight": 400},
+      "fields": {
+        "Ordinal": [80, 214, 142, 252],
+        "SyntheticAccount": [170, 214, 221, 252],
+        "AnalythicAccount": [250, 214, 318, 252],
+        "Name": [340, 214, 1351, 252],
+        "Type": [1530, 214, 1565, 252],
+        "Str": [1610, 214, 1628, 252],
+        "Odd": [1670, 214, 1688, 252],
+        "Pol": [1740, 214, 1758, 252],
+        "Saldo": [1800, 214, 1818, 252],
+        "Tax": [1860, 214, 1878, 252],
+        "Vat": [1930, 214, 1948, 252],
+        "Pod": [1990, 214, 2008, 252]
+      },
+      "amounts": []
+    },
+    {
+      "kind": "AccountClassRow",
+      "sourceSection": "FOOT2",
+      "anchor": {"rect": [340, 214, 597, 252], "size": 8, "text": "Počet účtov v triede:"},
+      "fields": {"AccountClassSymbol": [170, 214, 190, 252], "AccountClassCount": [600, 214, 678, 252]},
+      "amounts": []
+    },
+    {
+      "kind": "AccountGroup",
+      "sourceSection": "FOOT3",
+      "anchor": {"rect": [340, 224, 630, 262], "size": 8, "text": "Počet účtov v skupine: "},
+      "fields": {"AccountGroupSymbol": [170, 224, 209, 262], "AccountGroupCount": [630, 224, 708, 262]},
+      "amounts": []
+    },
+    {
+      "kind": "ReportLevel",
+      "sourceSection": "FOOT1",
+      "anchor": {"rect": [80, 214, 213, 247], "text": "© IFOsoft", "size": 7},
+      "fields": {"User": [1180, 214, 1770, 247]},
+      "amounts": []
+    }
+  ],
+  "importKinds": ["AnalythicAccount"],
+  "requiredText": ["ÚČTOVÝ  ROZVRH  ANALYTICKÝCH  ÚČTOV"]
+}

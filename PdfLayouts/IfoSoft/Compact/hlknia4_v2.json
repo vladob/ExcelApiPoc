@@ -1,0 +1,97 @@
+{
+  "version": 1,
+  "id": "ifosoft_hlknia4_v2",
+  "category": "GL",
+  "unitsPerInch": 254,
+  "header": {"AccountingEntityUserName": [20, 17, 695, 55], "PeriodFrom": [1490, 30, 1635, 68], "PeriodTo": [1660, 30, 1805, 68], "PageNumber": [1930, 70, 2011, 103]},
+  "anchors": [
+    {"text": "HLAVNÁ KNIHA -  PODROBNÁ", "rect": [720, 20, 1249, 67], "size": 10},
+    {"text": "Účtovné obdobie", "rect": [1270, 30, 1479, 68], "size": 8},
+    {"text": "Strana:", "rect": [1840, 70, 1919, 103], "size": 7},
+    {"text": "_HLKNIA4.GMX", "rect": [20, 73, 189, 106], "size": 7},
+    {"text": "Počiatočný stav", "rect": [750, 110, 942, 148], "size": 8},
+    {"text": "Obrat od začiatku roka", "rect": [1040, 110, 1322, 148], "size": 8},
+    {"text": "Obrat za posledný mesiac", "rect": [1450, 110, 1769, 148], "size": 8},
+    {"text": "Zostatok účtu", "rect": [1840, 110, 2009, 148], "size": 8},
+    {"text": "Účet ", "rect": [20, 140, 85, 178], "size": 8},
+    {"text": "OddP", "rect": [150, 140, 217, 178], "size": 8},
+    {"text": "Položka", "rect": [230, 140, 324, 178], "size": 8},
+    {"text": "KódZ", "rect": [330, 140, 394, 178], "size": 8},
+    {"text": "Stredisko", "rect": [420, 140, 534, 178], "size": 8},
+    {"text": "Zákazka", "rect": [560, 140, 661, 178], "size": 8},
+    {"text": "MÁ DAŤ - DAL", "rect": [780, 150, 914, 179], "size": 6},
+    {"text": "MÁ DAŤ                         DAL", "rect": [1040, 150, 1318, 179], "size": 6},
+    {"text": "MÁ DAŤ                         DAL", "rect": [1470, 150, 1748, 179], "size": 6},
+    {"text": "MÁ DAŤ - DAL", "rect": [1860, 150, 1994, 179], "size": 6}
+  ],
+  "sections": [
+    {
+      "kind": "AnalyticalRow",
+      "sourceSection": "RECORD",
+      "anchor": {"rect": [20, 0, 139, 38], "size": 8, "weight": 400},
+      "fields": {
+        "AnalyticalRowAccount": [20, 0, 139, 38],
+        "ItemField1": [150, 0, 235, 38],
+        "ItemField2": [240, 0, 342, 38],
+        "ItemField3": [350, 0, 418, 38],
+        "ItemField4": [430, 0, 549, 38],
+        "ItemField5": [560, 0, 729, 38],
+        "TurnoverDebit": [970, 0, 1170, 35],
+        "TurnoverCredit": [1180, 0, 1380, 35],
+        "PeriodTurnoverDebit": [1400, 0, 1600, 35],
+        "PeriodTurnoverCredit": [1610, 0, 1810, 35],
+        "ClosingNetto": [1830, 0, 2030, 35],
+        "OpeningNetto": [750, 1, 950, 36]
+      },
+      "itemFields": ["ItemField1", "ItemField2", "ItemField3", "ItemField4", "ItemField5"],
+      "amounts": ["TurnoverDebit", "TurnoverCredit", "PeriodTurnoverDebit", "PeriodTurnoverCredit", "ClosingNetto", "OpeningNetto"]
+    },
+    {
+      "kind": "SyntheticRow",
+      "sourceSection": "FOOT3",
+      "anchor": {"rect": [20, 0, 71, 33], "size": 7, "weight": 700},
+      "fields": {
+        "SyntheticAccount": [20, 0, 71, 33],
+        "AccountName": [90, 0, 641, 35],
+        "OpeningNetto": [750, 0, 950, 35],
+        "TurnoverDebit": [970, 0, 1170, 35],
+        "TurnoverCredit": [1180, 0, 1380, 35],
+        "PeriodTurnoverDebit": [1401, 0, 1600, 35],
+        "PeriodTurnoverCredit": [1610, 0, 1810, 35],
+        "ClosingNetto": [1830, 0, 2030, 35]
+      },
+      "amounts": ["OpeningNetto", "TurnoverDebit", "TurnoverCredit", "PeriodTurnoverDebit", "PeriodTurnoverCredit", "ClosingNetto"]
+    },
+    {
+      "kind": "AccountClassRow",
+      "sourceSection": "FOOT2",
+      "anchor": {"rect": [82, 16, 318, 45], "size": 6, "text": "MEDZISÚČET ZA TRIEDU"},
+      "fields": {
+        "AccountClass": [20, 10, 38, 43],
+        "OpeningNetto": [750, 10, 950, 45],
+        "TurnoverDebit": [970, 10, 1170, 45],
+        "TurnoverCredit": [1180, 10, 1380, 45],
+        "PeriodTurnoverDebit": [1400, 10, 1600, 45],
+        "PeriodTurnoverCredit": [1610, 10, 1810, 45],
+        "ClosingNetto": [1830, 10, 2030, 45]
+      },
+      "amounts": ["OpeningNetto", "TurnoverDebit", "TurnoverCredit", "PeriodTurnoverDebit", "PeriodTurnoverCredit", "ClosingNetto"]
+    },
+    {
+      "kind": "ReportLevel",
+      "sourceSection": "FOOT1",
+      "anchor": {"rect": [90, 10, 310, 43], "size": 7, "text": "KONTROLNÝ SÚČET"},
+      "fields": {
+        "OpeningNetto": [750, 10, 950, 45],
+        "TurnoverDebit": [970, 10, 1170, 45],
+        "TurnoverCredit": [1180, 10, 1380, 45],
+        "PeriodTurnoverDebit": [1400, 10, 1600, 45],
+        "PeriodTurnoverCredit": [1610, 10, 1810, 45],
+        "ClosingNetto": [1830, 10, 2030, 45]
+      },
+      "amounts": ["OpeningNetto", "TurnoverDebit", "TurnoverCredit", "PeriodTurnoverDebit", "PeriodTurnoverCredit", "ClosingNetto"]
+    }
+  ],
+  "importKinds": ["ItemRow", "AnalyticalRow"],
+  "requiredText": ["HLAVNÁ KNIHA -  PODROBNÁ", "_HLKNIA4.GMX"]
+}
