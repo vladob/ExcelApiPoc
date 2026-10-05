@@ -7,6 +7,9 @@ namespace PdfLayoutEngine.Simple;
 public sealed class CompactLayout
 {
     public int Version { get; set; }
+    public string Producer { get; set; } = "IfoSoft";
+    public WorksheetLayout? Worksheet { get; set; }
+    public TabularLayout? Table { get; set; }
     public string Id { get; set; } = "";
     public string Category { get; set; } = "";
     public double UnitsPerInch { get; set; }
@@ -18,6 +21,8 @@ public sealed class CompactLayout
     public static CompactLayout Load(string path)
     {
         var d=JsonSerializer.Deserialize<CompactLayout>(File.ReadAllText(path),new JsonSerializerOptions{PropertyNameCaseInsensitive=true,UnmappedMemberHandling=System.Text.Json.Serialization.JsonUnmappedMemberHandling.Disallow}) ?? throw new InvalidDataException(path);
+        if(d.Version==2&&d.Worksheet!=null){if(d.Table!=null||d.Category!="AJ")throw new InvalidDataException("Invalid worksheet category.");d.Worksheet.Validate();return d;}
+        if(d.Version==2 && d.Table!=null){d.Table.Validate();if(!new[]{"AJ","GL","AF"}.Contains(d.Category))throw new InvalidDataException("Invalid category");return d;}
         if(d.Version!=1 || d.UnitsPerInch<=0 || d.Anchors.Count<2 || d.Sections.Count==0 || !new[]{"GL","AJ","AF"}.Contains(d.Category))throw new InvalidDataException("Invalid compact layout: "+path);
         foreach(var r in d.Header.Values.Concat(d.Anchors.Select(a=>a.Rect)).Concat(d.Sections.SelectMany(s=>s.Fields.Values.Concat(new[]{s.Anchor.Rect}))))
             if(r.Length!=4 || r.Any(v=>double.IsNaN(v)||double.IsInfinity(v)) || r[2]<=r[0] || r[3]<=r[1])throw new InvalidDataException("Invalid rectangle: "+path);

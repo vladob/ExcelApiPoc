@@ -2,10 +2,14 @@ using System.Diagnostics;
 using System.Text.Json;
 using ExcelApiPoc.AccountingImport.Services.Layouts;
 using PdfLayoutEngine.Simple;
-if(args.Length<3){Console.Error.WriteLine("Usage: SimpleRunner <layout.json-or-directory> <level:1..5> <file-directory-or-manifest.csv> [output-directory] [selected-fiscal-year]");return 1;}
+int timeoutSeconds=120;
+var timeoutOptions=args.Where(a=>a.StartsWith("--timeout-seconds=",StringComparison.Ordinal)).ToArray();
+if(timeoutOptions.Length>1||timeoutOptions.Length==1&&(!int.TryParse(timeoutOptions[0].Substring("--timeout-seconds=".Length),out timeoutSeconds)||timeoutSeconds<1||timeoutSeconds>3600))throw new ArgumentException("Timeout must be 1..3600 seconds.");
+args=args.Where(a=>!a.StartsWith("--timeout-seconds=",StringComparison.Ordinal)).ToArray();
+if(args.Length<3){Console.Error.WriteLine("Usage: SimpleRunner <layout.json-or-directory> <level:1..5> <file-directory-or-manifest.csv> [output-directory] [selected-fiscal-year] [--timeout-seconds=120]");return 1;}
 if(!int.TryParse(args[1],out int level)||level<1||level>5)throw new ArgumentException("Level must be 1..5.");
 string output=args.Length>3?args[3]:"TestResults/CompactLayouts";Directory.CreateDirectory(output);
-var files=Path.GetExtension(args[2]).Equals(".csv",StringComparison.OrdinalIgnoreCase)&&IsManifest(args[2])?ReadManifest(args[2]):Directory.Exists(args[2])?Directory.GetFiles(args[2]).Where(f=>new[]{".pdf",".xps",".oxps",".dbf",".csv",".xml"}.Contains(Path.GetExtension(f).ToLowerInvariant())).OrderBy(f=>f).Select(f=>new Input(f)):new[]{new Input(args[2])};
+var files=Path.GetExtension(args[2]).Equals(".csv",StringComparison.OrdinalIgnoreCase)&&IsManifest(args[2])?ReadManifest(args[2]):Directory.Exists(args[2])?Directory.GetFiles(args[2]).Where(f=>new[]{".pdf",".xps",".oxps",".dbf",".csv",".xml",".xls",".xlsx"}.Contains(Path.GetExtension(f).ToLowerInvariant())).OrderBy(f=>f).Select(f=>new Input(f)):new[]{new Input(args[2])};
 var options=new JsonSerializerOptions{WriteIndented=true,PropertyNamingPolicy=JsonNamingPolicy.CamelCase};
 using var summary=new StreamWriter(Path.Combine(output,"summary.csv"));summary.WriteLine("File,RequestedLevel,CompletedLevel,Status,Layout,Category,FiscalYear,DecodedPages,Rows,Milliseconds,Errors,Warnings,ExpectedYearCheck,ExpectedCategoryCheck");
 int? selectedYear=args.Length>4?int.Parse(args[4]):null;
@@ -14,7 +18,7 @@ int failures=0,ordinal=0;
 foreach(var input in files){
     var watch=Stopwatch.StartNew();string stem=(++ordinal).ToString("D4")+"-"+Path.GetFileName(input.FilePath);
     try{
-        using var importer=new CompactLayoutImporter(input.FilePath,args[0],selectedYear);using var timeout=new CancellationTokenSource(TimeSpan.FromMinutes(2));
+        using var importer=new CompactLayoutImporter(input.FilePath,args[0],selectedYear);using var timeout=new CancellationTokenSource(TimeSpan.FromSeconds(timeoutSeconds));
         var result=importer.Examine((ImportLevel)level,timeout.Token);
         string year=CompactSession.Value(result.Identifiers,"fiscalYear");
         string yearCheck=string.IsNullOrEmpty(input.ExpectedYear)?"notSpecified":level<2?"notExamined":year.Length==0?"unavailable":year==input.ExpectedYear?"pass":"fail";

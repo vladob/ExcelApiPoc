@@ -1,0 +1,112 @@
+{
+  "version": 2,
+  "producer": "KROS OMEGA",
+  "id": "omega-pdf-gl",
+  "category": "GL",
+  "importKinds": [
+    "Record"
+  ],
+  "table": {
+    "titlePattern": "^Hlavná kniha \\(zúžená\\) v EUR",
+    "orientation": "portrait",
+    "requiredPageText": "Vytvorené v programe OMEGA",
+    "leftLabel": "Účet",
+    "rightLabel": "Konečný",
+    "left": 43.4,
+    "right": 503.3,
+    "lastHeaderLabel": "zost. účtu",
+    "headerPadding": 2,
+    "columns": {
+      "Account": [
+        28,
+        72
+      ],
+      "AccountName": [
+        72,
+        235
+      ],
+      "Structure": [
+        28,
+        175
+      ],
+      "SubtotalAccount": [
+        175,
+        230
+      ],
+      "OpeningNetto": [
+        235,
+        287
+      ],
+      "PeriodTurnoverDebit": [
+        287,
+        338
+      ],
+      "PeriodTurnoverCredit": [
+        338,
+        389
+      ],
+      "TurnoverDebit": [
+        389,
+        440
+      ],
+      "TurnoverCredit": [
+        440,
+        491
+      ],
+      "ClosingNetto": [
+        491,
+        540
+      ]
+    },
+    "rules": [
+      {
+        "kind": "SyntheticTotal",
+        "field": "Structure",
+        "pattern": "^Spolu za syntetický účet"
+      },
+      {
+        "kind": "Subtotal",
+        "field": "Structure",
+        "pattern": "^Spolu za"
+      },
+      {
+        "kind": "Record",
+        "field": "Account",
+        "pattern": "^\\d{6}$"
+      },
+      {
+        "kind": "ClassTotal",
+        "field": "SubtotalAccount",
+        "pattern": "^\\d$"
+      }
+    ],
+    "amounts": [
+      "OpeningNetto",
+      "PeriodTurnoverDebit",
+      "PeriodTurnoverCredit",
+      "TurnoverDebit",
+      "TurnoverCredit",
+      "ClosingNetto"
+    ],
+    "groupPattern": "(?!)",
+    "ignorePattern": "^Vytvorené v programe OMEGA",
+    "continuationKind": "Record",
+    "continueAcrossPages": true,
+    "controlMode": "accountTotals",
+    "compactFields": [
+      "Account",
+      "SubtotalAccount"
+    ],
+    "blankAmountsAreZero": true,
+    "continuationFields": [
+      "AccountName"
+    ],
+    "identifierPatterns": {
+      "AccountingEntityName": "^Firma\\s*:\\s*(?<value>.+?)(?=\\s+(?:Obdobie do:|Do\\s*:)|$)",
+      "fiscalYear": "(?:Účtovný rok\\s+|Firma\\s*:.*?\\()(?<value>\\d{4})",
+      "PeriodFrom": "Obdobie od:\\s*(?<value>\\d{1,2}/\\d{4})",
+      "PeriodTo": "Obdobie do:\\s*(?<value>\\d{1,2}/\\d{4})"
+    },
+    "pageNumberPattern": "Strana\\s+(?<page>\\d+)\\s*/\\s*\\d+"
+  }
+}

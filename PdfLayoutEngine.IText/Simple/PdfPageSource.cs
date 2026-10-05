@@ -17,13 +17,16 @@ public sealed class PdfPageSource : IPageSource
 {
     private readonly PdfDocument pdf;
     private readonly ExtractionLimits limits;
+    private readonly bool retainDecodedPages;
+    private readonly HashSet<int> decodedPages = new HashSet<int>();
     private readonly Dictionary<int, PositionedPage> cache = new Dictionary<int, PositionedPage>();
     public PositionedDocument Document { get; } = new PositionedDocument { Format = "PDF" };
     public string Format => "PDF";
     public int PageCount => pdf.GetNumberOfPages();
-    public int DecodedPageCount => cache.Count;
-    public PdfPageSource(string filePath, ExtractionLimits? limits = null)
+    public int DecodedPageCount => decodedPages.Count;
+    public PdfPageSource(string filePath, ExtractionLimits? limits = null, bool retainDecodedPages = true)
     {
+        this.retainDecodedPages = retainDecodedPages;
         this.limits = limits ?? new ExtractionLimits();
         if (new FileInfo(filePath).Length > this.limits.FileBytes) throw new InvalidDataException("PDF exceeds byte budget.");
         pdf = new PdfDocument(new PdfReader(filePath));
@@ -52,7 +55,8 @@ public sealed class PdfPageSource : IPageSource
             var page = new PositionedPage { PhysicalPageIndex = i - 1, SourcePageId = "pdf-page-" + i, WidthPt = rotation % 180 == 0 ? width : height, HeightPt = rotation % 180 == 0 ? height : width, SourceToNormalized = transform };
             var listener = new Listener(page, limits, token, Document);
             new PdfCanvasProcessor(listener).ProcessPageContent(source);
-            Document.Pages.Add(page); cache.Add(index, page);
+            if (!retainDecodedPages) foreach (int old in cache.Keys.Where(k => k != 0).ToArray()) { Document.Pages.Remove(cache[old]); cache.Remove(old); }
+            Document.Pages.Add(page); cache.Add(index, page); decodedPages.Add(index);
         return page;
     }
 
@@ -89,6 +93,16 @@ public sealed class PdfPageSource : IPageSource
             if(name.IndexOf("bold",StringComparison.OrdinalIgnoreCase)>=0)weight=Math.Max(weight,700);
             weights[font]=weight;return weight;
         }
+        private static string GlyphText(TextRenderInfo glyph)
+        {
+            string text=glyph.GetText();
+            // Incomplete ToUnicode maps can omit space; recover only when the font encoding confirms it.
+            if(text=="\uFFFD"||text.Length==0){
+                var bytes=glyph.GetPdfString().GetValueBytes();
+                if(bytes.Length==1&&glyph.GetFont() is iText.Kernel.Font.PdfTrueTypeFont font&&font.GetFontEncoding().GetUnicode(bytes[0])==32)return " ";
+            }
+            return text;
+        }
         public void EventOccurred(IEventData data, EventType type)
         {
             token.ThrowIfCancellationRequested();
@@ -103,7 +117,7 @@ public sealed class PdfPageSource : IPageSource
                     var points = new[] { P(glyph.GetAscentLine().GetStartPoint()), P(glyph.GetAscentLine().GetEndPoint()), P(glyph.GetDescentLine().GetStartPoint()), P(glyph.GetDescentLine().GetEndPoint()) };
                     var raw = new RectPt(points.Min(p => p.X), points.Min(p => p.Y), points.Max(p => p.X), points.Max(p => p.Y));
                     var bounds = page.SourceToNormalized.Apply(raw);
-                    page.Text.Add(new PositionedText { Id = $"p{page.PhysicalPageIndex}:t{page.Text.Count}", Text = glyph.GetText(), RawBounds = raw, Bounds = bounds, Baseline = page.SourceToNormalized.Apply(P(glyph.GetBaseline().GetStartPoint())), RunId = runId, AdvanceEnd = page.SourceToNormalized.Apply(P(glyph.GetBaseline().GetEndPoint())), FontSize = glyph.GetFontSize() * Math.Sqrt(Math.Pow(glyph.GetTextMatrix().Multiply(glyph.GetGraphicsState().GetCtm()).Get(Matrix.I21), 2) + Math.Pow(glyph.GetTextMatrix().Multiply(glyph.GetGraphicsState().GetCtm()).Get(Matrix.I22), 2)) * Math.Sqrt(Math.Abs(page.SourceToNormalized.A * page.SourceToNormalized.D - page.SourceToNormalized.B * page.SourceToNormalized.C)), FontWeight = Weight(glyph), Font = glyph.GetFont().GetFontProgram().GetFontNames().GetFontName(), HasGlyphGeometry = true, IsClipped = clip.HasValue && (!clip.Value.Contains(new PointPt(bounds.Left, bounds.Bottom), .2) || !clip.Value.Contains(new PointPt(bounds.Right, bounds.Top), .2)), SourceToNormalized = page.SourceToNormalized });
+                    page.Text.Add(new PositionedText { Id = $"p{page.PhysicalPageIndex}:t{page.Text.Count}", Text = GlyphText(glyph), RawBounds = raw, Bounds = bounds, Baseline = page.SourceToNormalized.Apply(P(glyph.GetBaseline().GetStartPoint())), RunId = runId, AdvanceEnd = page.SourceToNormalized.Apply(P(glyph.GetBaseline().GetEndPoint())), FontSize = glyph.GetFontSize() * Math.Sqrt(Math.Pow(glyph.GetTextMatrix().Multiply(glyph.GetGraphicsState().GetCtm()).Get(Matrix.I21), 2) + Math.Pow(glyph.GetTextMatrix().Multiply(glyph.GetGraphicsState().GetCtm()).Get(Matrix.I22), 2)) * Math.Sqrt(Math.Abs(page.SourceToNormalized.A * page.SourceToNormalized.D - page.SourceToNormalized.B * page.SourceToNormalized.C)), FontWeight = Weight(glyph), Font = glyph.GetFont().GetFontProgram().GetFontNames().GetFontName(), HasGlyphGeometry = true, IsClipped = clip.HasValue && (!clip.Value.Contains(new PointPt(bounds.Left, bounds.Bottom), .2) || !clip.Value.Contains(new PointPt(bounds.Right, bounds.Top), .2)), SourceToNormalized = page.SourceToNormalized });
                 }
             }
             else if (type == EventType.RENDER_PATH)

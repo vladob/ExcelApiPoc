@@ -1,0 +1,100 @@
+{
+  "version": 2,
+  "producer": "Urbis",
+  "id": "urbis-pdf-gl",
+  "category": "GL",
+  "importKinds": [
+    "Record"
+  ],
+  "table": {
+    "titlePattern": "Hlavná kniha",
+    "leftLabel": "Účet",
+    "rightLabel": "Popis",
+    "left": 56,
+    "right": 154,
+    "lastHeaderLabel": "Má dať",
+    "columns": {
+      "Type": [
+        46,
+        55
+      ],
+      "Account": [
+        55,
+        86
+      ],
+      "Function": [
+        86,
+        122
+      ],
+      "Analysis": [
+        122,
+        153
+      ],
+      "Name": [
+        153,
+        510
+      ],
+      "OpeningNetto": [
+        510,
+        574
+      ],
+      "TurnoverDebit": [
+        574,
+        645
+      ],
+      "TurnoverCredit": [
+        645,
+        716
+      ],
+      "ClosingNetto": [
+        716,
+        786
+      ],
+      "Structure": [
+        46,
+        153
+      ]
+    },
+    "rules": [
+      {
+        "kind": "ReportTotal",
+        "field": "Structure",
+        "pattern": "^Spolu$"
+      },
+      {
+        "kind": "Summary",
+        "field": "Structure",
+        "pattern": "^(Aktíva|Pasíva|Rozdiel|Výnosy|Náklady|Podsúvaha)$"
+      },
+      {
+        "kind": "Subtotal",
+        "field": "Structure",
+        "pattern": "\\*"
+      },
+      {
+        "kind": "Record",
+        "field": "Type",
+        "pattern": "^[0ABPXNV]$"
+      }
+    ],
+    "amounts": [
+      "OpeningNetto",
+      "TurnoverDebit",
+      "TurnoverCredit",
+      "ClosingNetto"
+    ],
+    "groupPattern": "(?!)",
+    "controlMode": "export",
+    "pageNumberPattern": "Strana\\s+(?<page>\\d+)",
+    "ignorePattern": "^Vytlačené",
+    "entityWidth": 0.3,
+    "amountSums": {
+      "PeriodDebitTurnover": [
+        "TurnoverDebit"
+      ],
+      "PeriodCreditTurnover": [
+        "TurnoverCredit"
+      ]
+    }
+  }
+}

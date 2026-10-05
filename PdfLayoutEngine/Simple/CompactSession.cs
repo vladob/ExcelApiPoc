@@ -6,7 +6,7 @@ using System.Text.RegularExpressions;
 using System.Threading;
 namespace PdfLayoutEngine.Simple;
 /// <summary>Lazy, cumulative examination using a small catalogue of coordinate layouts.</summary>
-public sealed class CompactSession : IDisposable
+public sealed partial class CompactSession : IDisposable
 {
     readonly IPageSource source;
     readonly CompactLayout[] layouts;
@@ -17,7 +17,7 @@ public sealed class CompactSession : IDisposable
     readonly Dictionary<int,Frame> frames=new Dictionary<int,Frame>();
     public CompactSession(IPageSource source,IEnumerable<CompactLayout> layouts){this.source=source;this.layouts=layouts.ToArray();result.Format=source.Format;}
     public void Dispose()=>source.Dispose();
-    struct Frame { public double U,X,Y; public double Px(double x)=>X+x*U; public double Py(double y)=>Y-y*U; }
+    struct Frame { public Dictionary<string,double[]>? WorksheetColumns; public double U,X,Y; public double Px(double x)=>X+x*U; public double Py(double y)=>Y-y*U; }
     static string Compact(string s)=>string.Concat(s.Where(c=>!char.IsWhiteSpace(c))).ToUpperInvariant();
     static List<PositionedText[]> Bands(IEnumerable<PositionedText> ts)
     {
@@ -38,6 +38,8 @@ public sealed class CompactSession : IDisposable
     // Fit header anchor starts; font size supplies an independent scale check.
     static (Frame frame,int score)? Fit(PositionedPage p,CompactLayout d)
     {
+        if(d.Worksheet!=null)return FitWorksheet(p,d.Worksheet,0);
+        if(d.Table!=null)return FitTable(p,d);
         var bands=Bands(p.Text.Where(t=>t.Baseline.Y>p.HeightPt*.65));
         if(d.RequiredText.Any(label=>!bands.Any(b=>Find(b,label).Length>0)))return null;
         var hits=new List<(CompactAnchor a,PositionedText[] ts)>();
@@ -73,7 +75,8 @@ public sealed class CompactSession : IDisposable
         if(extractionFailed)return result;
         if(result.CompletedLevel==0){
             var p=source.ReadPage(0,token);
-            var candidates=layouts.Select(d=>(d,fit:Fit(p,d))).Where(x=>x.fit.HasValue).OrderByDescending(x=>x.fit!.Value.score).ToArray();
+            if(!p.Text.Any(v=>!string.IsNullOrWhiteSpace(v.Text))){Issue("noReadableText","No readable text on the first page. Scanned/image-only documents require a text export; OCR is not supported.",1);result.Status="unsupported";result.PageCount=source.PageCount;result.DecodedPageCount=source.DecodedPageCount;result.CompletedLevel=1;extractionFailed=true;return result;}
+            var candidates=layouts.Select(d=>(d,fit:Fit(p,d))).Where(x=>x.fit.HasValue&&(x.d.Worksheet==null||!x.d.Worksheet.DynamicHeaders||WorksheetPanelsMatch(x.d.Worksheet,token))).OrderByDescending(x=>x.fit!.Value.score).ToArray();
             if(candidates.Length>0 && (candidates.Length==1 || candidates[0].fit!.Value.score>candidates[1].fit!.Value.score)){
                 Layout=candidates[0].d;frames[0]=candidates[0].fit!.Value.frame;result.LayoutId=Layout.Id;result.Category=Layout.Category;
             } else if(candidates.Length>0)Issue("ambiguousLayout","More than one layout matches the header.");
@@ -82,6 +85,8 @@ public sealed class CompactSession : IDisposable
         result.DecodedPageCount=source.DecodedPageCount;
         if(Layout==null)return result;
         var d=Layout;
+        if(d.Worksheet!=null)return ExamineWorksheet(level,token);
+        if(d.Table!=null)return ExamineTable(level,token);
         if(level>=ImportLevel.Identify && result.CompletedLevel<2){
             var p=source.ReadPage(0,token);result.PageCount=source.PageCount;
             foreach(var h in d.Header)result.Identifiers[h.Key]=Read(p.Text,frames[0],h.Value);

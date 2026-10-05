@@ -20,6 +20,7 @@ namespace ExcelApiPoc.AccountingImport.Services.Layouts
     public sealed class StructuredDefinition
     {
         public int Version {get;set;}
+        public string Producer {get;set;}="IfoSoft";
         public string Id {get;set;}="";
         public string Format {get;set;}="";
         public string Category {get;set;}="";
@@ -280,7 +281,7 @@ namespace ExcelApiPoc.AccountingImport.Services.Layouts
         {if(string.IsNullOrWhiteSpace(raw))return 0;if(decimal.TryParse(raw,NumberStyles.Number,Sk,out var v))return v;throw new InvalidDataException("Invalid amount: "+raw);}
         void SetMetadata(object obj,string hash)
         {
-            var values=new Dictionary<string,object>{{"SourceFileName",Path.GetFileName(path)},{"SourceFilePath",path},{"SourceFileHash",hash},{"TechnicalType",format},{"AccountingFormat","IfoSoft"},{"Ico",result.Identifiers["cin"]},{"CompanyName",result.Identifiers["AccountingEntityName"]},{"FiscalYear",Year},{"ImportedAtUtc",DateTime.UtcNow}};
+            var values=new Dictionary<string,object>{{"SourceFileName",Path.GetFileName(path)},{"SourceFilePath",path},{"SourceFileHash",hash},{"TechnicalType",format},{"AccountingFormat",definition.Producer},{"Ico",result.Identifiers["cin"]},{"CompanyName",result.Identifiers["AccountingEntityName"]},{"FiscalYear",Year},{"ImportedAtUtc",DateTime.UtcNow}};
             foreach(var v in values)obj.GetType().GetProperty(v.Key).SetValue(obj,v.Value);
         }
         public void Dispose(){}

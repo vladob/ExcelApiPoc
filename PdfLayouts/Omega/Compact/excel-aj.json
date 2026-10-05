@@ -1,0 +1,58 @@
+{
+  "version": 1,
+  "id": "omega-excel-aj",
+  "producer": "KROS OMEGA",
+  "category": "AJ",
+  "headers": [
+    [
+      "^Stredisko$",
+      "^Účt\\. obd\\.$",
+      "^DUÚP$",
+      "^Dátum splatnosti$",
+      "^Interné číslo$",
+      "^Externé číslo$",
+      "^Partner$",
+      "^Text$",
+      "^Suma MD \\[EUR\\]$",
+      "^Suma DAL \\[EUR\\]$",
+      "^MD synt\\.$",
+      "^MD anal\\.$",
+      "^DAL synt\\.$",
+      "^DAL anal\\.$"
+    ]
+  ],
+  "columnCounts": [
+    14
+  ],
+  "columns": {
+    "CostCentre": 0,
+    "AccountingMonth": 1,
+    "Date": 2,
+    "DueDate": 3,
+    "DocumentNumber": 4,
+    "ExternalDocumentNumber": 5,
+    "Partner": 6,
+    "OperationDescription": 7,
+    "DebitAmount": 8,
+    "CreditAmount": 9,
+    "DebitSynthetic": 10,
+    "DebitAnalytical": 11,
+    "CreditSynthetic": 12,
+    "CreditAnalytical": 13
+  },
+  "amounts": [
+    "DebitAmount",
+    "CreditAmount"
+  ],
+  "independentAmounts": true,
+  "accountParts": {
+    "DebitAccount": [
+      "DebitSynthetic",
+      "DebitAnalytical"
+    ],
+    "CreditAccount": [
+      "CreditSynthetic",
+      "CreditAnalytical"
+    ]
+  }
+}

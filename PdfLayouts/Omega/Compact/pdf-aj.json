@@ -1,0 +1,105 @@
+{
+  "version": 2,
+  "producer": "KROS OMEGA",
+  "id": "omega-pdf-aj",
+  "category": "AJ",
+  "importKinds": [
+    "Record"
+  ],
+  "table": {
+    "titlePattern": "^Účtovný denník \\(zúžený - dátum\\)",
+    "orientation": "portrait",
+    "requiredPageText": "Vytvorené v programe OMEGA",
+    "leftLabel": "DUÚP",
+    "rightLabel": "Partner",
+    "left": 37.2,
+    "right": 501,
+    "lastHeaderLabel": "DUÚP",
+    "headerPadding": 2,
+    "columns": {
+      "Date": [
+        28,
+        61
+      ],
+      "DebitAmount": [
+        61,
+        106
+      ],
+      "CreditAmount": [
+        106,
+        151
+      ],
+      "DebitAccount": [
+        151,
+        178
+      ],
+      "CreditAccount": [
+        178,
+        205
+      ],
+      "OperationDescription": [
+        205,
+        283
+      ],
+      "DocumentType": [
+        283,
+        303
+      ],
+      "DocumentNumber": [
+        303,
+        361
+      ],
+      "PaidDocument": [
+        361,
+        424
+      ],
+      "AdvanceDeduction": [
+        424,
+        487
+      ],
+      "Partner": [
+        487,
+        540
+      ],
+      "Structure": [
+        28,
+        61
+      ]
+    },
+    "rules": [
+      {
+        "kind": "ReportTotal",
+        "field": "Structure",
+        "pattern": "^Spolu\\s*:"
+      },
+      {
+        "kind": "Record",
+        "field": "Date",
+        "pattern": "^\\d{2}\\.\\d{2}\\.\\d{4}$"
+      }
+    ],
+    "amounts": [
+      "DebitAmount",
+      "CreditAmount"
+    ],
+    "groupPattern": "(?!)",
+    "ignorePattern": "^Vytvorené v programe OMEGA",
+    "continuationKind": "Record",
+    "continueAcrossPages": true,
+    "controlMode": "separateSides",
+    "compactFields": [
+      "DebitAccount",
+      "CreditAccount"
+    ],
+    "blankAmountsAreZero": true,
+    "continuationFields": [
+      "OperationDescription",
+      "Partner"
+    ],
+    "pageNumberPattern": "Strana\\s*:\\s*(?<page>\\d+)",
+    "identifierPatterns": {
+      "AccountingEntityName": "^Firma\\s*:\\s*(?<value>.+?)(?=\\s+(?:Obdobie do:|Do\\s*:)|$)",
+      "fiscalYear": "(?:Účtovný rok\\s+|Firma\\s*:.*?\\()(?<value>\\d{4})"
+    }
+  }
+}

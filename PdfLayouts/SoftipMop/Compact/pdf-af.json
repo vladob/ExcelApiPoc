@@ -1,0 +1,80 @@
+{
+  "version": 2,
+  "id": "softip-mop-pdf-af",
+  "producer": "Softip-MOP",
+  "category": "AF",
+  "importKinds": [
+    "Record"
+  ],
+  "table": {
+    "titlePattern": "Účtový rozvrh pre účtovné obdobie",
+    "requiredPageText": "UCT-S-201_0_0_151",
+    "leftLabel": "Účet",
+    "rightLabel": "Platí do",
+    "left": 56.3,
+    "right": 519,
+    "lastHeaderLabel": "Platí do",
+    "headerPadding": 4,
+    "columns": {
+      "Account": [
+        35,
+        97
+      ],
+      "Name": [
+        97,
+        265
+      ],
+      "Side": [
+        265,
+        300
+      ],
+      "Saldo": [
+        300,
+        336
+      ],
+      "Currency": [
+        336,
+        374
+      ],
+      "Type": [
+        374,
+        413
+      ],
+      "Keys": [
+        413,
+        453
+      ],
+      "ValidFrom": [
+        453,
+        508
+      ],
+      "ValidTo": [
+        508,
+        560
+      ]
+    },
+    "rules": [
+      {
+        "kind": "Record",
+        "field": "Account",
+        "pattern": "^\\d{3}(?:\\d{2})?$"
+      }
+    ],
+    "compactFields": [
+      "Account"
+    ],
+    "amounts": [],
+    "groupPattern": "(?!)",
+    "continuationKind": "Record",
+    "continuationFields": [
+      "Name"
+    ],
+    "continueAcrossPages": true,
+    "ignorePattern": "^(©|Autor:)",
+    "pageNumberInFooter": true,
+    "pageNumberPattern": "Strana:\\s*(?<page>\\d+)\\s+of\\s+\\d+",
+    "identifierPatterns": {
+      "fiscalYear": "účtovné obdobie (?<value>\\d{4})"
+    }
+  }
+}

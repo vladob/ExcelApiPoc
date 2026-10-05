@@ -1,0 +1,12 @@
+{
+  "version": 1,
+  "id": "omega-excel-gl-collapsed",
+  "producer": "KROS OMEGA",
+  "category": "GL",
+  "headers": [
+    [
+      "^Hlavná kniha \\(zúžená\\) v EUR$"
+    ]
+  ],
+  "unsupportedReason": "This print-style GL Excel export collapses blank amount cells and shifts debit/credit columns. Use the original GL PDF or a structured export with stable column headers. No amounts were guessed."
+}

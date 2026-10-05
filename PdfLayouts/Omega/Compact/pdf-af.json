@@ -1,0 +1,101 @@
+{
+  "version": 2,
+  "producer": "KROS OMEGA",
+  "id": "omega-pdf-af",
+  "category": "AF",
+  "importKinds": [
+    "Record"
+  ],
+  "table": {
+    "titlePattern": "^Účtový rozvrh",
+    "orientation": "portrait",
+    "requiredPageText": "Vytvorené v programe OMEGA",
+    "leftLabel": "Synt.",
+    "rightLabel": "Záp",
+    "left": 33.2,
+    "right": 507,
+    "lastHeaderLabel": "Poh",
+    "headerPadding": 2,
+    "columns": {
+      "Account": [
+        28,
+        85
+      ],
+      "Name": [
+        85,
+        305
+      ],
+      "Active": [
+        305,
+        323
+      ],
+      "Passive": [
+        323,
+        341
+      ],
+      "Correction": [
+        341,
+        359
+      ],
+      "Expense": [
+        359,
+        377
+      ],
+      "Income": [
+        377,
+        395
+      ],
+      "NonTax": [
+        395,
+        413
+      ],
+      "Closing": [
+        413,
+        431
+      ],
+      "OffBalance": [
+        431,
+        449
+      ],
+      "Receivable": [
+        449,
+        467
+      ],
+      "Payable": [
+        467,
+        485
+      ],
+      "OtherSaldo": [
+        485,
+        503
+      ],
+      "Negative": [
+        503,
+        521
+      ]
+    },
+    "rules": [
+      {
+        "kind": "Record",
+        "field": "Account",
+        "pattern": "^\\d{6}$"
+      }
+    ],
+    "amounts": [],
+    "groupPattern": "(?!)",
+    "ignorePattern": "^Vytvorené v programe OMEGA",
+    "continuationKind": "Record",
+    "continueAcrossPages": true,
+    "compactFields": [
+      "Account"
+    ],
+    "continuationFields": [
+      "Name"
+    ],
+    "pageNumberPattern": "Strana\\s+(?<page>\\d+)",
+    "identifierPatterns": {
+      "AccountingEntityName": "^Firma\\s*:\\s*(?<value>.+?)(?=\\s+(?:Obdobie do:|Do\\s*:)|$)",
+      "fiscalYear": "(?:Účtovný rok\\s+|Firma\\s*:.*?\\()(?<value>\\d{4})"
+    }
+  }
+}

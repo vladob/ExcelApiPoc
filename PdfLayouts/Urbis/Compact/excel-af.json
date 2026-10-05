@@ -1,0 +1,58 @@
+{
+  "version": 1,
+  "id": "urbis-af",
+  "producer": "Urbis",
+  "category": "AF",
+  "headers": [
+    [
+      "^Pč$",
+      "^Účet$",
+      "^Názov$",
+      "^A/P$",
+      "^RS$",
+      "^HS$",
+      "^An1$",
+      "^An2$",
+      "^An3$",
+      "^An4$",
+      "^An5$",
+      "^An6$",
+      "^An7$",
+      "^An8$",
+      "^An9$",
+      "^An10$",
+      "^An11$",
+      "^An12$",
+      "^An13$",
+      "^An14$",
+      "^An15$"
+    ]
+  ],
+  "columns": {
+    "Ordinal": 0,
+    "Account": 1,
+    "Name": 2,
+    "Type": 3,
+    "RS": 4,
+    "HS": 5,
+    "An1": 6,
+    "An2": 7,
+    "An3": 8,
+    "An4": 9,
+    "An5": 10,
+    "An6": 11,
+    "An7": 12,
+    "An8": 13,
+    "An9": 14,
+    "An10": 15,
+    "An11": 16,
+    "An12": 17,
+    "An13": 18,
+    "An14": 19,
+    "An15": 20
+  },
+  "amounts": [],
+  "columnCounts": [
+    21
+  ]
+}

@@ -19,7 +19,7 @@ public class CompactTests
     }
     [Fact]public void Wrong_title_is_not_recognized()
     {
-        var d=Catalogue()[0];using var source=new Fixture(d);source.Document.Pages[0].Text.Clear();using var session=new CompactSession(source,Catalogue());Assert.Equal("unrecognized",session.Examine(ImportLevel.Identify).Status);
+        var d=Catalogue()[0];using var source=new Fixture(d);source.Document.Pages[0].Text.Clear();using var session=new CompactSession(source,Catalogue());Assert.Equal("unsupported",session.Examine(ImportLevel.Identify).Status);
     }
     [Theory,InlineData("3 805 101.04",3805101.04),InlineData("1.234,56",1234.56),InlineData("-12,00",-12)]
     public void Printed_number_formats(string raw,decimal expected){Assert.True(CompactSession.TryMoney(raw,out var actual));Assert.Equal(expected,actual);}
