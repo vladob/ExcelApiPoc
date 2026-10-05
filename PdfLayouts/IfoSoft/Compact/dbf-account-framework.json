@@ -1,0 +1,27 @@
+{
+  "id": "ifosoft-dbf-account-framework",
+  "version": 1,
+  "format": "DBF",
+  "category": "AF",
+  "encoding": 852,
+  "requiredFields": {
+    "UCET": "C",
+    "SYN": "C",
+    "ANA": "C",
+    "NAZOV": "C",
+    "TYP": "C",
+    "D": "C",
+    "SALDO": "C",
+    "DPH": "C"
+  },
+  "map": {
+    "account": "UCET",
+    "synthetic": "SYN",
+    "analytical": "ANA",
+    "name": "NAZOV",
+    "type": "TYP",
+    "tax": "D",
+    "balance": "SALDO",
+    "vat": "DPH"
+  }
+}

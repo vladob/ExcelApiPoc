@@ -76,9 +76,11 @@ public sealed class PdfPageSource : IPageSource
             if(bytes!=null && bytes.Length>=12){
                 int count=bytes[4]*256+bytes[5];
                 for(int i=0;i<count && 12+i*16+16<=bytes.Length;i++){
-                    int at=12+i*16;if(System.Text.Encoding.ASCII.GetString(bytes,at,4)!="OS/2")continue;
+                    int at=12+i*16;string tag=System.Text.Encoding.ASCII.GetString(bytes,at,4);
                     long offset=((long)bytes[at+8]<<24)|((long)bytes[at+9]<<16)|((long)bytes[at+10]<<8)|bytes[at+11];
-                    if(offset>=0 && offset+6<=bytes.Length)weight=bytes[(int)offset+4]*256+bytes[(int)offset+5];
+                    if(tag=="OS/2" && offset>=0 && offset+6<=bytes.Length)weight=bytes[(int)offset+4]*256+bytes[(int)offset+5];
+                    // Subset fonts may omit OS/2 and names but retain the TrueType bold bit.
+                    if(tag=="head" && offset>=0 && offset+46<=bytes.Length && (bytes[(int)offset+45]&1)!=0)weight=Math.Max(weight,700);
                 }
             }
             if((descriptor?.GetAsNumber(PdfName.Flags)?.IntValue() & 262144)!=0 && descriptor?.GetAsNumber(PdfName.Flags)!=null)weight=700;

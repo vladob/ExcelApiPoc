@@ -13,6 +13,7 @@ public sealed class CompactSession : IDisposable
     readonly ImportResult result=new ImportResult();
     readonly HashSet<Tuple<string,string,int?>> issueKeys=new HashSet<Tuple<string,string,int?>>();
     public CompactLayout? Layout { get; private set; }
+    bool extractionFailed;
     readonly Dictionary<int,Frame> frames=new Dictionary<int,Frame>();
     public CompactSession(IPageSource source,IEnumerable<CompactLayout> layouts){this.source=source;this.layouts=layouts.ToArray();result.Format=source.Format;}
     public void Dispose()=>source.Dispose();
@@ -69,6 +70,7 @@ public sealed class CompactSession : IDisposable
     public ImportResult Examine(ImportLevel level,CancellationToken token=default)
     {
         token.ThrowIfCancellationRequested();result.RequestedLevel=level;
+        if(extractionFailed)return result;
         if(result.CompletedLevel==0){
             var p=source.ReadPage(0,token);
             var candidates=layouts.Select(d=>(d,fit:Fit(p,d))).Where(x=>x.fit.HasValue).OrderByDescending(x=>x.fit!.Value.score).ToArray();
@@ -91,7 +93,12 @@ public sealed class CompactSession : IDisposable
         if(level>=ImportLevel.Extract && result.CompletedLevel<3){
             var rows=new List<SourceRow>();
             for(int i=0;i<source.PageCount;i++){
-                token.ThrowIfCancellationRequested();var p=source.ReadPage(i,token);var fit=Fit(p,d);
+                token.ThrowIfCancellationRequested();var p=source.ReadPage(i,token);
+                if(!p.Text.Any(t=>!string.IsNullOrWhiteSpace(t.Text))){
+                    Issue("criticalPageContentMissing","Page has no readable text; report completeness cannot be established. Import stopped.",i+1);
+                    result.Rows=rows;result.Status="invalid";result.DecodedPageCount=source.DecodedPageCount;extractionFailed=true;return result;
+                }
+                var fit=Fit(p,d);
                 if(!fit.HasValue){Issue("pageLayoutMismatch","Header could not be aligned.",i+1);continue;}
                 frames[i]=fit.Value.frame;var head=new SourceRow{Kind="PageLevel",Page=i+1};foreach(var h in d.Header)head.Fields[h.Key]=Read(p.Text,fit.Value.frame,h.Value);rows.Add(head);
                 Extract(p,fit.Value.frame,rows,token);
@@ -161,7 +168,7 @@ public sealed class CompactSession : IDisposable
             }
             if(def.ItemFields.Any(k=>row.Fields[k].Length>0))row.Kind="ItemRow";
             row.Account=Value(row.Fields,"AnalyticalRowAccount","AnalyticalAccount","SyntheticAccount","AccountClass");row.Name=Value(row.Fields,"AccountName","Name");
-            if(d.Category=="AF" && row.Kind=="AnalythicAccount" && Value(row.Fields,"SyntheticAccount").Length==0 && Value(row.Fields,"AnalythicAccount").Trim('*').Length==0 && Value(row.Fields,"Name").Length==0)row.Kind="EmptyAccount";
+            if(d.Category=="AF" && row.Kind=="AnalythicAccount" && Value(row.Fields,"SyntheticAccount").Length==0 && Value(row.Fields,"AnalythicAccount").Trim('*').Length==0 && (Value(row.Fields,"Name").Length==0 || string.Equals(Value(row.Fields,"Name").Trim(),"Prázdny účet",StringComparison.OrdinalIgnoreCase)))row.Kind="EmptyAccount";
             if(d.Category=="AF" && row.Kind=="AnalythicAccount" && Value(row.Fields,"AnalythicAccount")=="****")row.Kind="AccountHeading";
             rows.Add(row);
             double top=Math.Min(def.Anchor.Rect[1],def.Fields.Values.Select(r=>r[1]).DefaultIfEmpty(def.Anchor.Rect[1]).Min());
@@ -184,7 +191,7 @@ public sealed class CompactSession : IDisposable
         return Regex.IsMatch(compact,@"^[+-]?\d+\.\d{2}$") && decimal.TryParse(compact,NumberStyles.AllowLeadingSign|NumberStyles.AllowDecimalPoint,CultureInfo.InvariantCulture,out amount);
     }
     void Validate(CancellationToken token){
-        var d=Layout!;
+        var d=Layout!;int? previousPrintedPage=null;
         if(!source.Document.CompleteDecode)Issue("decodeIncomplete","Adapter reported unsupported source features.");
         foreach(var row in result.Rows){
             token.ThrowIfCancellationRequested();
@@ -195,7 +202,14 @@ public sealed class CompactSession : IDisposable
                     if(!Date(raw,out _) && !(m.Success && int.Parse(m.Groups[1].Value)<=14 && int.Parse(m.Groups[2].Value)>=1900))Issue("invalidPeriod",key+": "+raw,row.Page);
                 }
                 foreach(var key in d.Header.Keys.Where(k=>k!="PageNumber"&&k!="PrintDate"&&k!="PrintTime"))if(Value(row.Fields,key)!=Value(result.Identifiers,key))Issue("inconsistentHeader",key+" differs between pages.",row.Page);
-                if(row.Fields.TryGetValue("PageNumber",out var page)&&(!int.TryParse(page.TrimStart(':',' '),out int pn)||pn!=row.Page))Issue("pageSequence","Printed page differs from physical page.",row.Page);
+                if(row.Fields.TryGetValue("PageNumber",out var page)){
+                    if(!int.TryParse(page.TrimStart(':',' '),out int pn)||pn<1)Issue("pageSequence","Invalid printed page number: "+page,row.Page);
+                    else {
+                        if(!previousPrintedPage.HasValue && pn!=1)Issue("partialReport","Report starts at printed page "+pn+"; coverage is incomplete.",row.Page,"warning");
+                        if(previousPrintedPage.HasValue && pn!=previousPrintedPage.Value+1)Issue("pageSequence","Printed pages are not consecutive.",row.Page);
+                        previousPrintedPage=pn;
+                    }
+                }
                 continue;
             }
             var def=d.Sections.FirstOrDefault(s=>s.Kind==row.Kind || row.Kind=="ItemRow"&&s.ItemFields.Length>0);if(def==null)continue;
@@ -203,7 +217,8 @@ public sealed class CompactSession : IDisposable
             if(d.ImportKinds.Contains(row.Kind)){
                 if(d.Category=="GL"&&row.Account.Length==0)Issue("missingAccount","Account is blank.",row.Page);
                 if(d.Category=="AJ"){
-                    if(!Date(Value(row.Fields,"Date"),out _))Issue("invalidDate","Missing or invalid posting date: "+Value(row.Fields,"Date"),row.Page);
+                    if(!Date(Value(row.Fields,"Date"),out var postingDate)||postingDate.Year<1900)Issue("invalidDate","Missing, invalid or implausible posting date: "+Value(row.Fields,"Date"),row.Page,"warning");
+                    else if(Year(Value(result.Identifiers,"PeriodTo")) is int fiscalYear && postingDate.Year!=fiscalYear)Issue("dateOutsideFiscalYear","Posting date outside report year: "+Value(row.Fields,"Date"),row.Page,"warning");
                     if(Value(row.Fields,"DebitAccount","Debit").Length==0 && Value(row.Fields,"CreditAccount","Credit").Length==0)Issue("missingAccount","Both journal accounts are blank.",row.Page);
                 }
                 if(d.Category=="AF"&&Value(row.Fields,"SyntheticAccount").Length==0)Issue("missingAccount","Synthetic code is blank.",row.Page);

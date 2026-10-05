@@ -198,7 +198,7 @@ namespace ExcelApiPoc.AccountingImport.Services.IfoSoft
             return result;
         }
 
-        private static JournalRow ReadRecord(XElement record, int sourceNumber, int year)
+        internal static JournalRow ReadRecord(XElement record, int sourceNumber, int year)
         {
             string location = "XML record " + sourceNumber;
             string debitText = Value(record, "md"), creditText = Value(record, "dal");
@@ -259,7 +259,7 @@ namespace ExcelApiPoc.AccountingImport.Services.IfoSoft
                 !(fiscalYear == 2023 && sourceDate == "03.01.4202");
         }
 
-        private static JournalRecordKind Classify(JournalRow row) =>
+        internal static JournalRecordKind Classify(JournalRow row) =>
             row.PostingDate.Month == 1 && row.PostingDate.Day == 1 &&
                 (row.DebitAccount == "701" || row.CreditAccount == "701") ? JournalRecordKind.Opening :
             row.PostingDate.Month == 12 && row.PostingDate.Day == 31 &&
@@ -278,7 +278,7 @@ namespace ExcelApiPoc.AccountingImport.Services.IfoSoft
             return amount;
         }
 
-        private static XDocument Read(string path, out int repairedTextCharacters)
+        internal static XDocument Read(string path, out int repairedTextCharacters)
         {
             repairedTextCharacters = 0;
             var settings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Prohibit, XmlResolver = null };

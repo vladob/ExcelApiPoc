@@ -1,0 +1,29 @@
+{
+  "version": 1,
+  "id": "ifosoft-csv-af",
+  "format": "CSV",
+  "category": "AF",
+  "encoding": 1250,
+  "delimiter": ";",
+  "titlePattern": "^(?:Uctovny rozvrh|Účtovný rozvrh)\\s+(?<year>\\d{4})$",
+  "headers": [
+    "Syn",
+    "Ana",
+    "Nazov uctu",
+    "Typ",
+    "Pods",
+    "Dan",
+    "Saldo",
+    "DPH"
+  ],
+  "columns": {
+    "SyntheticCode": 0,
+    "AnalyticalCode": 1,
+    "AccountName": 2,
+    "Type": 3,
+    "SubsidiaryFlag": 4,
+    "TaxFlag": 5,
+    "BalanceFlag": 6,
+    "VatFlag": 7
+  }
+}

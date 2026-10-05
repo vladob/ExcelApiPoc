@@ -127,7 +127,7 @@ namespace ExcelApiPoc.AccountingImport.Services.IfoSoft
             return journalImport;
         }
 
-        private static JournalRow MapJournalRow(CsvRecord source,int sourceRecordNumber,int sequenceNumber,JournalImport journalImport)
+        internal static JournalRow MapJournalRow(CsvRecord source,int sourceRecordNumber,int sequenceNumber,JournalImport journalImport)
         {
             string[] fields = source.Fields;
             bool rowNormalized = false;
@@ -380,7 +380,7 @@ namespace ExcelApiPoc.AccountingImport.Services.IfoSoft
             }
         }
 
-        private static IEnumerable<CsvRecord> ReadCsvRecords(string filePath)
+        internal static IEnumerable<CsvRecord> ReadCsvRecords(string filePath)
         {
             using (var reader = new StreamReader(filePath,Encoding.GetEncoding(1250),true))
             {
@@ -495,8 +495,9 @@ namespace ExcelApiPoc.AccountingImport.Services.IfoSoft
             return fields.ToArray();
         }
 
-        private sealed class CsvRecord
+        internal sealed class CsvRecord
         {
+            public string RawRecord { get; set; }
             public string[] Fields { get; set; }
             public int StartLineNumber { get; set; }
             public int EndLineNumber { get; set; }

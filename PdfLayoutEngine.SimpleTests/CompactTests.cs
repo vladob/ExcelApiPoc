@@ -6,8 +6,8 @@ namespace PdfLayoutEngine.SimpleTests;
 public class CompactTests
 {
     static string Root=>Path.Combine(AppContext.BaseDirectory,"Compact");
-    static CompactLayout[] Catalogue()=>Directory.GetFiles(Root,"*.json").Select(CompactLayout.Load).ToArray();
-    public static IEnumerable<object[]> Definitions()=>Directory.GetFiles(Root,"*.json").Select(p=>new object[]{Path.GetFileName(p)});
+    static CompactLayout[] Catalogue()=>Directory.GetFiles(Root,"*.json").Where(p=>!Path.GetFileName(p).StartsWith("dbf-")&&!Path.GetFileName(p).StartsWith("structured-")).Select(CompactLayout.Load).ToArray();
+    public static IEnumerable<object[]> Definitions()=>Directory.GetFiles(Root,"*.json").Where(p=>!Path.GetFileName(p).StartsWith("dbf-")&&!Path.GetFileName(p).StartsWith("structured-")).Select(p=>new object[]{Path.GetFileName(p)});
     [Theory,MemberData(nameof(Definitions))]
     public void Every_layout_recognizes_and_extracts_its_record_block(string file)
     {
