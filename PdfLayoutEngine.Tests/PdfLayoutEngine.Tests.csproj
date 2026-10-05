@@ -18,6 +18,7 @@
     <ProjectReference Include="..\PdfLayoutEngine\PdfLayoutEngine.csproj" />
     <ProjectReference Include="..\PdfLayoutEngine.IText\PdfLayoutEngine.IText.csproj" />
     <ProjectReference Include="..\PdfLayoutEngine.Xps\PdfLayoutEngine.Xps.csproj" />
+    <ProjectReference Include="../PdfLayoutEngine.Runner/PdfLayoutEngine.Runner.csproj" />
   </ItemGroup>
   <ItemGroup>
     <None Include="../LayoutDefinitions/v2/**/*.json" Link="TestData/V2/%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
