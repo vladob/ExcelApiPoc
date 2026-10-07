@@ -14,6 +14,8 @@ From the repository root, using PowerShell with Visual Studio Build Tools and .N
 .\deployment\ExcelApiPoc.AddIn\Test-ReleaseCandidate.ps1
 ```
 
+The script loads LocalTests.runsettings by default for both suites. Use
+-RunSettingsPath to select another settings file; its external sample paths must exist.
 The script stops on failed tests/build/dependency checks. Both staged and accounting
 regression suites must pass. Corpus tests that return early without their environment
 variables are NOT evidence that the external corpus passed. Run the existing corpus

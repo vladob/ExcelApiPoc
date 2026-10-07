@@ -1,18 +1,22 @@
-param([string]$MSBuildPath)
+param([string]$MSBuildPath, [string]$RunSettingsPath)
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 $repo = (Resolve-Path (Join-Path $PSScriptRoot '..\..')).Path
 Push-Location $repo
 try {
+    if ([string]::IsNullOrWhiteSpace($RunSettingsPath)) { $RunSettingsPath = Join-Path $repo 'LocalTests.runsettings' }
+    if (!(Test-Path -LiteralPath $RunSettingsPath)) { throw "Test settings not found: $RunSettingsPath" }
+    $RunSettingsPath = (Resolve-Path -LiteralPath $RunSettingsPath).Path
+    Write-Host "Test settings: $RunSettingsPath"
     if ([string]::IsNullOrWhiteSpace($MSBuildPath)) {
         $vswhere = Join-Path ${env:ProgramFiles(x86)} 'Microsoft Visual Studio\Installer\vswhere.exe'
         if (!(Test-Path $vswhere)) { throw 'Visual Studio Build Tools with the .NET Framework 4.8 targeting pack are required. Supply -MSBuildPath if installed elsewhere.' }
         $MSBuildPath = (& $vswhere -latest -products '*' -requires Microsoft.Component.MSBuild -find 'MSBuild\**\Bin\MSBuild.exe' | Select-Object -First 1)
     }
     if (!$MSBuildPath -or !(Test-Path $MSBuildPath)) { throw 'MSBuild.exe was not found.' }
-    & dotnet test PdfLayoutEngine.SimpleTests/PdfLayoutEngine.SimpleTests.csproj -c Release --logger 'trx;LogFileName=staged-release.trx'
+    & dotnet test PdfLayoutEngine.SimpleTests/PdfLayoutEngine.SimpleTests.csproj -c Release --settings $RunSettingsPath --logger 'trx;LogFileName=staged-release.trx'
     if ($LASTEXITCODE -ne 0) { throw 'Staged engine/runtime tests failed.' }
-    & dotnet test ExcelApiPoc.AccountingImport.Tests/ExcelApiPoc.AccountingImport.Tests.csproj -c Release --logger 'trx;LogFileName=accounting-release.trx'
+    & dotnet test ExcelApiPoc.AccountingImport.Tests/ExcelApiPoc.AccountingImport.Tests.csproj -c Release --settings $RunSettingsPath --logger 'trx;LogFileName=accounting-release.trx'
     if ($LASTEXITCODE -ne 0) { throw 'Accounting regression tests failed.' }
     & $MSBuildPath ExcelApiPoc.AddIn/ExcelApiPoc.AddIn.csproj /restore /t:Rebuild /p:RestorePackagesConfig=true /p:Configuration=Release /nologo
     if ($LASTEXITCODE -ne 0) { throw 'AddIn Release rebuild failed.' }

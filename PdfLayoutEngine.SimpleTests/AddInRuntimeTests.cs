@@ -26,6 +26,13 @@ public sealed class AddInRuntimeTests
         ExpectedIco = "00323110", ExpectedFiscalYear = 2024
     };
 
+    [Fact] public void Legacy_journal_regression_resource_is_available()
+    {
+        using var resource = typeof(StagedImportRuntime).Assembly.GetManifestResourceStream(
+            "ExcelApiPoc.AccountingImport.PdfLayouts.IfoSoft.journal-dennik1.v1.json");
+        Assert.NotNull(resource);
+    }
+
     [Fact] public void Runtime_catalogue_is_embedded_and_complete()
     {
         var assembly = typeof(StagedImportRuntime).Assembly;

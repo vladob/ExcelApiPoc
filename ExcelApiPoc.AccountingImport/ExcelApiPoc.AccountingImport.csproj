@@ -16,6 +16,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <!-- Retained for direct legacy-parser regression tests, not AddIn dispatch. -->
+    <EmbeddedResource Include="../PdfLayouts/IfoSoft/journal-dennik1.v1.json">
+      <LogicalName>ExcelApiPoc.AccountingImport.PdfLayouts.IfoSoft.journal-dennik1.v1.json</LogicalName>
+    </EmbeddedResource>
     <EmbeddedResource Include="..\PdfLayouts\SoftipMop\general-ledger.v1.json">
       <Link>PdfLayouts\SoftipMop\general-ledger.v1.json</Link>
       <LogicalName>ExcelApiPoc.AccountingImport.PdfLayouts.SoftipMop.general-ledger.v1.json</LogicalName>
