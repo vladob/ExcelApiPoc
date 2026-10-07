@@ -127,6 +127,15 @@ namespace ExcelApiPoc.AddIn.Services
                 table.Name = "AccountDetail_" + account;
                 table.TableStyle = (string)definition["detailTable"]["style"];
 
+                step = "adding the debit and credit subtotals";
+                for (int column = 5; column <= 6; column++)
+                {
+                    Excel.Range subtotal = (Excel.Range)sheet.Cells[4, column];
+                    subtotal.Formula = "=SUBTOTAL(9," + table.Name + "[" +
+                        table.ListColumns[column].Name + "])";
+                    subtotal.NumberFormat = "#,##0.00";
+                }
+
                 step = "creating the worksheet significance name";
                 ((Excel.Range)sheet.Cells[1, 4]).Value2 = "Worksheet implementation significance:";
                 ((Excel.Range)sheet.Cells[1, 4]).HorizontalAlignment = Excel.XlHAlign.xlHAlignRight;
