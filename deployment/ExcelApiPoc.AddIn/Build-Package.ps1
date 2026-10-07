@@ -1,5 +1,5 @@
 param(
-    [string]$Version = "1.1.4",
+    [string]$Version = "1.2.0",
     [string]$RepositoryRoot = (Resolve-Path (Join-Path $PSScriptRoot "..\..")),
     [string]$OutputDirectory = (Join-Path $PSScriptRoot "artifacts")
 )
@@ -76,6 +76,10 @@ if ($null -eq $packedXll) {
     throw "The 64-bit packed XLL was not found beneath '$releaseRoot'."
 }
 
+$builtDll = Join-Path $releaseRoot "ExcelApiPoc.AddIn.dll"
+$builtVersion = [Reflection.AssemblyName]::GetAssemblyName($builtDll).Version.ToString(3)
+if ($builtVersion -ne $Version) { throw "Built add-in '$builtVersion' differs from package '$Version'." }
+
 $packageName = "ExcelApiPoc.AddIn-$Version-x64"
 $stagingRoot = Join-Path $OutputDirectory $packageName
 $payloadRoot = Join-Path $stagingRoot "payload"
@@ -97,7 +101,8 @@ $packageFiles = @(
     "Rollback.cmd",
     "Uninstall.ps1",
     "Uninstall.cmd",
-    "README.txt"
+    "README.txt",
+    "RELEASE-1.2.0.md"
 )
 foreach ($packageFile in $packageFiles) {
     Copy-Item `

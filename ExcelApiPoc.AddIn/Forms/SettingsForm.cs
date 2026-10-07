@@ -264,11 +264,7 @@ namespace ExcelApiPoc.AddIn.Forms
             if (version == null)
                 return "unknown";
 
-            return version.Build == 0 && version.Revision == 0
-                ? version.Major + "." + version.Minor
-                : version.Revision == 0
-                    ? version.Major + "." + version.Minor + "." + version.Build
-                    : version.ToString();
+            return version.Revision == 0 ? version.ToString(3) : version.ToString();
         }
 
         private static string ValidateAndNormalizeUrl(string value, string language)

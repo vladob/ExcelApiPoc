@@ -101,6 +101,13 @@ Build ExcelApiPoc.AddIn in Release mode first, or run this script without -SkipB
 "@
 }
 
+# Refuse a ZIP labelled with a different version than the built add-in.
+$BuiltDll = Join-Path $RepoRoot "ExcelApiPoc.AddIn\bin\Release\ExcelApiPoc.AddIn.dll"
+$BuiltVersion = [Reflection.AssemblyName]::GetAssemblyName($BuiltDll).Version.ToString(3)
+if ($BuiltVersion -ne $Version) {
+    throw "Package version '$Version' differs from built add-in '$BuiltVersion'."
+}
+
 # ------------------------------------------------------------
 # Recreate package directory
 # ------------------------------------------------------------
@@ -131,7 +138,8 @@ $DeploymentFiles = @(
     "Uninstall.cmd",
     "Uninstall.ps1",
     "Deployment.Common.ps1",
-    "README.txt"
+    "README.txt",
+    "RELEASE-1.2.0.md"
 )
 
 foreach ($File in $DeploymentFiles) {

@@ -23,7 +23,7 @@ try {
     $output = Join-Path $repo 'ExcelApiPoc.AddIn\bin\Release'
     $dll = Join-Path $output 'ExcelApiPoc.AddIn.dll'
     $version = [Reflection.AssemblyName]::GetAssemblyName($dll).Version.ToString()
-    if ($version -ne '1.1.4.0') { throw "Validation phase expects assembly 1.1.4.0; found $version." }
+    if ($version -ne '1.2.0.0') { throw "Release validation expects assembly 1.2.0.0; found $version." }
     [xml]$dna = Get-Content (Join-Path $repo 'ExcelApiPoc.AddIn\ExcelApiPoc.AddIn-AddIn.dna') -Raw
     $packed = @($dna.SelectNodes('//*[@Pack="true"]') | ForEach-Object { $_.Path })
     foreach ($name in $packed) {

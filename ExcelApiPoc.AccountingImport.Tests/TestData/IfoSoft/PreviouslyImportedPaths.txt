@@ -71,10 +71,8 @@ f:\Audit\TESTS\TestAll\00323292 - Obec Nižná Jablonka\UCT_ROZVRH_00323292_2024
 f:\Audit\TESTS\TestAll\00323292 - Obec Nižná Jablonka\U_DENNIK_00323292_2023.pdf
 f:\Audit\TESTS\TestAll\00323292 - Obec Nižná Jablonka\U_DENNIK_00323292_2023.xml
 f:\Audit\TESTS\TestAll\00323292 - Obec Nižná Jablonka\U_DENNIK_00323292_2024.xml
-f:\Audit\TESTS\TestAll\00323292 - Obec Nižná Jablonka\HL_KNIHA_00323292_2024.pdf
 f:\Audit\TESTS\TestAll\00323292 - Obec Nižná Jablonka\HL_KNIHA_00323292_202412.CSV
 f:\Audit\TESTS\TestAll\00323292 - Obec Nižná Jablonka\HL_KNIHA_00323292_202512.CSV
 f:\Audit\TESTS\TestAll\00323292 - Obec Nižná Jablonka\UCT_ROZVRH_00323292_2024.CSV
 f:\Audit\TESTS\TestAll\00323292 - Obec Nižná Jablonka\UCT_ROZVRH_00323292_2025.CSV
-f:\Audit\TESTS\TestAll\00323292 - Obec Nižná Jablonka\U_DENNIK_00323292_2024.pdf
 f:\Audit\TESTS\TestAll\00323292 - Obec Nižná Jablonka\U_DENNIK_00323292_2025.xml
