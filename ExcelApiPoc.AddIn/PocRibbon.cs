@@ -171,6 +171,8 @@ namespace ExcelApiPoc.AddIn
 
         private void InvalidateAuditControls()
         {
+            _ribbon?.InvalidateControl("buttonCreateAccountDetails");
+            _ribbon?.InvalidateControl("buttonRefreshNavigation");
             _ribbon?.InvalidateControl(RecalculateGeneralLedgerControlId);
             _ribbon?.InvalidateControl(RecalculateAuditReportControlId);
             _ribbon?.InvalidateControl(OpenRegisterUzReportControlId);
@@ -188,10 +190,17 @@ namespace ExcelApiPoc.AddIn
             Excel.Application application = (Excel.Application)ExcelDnaUtil.Application;
             Excel.Workbook auditWorkbook = application.Workbooks.Add();
             auditWorkbook.Activate();
-            using (var dialog = new CreateAuditWorkbookForm(auditWorkbook))
+            try
             {
-                if (dialog.ShowDialog() != DialogResult.OK)
-                    auditWorkbook.Close(SaveChanges: false);
+                using (var dialog = new CreateAuditWorkbookForm(auditWorkbook))
+                {
+                    if (dialog.ShowDialog() != DialogResult.OK)
+                        auditWorkbook.Close(SaveChanges: false);
+                }
+            }
+            finally
+            {
+                InvalidateAuditControls();
             }
         }
 
