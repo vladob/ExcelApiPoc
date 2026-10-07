@@ -105,6 +105,7 @@ public sealed class IfoSoftDbfJournalImporter : IDisposable
                 aj.Rows.Add(new JournalRow{SequenceNumber=i+1,SourceRecordNumber=r.Number,SourceLocation="DBF record "+r.Number,SourceFields=new Dictionary<string,string>(r.Fields),DocumentType=Get(r,"documentType"),DocumentNumber=Get(r,"documentNumber"),PostingDate=date,Description=Get(r,"description"),DebitAccount=Get(r,"debitAccount"),CreditAccount=Get(r,"creditAccount"),DebitAmount=Get(r,"debitAccount").Length==0?(decimal?)null:result.Rows[i].Amounts["debitAmount"],CreditAmount=Get(r,"creditAccount").Length==0?(decimal?)null:result.Rows[i].Amounts["creditAmount"],DebitSection=Get(r,"debitSection"),CreditSection=Get(r,"creditSection"),DebitItem=Get(r,"debitItem"),CreditItem=Get(r,"creditItem"),DebitFundingSource=Get(r,"debitFundingSource"),CreditFundingSource=Get(r,"creditFundingSource"),DebitCostCenter=Get(r,"debitCostCenter"),CreditCostCenter=Get(r,"creditCostCenter"),DebitOrder=Get(r,"debitOrder"),CreditOrder=Get(r,"creditOrder")});
             }
             foreach(var row in aj.Rows){
+                row.RecordKind=ExcelApiPoc.AccountingImport.Services.IfoSoft.IfoSoftCsvJournalImporter.ClassifyRecord(row);
                 Date(row.SourceFields.TryGetValue(definition.Map["accountingDate"],out var raw)?raw:"",out var accountingDate);
                 ExcelApiPoc.AccountingImport.Services.Layouts.JournalDateReview.Apply(row,aj.FiscalYear,row.PostingDate!=DateTime.MinValue,accountingDate);
             }

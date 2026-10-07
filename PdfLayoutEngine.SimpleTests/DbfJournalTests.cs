@@ -8,7 +8,7 @@ public sealed class DbfJournalTests
 {
     static string Definitions=>Path.Combine(AppContext.BaseDirectory,"Compact");
     static readonly (string name,char type,int width,int scale)[] Fields={ ("DD",'C',2,0),("CDOK",'N',6,0),("DATUM",'D',8,0),("DATVY",'D',8,0),("POPIS",'C',60,0),("SUMA",'N',13,2),("MU",'C',7,0),("DU",'C',7,0),("MSUMA",'N',13,2),("DSUMA",'N',13,2) };
-    static byte[] Bytes(string date="20251201",bool deleted=false,string amount="12.34",string secondDate="")
+    static byte[] Bytes(string date="20251201",bool deleted=false,string amount="12.34",string secondDate="",string creditAccount="321")
     {
         Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);var enc=Encoding.GetEncoding(852);int count=secondDate.Length>0?2:1,h=33+Fields.Length*32,len=1+Fields.Sum(f=>f.width);var bytes=new byte[h+count*len+1];
         bytes[0]=3;BitConverter.GetBytes(count).CopyTo(bytes,4);BitConverter.GetBytes((ushort)h).CopyTo(bytes,8);BitConverter.GetBytes((ushort)len).CopyTo(bytes,10);
@@ -16,7 +16,7 @@ public sealed class DbfJournalTests
         bytes[h-1]=13;bytes[bytes.Length-1]=26;
         for(int r=0;r<count;r++){
             int at=h+r*len;bytes[at++]=(byte)(deleted&&r==0?'*':' ');
-            string[] values={"BU","17",r==0?date:secondDate,r==0?"20251201":secondDate,"Žltý účet",amount,"001A","321",amount,amount};
+            string[] values={"BU","17",r==0?date:secondDate,r==0?"20251201":secondDate,"Žltý účet",amount,"001A",creditAccount,amount,amount};
             for(int i=0;i<Fields.Length;i++){var f=Fields[i];enc.GetBytes(values[i].PadRight(f.width)).CopyTo(bytes,at);at+=f.width;}
         }return bytes;
     }
@@ -35,6 +35,20 @@ public sealed class DbfJournalTests
     [Fact]public void Implausible_date_is_preserved()=>WithFile(Bytes(date:"02040704"),p=>{using var i=new CompactLayoutImporter(p,Definitions);var r=i.Examine(ImportLevel.Normalize);var row=Assert.Single(Assert.IsType<JournalImport>(i.Canonical).Rows);Assert.Equal("02040704",row.SourceFields["DATUM"]);Assert.False(row.UsedForReportCalculation);Assert.Contains(r.Issues,x=>x.Code=="invalidDate");});
     [Fact]public void Truncated_file_is_rejected()=>WithFile(Bytes().Take(90).ToArray(),p=>Assert.Throws<InvalidDataException>(()=>new DbfTable(p)));
     [Fact]public void Cancellation_does_not_prevent_retry()=>WithFile(Bytes(),p=>{using var i=new CompactLayoutImporter(p,Definitions);Assert.Throws<OperationCanceledException>(()=>i.Examine(ImportLevel.Normalize,new CancellationToken(true)));Assert.Equal("completed",i.Examine(ImportLevel.Normalize).Status);});
+    [Theory]
+    [InlineData("20250101", "701", JournalRecordKind.Opening)]
+    [InlineData("20250102", "701", JournalRecordKind.Normal)]
+    [InlineData("20251231", "702", JournalRecordKind.Closing)]
+    [InlineData("20251231", "710", JournalRecordKind.Closing)]
+    [InlineData("20251230", "702", JournalRecordKind.Normal)]
+    public void Dbf_uses_same_opening_and_closing_classification_as_csv(string date, string account, JournalRecordKind expected)
+        => WithFile(Bytes(date: date, creditAccount: account), path => {
+            var journal = StagedImportRuntime.Import<JournalImport>(path, "IfoSoft", "AJ", 2025);
+            var row = Assert.Single(journal.Rows);
+            Assert.Equal(expected, row.RecordKind);
+            Assert.Equal(expected != JournalRecordKind.Closing, row.UsedForReportCalculation);
+        });
+
     [Fact]public void Supplied_October_and_December_samples()
     {
         string? root=Environment.GetEnvironmentVariable("IFOSOFT_DBF_TEST_ROOT");if(root==null)return;

@@ -42,6 +42,17 @@ public sealed class DbfAccountTests
         var af=Assert.IsType<AccountingFrameworkImport>(i.Canonical);Assert.Equal(0,af.FiscalYear);Assert.Equal(2,af.Rows.Count);Assert.Equal(3,af.Rows[0].SourceRecordNumber);Assert.Equal(AccountingFrameworkRowKind.SyntheticAccount,af.Rows[0].RowKind);Assert.Equal(AccountingFrameworkRowKind.AnalyticalAccount,af.Rows[1].RowKind);Assert.Equal("001A",af.Rows[1].AccountCode);Assert.Equal("001A",af.Rows[1].SourceFields["UCET"]);
     },new(),Af("01","****"),Af("001",""),Af());
     [Fact]public void Af_context_year_is_distinct_from_observed_year()=>Fixture("AF",p=>{using var i=new CompactLayoutImporter(p,Definitions,2025);var r=i.Examine(ImportLevel.Normalize);Assert.Null(r.Identifiers["fiscalYear"]);Assert.Equal("2025",r.Identifiers["selectedFiscalYear"]);Assert.Equal(2025,Assert.IsType<AccountingFrameworkImport>(i.Canonical).FiscalYear);},Af());
+    [Fact]
+    public void Af_account_comparison_normalizes_both_sides_and_preserves_source()
+    {
+        Fixture("AF", path => {
+            var af = StagedImportRuntime.Import<AccountingFrameworkImport>(path, "IfoSoft", "AF");
+            var row = Assert.Single(af.Rows);
+            Assert.Equal("336UNM", row.AccountCode);
+            Assert.Equal("336UN M", row.SourceFields["UCET"]);
+            Assert.Equal("UN M", row.SourceAnalyticalCode);
+        }, Af("336", "UN M"));
+    }
     [Fact]public void Af_inconsistent_code_is_not_guessed(){var row=Af();row["UCET"]="999X";Fixture("AF",p=>{using var i=new CompactLayoutImporter(p,Definitions);Assert.Equal("invalid",i.Examine(ImportLevel.Normalize).Status);Assert.Null(i.Canonical);},row);}
     [Fact]public void Unusual_af_synthetic_is_preserved_with_warning()=>Fixture("AF",p=>{using var i=new CompactLayoutImporter(p,Definitions);var r=i.Examine(ImportLevel.Normalize);Assert.Equal("completed",r.Status);Assert.Contains(r.Issues,x=>x.Code=="unusualSyntheticAccount");Assert.Equal("75D",Assert.Single(Assert.IsType<AccountingFrameworkImport>(i.Canonical).Rows).SourceSyntheticCode);},Af("75D","HZ"));
     [Fact]public void Deleted_gl_rows_excluded_and_dimensions_not_aggregated(){var deleted=Gl();deleted["deleted"]="yes";var second=Gl();second["ODD"]="0222";Fixture("GL",p=>{using var i=new CompactLayoutImporter(p,Definitions);i.Examine(ImportLevel.Normalize);var gl=Assert.IsType<GeneralLedgerImport>(i.Canonical);Assert.Equal(2,gl.Rows.Count);Assert.Equal(2,gl.Rows[0].SourceRecordNumber);Assert.Equal("0222",gl.Rows[1].Section);},deleted,Gl(),second);}

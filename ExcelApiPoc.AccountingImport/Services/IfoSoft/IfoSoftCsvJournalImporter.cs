@@ -172,7 +172,7 @@ namespace ExcelApiPoc.AccountingImport.Services.IfoSoft
             return row;
         }
 
-        private static JournalRecordKind ClassifyRecord(JournalRow row)
+        internal static JournalRecordKind ClassifyRecord(JournalRow row)
         {
             if (IsOpeningRecord(row))
                 return JournalRecordKind.Opening;

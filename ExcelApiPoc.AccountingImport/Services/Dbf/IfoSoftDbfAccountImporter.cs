@@ -104,7 +104,7 @@ namespace ExcelApiPoc.AccountingImport.Services.Dbf
                         string syn=Get(r,"synthetic"),ana=Get(r,"analytical");
                         if(syn.Length==0)Issue("missingAccount",loc+"SYN is blank.","error");
                         else if(!Regex.IsMatch(syn,@"^\d{3}$"))Issue("unusualSyntheticAccount",loc+"Nonstandard SYN retained: "+syn);
-                        if(Regex.Replace(row.Account,@"\s+","")!=syn+ana)Issue("accountCodeMismatch",loc+"UCET differs from SYN + ANA; no account code guessed.","error");
+                        if(AccountCodeNormalizer.Normalize(row.Account)!=AccountCodeNormalizer.Normalize(syn+ana))Issue("accountCodeMismatch",loc+"UCET differs from SYN + ANA; no account code guessed.","error");
                     }
                 }
                 if(accounts==0)Issue("noData","No active account records.","error");
