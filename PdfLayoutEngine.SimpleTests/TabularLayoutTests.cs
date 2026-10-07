@@ -2,7 +2,18 @@ using PdfLayoutEngine.Simple;
 namespace PdfLayoutEngine.SimpleTests;
 public class TabularLayoutTests
 {
-    [Fact]public void Six_Ives_definitions_load(){var files=Directory.GetFiles(Path.Combine(AppContext.BaseDirectory,"Ives"),"*.json").Where(p=>!Path.GetFileName(p).StartsWith("structured-")&&!Path.GetFileName(p).StartsWith("crystal-")).ToArray();Assert.Equal(6,files.Length);foreach(var file in files){var d=CompactLayout.Load(file);Assert.Equal("Ives",d.Producer);Assert.NotNull(d.Table);}}
+    [Fact]
+    public void Six_Ives_pdf_definitions_load()
+    {
+        var files = LayoutFiles.Family(Path.Combine(AppContext.BaseDirectory, "Ives"), "");
+        Assert.Equal(6, files.Length);
+        foreach (var file in files)
+        {
+            var definition = CompactLayout.Load(file);
+            Assert.Equal("Ives", definition.Producer);
+            Assert.NotNull(definition.Table);
+        }
+    }
     static CompactLayout Layout()=>new(){Version=2,Producer="Ives",Id="test",Category="AJ",ImportKinds=new[]{"AjRecord"},Table=new(){TitlePattern="^Journal$",LeftLabel="Date",RightLabel="Amount",Left=20,Right=400,LastHeaderLabel="Amount",Columns=new(){["Date"]=new[]{20d,100d},["DebitAccount"]=new[]{100d,200d},["CreditAccount"]=new[]{200d,300d},["Amount"]=new[]{300d,460d}},Amounts=new[]{"Amount"},Rules=new(){new(){Kind="GroupTotal",Field="Date",Pattern="^Spolu"},new(){Kind="AjRecord",Field="Date",Pattern=@"^\d{1,2}\.\d{1,2}\.\d{4}$"}},ContinuationKind="AjRecord",ContinueAcrossPages=true}};
     [Theory,InlineData(1d,0d),InlineData(.8,12d),InlineData(1.2,7d)]
     public void Scale_offsets_and_independent_fonts_preserve_amounts(double scale,double offset){

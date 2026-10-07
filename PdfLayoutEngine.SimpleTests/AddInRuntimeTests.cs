@@ -46,7 +46,7 @@ public sealed class AddInRuntimeTests
         {
             var result = AccountingImportCoordinator.CreateDefault().Import(Request(path));
             Assert.Equal(2, result.Journal.Rows.Count);
-            Assert.Single(result.Journal.Rows.Where(r => r.DateExceptionResolution == JournalDateExceptionResolution.Excluded));
+            Assert.Single(result.Journal.Rows, r => r.DateExceptionResolution == JournalDateExceptionResolution.Excluded);
         }
         finally { Delete(path); }
     }
