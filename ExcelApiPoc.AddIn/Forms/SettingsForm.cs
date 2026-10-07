@@ -258,7 +258,7 @@ namespace ExcelApiPoc.AddIn.Forms
             }
         }
 
-        private static string GetDisplayVersion()
+        internal static string GetDisplayVersion()
         {
             Version version = Assembly.GetExecutingAssembly().GetName().Version;
             if (version == null)

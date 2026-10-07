@@ -38,7 +38,7 @@ namespace ExcelApiPoc.AddIn.Forms
                 throw new ArgumentNullException(nameof(auditWorkbook));
             _uiLanguage = SettingsService.Load().UiLanguage;
 
-            Text = UiText.Get("Create.Title", _uiLanguage);
+            Text = UiText.Get("Create.Title", _uiLanguage) + " - v" + SettingsForm.GetDisplayVersion();
             StartPosition = FormStartPosition.CenterScreen;
             FormBorderStyle = FormBorderStyle.FixedDialog;
             MaximizeBox = false;
