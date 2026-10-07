@@ -33,6 +33,7 @@
     <Reference Path="System.Memory.dll" Pack="true" />
     <Reference Path="System.Numerics.Vectors.dll" Pack="true" />
     <Reference Path="System.Runtime.CompilerServices.Unsafe.dll" Pack="true" />
+    <Reference Path="System.Runtime.InteropServices.RuntimeInformation.dll" Pack="true" />
     <Reference Path="System.Security.Cryptography.Pkcs.dll" Pack="true" />
     <Reference Path="System.Text.Encodings.Web.dll" Pack="true" />
     <Reference Path="System.Text.Json.dll" Pack="true" />

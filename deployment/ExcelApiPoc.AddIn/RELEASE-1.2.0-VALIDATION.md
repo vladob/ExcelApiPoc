@@ -43,9 +43,21 @@ are necessary but do not prove that Excel can load every packed assembly.
 
 ## Remaining gates
 
-The integration was prepared in Linux; .NET/MSBuild failed during startup due to
-unavailable process information, before compilation. No build or test pass is claimed.
-Windows tests and packed-XLL execution remain pending. Existing coordinator tests may
-expose compatibility differences between old and staged importers; investigate failures
-rather than disabling the tests. After all gates pass, bump to 1.2.0, rebuild, repeat
-the packed-XLL smoke test, then tag the exact verified release commit.
+Validation update, 2026-10-07:
+
+- 255 SimpleTests cases passed with the Linux direct-compiler test harness. This is
+  not a Windows MSBuild or standard VSTest run, and does not validate external corpora.
+- The materiality writer compiled against the Excel interop assembly. The supplied
+  Excel screenshot confirms current equity 54,949.31, previous equity 59,534.43,
+  and performance materiality 549.49 with the template settings.
+- Explicit add-in package references are covered by the packing manifest, excluding
+  Excel-DNA and Office interop references supplied by the host.
+- Windows release tests, the full add-in rebuild, and an isolated packed-XLL smoke
+  test remain required. Run Test-ReleaseCandidate.ps1 and retain its output/TRX files.
+- In Excel, verify that _WB_significance selects the PerformanceMat result cell,
+  changes to source/percentage flow through to account-detail processing, and saving
+  and reopening preserves the formulas and hidden metadata. Confirm Navigation has
+  no duplicate significance input and headings use Center Across Selection.
+
+After all gates pass, bump to 1.2.0, rebuild, repeat the packed-XLL smoke test, then
+package and tag the exact verified release commit. Assembly remains 1.1.4.0 until then.
