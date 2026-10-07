@@ -77,7 +77,6 @@ namespace ExcelApiPoc.AddIn.Services
                     x.Statement.Id == selectedStatementId)?.Statement;
                 int evidenceRow = 2;
                 int missing = 0;
-                var overviewFormulas = new object[7, 2];
                 for (int row = 3; row <= 9; row++)
                 {
                     string source = Convert.ToString(((Excel.Range)sheet.Cells[row, 1]).Value2);
@@ -91,7 +90,6 @@ namespace ExcelApiPoc.AddIn.Services
                         if (!value.Value.HasValue)
                         {
                             missing++;
-                            overviewFormulas[row - 3, column - 2] = "=NA()";
                             cell.AddComment(year + ": " + value.Problem);
                             metadata.Range[metadata.Cells[evidenceRow, 10], metadata.Cells[evidenceRow, 19]].Value2 =
                                 new object[,] { { source, year, null, null, null, null, null, null, value.Problem,
@@ -108,16 +106,26 @@ namespace ExcelApiPoc.AddIn.Services
                                         (double)evidence.Value, "Official RegisterUZ value", column == 2 ? (object)selectedStatementId : null } };
                                 evidenceRow++;
                             }
-                            overviewFormulas[row - 3, column - 2] =
-                                "=SUM('" + MetadataName + "'!Q" + firstRow + ":Q" + (evidenceRow - 1) + ")";
                             cell.AddComment("Official RegisterUZ data for " + year + ". Source rows: " + MetadataName + "!J" + firstRow + ":S" + (evidenceRow - 1));
                         }
                     }
                 }
-                SetFormula(sheet.Range["B3:C9"], overviewFormulas);
                 var evidenceTable = metadata.ListObjects.Add(Excel.XlListObjectSourceType.xlSrcRange,
                     metadata.Range["J1:S" + (evidenceRow - 1)], Type.Missing, Excel.XlYesNoGuess.xlYes, Type.Missing);
                 evidenceTable.Name = "PerformanceMatEvidence";
+                // Existing Excel calculated columns can replace per-cell formulas even
+                // with AutoFillFormulasInLists disabled. Use one valid formula per
+                // column, keyed by source and year rather than physical evidence rows.
+                var overview = sheet.ListObjects["ValuesOverview"];
+                for (int column = 2; column <= 3; column++)
+                {
+                    string criteria = "PerformanceMatEvidence[Source],[@Zdroj]," +
+                        "PerformanceMatEvidence[FiscalYear]," + (fiscalYear - (column - 2)) +
+                        ",PerformanceMatEvidence[Status],\"Official RegisterUZ value\"";
+                    SetFormula(overview.ListColumns[column].DataBodyRange,
+                        "=IF(COUNTIFS(" + criteria + ")=0,NA()," +
+                        "SUMIFS(PerformanceMatEvidence[OfficialValue]," + criteria + "))");
+                }
                 sheet.Range["A55"].Value2 = "RegisterUZ: " + fiscalYear + " / " + (fiscalYear - 1) +
                     (missing == 0 ? ". All source values available." : ". " + missing + " source values unavailable (#N/A); see cell comments.");
                 sheet.Range["A55:H55"].HorizontalAlignment = Excel.XlHAlign.xlHAlignCenterAcrossSelection;
