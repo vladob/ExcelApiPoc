@@ -30,6 +30,7 @@ public sealed class AccountingFileNameMetadataTests
         "00325791",
         2024,
         null)]
+    [InlineData("U_DENNIK_00323748_2023_a.pdf", AccountingSourceDocumentKind.AccountingJournal, "00323748", 2023, null)]
     public void TryParse_ExtractsDocumentMetadata(
         string fileName,
         AccountingSourceDocumentKind expectedKind,

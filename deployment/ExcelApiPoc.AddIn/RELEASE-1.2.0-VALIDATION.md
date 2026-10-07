@@ -61,3 +61,24 @@ Validation update, 2026-10-07:
 
 After all gates pass, bump to 1.2.0, rebuild, repeat the packed-XLL smoke test, then
 package and tag the exact verified release commit. Assembly remains 1.1.4.0 until then.
+
+## Regression follow-up after Windows run at 661790d
+
+The Windows run passed 255 SimpleTests and failed 14 of 254 accounting tests;
+therefore the Release rebuild and packed-XLL checks did not run.
+
+The follow-up fixes metadata fallback ordering, source detection with letter-suffixed
+filenames, and the missing inline 28-column IVES GL layout. The synthetic Urbis
+fixture now includes its printed total; the staged Softip fixture includes identifying
+headers and a synthetic total. Standalone footer page labels are validated and ignored
+as data. The duplicate regression-manifest entry is removed and Medzilaborce settings
+are supplied from the paths already present in that manifest.
+
+The external Dúbravka malformed-CSV test remains unchanged: the tested local file
+was accepted, whereas this test expects an unterminated quote at line 13. A new
+self-contained test verifies that exact parser diagnostic. Inspect the external file
+and its environment-variable path before deciding whether the sample was corrected.
+Do not disable the test or claim the external corpus passed without rerunning it.
+
+Local follow-up validation: 257 SimpleTests and 52 focused accounting regression
+cases passed in the direct-compiler harness. Windows and external-corpus rerun pending.

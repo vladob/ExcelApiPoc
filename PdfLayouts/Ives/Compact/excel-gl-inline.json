@@ -1,0 +1,199 @@
+{
+  "version": 1,
+  "id": "ives-excel-gl-inline",
+  "producer": "Ives",
+  "category": "GL",
+  "headers": [
+    [],
+    [],
+    [],
+    [],
+    [
+      ".*",
+      "^Hlavná kniha$"
+    ],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [
+      ".*",
+      "^Dátum$",
+      ".*",
+      "^Doklad$",
+      ".*",
+      ".*",
+      ".*",
+      ".*",
+      ".*",
+      ".*",
+      ".*",
+      ".*",
+      ".*",
+      ".*",
+      ".*",
+      ".*",
+      ".*",
+      "^Starý zostatok$",
+      ".*",
+      ".*",
+      ".*",
+      ".*",
+      "^Obrat MD$",
+      ".*",
+      "^Obrat DAL$",
+      ".*",
+      ".*",
+      "^Nový zostatok$"
+    ],
+    [],
+    []
+  ],
+  "columnCounts": [
+    28
+  ],
+  "columns": {
+    "OpeningNetto": 15,
+    "TurnoverDebit": 19,
+    "TurnoverCredit": 23,
+    "ClosingNetto": 26,
+    "Date": 1,
+    "DocumentNumber": 3,
+    "Account": 8,
+    "Name": 12
+  },
+  "amounts": [
+    "OpeningNetto",
+    "TurnoverDebit",
+    "TurnoverCredit",
+    "ClosingNetto"
+  ],
+  "report": {
+    "identifiers": [
+      {
+        "row": 2,
+        "column": 1,
+        "pattern": "^(?<AccountingEntityName>.+)$"
+      },
+      {
+        "row": 3,
+        "column": 21,
+        "pattern": "^IČO:\\s*(?<cin>\\d{8})$"
+      },
+      {
+        "row": 8,
+        "column": 1,
+        "pattern": "^Dátum od:\\s*(?<PeriodFrom>\\d{1,2}\\.\\d{1,2}\\.\\d{4}),\\s*Dátum do:\\s*(?<PeriodTo>\\d{1,2}\\.\\d{1,2}\\.\\d{4})$"
+      }
+    ],
+    "compactFields": [
+      "Account"
+    ],
+    "totalFields": [
+      "OpeningNetto",
+      "TurnoverDebit",
+      "TurnoverCredit",
+      "ClosingNetto"
+    ],
+    "requiredFields": [
+      "Account",
+      "Name"
+    ],
+    "rules": [
+      {
+        "kind": "Record",
+        "match": {
+          "1": "^-$",
+          "8": "^\\d{3}\\.[^=]*$"
+        },
+        "allowedColumns": [
+          1,
+          3,
+          8,
+          12,
+          15,
+          19,
+          23,
+          26
+        ]
+      },
+      {
+        "kind": "Subtotal",
+        "match": {
+          "1": "^-$",
+          "8": "^\\d{3}\\.=+$"
+        },
+        "allowedColumns": [
+          1,
+          3,
+          8,
+          12
+        ],
+        "awaitAmounts": true
+      },
+      {
+        "kind": "Amounts",
+        "match": {
+          "1": "^$",
+          "15": "^-?\\d"
+        },
+        "allowedColumns": [
+          12,
+          15,
+          18,
+          23,
+          26
+        ],
+        "columns": {
+          "TurnoverDebit": 18
+        }
+      },
+      {
+        "kind": "Transaction",
+        "match": {
+          "1": "^\\d",
+          "3": "^\\S+$"
+        },
+        "allowedColumns": [
+          1,
+          3,
+          8,
+          12,
+          18,
+          23
+        ]
+      },
+      {
+        "kind": "Group",
+        "match": {
+          "1": "^(Hlavná|Podnikateľská) činnosť$"
+        },
+        "allowedColumns": [
+          1,
+          10
+        ],
+        "columns": {
+          "GroupName": 1
+        }
+      },
+      {
+        "kind": "ReportTotal",
+        "match": {
+          "1": "^C\\s*e\\s*l\\s*k\\s*o\\s*m$"
+        },
+        "allowedColumns": [
+          1,
+          13,
+          19,
+          23,
+          26
+        ],
+        "columns": {
+          "OpeningNetto": 13
+        }
+      }
+    ]
+  }
+}

@@ -284,7 +284,7 @@ public sealed class AccountingImportCoordinatorTests
                             }));
 
         Assert.Contains(
-            "No registered importer recognizes",
+            "No staged layouts are available",
             exception.Message);
     }
 

@@ -70,12 +70,12 @@ public sealed partial class CompactSession
                 if(yearMatch.Success)result.Identifiers["fiscalYear"]=yearMatch.Groups[1].Value;
                 var periodLine=lines.FirstOrDefault(v=>v.Contains("Obdobie:"));
                 if(periodLine!=null){var dates=Regex.Matches(periodLine,@"\d{1,2}\.\s*\d{1,2}\.\s*\d{4}");if(dates.Count==2){result.Identifiers["PeriodFrom"]=Regex.Replace(dates[0].Value,@"\s","");result.Identifiers["PeriodTo"]=Regex.Replace(dates[1].Value,@"\s","");}}
-                if(!cin.Success)Issue("entityIdentifierUnavailable","No verified IČO in report header; filename is not used.",null,"warning");
+                if(!cin.Success)Issue("entityIdentifierUnavailable","No verified IČO in report header; use AJ/GL/AF content, then filename fallback, then manual context.",null,"warning");
             }
             foreach(var identifier in t.IdentifierPatterns){var match=Regex.Match(header,identifier.Value,RegexOptions.Multiline);result.Identifiers[identifier.Key]=match.Success?match.Groups["value"].Value.Trim():null;}
             if(t.IdentifierPatterns.Count>0){
                 result.Identifiers["fiscalYearBasis"]="report header";
-                if(!cin.Success)Issue("entityIdentifierUnavailable","No verified IČO in report header; filename is not used.",null,"warning");
+                if(!cin.Success)Issue("entityIdentifierUnavailable","No verified IČO in report header; use AJ/GL/AF content, then filename fallback, then manual context.",null,"warning");
             }
             if(result.Identifiers.TryGetValue("accountingPeriod",out var accountingPeriod)&&SingleAccountJournal.Period(accountingPeriod??"",out var periodYear,out var periodMonth)){
                 result.Identifiers["PeriodFrom"]=new DateTime(periodYear,periodMonth,1).ToString("dd.MM.yyyy");result.Identifiers["PeriodTo"]=new DateTime(periodYear,periodMonth,DateTime.DaysInMonth(periodYear,periodMonth)).ToString("dd.MM.yyyy");
@@ -99,6 +99,7 @@ public sealed partial class CompactSession
                 foreach(var band in TableBands(p.Text.Where(v=>v.Baseline.Y<f.Y))){
                     token.ThrowIfCancellationRequested();string text=LayoutSession.Assemble(band);if(string.IsNullOrWhiteSpace(text))continue;
                     if(t.IgnorePattern.Length>0&&Matches(text,t.IgnorePattern))continue;
+                    if(t.PageNumberInFooter&&t.PageNumberPattern.Length>0&&Regex.IsMatch(text,"^(?:"+t.PageNumberPattern+")$"))continue;
                     var g=Regex.Match(text,t.GroupPattern,RegexOptions.IgnoreCase);
                     if(g.Success){string name=g.Groups["group"].Value.Trim();if(name!=tableGroup){if(groupHasRows)Issue("missingGroupTotal","Previous journal group has no printed total.",i+1);tableGroup=name;groupAmount=0;groupHasRows=false;}pending=null;result.Rows.Add(new SourceRow{Kind="Group",Page=i+1,Fields=new Dictionary<string,string>{{"Group",tableGroup},{"text",text}}});continue;}
                     var row=new SourceRow{Page=i+1,BaselinePt=band.Average(v=>v.Baseline.Y)};

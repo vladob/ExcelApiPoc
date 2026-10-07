@@ -60,6 +60,19 @@ public sealed class IfoSoftCsvGeneralLedgerImporterTests
         Assert.NotEmpty(import.Rows);
     }
 
+    [Fact]
+    public void Import_ReportsUnterminatedFieldAtPhysicalLine13()
+    {
+        using var file = CreateLedger("12/2024", "12/2024");
+        File.AppendAllLines(file.Path, Enumerable.Repeat("", 8).Concat(new[] { "\"unfinished" }),
+            System.Text.Encoding.GetEncoding(1250));
+        var error = Assert.Throws<InvalidDataException>(() => new IfoSoftCsvGeneralLedgerImporter().Import(file.Path));
+        Assert.Contains(Path.GetFileName(file.Path), error.Message);
+        Assert.Contains("line 13:", error.Message);
+        Assert.Contains("unterminated quoted field", error.Message);
+        Assert.IsType<InvalidDataException>(error.InnerException);
+    }
+
     private static TemporaryCsvFile CreateLedger(
         string debitPeriod,
         string creditPeriod)

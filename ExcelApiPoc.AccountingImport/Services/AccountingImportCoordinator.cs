@@ -58,6 +58,13 @@ namespace ExcelApiPoc.AccountingImport.Services
 
             if (useStagedEngine)
             {
+                if (AccountingFileNameMetadataParser.TryParse(journal.SourceFileName, out var name))
+                {
+                    if (string.IsNullOrWhiteSpace(journal.Ico)) journal.Ico = name.Ico;
+                    if (journal.FiscalYear == 0) journal.FiscalYear = name.FiscalYear;
+                    if (!journal.ExportStage.HasValue) journal.ExportStage = name.ExportStage;
+                }
+                AdmitMissingSoftipMopIco(journal, request);
                 if (string.IsNullOrWhiteSpace(journal.Ico)) journal.Ico = request.ExpectedIco;
                 if (journal.FiscalYear == 0) journal.FiscalYear = request.ExpectedFiscalYear;
             }
@@ -84,6 +91,12 @@ namespace ExcelApiPoc.AccountingImport.Services
 
                 if (useStagedEngine)
                 {
+                    if (AccountingFileNameMetadataParser.TryParse(generalLedger.SourceFileName, out var name))
+                    {
+                        if (string.IsNullOrWhiteSpace(generalLedger.Ico)) generalLedger.Ico = name.Ico;
+                        if (generalLedger.FiscalYear == 0) generalLedger.FiscalYear = name.FiscalYear;
+                        if (!generalLedger.ExportStage.HasValue) generalLedger.ExportStage = name.ExportStage;
+                    }
                     if (string.IsNullOrWhiteSpace(generalLedger.Ico)) generalLedger.Ico = request.ExpectedIco;
                     if (generalLedger.FiscalYear == 0) generalLedger.FiscalYear = request.ExpectedFiscalYear;
                 }

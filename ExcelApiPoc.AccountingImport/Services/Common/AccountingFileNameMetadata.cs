@@ -28,7 +28,7 @@ namespace ExcelApiPoc.AccountingImport.Services.Common
                 @"^(?<document>U_DENNIK|UCT_ROZVRH|HL_KNIHA)_" +
                 @"(?<ico>\d{8})_" +
                 @"(?<year>\d{4})" +
-                @"(?<stage>\d{2})?$",
+                @"(?<stage>\d{2})?(?:_?[A-Za-z])?$",
                 RegexOptions.Compiled |
                 RegexOptions.CultureInvariant |
                 RegexOptions.IgnoreCase);

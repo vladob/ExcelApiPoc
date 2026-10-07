@@ -58,7 +58,7 @@ public sealed partial class CompactSession
         if(level>=ImportLevel.Identify&&result.CompletedLevel<2){
             var page=source.ReadPage(0,token);var first=WorksheetRows(page,layout,0,frames[0],true).FirstOrDefault();
             result.Identifiers["cin"]=null;result.Identifiers["AccountingEntityName"]=null;
-            Issue("entityIdentifierUnavailable","Printed worksheet has no verified entity identification; filename is not used.",null,"warning");
+            Issue("entityIdentifierUnavailable","Printed worksheet has no verified entity identification; use AJ/GL/AF content, then filename fallback, then manual context.",null,"warning");
             SingleAccountJournal.Identify(result,first.fields==null?"":Value(first.fields,"AccountingPeriod"));result.PageCount=source.PageCount;
             result.Identifiers["orientation"]=page.WidthPt>page.HeightPt?"landscape":"portrait";result.CompletedLevel=2;
         }

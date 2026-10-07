@@ -4,6 +4,7 @@ using System.Linq;
 using ExcelApiPoc.AccountingImport.Models;
 using ExcelApiPoc.AccountingImport.Models.Reporting;
 using PdfLayoutEngine.Simple;
+using ExcelApiPoc.AccountingImport.Services.Common;
 
 namespace ExcelApiPoc.AccountingImport.Services.Layouts
 {
@@ -23,7 +24,7 @@ namespace ExcelApiPoc.AccountingImport.Services.Layouts
                 case "URBIS": folder = "Urbis"; break;
                 case "SOFTIP-MOP": folder = "SoftipMop"; break;
                 case "KROS OMEGA": case "OMEGA": folder = "Omega"; break;
-                default: throw new NotSupportedException("No staged layouts are available for '" + producer + "'.");
+                default: throw new InvalidDataException("No staged layouts are available for '" + producer + "'.");
             }
             return Path.Combine(CatalogueDirectory, folder, "Compact");
         }
@@ -70,6 +71,12 @@ namespace ExcelApiPoc.AccountingImport.Services.Layouts
                         Ico = ico,
                         FiscalYear = int.TryParse(year, out int parsed) && parsed >= 1900 ? (int?)parsed : null
                     };
+                    if (AccountingFileNameMetadataParser.TryParse(path, out var filename) &&
+                        filename.DocumentKind == AccountingSourceDocumentKind.AccountingJournal)
+                    {
+                        if (string.IsNullOrWhiteSpace(detection.Ico)) detection.Ico = filename.Ico;
+                        if (!detection.FiscalYear.HasValue) detection.FiscalYear = filename.FiscalYear;
+                    }
                     return true;
                 }
             }
@@ -89,7 +96,14 @@ namespace ExcelApiPoc.AccountingImport.Services.Layouts
                 report.Diagnostics.Add(new ImportDiagnostic { Code = "STAGED_LAYOUT", Severity = ImportDiagnosticSeverity.Information, Message = "Staged engine: " + result.LayoutId });
                 foreach (var issue in result.Issues)
                     report.Diagnostics.Add(new ImportDiagnostic { Code = issue.Code, Message = issue.Message, Severity = issue.Severity == "error" ? ImportDiagnosticSeverity.Error : issue.Severity == "warning" ? ImportDiagnosticSeverity.Warning : ImportDiagnosticSeverity.Information });
-                if (canonical is JournalImport journal) { journal.ImportReport = report; journal.AccountingFormat = producer; }
+                if (canonical is JournalImport journal)
+                {
+                    journal.ImportReport = report; journal.AccountingFormat = producer;
+                    // A selected year is context, not evidence. Leave an unstated year
+                    // unresolved for the coordinator's filename/manual fallback.
+                    journal.FiscalYear = CompactSession.Value(result.Identifiers, "fiscalYearBasis") != "transaction dates" &&
+                        int.TryParse(CompactSession.Value(result.Identifiers, "fiscalYear"), out int reportedYear) ? reportedYear : 0;
+                }
                 if (canonical is GeneralLedgerImport ledger) { ledger.ImportReport = report; ledger.AccountingFormat = producer; }
                 if (canonical is AccountingFrameworkImport framework) { framework.ImportReport = report; framework.AccountingFormat = producer; }
                 return canonical;

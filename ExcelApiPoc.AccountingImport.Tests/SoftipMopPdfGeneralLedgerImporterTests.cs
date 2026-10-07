@@ -86,7 +86,7 @@ public sealed class SoftipMopPdfGeneralLedgerImporterTests
 
         try
         {
-            CreatePdf(ledgerPath);
+            CreateStagedPdf(ledgerPath);
 
             AccountingImportPackage result =
                 AccountingImportCoordinator
@@ -126,6 +126,36 @@ public sealed class SoftipMopPdfGeneralLedgerImporterTests
             "TestData",
             "SoftipMop",
             fileName);
+    }
+
+    // A staged export requires its identifying header and printed synthetic total.
+    private static void CreateStagedPdf(string path)
+    {
+        using var writer = new PdfWriter(path);
+        using var pdf = new PdfDocument(writer);
+        var page = pdf.AddNewPage(new iText.Kernel.Geom.PageSize(842, 595));
+        var font = PdfFontFactory.CreateFont(StandardFonts.HELVETICA, "Cp1250");
+        var canvas = new PdfCanvas(page);
+        Add(canvas, font, "Hlavná kniha k účtovnému mesiacu 202512", 200, 550);
+        Add(canvas, font, "UCT-S-201_31_0_1", 20, 570);
+        Add(canvas, font, "Účet", 42, 510);
+        Add(canvas, font, "Konečný zostatok", 700.5f, 510);
+        Add(canvas, font, "Má dať", 400, 490);
+        Add(canvas, font, "01110", 22.5f, 450);
+        Add(canvas, font, "ACCOUNT NAME", 81, 450);
+        Add(canvas, font, "Medzisúčet za :", 22.5f, 425);
+        Add(canvas, font, "011", 115, 425);
+        foreach (float y in new[] { 450f, 425f })
+        {
+            AddRight(canvas, font, "-100,00", 372, y);
+            AddRight(canvas, font, "10,00", 452, y);
+            AddRight(canvas, font, "5,00", 532, y);
+            AddRight(canvas, font, "120,00", 611, y);
+            AddRight(canvas, font, "20,00", 691, y);
+            AddRight(canvas, font, "0,00", 770, y);
+        }
+        Add(canvas, font, "Strana: 1 z 1", 20, 40);
+        Add(canvas, font, "© Softip a.s.", 20, 25);
     }
 
     private static void CreatePdf(string path)

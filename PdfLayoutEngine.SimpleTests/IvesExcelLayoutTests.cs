@@ -31,6 +31,41 @@ public sealed class IvesExcelLayoutTests
         rows[18][27] = "12.34";
         return rows;
     }
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void Inline_ledger_variant_validates_its_printed_total(bool corruptTotal)
+    {
+        var rows = Enumerable.Range(0, 17).Select(_ => Enumerable.Repeat("", 28).ToArray()).ToArray();
+        rows[1][1] = "Test entity"; rows[2][21] = "IČO:00322881";
+        rows[4][1] = "Hlavná kniha";
+        rows[7][1] = "Dátum od: 1.1.2024, Dátum do: 31.12.2024";
+        foreach (var pair in new Dictionary<int, string> { [1] = "Dátum", [3] = "Doklad", [17] = "Starý zostatok", [22] = "Obrat MD", [24] = "Obrat DAL", [27] = "Nový zostatok" }) rows[11][pair.Key] = pair.Value;
+        rows[14][1] = "Hlavná činnosť"; rows[14][10] = "EUR";
+        rows[15][1] = rows[15][3] = "-"; rows[15][8] = "211.1."; rows[15][12] = "Cash";
+        rows[15][15] = "10"; rows[15][19] = "12.34"; rows[15][23] = "0"; rows[15][26] = "22.34";
+        rows[16][1] = "C e l k o m"; rows[16][13] = "10"; rows[16][19] = corruptTotal ? "13.34" : "12.34";
+        rows[16][23] = "0"; rows[16][26] = "22.34";
+        var path = UrbisLayoutTests.Workbook(rows);
+        try
+        {
+            using var importer = new CompactLayoutImporter(path, StagedImportRuntime.ProducerDirectory("IVES"));
+            var result = importer.Examine(ImportLevel.Normalize);
+            if (corruptTotal)
+            {
+                Assert.Equal("invalid", result.Status); Assert.Null(importer.Canonical);
+                Assert.Contains(result.Issues, i => i.Code == "printedTotalMismatch");
+            }
+            else
+            {
+                Assert.Equal("completed", result.Status);
+                var row = Assert.Single(Assert.IsType<GeneralLedgerImport>(importer.Canonical).Rows);
+                Assert.Equal("211.1.", row.AccountCode); Assert.Equal(12.34m, row.AnnualDebitTurnover);
+            }
+        }
+        finally { File.Delete(path); }
+    }
+
     static void Invalid(string[][] rows, string code)
     {
         var path = UrbisLayoutTests.Workbook(rows);
