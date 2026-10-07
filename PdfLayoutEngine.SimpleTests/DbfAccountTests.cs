@@ -39,6 +39,8 @@ public sealed class DbfAccountTests
     [Fact]public void Caller_year_cannot_silently_override_gl_source()=>Fixture("GL",p=>{using var i=new CompactLayoutImporter(p,Definitions,2024);var r=i.Examine(ImportLevel.Normalize);Assert.Equal("2025",r.Identifiers["fiscalYear"]);Assert.Contains(r.Issues,x=>x.Code=="fiscalYearConflict");Assert.Null(i.Canonical);},Gl());
     [Fact]public void Af_filters_headings_retains_source_and_does_not_infer_year()=>Fixture("AF",p=>{
         using var i=new CompactLayoutImporter(p,Definitions);var r=i.Examine(ImportLevel.Normalize);Assert.Equal("completed",r.Status);Assert.Equal(4,r.Rows.Count);Assert.Null(r.Identifiers["fiscalYear"]);
+        Assert.DoesNotContain(r.Issues, x => x.Code == "fiscalYearUnavailable");
+        Assert.DoesNotContain(r.Issues, x => x.Message.Contains("Filename is not evidence"));
         var af=Assert.IsType<AccountingFrameworkImport>(i.Canonical);Assert.Equal(0,af.FiscalYear);Assert.Equal(2,af.Rows.Count);Assert.Equal(3,af.Rows[0].SourceRecordNumber);Assert.Equal(AccountingFrameworkRowKind.SyntheticAccount,af.Rows[0].RowKind);Assert.Equal(AccountingFrameworkRowKind.AnalyticalAccount,af.Rows[1].RowKind);Assert.Equal("001A",af.Rows[1].AccountCode);Assert.Equal("001A",af.Rows[1].SourceFields["UCET"]);
     },new(),Af("01","****"),Af("001",""),Af());
     [Fact]public void Af_context_year_is_distinct_from_observed_year()=>Fixture("AF",p=>{using var i=new CompactLayoutImporter(p,Definitions,2025);var r=i.Examine(ImportLevel.Normalize);Assert.Null(r.Identifiers["fiscalYear"]);Assert.Equal("2025",r.Identifiers["selectedFiscalYear"]);Assert.Equal(2025,Assert.IsType<AccountingFrameworkImport>(i.Canonical).FiscalYear);},Af());

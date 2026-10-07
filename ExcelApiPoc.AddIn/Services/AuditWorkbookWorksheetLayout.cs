@@ -21,6 +21,7 @@ namespace ExcelApiPoc.AddIn.Services
             AccountWorksheetName,
             "General Ledger",
             "GL Comparison",
+            "PerformanceMat",
             "Analytical Mapping",
             "Calculation Results",
             "Multi-year Income Statement",
@@ -93,6 +94,7 @@ namespace ExcelApiPoc.AddIn.Services
             new HashSet<string>(
                 new[]
                 {
+                    "PerformanceMat",
                     "Analytical Mapping",
                     "Calculation Results",
                     "Multi-year Income Statement",

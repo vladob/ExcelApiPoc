@@ -140,7 +140,7 @@ namespace ExcelApiPoc.AccountingImport.Services.Layouts
                 SetYears(years);result.Identifiers["recordCount"]=count.ToString();result.Identifiers["fiscalYearBasis"]="XML record rok";
                 if(result.Identifiers["fiscalYear"]!=null&&result.Identifiers["exportHeaderYear"]!=result.Identifiers["fiscalYear"])Issue("exportPeriodDiffers","XML header year "+result.Identifiers["exportHeaderYear"]+" differs from record year "+result.Identifiers["fiscalYear"]+".");
             }
-            if(string.IsNullOrEmpty(result.Identifiers["cin"]))Issue("entityIdentifierUnavailable","Source does not establish IČO; confirm entity context. Filename is not used.");
+            if(string.IsNullOrEmpty(result.Identifiers["cin"]))Issue("entityIdentifierUnavailable","Source does not establish IČO; use AJ/GL/AF content, then filename fallback, then manual context.");
         }
         bool XmlDate(XElement record,out DateTime date)
         {

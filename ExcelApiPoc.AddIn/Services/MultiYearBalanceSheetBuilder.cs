@@ -196,7 +196,7 @@ namespace ExcelApiPoc.AddIn.Services
             };
         }
 
-        private static int ResolveCurrentPeriodDataColumnOrdinal(
+        internal static int ResolveCurrentPeriodDataColumnOrdinal(
             AuditReportTableDefinitionResponse table)
         {
             if (!table.NumberOfColumns.HasValue ||

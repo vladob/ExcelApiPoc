@@ -80,7 +80,7 @@ namespace ExcelApiPoc.AccountingImport.Services.Layouts
             if(layout.UnsupportedReason.Length>0){if(!result.Issues.Any(v=>v.Code=="unsupportedExport"))Issue("unsupportedExport",layout.UnsupportedReason);result.Status="unsupported";return result;}
             if(level>=ImportLevel.Identify&&result.CompletedLevel<2){
                 result.Identifiers["cin"]=null;result.Identifiers["AccountingEntityName"]=null;
-                Issue("entityIdentifierUnavailable","Export contains no verified entity identifier; filename is not used.","warning");
+                Issue("entityIdentifierUnavailable","Export contains no verified entity identifier; use AJ/GL/AF content, then filename fallback, then manual context.","warning");
                 if(layout.SingleAccount){
                     string period=Read(token).Skip(layout.Headers.Length).Select(a=>Field(a,"AccountingPeriod")).FirstOrDefault(v=>v.Length>0)??"";
                     SingleAccountJournal.Identify(result,period);

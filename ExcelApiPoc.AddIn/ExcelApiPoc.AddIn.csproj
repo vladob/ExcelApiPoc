@@ -282,6 +282,8 @@
     <Compile Include="Services\JournalAccountSummaryBuilder.cs" />
     <Compile Include="Services\JournalWorksheetWriter.cs" />
     <Compile Include="Services\MultiYearBalanceSheetBuilder.cs" />
+    <Compile Include="Services\PerformanceMaterialityResolver.cs" />
+    <Compile Include="Services\PerformanceMaterialityWorksheetWriter.cs" />
     <Compile Include="Services\MultiYearBalanceSheetWorksheetWriter.cs" />
     <Compile Include="Services\NoCalculationReportWorksheetWriter.cs" />
     <Compile Include="Services\RegisterUzAttachmentsWorksheetBuilder.cs" />
@@ -296,6 +298,9 @@
     <Compile Include="Services\TemplateMetadataCache.cs" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="Templates\PerformanceMateriality.xlsx">
+      <LogicalName>ExcelApiPoc.AddIn.Templates.PerformanceMateriality.xlsx</LogicalName>
+    </EmbeddedResource>
     <None Include="app.config" />
     <None Include="ExcelApiPoc.AddIn-AddIn.dna" />
     <None Include="packages.config" />

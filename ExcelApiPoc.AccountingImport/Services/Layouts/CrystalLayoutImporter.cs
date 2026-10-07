@@ -73,7 +73,7 @@ namespace ExcelApiPoc.AccountingImport.Services.Layouts
                 result.Identifiers["cin"]=null;result.Identifiers["AccountingEntityName"]=null;result.Identifiers["fiscalYear"]=years.Count==1?years.Single().ToString():null;
                 result.Identifiers["observedYears"]=string.Join(",",years.OrderBy(y=>y));result.Identifiers["fiscalYearBasis"]=d.DateField.Length>0?"XML transaction dates":"not present";result.Identifiers["recordCount"]=count.ToString();
                 if(selectedYear.HasValue)result.Identifiers["selectedFiscalYear"]=selectedYear.ToString();
-                Issue("entityIdentifierUnavailable","XML contains no verified entity identifier; caller context is required. Filename is not used.","warning");
+                Issue("entityIdentifierUnavailable","XML contains no verified entity identifier; use AJ/GL/AF content, then filename fallback, then manual context.","warning");
                 if(d.Category!="AF"&&years.Count!=1)Issue("fiscalYearSelectionRequired","Transaction dates do not establish one fiscal year.","warning");
                 if(badDate)Issue("invalidSourceDate","Invalid transaction dates retained for review.","warning");result.CompletedLevel=2;
             }

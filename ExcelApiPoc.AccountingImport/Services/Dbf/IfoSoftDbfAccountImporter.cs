@@ -71,7 +71,7 @@ namespace ExcelApiPoc.AccountingImport.Services.Dbf
                 result.Identifiers["activeRecordCount"]=active.ToString(CultureInfo.InvariantCulture);result.Identifiers["deletedRecordCount"]=deleted.ToString(CultureInfo.InvariantCulture);
                 result.Identifiers["encoding"]=definition.Encoding.ToString(CultureInfo.InvariantCulture);result.Identifiers["languageDriver"]=table.LanguageDriver.ToString(CultureInfo.InvariantCulture);
                 result.Identifiers["cin"]=null;result.Identifiers["AccountingEntityName"]=null;result.Identifiers["fiscalYear"]=null;
-                Issue("entityUnavailable","No verified entity identifier in this DBF layout; use caller-confirmed entity context.");
+                Issue("entityUnavailable","No entity identifier in the DBF contents; use AJ/GL/AF content, then filename fallback, then manual context.");
                 if(selectedYear.HasValue)result.Identifiers["selectedFiscalYear"]=selectedYear.Value.ToString(CultureInfo.InvariantCulture);
                 if(deleted>0)Issue("deletedRecords",deleted+" records marked deleted were excluded.");
                 if(definition.Category=="GL"){
@@ -81,7 +81,7 @@ namespace ExcelApiPoc.AccountingImport.Services.Dbf
                     if(valid&&periods.Count==1){result.Identifiers["PeriodTo"]=periods.Single();result.Identifiers["PeriodFrom"]=null;}
                     result.Identifiers["fiscalYearBasis"]="MES";
                     if(selectedYear.HasValue&&years.Any(y=>y!=selectedYear.Value))Issue("fiscalYearConflict","Selected fiscal year conflicts with MES; source year is preserved.","error");
-                }else Issue("fiscalYearUnavailable","AF contains no fiscal-year field; use confirmed AJ/context. Filename is not evidence.");
+                } // AF may omit its year; the workbook context supplies it silently.
                 result.CompletedLevel=2;
             }
             if(level>=ImportLevel.Extract&&result.CompletedLevel<3){

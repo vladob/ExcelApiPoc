@@ -89,6 +89,9 @@ namespace ExcelApiPoc.AddIn.Services
                     accountingFrameworkImport,
                     generalLedgerImport);
 
+                PerformanceMaterialityWorksheetWriter.AddWorksheet(workbook, accountingEntityPackage,
+                    journalImport.FiscalYear, registerUzReportSelection.Statement.Statement.Id);
+
                 AuditWorkbookWorksheetLayout.Apply(workbook);
                 AuditWorkbookIdentity.Stamp(workbook);
                 AccountDetailSnapshot.Create(workbook);
@@ -166,6 +169,9 @@ namespace ExcelApiPoc.AddIn.Services
                     generalLedgerImport,
                     accountingEntityPackage,
                     calculationFailure);
+
+                PerformanceMaterialityWorksheetWriter.AddWorksheet(workbook, accountingEntityPackage,
+                    journalImport.FiscalYear);
 
                 AuditWorkbookWorksheetLayout.Apply(workbook);
                 AuditWorkbookIdentity.Stamp(workbook);

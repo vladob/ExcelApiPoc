@@ -16,6 +16,12 @@
     <None Include="../PdfLayouts/Omega/Compact/*.json" Link="AllLayouts/Omega/Compact/%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
     <None Include="../PdfLayouts/SoftipMop/Compact/*.json" Link="AllLayouts/SoftipMop/Compact/%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
     <None Include="../PdfLayouts/Urbis/Compact/*.json" Link="AllLayouts/Urbis/Compact/%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+    <Compile Include="../ExcelApiPoc.AddIn/Models/AccountingEntityPackageDto.cs" Link="AddIn/Models/AccountingEntityPackageDto.cs" />
+    <Compile Include="../ExcelApiPoc.AddIn/Models/AccountingEntityPackageEnvelope.cs" Link="AddIn/Models/AccountingEntityPackageEnvelope.cs" />
+    <Compile Include="../ExcelApiPoc.AddIn/Models/AuditTemplatePackageResponse.cs" Link="AddIn/Models/AuditTemplatePackageResponse.cs" />
+    <Compile Include="../ExcelApiPoc.AddIn/Models/MultiYearBalanceSheet.cs" Link="AddIn/Models/MultiYearBalanceSheet.cs" />
+    <Compile Include="../ExcelApiPoc.AddIn/Services/MultiYearBalanceSheetBuilder.cs" Link="AddIn/Services/MultiYearBalanceSheetBuilder.cs" />
+    <Compile Include="../ExcelApiPoc.AddIn/Services/PerformanceMaterialityResolver.cs" Link="AddIn/Services/PerformanceMaterialityResolver.cs" />
     <Using Include="Xunit" />
   </ItemGroup>
 </Project>

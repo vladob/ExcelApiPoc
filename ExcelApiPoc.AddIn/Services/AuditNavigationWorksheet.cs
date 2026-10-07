@@ -45,8 +45,7 @@ namespace ExcelApiPoc.AddIn.Services
                 source.EntireRow.RowHeight = 30;
             }
             ((Excel.Range)sheet.Range[sheet.Cells[9, 1], sheet.Cells[lastSourceRow, 1]]).Font.Size = 9;
-            int significanceRow = lastSourceRow + 1;
-            int noticeRow = significanceRow + 1;
+            int noticeRow = lastSourceRow + 1;
             int headingRow = noticeRow + 1;
             ((Excel.Range)sheet.Cells[headingRow, 1]).Value2 = "Worksheets";
             Excel.Range notice = (Excel.Range)sheet.Cells[noticeRow, 1];
@@ -73,6 +72,13 @@ namespace ExcelApiPoc.AddIn.Services
 
         public static void EnsureWorkbookSignificance(Excel.Workbook workbook)
         {
+            foreach (Excel.Worksheet sheet in workbook.Worksheets)
+                if (sheet.Name == PerformanceMaterialityWorksheetWriter.WorksheetName)
+                {
+                    PerformanceMaterialityWorksheetWriter.BindSignificance(workbook, sheet);
+                    return;
+                }
+            // Existing workbooks without PerformanceMat retain their original input.
             Excel.Worksheet navigation = null;
             foreach (Excel.Worksheet sheet in workbook.Worksheets)
                 if (sheet.Name == Name) { navigation = sheet; break; }
@@ -187,7 +193,7 @@ namespace ExcelApiPoc.AddIn.Services
 
         private static int WorksheetsFirstRow(Excel.Worksheet navigation)
         {
-            for (int row = 13; row <= 30; row++)
+            for (int row = 12; row <= 30; row++)
                 if (string.Equals(Convert.ToString(((Excel.Range)navigation.Cells[row, 1]).Value2),
                     "Worksheets", StringComparison.Ordinal)) return row + 1;
             throw new InvalidOperationException("Navigation is missing its Worksheets heading.");
