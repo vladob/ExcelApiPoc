@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using Excel = Microsoft.Office.Interop.Excel;
 
 namespace ExcelApiPoc.AddIn.Services
@@ -48,18 +49,18 @@ namespace ExcelApiPoc.AddIn.Services
                 // Replace XLOOKUP/array formulas with compatible scalar formulas and
                 // remove every illustrative amount from the supplied template.
                 sheet.Range["B3:C9"].ClearContents();
-                metadata.Range["H15:H41"].Formula =
-                    "=INDEX(TableSources[Source],MATCH([@SignificanceSourceType_sk],TableSources[Zdroj],0))";
+                SetFormula(metadata.Range["H15:H41"],
+                    "=INDEX(TableSources[Source],MATCH([@[SignificanceSourceType_sk]],TableSources[Zdroj],0))");
                 for (int row = 0; row < 7; row++)
                 {
-                    ((Excel.Range)sheet.Cells[14 + row, 2]).Formula = "=B" + (3 + row);
-                    ((Excel.Range)sheet.Cells[26 + row, 2]).Formula = "=B" + (3 + row);
-                    ((Excel.Range)sheet.Cells[38 + row, 2]).Formula = "=C" + (3 + row);
+                    SetFormula((Excel.Range)sheet.Cells[14 + row, 2], "=B" + (3 + row));
+                    SetFormula((Excel.Range)sheet.Cells[26 + row, 2], "=B" + (3 + row));
+                    SetFormula((Excel.Range)sheet.Cells[38 + row, 2], "=C" + (3 + row));
                 }
                 sheet.Range["B49"].ClearContents(); // remove the template's single-cell array formula
-                sheet.Range["B49"].Formula = "=INDEX(SignificanceCurrentYear[Kritická 100%],MATCH(SelectedSignificance,SignificanceCurrentYear[Zdroj],0))";
-                sheet.Range["B51"].Formula = "=INDEX(SignificanceCurrentYear[Kritická 5%],MATCH(SelectedSignificance,SignificanceCurrentYear[Zdroj],0))";
-                sheet.Range["B53"].Formula = "=VyznamnostPercent*Hodnota";
+                SetFormula(sheet.Range["B49"], "=INDEX(SignificanceCurrentYear[[Kritická 100%]],MATCH(SelectedSignificance,SignificanceCurrentYear[Zdroj],0))");
+                SetFormula(sheet.Range["B51"], "=INDEX(SignificanceCurrentYear[[Kritická 5%]],MATCH(SelectedSignificance,SignificanceCurrentYear[Zdroj],0))");
+                SetFormula(sheet.Range["B53"], "=VyznamnostPercent*Hodnota");
 
                 metadata.Range["J1:S1"].Value2 = new object[,] { { "Source", "FiscalYear", "ReportId", "TableKey",
                     "PrintedRow", "RowOrdinal", "DataColumnOrdinal", "OfficialValue", "Status", "SelectedStatementId" } };
@@ -80,7 +81,7 @@ namespace ExcelApiPoc.AddIn.Services
                         if (!value.Value.HasValue)
                         {
                             missing++;
-                            cell.Formula = "=NA()";
+                            SetFormula(cell, "=NA()");
                             cell.AddComment(year + ": " + value.Problem);
                             metadata.Range[metadata.Cells[evidenceRow, 10], metadata.Cells[evidenceRow, 19]].Value2 =
                                 new object[,] { { source, year, null, null, null, null, null, null, value.Problem,
@@ -97,7 +98,7 @@ namespace ExcelApiPoc.AddIn.Services
                                         (double)evidence.Value, "Official RegisterUZ value", column == 2 ? (object)selectedStatementId : null } };
                                 evidenceRow++;
                             }
-                            cell.Formula = "=SUM('" + MetadataName + "'!Q" + firstRow + ":Q" + (evidenceRow - 1) + ")";
+                            SetFormula(cell, "=SUM('" + MetadataName + "'!Q" + firstRow + ":Q" + (evidenceRow - 1) + ")");
                             cell.AddComment("Official RegisterUZ data for " + year + ". Source rows: " + MetadataName + "!J" + firstRow + ":S" + (evidenceRow - 1));
                         }
                     }
@@ -134,6 +135,24 @@ namespace ExcelApiPoc.AddIn.Services
                     return;
                 }
             throw new InvalidOperationException("PerformanceMat has no implementation significance value row.");
+        }
+
+        private static void SetFormula(Excel.Range target, string formula)
+        {
+            string location = target.Worksheet.Name + "!" +
+                target.Address[true, true, Excel.XlReferenceStyle.xlA1];
+            try
+            {
+                // Formula uses invariant English syntax; special-character table
+                // headers still require Excel's nested structured-reference brackets.
+                target.Formula = formula;
+            }
+            catch (COMException ex)
+            {
+                throw new InvalidOperationException(
+                    "PerformanceMat formula assignment failed at " + location +
+                    ". Formula: " + formula, ex);
+            }
         }
 
         private static void BindName(Excel.Workbook workbook, string name, string refersTo)
