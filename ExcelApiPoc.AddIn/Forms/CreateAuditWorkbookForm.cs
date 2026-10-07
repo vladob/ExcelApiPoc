@@ -557,15 +557,8 @@ namespace ExcelApiPoc.AddIn.Forms
                             ".");
                     }
 
-                    if (accountingFrameworkImport.FiscalYear != selectedFiscalYear)
-                    {
-                        throw new InvalidOperationException(
-                            "The accounting framework is for fiscal year " +
-                            accountingFrameworkImport.FiscalYear +
-                            ", but fiscal year " +
-                            selectedFiscalYear +
-                            " is selected.");
-                    }
+                    ExcelApiPoc.AccountingImport.Services.AccountingFrameworkYearValidator.Validate(
+                        accountingFrameworkImport, selectedFiscalYear);
                 }
 
                 DateTime dateFrom = journalImport.Rows.Min(row => row.PostingDate);
