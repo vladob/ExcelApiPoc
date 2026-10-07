@@ -26,6 +26,31 @@ public sealed class AddInRuntimeTests
         ExpectedIco = "00323110", ExpectedFiscalYear = 2024
     };
 
+    [Fact] public void Staged_contents_override_misleading_filename()
+    {
+        var path = Save(Journal("text"), "U_DENNIK_99999999_2023.csv");
+        try
+        {
+            var result = AccountingImportCoordinator.CreateDefault().Import(Request(path));
+            Assert.Equal("00323110", result.Journal.Ico);
+            Assert.Equal(2024, result.Journal.FiscalYear);
+        }
+        finally { Delete(path); }
+    }
+
+    [Fact] public void Confirmed_year_excludes_only_out_of_year_rows()
+    {
+        var text = Journal("valid") + "1;2;01.01.3025;bad year;211;;;;;1,00;321;;;;;;1,00\n";
+        var path = Save(text, "U_DENNIK_00323110_2024.csv");
+        try
+        {
+            var result = AccountingImportCoordinator.CreateDefault().Import(Request(path));
+            Assert.Equal(2, result.Journal.Rows.Count);
+            Assert.Single(result.Journal.Rows.Where(r => r.DateExceptionResolution == JournalDateExceptionResolution.Excluded));
+        }
+        finally { Delete(path); }
+    }
+
     [Fact] public void Legacy_journal_regression_resource_is_available()
     {
         using var resource = typeof(StagedImportRuntime).Assembly.GetManifestResourceStream(

@@ -194,7 +194,7 @@ namespace ExcelApiPoc.AccountingImport.Services.Layouts
             result.Identifiers["observedYears"]=string.Join(",",years.OrderBy(y=>y));result.Identifiers["fiscalYear"]=years.Count==1?years.Single().ToString():null;
             if(years.Count!=1)Issue("fiscalYearSelectionRequired","Records do not establish one fiscal year; caller selection is required for calculation.");
         }
-        int Year=>selectedYear??(int.TryParse(result.Identifiers["fiscalYear"],out var y)?y:0);
+        int Year=>int.TryParse(result.Identifiers["fiscalYear"],out var y)&&y>0?y:selectedYear??0;
         public ImportResult Examine(ImportLevel level,CancellationToken token=default)
         {
             token.ThrowIfCancellationRequested();if(level<ImportLevel.Recognize||level>ImportLevel.Normalize)throw new ArgumentOutOfRangeException(nameof(level));result.RequestedLevel=level;

@@ -289,6 +289,7 @@ namespace ExcelApiPoc.AddIn.Forms
                 if (dialog.ShowDialog() == DialogResult.OK)
                 {
                     _accountsPathTextBox.Text = dialog.FileName;
+                    DetectJournalInformation(_journalPathTextBox.Text);
                 }
             }
         }
@@ -299,7 +300,10 @@ namespace ExcelApiPoc.AddIn.Forms
             {
                 dialog.Title = UiText.Get("Create.SelectGeneralLedger", _uiLanguage);
                 if (dialog.ShowDialog() == DialogResult.OK)
+                {
                     _generalLedgerPathTextBox.Text = dialog.FileName;
+                    DetectJournalInformation(_journalPathTextBox.Text);
+                }
             }
         }
 
@@ -547,7 +551,8 @@ namespace ExcelApiPoc.AddIn.Forms
                     accountingFrameworkImport = ExcelApiPoc.AccountingImport.Services.Layouts.StagedImportRuntime
                         .Import<AccountingFrameworkImport>(accountsPath, importPackage.AccountingFormat, "AF");
 
-                    if (!string.Equals(accountingFrameworkImport.Ico, journalImport.Ico, StringComparison.Ordinal))
+                    if (!string.IsNullOrWhiteSpace(accountingFrameworkImport.Ico) &&
+                        !string.Equals(accountingFrameworkImport.Ico, journalImport.Ico, StringComparison.Ordinal))
                     {
                         throw new InvalidOperationException(
                             "The accounting framework belongs to IČO " +
@@ -866,36 +871,22 @@ namespace ExcelApiPoc.AddIn.Forms
 
         private void DetectJournalInformation(string filePath)
         {
-            // Reset values previously detected from another file.
-            _accountingFormatComboBox.SelectedItem = "Unknown";
-
-            _icoTextBox.Clear();
-            _fiscalYearTextBox.Clear();
-
-            if (!AccountingJournalDetectionService.TryDetect(filePath,out JournalDetectionResult detection))
+            var producer = _accountingFormatComboBox.Text;
+            var candidates = new List<ExcelApiPoc.AccountingImport.Services.Layouts.ImportMetadataCandidate>();
+            foreach (var path in _journalFilePaths.Count > 0 ? (IEnumerable<string>)_journalFilePaths : new[] { filePath })
+                candidates.Add(ExcelApiPoc.AccountingImport.Services.Layouts.ImportMetadataResolver.Read(path, "AJ", producer));
+            candidates.Add(ExcelApiPoc.AccountingImport.Services.Layouts.ImportMetadataResolver.Read(_generalLedgerPathTextBox.Text, "GL", producer));
+            candidates.Add(ExcelApiPoc.AccountingImport.Services.Layouts.ImportMetadataResolver.Read(_accountsPathTextBox.Text, "AF", producer));
+            var detected = ExcelApiPoc.AccountingImport.Services.Layouts.ImportMetadataResolver.Resolve(candidates);
+            if (!string.IsNullOrWhiteSpace(detected.Producer) && (string.IsNullOrWhiteSpace(producer) || producer == "Unknown"))
             {
-                return;
+                candidates = candidates.Select(c => ExcelApiPoc.AccountingImport.Services.Layouts.ImportMetadataResolver.Read(
+                    c.Path, c.Category, detected.Producer)).ToList();
+                detected = ExcelApiPoc.AccountingImport.Services.Layouts.ImportMetadataResolver.Resolve(candidates);
             }
-
-            if (!string.IsNullOrWhiteSpace(detection.TechnicalType))
-            {
-                _technicalTypeComboBox.SelectedItem = detection.TechnicalType;
-            }
-
-            if (!string.IsNullOrWhiteSpace(detection.AccountingFormat))
-            {
-                _accountingFormatComboBox.SelectedItem = detection.AccountingFormat;
-            }
-
-            if (!string.IsNullOrWhiteSpace(detection.Ico))
-            {
-                _icoTextBox.Text = detection.Ico;
-            }
-
-            if (detection.FiscalYear.HasValue)
-            {
-                _fiscalYearTextBox.Text = detection.FiscalYear.Value.ToString( CultureInfo.InvariantCulture);
-            }
+            if (!string.IsNullOrWhiteSpace(detected.Producer)) _accountingFormatComboBox.SelectedItem = detected.Producer;
+            _icoTextBox.Text = detected.Ico ?? "";
+            _fiscalYearTextBox.Text = detected.FiscalYear?.ToString(CultureInfo.InvariantCulture) ?? "";
         }
 
         private void ProcessJournalFile(string filePath)
@@ -908,6 +899,7 @@ namespace ExcelApiPoc.AddIn.Forms
             }
 
             SelectTechnicalType(path);
+            _accountingFormatComboBox.SelectedItem = "Unknown";
             DetectJournalInformation(path);
         }
 

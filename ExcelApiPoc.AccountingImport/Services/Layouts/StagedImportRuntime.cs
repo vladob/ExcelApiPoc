@@ -78,9 +78,9 @@ namespace ExcelApiPoc.AccountingImport.Services.Layouts
             catch (NotSupportedException) { return false; }
         }
 
-        public static T Import<T>(string path, string producer, string category) where T : class
+        public static T Import<T>(string path, string producer, string category, int? fiscalYear = null) where T : class
         {
-            using (var importer = new CompactLayoutImporter(path, ProducerDirectory(producer)))
+            using (var importer = new CompactLayoutImporter(path, ProducerDirectory(producer), fiscalYear))
             {
                 var result = importer.Examine(ImportLevel.Normalize);
                 if (result.Status != "completed" || result.CompletedLevel != 5 || result.Category != category || !(importer.Canonical is T canonical))

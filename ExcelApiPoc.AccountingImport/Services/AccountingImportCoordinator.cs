@@ -56,7 +56,12 @@ namespace ExcelApiPoc.AccountingImport.Services
             IReadOnlyList<string> journalFilePaths = ResolveJournalFilePaths(request);
             JournalImport journal = ImportJournal(request, journalFilePaths);
 
-            ValidateJournal(journal, request);
+            if (useStagedEngine)
+            {
+                if (string.IsNullOrWhiteSpace(journal.Ico)) journal.Ico = request.ExpectedIco;
+                if (journal.FiscalYear == 0) journal.FiscalYear = request.ExpectedFiscalYear;
+            }
+            ValidateJournal(journal, request, !useStagedEngine);
 
             CalculatedGeneralLedger calculatedGeneralLedger =
                 CalculatedGeneralLedgerBuilder.Build(journal);
@@ -68,7 +73,7 @@ namespace ExcelApiPoc.AccountingImport.Services
             {
                 if (useStagedEngine)
                     generalLedger = Layouts.StagedImportRuntime.Import<GeneralLedgerImport>(
-                        request.GeneralLedgerFilePath, request.AccountingFormat, "GL");
+                        request.GeneralLedgerFilePath, request.AccountingFormat, "GL", request.ExpectedFiscalYear);
                 else
                 {
                     var ledgerImporter = SelectExactlyOne(generalLedgerImporters,
@@ -77,7 +82,12 @@ namespace ExcelApiPoc.AccountingImport.Services
                     generalLedger = ledgerImporter.Import(request.GeneralLedgerFilePath);
                 }
 
-                ValidateGeneralLedger(generalLedger, journal, request);
+                if (useStagedEngine)
+                {
+                    if (string.IsNullOrWhiteSpace(generalLedger.Ico)) generalLedger.Ico = request.ExpectedIco;
+                    if (generalLedger.FiscalYear == 0) generalLedger.FiscalYear = request.ExpectedFiscalYear;
+                }
+                ValidateGeneralLedger(generalLedger, journal, request, !useStagedEngine);
 
                 reconciliation = JournalLedgerReconciliationService.Reconcile(
                     journal,
@@ -116,7 +126,7 @@ namespace ExcelApiPoc.AccountingImport.Services
 
             string journalFilePath = journalFilePaths[0];
             if (useStagedEngine)
-                return Layouts.StagedImportRuntime.Import<JournalImport>(journalFilePath, request.AccountingFormat, "AJ");
+                return Layouts.StagedImportRuntime.Import<JournalImport>(journalFilePath, request.AccountingFormat, "AJ", request.ExpectedFiscalYear);
             IJournalImporter journalImporter = SelectExactlyOne(
                 journalImporters,
                 importer => importer.CanImport(
@@ -206,7 +216,7 @@ namespace ExcelApiPoc.AccountingImport.Services
 
         private static void ValidateJournal(
             JournalImport journal,
-            AccountingImportRequest request)
+            AccountingImportRequest request, bool useFilename = true)
         {
             if (journal == null)
             {
@@ -219,7 +229,7 @@ namespace ExcelApiPoc.AccountingImport.Services
                 journal.AccountingFormat,
                 request.AccountingFormat);
 
-            ReconcileJournalFileNameMetadata(journal);
+            if (useFilename) ReconcileJournalFileNameMetadata(journal);
             AdmitMissingSoftipMopIco(journal, request);
 
             ValidateIco(
@@ -356,7 +366,7 @@ namespace ExcelApiPoc.AccountingImport.Services
         private static void ValidateGeneralLedger(
             GeneralLedgerImport ledger,
             JournalImport journal,
-            AccountingImportRequest request)
+            AccountingImportRequest request, bool useFilename = true)
         {
             if (ledger == null)
             {
@@ -369,7 +379,7 @@ namespace ExcelApiPoc.AccountingImport.Services
                 ledger.AccountingFormat,
                 request.AccountingFormat);
 
-            ReconcileGeneralLedgerFileNameMetadata(ledger);
+            if (useFilename) ReconcileGeneralLedgerFileNameMetadata(ledger);
 
             ValidateIco(
                 "general ledger",
