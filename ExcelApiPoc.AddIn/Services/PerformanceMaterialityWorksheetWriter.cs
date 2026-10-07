@@ -120,10 +120,10 @@ namespace ExcelApiPoc.AddIn.Services
                 evidenceTable.Name = "PerformanceMatEvidence";
                 sheet.Range["A55"].Value2 = "RegisterUZ: " + fiscalYear + " / " + (fiscalYear - 1) +
                     (missing == 0 ? ". All source values available." : ". " + missing + " source values unavailable (#N/A); see cell comments.");
-                sheet.Range["A55:H56"].Merge();
-                sheet.Range["A55"].WrapText = true;
+                sheet.Range["A55:H55"].HorizontalAlignment = Excel.XlHAlign.xlHAlignCenterAcrossSelection;
+                sheet.Range["A55"].WrapText = false;
                 sheet.Range["A55"].Font.Size = 10;
-                sheet.Range["A55:H56"].RowHeight = 20;
+                sheet.Range["A55:H55"].RowHeight = 20;
                 BindSignificance(workbook, sheet);
                 AuditWorkbookWorksheetLayout.ApplyAuditWorkColor(sheet);
                 sheet.Calculate();
