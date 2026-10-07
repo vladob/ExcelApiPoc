@@ -74,11 +74,18 @@ headers and a synthetic total. Standalone footer page labels are validated and i
 as data. The duplicate regression-manifest entry is removed and Medzilaborce settings
 are supplied from the paths already present in that manifest.
 
-The external Dúbravka malformed-CSV test remains unchanged: the tested local file
-was accepted, whereas this test expects an unterminated quote at line 13. A new
-self-contained test verifies that exact parser diagnostic. Inspect the external file
-and its environment-variable path before deciding whether the sample was corrected.
-Do not disable the test or claim the external corpus passed without rerunning it.
+The uploaded Dúbravka sample (SHA256
+3a3efb7193d13a6eb4a29dd37fdf795588550b20194e21d64c0c6d369ac913fe)
+is valid CSV: 714 rows, each with 20 fields. Both legacy and staged imports pass
+metadata, row, and balance assertions. The external regression now checks this
+corrected file; the separate synthetic unterminated-quote diagnostic test remains.
+The old MALFORMED environment-variable name is retained as an alias.
+
+Windows follow-up at 6fba9c2 passed 257 SimpleTests and 254 of 256 accounting tests.
+Besides the obsolete Dúbravka assertion, the corpus gate reports two missing files
+under `00323292 - Obec Nižná Jablonka`: `HL_KNIHA_00323292_2024.pdf` and
+`U_DENNIK_00323292_2024.pdf`. The other 78 corpus files parsed. Restore the files
+or verify their correct manifest paths; do not silently skip them.
 
 Local follow-up validation: 257 SimpleTests and 52 focused accounting regression
 cases passed in the direct-compiler harness. Windows and external-corpus rerun pending.
