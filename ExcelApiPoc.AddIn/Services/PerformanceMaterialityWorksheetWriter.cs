@@ -19,8 +19,13 @@ namespace ExcelApiPoc.AddIn.Services
         {
             string path = Path.Combine(Path.GetTempPath(), "PerformanceMat-" + Guid.NewGuid().ToString("N") + ".xlsx");
             Excel.Workbook template = null;
+            var autoCorrect = workbook.Application.AutoCorrect;
+            bool previousAutoFill = autoCorrect.AutoFillFormulasInLists;
             try
             {
+                // Each materiality row has its own source. Excel must not propagate
+                // the last formula (often =NA()) over the other table rows.
+                autoCorrect.AutoFillFormulasInLists = false;
                 using (var source = typeof(PerformanceMaterialityWorksheetWriter).Assembly
                     .GetManifestResourceStream("ExcelApiPoc.AddIn.Templates.PerformanceMateriality.xlsx"))
                 using (var target = File.Create(path))
@@ -51,12 +56,16 @@ namespace ExcelApiPoc.AddIn.Services
                 sheet.Range["B3:C9"].ClearContents();
                 SetFormula(metadata.Range["H15:H41"],
                     "=INDEX(TableSources[Source],MATCH([@[SignificanceSourceType_sk]],TableSources[Zdroj],0))");
+                var currentLinks = new object[7, 1];
+                var previousLinks = new object[7, 1];
                 for (int row = 0; row < 7; row++)
                 {
-                    SetFormula((Excel.Range)sheet.Cells[14 + row, 2], "=B" + (3 + row));
-                    SetFormula((Excel.Range)sheet.Cells[26 + row, 2], "=B" + (3 + row));
-                    SetFormula((Excel.Range)sheet.Cells[38 + row, 2], "=C" + (3 + row));
+                    currentLinks[row, 0] = "=B" + (3 + row);
+                    previousLinks[row, 0] = "=C" + (3 + row);
                 }
+                SetFormula(sheet.Range["B14:B20"], currentLinks);
+                SetFormula(sheet.Range["B26:B32"], currentLinks);
+                SetFormula(sheet.Range["B38:B44"], previousLinks);
                 sheet.Range["B49"].ClearContents(); // remove the template's single-cell array formula
                 SetFormula(sheet.Range["B49"], "=INDEX(SignificanceCurrentYear[[Kritická 100%]],MATCH(SelectedSignificance,SignificanceCurrentYear[Zdroj],0))");
                 SetFormula(sheet.Range["B51"], "=INDEX(SignificanceCurrentYear[[Kritická 5%]],MATCH(SelectedSignificance,SignificanceCurrentYear[Zdroj],0))");
@@ -68,6 +77,7 @@ namespace ExcelApiPoc.AddIn.Services
                     x.Statement.Id == selectedStatementId)?.Statement;
                 int evidenceRow = 2;
                 int missing = 0;
+                var overviewFormulas = new object[7, 2];
                 for (int row = 3; row <= 9; row++)
                 {
                     string source = Convert.ToString(((Excel.Range)sheet.Cells[row, 1]).Value2);
@@ -81,7 +91,7 @@ namespace ExcelApiPoc.AddIn.Services
                         if (!value.Value.HasValue)
                         {
                             missing++;
-                            SetFormula(cell, "=NA()");
+                            overviewFormulas[row - 3, column - 2] = "=NA()";
                             cell.AddComment(year + ": " + value.Problem);
                             metadata.Range[metadata.Cells[evidenceRow, 10], metadata.Cells[evidenceRow, 19]].Value2 =
                                 new object[,] { { source, year, null, null, null, null, null, null, value.Problem,
@@ -98,11 +108,13 @@ namespace ExcelApiPoc.AddIn.Services
                                         (double)evidence.Value, "Official RegisterUZ value", column == 2 ? (object)selectedStatementId : null } };
                                 evidenceRow++;
                             }
-                            SetFormula(cell, "=SUM('" + MetadataName + "'!Q" + firstRow + ":Q" + (evidenceRow - 1) + ")");
+                            overviewFormulas[row - 3, column - 2] =
+                                "=SUM('" + MetadataName + "'!Q" + firstRow + ":Q" + (evidenceRow - 1) + ")";
                             cell.AddComment("Official RegisterUZ data for " + year + ". Source rows: " + MetadataName + "!J" + firstRow + ":S" + (evidenceRow - 1));
                         }
                     }
                 }
+                SetFormula(sheet.Range["B3:C9"], overviewFormulas);
                 var evidenceTable = metadata.ListObjects.Add(Excel.XlListObjectSourceType.xlSrcRange,
                     metadata.Range["J1:S" + (evidenceRow - 1)], Type.Missing, Excel.XlYesNoGuess.xlYes, Type.Missing);
                 evidenceTable.Name = "PerformanceMatEvidence";
@@ -118,8 +130,15 @@ namespace ExcelApiPoc.AddIn.Services
             }
             finally
             {
-                if (template != null) template.Close(SaveChanges: false);
-                if (File.Exists(path)) File.Delete(path);
+                try
+                {
+                    if (template != null) template.Close(SaveChanges: false);
+                    if (File.Exists(path)) File.Delete(path);
+                }
+                finally
+                {
+                    autoCorrect.AutoFillFormulasInLists = previousAutoFill;
+                }
             }
         }
 
@@ -137,7 +156,7 @@ namespace ExcelApiPoc.AddIn.Services
             throw new InvalidOperationException("PerformanceMat has no implementation significance value row.");
         }
 
-        private static void SetFormula(Excel.Range target, string formula)
+        private static void SetFormula(Excel.Range target, object formula)
         {
             string location = target.Worksheet.Name + "!" +
                 target.Address[true, true, Excel.XlReferenceStyle.xlA1];
@@ -151,7 +170,8 @@ namespace ExcelApiPoc.AddIn.Services
             {
                 throw new InvalidOperationException(
                     "PerformanceMat formula assignment failed at " + location +
-                    ". Formula: " + formula, ex);
+                    ". Formula: " + (formula is object[,]
+                        ? "per-cell formula matrix" : Convert.ToString(formula)), ex);
             }
         }
 
