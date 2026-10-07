@@ -1,0 +1,51 @@
+{
+  "version": 1,
+  "id": "urbis-gl",
+  "producer": "Urbis",
+  "category": "GL",
+  "headers": [
+    [
+      "^Účet$",
+      "^Popis$",
+      "^Počiatočný stav$",
+      "^Obraty od ",
+      "^Konečný stav$"
+    ],
+    [
+      "^$",
+      "^$",
+      "^k ",
+      "^Má dať$",
+      "^k ",
+      "^Dal$"
+    ]
+  ],
+  "columns": {
+    "Account": 0,
+    "Name": 1,
+    "OpeningNetto": 2,
+    "TurnoverDebit": 3,
+    "ClosingNetto": 4,
+    "TurnoverCredit": 5,
+    "Type": 6,
+    "Structure": 7
+  },
+  "amounts": [
+    "OpeningNetto",
+    "TurnoverDebit",
+    "TurnoverCredit",
+    "ClosingNetto"
+  ],
+  "columnCounts": [
+    8,
+    9
+  ],
+  "amountSums": {
+    "PeriodDebitTurnover": [
+      "TurnoverDebit"
+    ],
+    "PeriodCreditTurnover": [
+      "TurnoverCredit"
+    ]
+  }
+}

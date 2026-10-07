@@ -1,0 +1,40 @@
+{
+  "version": 1,
+  "id": "ifosoft_dbf_journal",
+  "format": "DBF",
+  "category": "AJ",
+  "encoding": 852,
+  "requiredFields": {
+    "DD": "C",
+    "CDOK": "N",
+    "DATUM": "D",
+    "POPIS": "C",
+    "SUMA": "N",
+    "MU": "C",
+    "DU": "C",
+    "MSUMA": "N",
+    "DSUMA": "N"
+  },
+  "map": {
+    "date": "DATUM",
+    "documentType": "DD",
+    "documentNumber": "CDOK",
+    "description": "POPIS",
+    "amount": "SUMA",
+    "debitAccount": "MU",
+    "creditAccount": "DU",
+    "debitAmount": "MSUMA",
+    "creditAmount": "DSUMA",
+    "debitSection": "MZ",
+    "creditSection": "DZ",
+    "debitItem": "MK",
+    "creditItem": "DK",
+    "debitFundingSource": "MA",
+    "creditFundingSource": "DA",
+    "debitCostCenter": "MS",
+    "creditCostCenter": "DS",
+    "debitOrder": "MZAKC",
+    "creditOrder": "DZAKC",
+    "accountingDate": "DATVY"
+  }
+}

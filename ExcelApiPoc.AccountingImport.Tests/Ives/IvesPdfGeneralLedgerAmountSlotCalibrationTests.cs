@@ -23,7 +23,7 @@ public sealed class IvesPdfGeneralLedgerAmountSlotCalibrationTests
     }
 
     [Fact]
-    public void Derive_amount_glyph_slots_from_normalized_xml()
+    public void Derive_amount_token_slots_from_normalized_xml()
     {
         string pdfPath = RequireFile(PdfVariable);
         string workbookPath = RequireFile(WorkbookVariable);
@@ -90,7 +90,7 @@ public sealed class IvesPdfGeneralLedgerAmountSlotCalibrationTests
             Observe(stats["Closing"], totals[i], row.Closing, 513, 580, row.Key);
         }
 
-        output.WriteLine("IVES GL PDF amount glyph-slot calibration");
+        output.WriteLine("IVES GL PDF amount-token calibration");
         output.WriteLine("------------------------------------------");
         output.WriteLine("PDF      : " + Path.GetFileName(pdfPath));
         output.WriteLine("Workbook : " + Path.GetFileName(workbookPath));
@@ -115,7 +115,7 @@ public sealed class IvesPdfGeneralLedgerAmountSlotCalibrationTests
             .ToString("0.00", CultureInfo.InvariantCulture)
             .Replace('.', ',');
 
-        GlyphMatch? match = MatchAmount(
+        IReadOnlyList<PdfTextToken>? match = MatchAmount(
             group,
             text,
             minimumLeft,
@@ -134,25 +134,10 @@ public sealed class IvesPdfGeneralLedgerAmountSlotCalibrationTests
 
         stats.Matched++;
 
-        for (int i = 0; i < match.Glyphs.Count; i++)
-        {
-            Glyph glyph = match.Glyphs[i];
-            int positionFromRight = match.Glyphs.Count - 1 - i;
-            double? gapToRight = i + 1 < match.Glyphs.Count
-                ? match.Glyphs[i + 1].Left - glyph.Right
-                : null;
-
-            stats.Add(
-                positionFromRight,
-                glyph.Character,
-                stats.Anchor - glyph.Left,
-                stats.Anchor - glyph.Right,
-                glyph.Right - glyph.Left,
-                gapToRight);
-        }
+        stats.Add(match.Count, stats.Anchor - match[^1].Right);
     }
 
-    private static GlyphMatch? MatchAmount(
+    private static IReadOnlyList<PdfTextToken>? MatchAmount(
         BaselineGroup group,
         string expected,
         double minimumLeft,
@@ -161,78 +146,39 @@ public sealed class IvesPdfGeneralLedgerAmountSlotCalibrationTests
     {
         string target = CompactValue(expected);
 
-        List<Glyph> glyphs = new();
-
-        foreach (PdfTextToken token in group.Tokens
+        PdfTextToken[] tokens = group.Tokens
             .Where(token =>
                 token.Right >= minimumLeft &&
                 token.Left <= maximumRight)
             .OrderBy(token => token.Left)
-            .ThenBy(token => token.Right))
-        {
-            string text = token.Text ?? string.Empty;
+            .ThenBy(token => token.Right)
+            .ToArray();
 
-            foreach (char character in text)
-            {
-                if (!char.IsWhiteSpace(character) &&
-                    character != '\u00A0')
-                {
-                    glyphs.Add(
-                        new Glyph(character, token.Left, token.Right));
-                }
-            }
-        }
-
-        int[] endings = glyphs
-            .Select((glyph, index) => new { glyph, index })
+        int[] endings = tokens
+            .Select((token, index) => new { token, index })
             .Where(item =>
-                item.glyph.Character == target[^1] &&
-                Math.Abs(item.glyph.Right - anchor) <= 3.0)
-            .OrderBy(item => Math.Abs(item.glyph.Right - anchor))
+                CompactValue(item.token.Text ?? string.Empty).EndsWith(target[^1]) &&
+                Math.Abs(item.token.Right - anchor) <= 3.0)
+            .OrderBy(item => Math.Abs(item.token.Right - anchor))
             .Select(item => item.index)
             .ToArray();
 
         foreach (int ending in endings)
         {
-            var reversed = new List<Glyph> { glyphs[ending] };
-            int at = ending;
-            bool failed = false;
-
-            for (int targetIndex = target.Length - 2;
-                targetIndex >= 0;
-                targetIndex--)
+            var matched = new List<PdfTextToken> { tokens[ending] };
+            string value = CompactValue(tokens[ending].Text ?? string.Empty);
+            for (int index = ending - 1; index >= 0 && value.Length < target.Length; index--)
             {
-                int found = -1;
-
-                for (int i = at - 1; i >= 0; i--)
-                {
-                    if (glyphs[i].Character != target[targetIndex])
-                        continue;
-
-                    double gap = glyphs[at].Left - glyphs[i].Right;
-
-                    if (gap >= -5.0 && gap <= 8.0)
-                    {
-                        found = i;
-                        break;
-                    }
-                }
-
-                if (found < 0)
-                {
-                    failed = true;
+                double gap = matched[0].Left - tokens[index].Right;
+                if (gap < -0.3 || gap > 4.0 ||
+                    Math.Abs(tokens[index].Baseline - tokens[ending].Baseline) > 1.5)
                     break;
-                }
-
-                at = found;
-                reversed.Add(glyphs[at]);
+                value = CompactValue(tokens[index].Text ?? string.Empty) + value;
+                matched.Insert(0, tokens[index]);
             }
 
-            if (!failed)
-            {
-                reversed.Reverse();
-                return new GlyphMatch(reversed);
-            }
+            if (value == target)
+                return matched;
         }
 
         return null;
@@ -240,7 +186,8 @@ public sealed class IvesPdfGeneralLedgerAmountSlotCalibrationTests
 
     private sealed class AmountSlotStats
     {
-        private readonly Dictionary<int, SlotStats> slots = new();
+        private readonly List<double> rightOffsets = new();
+        private readonly Dictionary<int, int> tokenCounts = new();
 
         public AmountSlotStats(string name, double anchor)
         {
@@ -254,139 +201,32 @@ public sealed class IvesPdfGeneralLedgerAmountSlotCalibrationTests
         public int Matched { get; set; }
         public List<string> Unmatched { get; } = new();
 
-        public void Add(
-            int positionFromRight,
-            char character,
-            double leftOffset,
-            double rightOffset,
-            double width,
-            double? gapToRight)
+        public void Add(int tokens, double rightOffset)
         {
-            if (!slots.TryGetValue(positionFromRight, out SlotStats? slot))
-            {
-                slot = new SlotStats(positionFromRight);
-                slots[positionFromRight] = slot;
-            }
-
-            slot.Characters.TryGetValue(character, out int count);
-            slot.Characters[character] = count + 1;
-            slot.LeftOffsets.Add(leftOffset);
-            slot.RightOffsets.Add(rightOffset);
-            slot.Widths.Add(width);
-
-            if (gapToRight.HasValue)
-                slot.GapsToRight.Add(gapToRight.Value);
+            rightOffsets.Add(rightOffset);
+            tokenCounts[tokens] = tokenCounts.TryGetValue(tokens, out int count)
+                ? count + 1 : 1;
         }
 
         public void Write(ITestOutputHelper output)
         {
             output.WriteLine(
                 "{0} anchor {1:F3}: matched {2}/{3}",
-                Name,
-                Anchor,
-                Matched,
-                Total);
-
-            output.WriteLine(
-                "  pos  role               chars      right offset min/med/max   gap-to-right min/med/max");
-
-            foreach (SlotStats slot in slots.Values.OrderBy(s => s.Position))
+                Name, Anchor, Matched, Total);
+            if (rightOffsets.Count > 0)
             {
-                string chars = string.Join(
-                    "",
-                    slot.Characters
-                        .OrderByDescending(pair => pair.Value)
-                        .ThenBy(pair => pair.Key)
-                        .Select(pair => pair.Key));
-
+                double[] ordered = rightOffsets.OrderBy(value => value).ToArray();
                 output.WriteLine(
-                    "  {0,3}  {1,-18} {2,-10} {3,7:F3}/{4,7:F3}/{5,7:F3}   {6}",
-                    slot.Position,
-                    Role(slot.Position, slot.Characters.Keys),
-                    chars,
-                    slot.RightOffsets.Min(),
-                    Median(slot.RightOffsets),
-                    slot.RightOffsets.Max(),
-                    slot.GapsToRight.Count == 0
-                        ? "-"
-                        : string.Format(
-                            CultureInfo.InvariantCulture,
-                            "{0:F3}/{1:F3}/{2:F3}",
-                            slot.GapsToRight.Min(),
-                            Median(slot.GapsToRight),
-                            slot.GapsToRight.Max()));
+                    "  terminal token right offset min/med/max: {0:F3}/{1:F3}/{2:F3}",
+                    ordered[0], ordered[ordered.Length / 2], ordered[^1]);
+                output.WriteLine("  tokens per amount: " + string.Join(", ",
+                    tokenCounts.OrderBy(pair => pair.Key)
+                        .Select(pair => pair.Key + "=" + pair.Value)));
             }
-
             foreach (string unmatched in Unmatched)
                 output.WriteLine("  unmatched: " + unmatched);
-
             output.WriteLine("");
         }
-
-        private static string Role(
-            int position,
-            IEnumerable<char> characters)
-        {
-            if (characters.Contains('-'))
-                return "sign/leading";
-
-            return position switch
-            {
-                0 => "decimal-2",
-                1 => "decimal-1",
-                2 => "decimal-comma",
-                3 => "units",
-                4 => "tens",
-                5 => "hundreds",
-                _ => IntegerRole(position - 3)
-            };
-        }
-
-        private static string IntegerRole(int digitFromUnits)
-        {
-            int group = digitFromUnits / 3;
-            int inGroup = digitFromUnits % 3;
-
-            string groupName = group switch
-            {
-                1 => "thousands",
-                2 => "millions",
-                3 => "billions",
-                4 => "trillions",
-                _ => "10^" + (group * 3)
-            };
-
-            string digitName = inGroup switch
-            {
-                0 => "units",
-                1 => "tens",
-                _ => "hundreds"
-            };
-
-            return groupName + "-" + digitName;
-        }
-    }
-
-    private sealed class SlotStats
-    {
-        public SlotStats(int position) => Position = position;
-
-        public int Position { get; }
-        public Dictionary<char, int> Characters { get; } = new();
-        public List<double> LeftOffsets { get; } = new();
-        public List<double> RightOffsets { get; } = new();
-        public List<double> Widths { get; } = new();
-        public List<double> GapsToRight { get; } = new();
-    }
-
-    private static double Median(IReadOnlyList<double> values)
-    {
-        double[] ordered = values.OrderBy(value => value).ToArray();
-        int middle = ordered.Length / 2;
-
-        return ordered.Length % 2 == 1
-            ? ordered[middle]
-            : (ordered[middle - 1] + ordered[middle]) / 2.0;
     }
 
     private static ReferenceData ReadWorkbook(string path)
@@ -606,14 +446,6 @@ public sealed class IvesPdfGeneralLedgerAmountSlotCalibrationTests
 
         return path!;
     }
-
-    private sealed record Glyph(
-        char Character,
-        double Left,
-        double Right);
-
-    private sealed record GlyphMatch(
-        IReadOnlyList<Glyph> Glyphs);
 
     private sealed class ReferenceData
     {

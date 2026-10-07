@@ -1,0 +1,175 @@
+{
+  "version": 2,
+  "id": "softip-mop-pdf-aj-portrait-wide",
+  "producer": "Softip-MOP",
+  "category": "AJ",
+  "importKinds": [
+    "Record"
+  ],
+  "worksheet": {
+    "pageWidth": 595.2,
+    "pageHeight": 841.8,
+    "panels": [
+      {
+        "headers": {
+          "Účt.mes.": 52.6,
+          "DD": 92,
+          "Číslo dokladu": 112.2,
+          "Účet": 168.6,
+          "Dát.účt.": 214.5,
+          "Popis zápisu": 263.7
+        },
+        "columns": {
+          "AccountingPeriod": [
+            51,
+            91
+          ],
+          "DocumentType": [
+            91,
+            111
+          ],
+          "DocumentNumber": [
+            111,
+            168
+          ],
+          "Account": [
+            168,
+            198
+          ],
+          "State": [
+            198,
+            215
+          ],
+          "Date": [
+            215,
+            263
+          ],
+          "OperationDescription": [
+            263,
+            550
+          ]
+        },
+        "headerFields": {
+          "AccountingPeriod": "Účt.mes.",
+          "DocumentType": "DD",
+          "DocumentNumber": "Číslo dokladu",
+          "Account": "Účet",
+          "State": "St.",
+          "Date": "Dát.účt.",
+          "OperationDescription": "Popis zápisu"
+        }
+      },
+      {
+        "headers": {
+          "Faktúra": 52.6,
+          "Fakt.hist.": 118.7,
+          "Subjekt": 159,
+          "Názov účtu": 305.7,
+          "Stredisko": 476.5
+        },
+        "columns": {
+          "Invoice": [
+            51,
+            118
+          ],
+          "HistoricalInvoice": [
+            118,
+            158
+          ],
+          "Partner": [
+            158,
+            305
+          ],
+          "AccountName": [
+            305,
+            476
+          ],
+          "CostCentre": [
+            476,
+            550
+          ]
+        },
+        "alternatives": [
+          {
+            "headers": {
+              "Faktúra": 52.6,
+              "Fakt.hist.": 118.7,
+              "Subjekt": 159,
+              "Názov účtu": 329.1
+            },
+            "columns": {
+              "Invoice": [
+                51,
+                118
+              ],
+              "HistoricalInvoice": [
+                118,
+                158
+              ],
+              "Partner": [
+                158,
+                328.6
+              ],
+              "AccountName": [
+                328.6,
+                550
+              ]
+            },
+            "headerFields": {
+              "Invoice": "Faktúra",
+              "HistoricalInvoice": "Fakt.hist.",
+              "Partner": "Subjekt",
+              "AccountName": "Názov účtu"
+            }
+          }
+        ],
+        "headerFields": {
+          "Invoice": "Faktúra",
+          "HistoricalInvoice": "Fakt.hist.",
+          "Partner": "Subjekt",
+          "AccountName": "Názov účtu",
+          "CostCentre": "Stredisko"
+        }
+      },
+      {
+        "headers": {
+          "Má dať": 52.6,
+          "DAL": 99.3,
+          "Užív.": 145.9,
+          "kód dávky": 190.2,
+          "Popis dávky": 265.1
+        },
+        "columns": {
+          "DebitAmount": [
+            51,
+            99
+          ],
+          "CreditAmount": [
+            99,
+            145.5
+          ],
+          "User": [
+            145.5,
+            190
+          ],
+          "BatchCode": [
+            190,
+            265
+          ],
+          "BatchDescription": [
+            265,
+            550
+          ]
+        },
+        "headerFields": {
+          "DebitAmount": "Má dať",
+          "CreditAmount": "DAL",
+          "User": "Užív.",
+          "BatchCode": "kód dávky",
+          "BatchDescription": "Popis dávky"
+        }
+      }
+    ],
+    "dynamicHeaders": true
+  }
+}

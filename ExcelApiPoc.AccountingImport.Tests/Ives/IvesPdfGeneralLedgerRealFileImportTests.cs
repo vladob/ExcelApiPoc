@@ -1,5 +1,6 @@
 using ExcelApiPoc.AccountingImport.Models.Reporting;
 using ExcelApiPoc.AccountingImport.Services.Ives;
+using PdfLayoutEngine.IText.Extraction;
 using Xunit.Abstractions;
 
 namespace ExcelApiPoc.AccountingImport.Tests.Ives;
@@ -51,6 +52,23 @@ public sealed class IvesPdfGeneralLedgerRealFileImportTests
         Assert.Equal(2, result.Activities.Count);
 
         IvesGeneralLedgerActivity main = result.Activities[0];
+        var pageFive = new ITextPdfTokenExtractor().Extract(path).Pages[4];
+        var amountEnd = pageFive.Tokens.FirstOrDefault(t =>
+            t.Left >= 305 && t.Right <= 370 && t.Text.Contains("946,21"));
+        if (amountEnd != null)
+        {
+            foreach (var token in pageFive.Tokens
+                .Where(t => t.Left >= 300 && t.Right <= 370 &&
+                    Math.Abs(t.Baseline - amountEnd.Baseline) <= 5)
+                .OrderBy(t => t.Left))
+                output.WriteLine("Amount token: '{0}' x={1:F2}..{2:F2} baseline={3:F2}",
+                    token.Text, token.Left, token.Right, token.Baseline);
+        }
+        foreach (var row in main.AccountRows.Where(r => r.AccountCode != null &&
+            r.AccountCode.StartsWith("081.1", StringComparison.Ordinal)).Take(2))
+            output.WriteLine("Account '{0}': opening={1}, debit={2}, credit={3}, closing={4}",
+                row.AccountCode, row.OpeningBalance, row.DebitTurnover,
+                row.CreditTurnover, row.ClosingBalance);
         Assert.Equal("Hlavná činnosť", main.Name);
         Assert.Equal("EUR", main.Currency);
         Assert.Equal(12712, main.DocumentRows.Count);

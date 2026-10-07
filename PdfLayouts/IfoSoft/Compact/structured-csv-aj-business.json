@@ -1,0 +1,30 @@
+{
+  "version": 1,
+  "id": "ifosoft-csv-aj-business",
+  "format": "CSV",
+  "category": "AJ",
+  "encoding": 1250,
+  "delimiter": ";",
+  "titlePattern": "^(?:Uctovny dennik|Účtovný denník)$",
+  "headers": [
+    "Ucet",
+    "Datum",
+    "DruhDokladu",
+    "Doklad",
+    "Popis operacie",
+    "MD",
+    "D",
+    "Rozdiel",
+    "Protiucet"
+  ],
+  "columns": {
+    "DebitAccount": 0,
+    "CreditAccount": 8,
+    "DebitAmount": 5,
+    "CreditAmount": 6,
+    "PostingDate": 1,
+    "DocumentType": 2,
+    "DocumentNumber": 3,
+    "Description": 4
+  }
+}

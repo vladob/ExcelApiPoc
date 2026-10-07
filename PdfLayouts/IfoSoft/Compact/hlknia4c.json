@@ -1,0 +1,92 @@
+{
+  "version": 1,
+  "id": "ifosoft_hlknia4c",
+  "category": "GL",
+  "unitsPerInch": 254,
+  "header": {
+    "AccountingEntityName": [160, 40, 666, 78],
+    "AccountingEntityUserName": [1350, 40, 2025, 78],
+    "PeriodFrom": [1500, 80, 1619, 118],
+    "PeriodTo": [1670, 80, 1789, 118],
+    "PageNumber": [1970, 120, 2024, 153]
+  },
+  "anchors": [
+    {"text": "HLAVNÁ KNIHA -  PODĽA ÚČTOV", "rect": [670, 70, 1248, 117], "size": 10},
+    {"text": "Účtovné obdobie", "rect": [1280, 80, 1489, 118], "size": 8},
+    {"text": "_HLKNIA4C.GMX", "rect": [160, 120, 344, 153], "size": 7},
+    {"text": "Strana:", "rect": [1890, 120, 1969, 153], "size": 7},
+    {"text": "Počiatočný stav", "rect": [1110, 160, 1302, 198], "size": 8},
+    {"text": "Obrat od začiatku roka", "rect": [1430, 160, 1712, 198], "size": 8},
+    {"text": "Zostatok účtu", "rect": [1840, 160, 2009, 198], "size": 8},
+    {"text": "Účet ", "rect": [160, 180, 225, 218], "size": 8},
+    {"text": "Typ", "rect": [280, 180, 324, 218], "size": 8},
+    {"text": "Názov účtu", "rect": [340, 180, 479, 218], "size": 8},
+    {"text": "MÁ DAŤ - DAL", "rect": [1150, 200, 1284, 229], "size": 6},
+    {"text": "MÁ DAŤ                         DAL", "rect": [1430, 200, 1708, 229], "size": 6},
+    {"text": "MÁ DAŤ - DAL", "rect": [1860, 200, 1994, 229], "size": 6}
+  ],
+  "sections": [
+    {
+      "kind": "AnalyticalRow",
+      "sourceSection": "RECORD",
+      "anchor": {"rect": [160, 0, 279, 38], "size": 8, "weight": 400},
+      "fields": {
+        "AnalyticalAccount": [160, 0, 279, 38],
+        "Type": [290, 0, 325, 38],
+        "AccountName": [340, 0, 1015, 38],
+        "OpeningNetto": [1100, 0, 1320, 38],
+        "TurnoverDebit": [1340, 0, 1560, 38],
+        "TurnoverCredit": [1570, 0, 1790, 38],
+        "ClosingNetto": [1810, 0, 2030, 38]
+      },
+      "amounts": ["OpeningNetto", "TurnoverDebit", "TurnoverCredit", "ClosingNetto"]
+    },
+    {
+      "kind": "SyntheticRow",
+      "sourceSection": "FOOT3",
+      "anchor": {"rect": [160, 0, 211, 33], "size": 7, "weight": 700},
+      "fields": {
+        "SyntheticAccount": [160, 0, 211, 33],
+        "AccountName": [340, 0, 1008, 33],
+        "OpeningNetto": [1100, 0, 1321, 33],
+        "TurnoverDebit": [1340, 0, 1561, 33],
+        "TurnoverCredit": [1570, 0, 1791, 33],
+        "ClosingNetto": [1810, 0, 2031, 33]
+      },
+      "amounts": ["OpeningNetto", "TurnoverDebit", "TurnoverCredit", "ClosingNetto"]
+    },
+    {
+      "kind": "AccountClassRow",
+      "sourceSection": "FOOT2",
+      "anchor": {"rect": [340, 10, 678, 45], "size": 8, "text": "MEDZISÚČET ZA TRIEDU"},
+      "fields": {
+        "AccountClass": [160, 10, 179, 45],
+        "OpeningNetto": [1100, 10, 1321, 43],
+        "TurnoverDebit": [1340, 10, 1561, 43],
+        "TurnoverCredit": [1570, 10, 1791, 43],
+        "ClosingNetto": [1810, 10, 2031, 43]
+      },
+      "amounts": ["OpeningNetto", "TurnoverDebit", "TurnoverCredit", "ClosingNetto"]
+    },
+    {
+      "kind": "ReportLevel",
+      "sourceSection": "FOOT1",
+      "anchor": {"rect": [340, 10, 620, 45], "size": 8, "text": "KONTROLNÝ SÚČET"},
+      "fields": {
+        "OpeningNetto": [1100, 10, 1321, 43],
+        "TurnoverDebit": [1340, 10, 1561, 43],
+        "TurnoverCredit": [1570, 10, 1791, 43],
+        "ClosingNetto": [1810, 10, 2031, 43],
+        "IssuedBy": [280, 70, 702, 108],
+        "ControledBy": [980, 70, 1402, 108],
+        "ApprovedBy": [1610, 70, 2032, 108],
+        "SoftwareVersion": [560, 220, 635, 253],
+        "SoftwareServicePack": [640, 220, 715, 253],
+        "User": [1260, 220, 1850, 253]
+      },
+      "amounts": ["OpeningNetto", "TurnoverDebit", "TurnoverCredit", "ClosingNetto"]
+    }
+  ],
+  "importKinds": ["ItemRow", "AnalyticalRow"],
+  "requiredText": ["HLAVNÁ KNIHA -  PODĽA ÚČTOV", "_HLKNIA4C.GMX"]
+}

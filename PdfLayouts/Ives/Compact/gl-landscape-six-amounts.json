@@ -1,0 +1,123 @@
+{
+  "version": 2,
+  "id": "ives-gl-landscape-six-amounts",
+  "producer": "Ives",
+  "category": "GL",
+  "importKinds": [
+    "AnalyticalRow"
+  ],
+  "table": {
+    "titlePattern": "^Hlavná kniha$",
+    "requiredHeader": "Obraty do DATA",
+    "forbiddenHeader": "",
+    "leftLabel": "Dátum",
+    "rightLabel": "Nový zostatok",
+    "left": 43.7,
+    "right": 774.3,
+    "lastHeaderLabel": "Nový zostatok",
+    "headerPadding": 4,
+    "columns": {
+      "Date": [
+        41,
+        65
+      ],
+      "DocumentNumber": [
+        65,
+        122
+      ],
+      "OpeningNetto": [
+        397,
+        464
+      ],
+      "TurnoverToDateDebit": [
+        464,
+        533
+      ],
+      "TurnoverToDateCredit": [
+        533,
+        599
+      ],
+      "TurnoverDebitPrinted": [
+        599,
+        666
+      ],
+      "TurnoverCreditPrinted": [
+        666,
+        752
+      ],
+      "ClosingNetto": [
+        752,
+        818
+      ],
+      "AccountName": [
+        242,
+        397
+      ],
+      "AnalyticalRowAccount": [
+        122,
+        241
+      ]
+    },
+    "amounts": [
+      "OpeningNetto",
+      "TurnoverToDateDebit",
+      "TurnoverToDateCredit",
+      "TurnoverDebitPrinted",
+      "TurnoverCreditPrinted",
+      "ClosingNetto"
+    ],
+    "compactFields": [
+      "AnalyticalRowAccount"
+    ],
+    "rules": [
+      {
+        "kind": "SyntheticSubtotal",
+        "field": "AccountName",
+        "pattern": "^Spolu za\\s*SU"
+      },
+      {
+        "kind": "DimensionSubtotal",
+        "field": "AccountName",
+        "pattern": "^Spolu za (zákazku|stredisko)"
+      },
+      {
+        "kind": "ReportTotal",
+        "field": "Date",
+        "pattern": "^C\\s*e\\s*l"
+      },
+      {
+        "kind": "SyntheticSubtotal",
+        "field": "AnalyticalRowAccount",
+        "pattern": "="
+      },
+      {
+        "kind": "AnalyticalRow",
+        "field": "Date",
+        "pattern": "^-"
+      },
+      {
+        "kind": "Transaction",
+        "field": "Date",
+        "pattern": "^\\d{1,2}\\."
+      }
+    ],
+    "orientation": "landscape",
+    "amountSums": {
+      "TurnoverDebit": [
+        "TurnoverToDateDebit",
+        "TurnoverDebitPrinted"
+      ],
+      "TurnoverCredit": [
+        "TurnoverToDateCredit",
+        "TurnoverCreditPrinted"
+      ],
+      "PeriodTurnoverDebit": [
+        "TurnoverDebitPrinted"
+      ],
+      "PeriodTurnoverCredit": [
+        "TurnoverCreditPrinted"
+      ]
+    },
+    "amountsInSourceOrder": true
+  }
+}

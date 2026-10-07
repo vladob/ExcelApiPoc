@@ -1,0 +1,66 @@
+{
+  "version": 1,
+  "id": "ifosoft_urozvrh_v2",
+  "category": "AF",
+  "unitsPerInch": 254,
+  "header": {"AccountingEntityUserName": [50, 12, 893, 59], "PageNumber": [1930, 90, 2000, 133]},
+  "anchors": [
+    {"text": "Opis účtovného rozvrhu analytických účtov", "rect": [740, 70, 1471, 122], "size": 11},
+    {"text": "Strana:", "rect": [1820, 90, 1921, 133], "size": 9},
+    {"text": "SYN", "rect": [60, 140, 118, 183], "size": 9},
+    {"text": "ANA ", "rect": [130, 140, 200, 183], "size": 9},
+    {"text": "Názov ", "rect": [220, 140, 315, 183], "size": 9},
+    {"text": "TYP", "rect": [1490, 140, 1544, 183], "size": 9},
+    {"text": "STR", "rect": [1550, 140, 1607, 183], "size": 9},
+    {"text": "ODD", "rect": [1610, 140, 1676, 183], "size": 9},
+    {"text": "POL", "rect": [1680, 140, 1736, 183], "size": 9},
+    {"text": "SAL", "rect": [1750, 140, 1803, 183], "size": 9},
+    {"text": "DAŇ", "rect": [1810, 140, 1872, 183], "size": 9},
+    {"text": "DPH", "rect": [1880, 140, 1941, 183], "size": 9},
+    {"text": "POD", "rect": [1950, 140, 2012, 183], "size": 9}
+  ],
+  "sections": [
+    {
+      "kind": "AnalythicAccount",
+      "sourceSection": "RECORD",
+      "anchor": {"rect": [60, 0, 118, 43], "size": 9, "weight": 400},
+      "fields": {
+        "SyntheticAccount": [60, 0, 118, 43],
+        "AnalythicAccount": [130, 0, 207, 43],
+        "Name": [220, 0, 1358, 43],
+        "Type": [1510, 0, 1549, 43],
+        "Str": [1570, 0, 1590, 43],
+        "Odd": [1640, 0, 1660, 43],
+        "Pol": [1710, 0, 1730, 43],
+        "Saldo": [1780, 0, 1800, 43],
+        "Tax": [1840, 0, 1860, 43],
+        "Vat": [1920, 0, 1940, 43],
+        "Pod": [1970, 0, 1990, 43]
+      },
+      "amounts": []
+    },
+    {
+      "kind": "ReportLevel",
+      "sourceSection": "FOOT1",
+      "anchor": {"rect": [50, 0, 299, 38], "size": 8, "text": "Celkový počet účtov"},
+      "fields": {"CountOfAllAccounts": [310, 0, 388, 38]},
+      "amounts": []
+    },
+    {
+      "kind": "AccountClassRow",
+      "sourceSection": "FOOT2",
+      "anchor": {"rect": [60, 10, 146, 48], "size": 8, "text": "Trieda:"},
+      "fields": {"AccountClassSymbol": [190, 10, 208, 48], "AccountClassCount": [580, 10, 658, 48]},
+      "amounts": []
+    },
+    {
+      "kind": "AccountGroup",
+      "sourceSection": "FOOT3",
+      "anchor": {"rect": [60, 10, 169, 48], "size": 8, "text": "Skupina:"},
+      "fields": {"AccountGroupSymbol": [190, 10, 225, 48], "AccountGroupCount": [580, 10, 658, 48]},
+      "amounts": []
+    }
+  ],
+  "importKinds": ["AnalythicAccount"],
+  "requiredText": ["Opis účtovného rozvrhu analytických účtov"]
+}

@@ -1,0 +1,224 @@
+{
+  "version": 1,
+  "id": "ifosoft_predvas3_firma",
+  "category": "GL",
+  "unitsPerInch": 72,
+  "header": {
+    "AccountingEntityName": [94, 10, 330, 23],
+    "PrintDate": [127, 25, 168, 35],
+    "PrintTime": [168, 25, 210, 35],
+    "PeriodFrom": [438, 25, 470, 35],
+    "PeriodTo": [480, 25, 515, 35],
+    "PageNumber": [775, 23, 800, 33]
+  },
+  "anchors": [
+    {
+      "text": "HLAVNÁ KNIHA  ANALYTICKÝCH  ÚČTOV",
+      "rect": [386.16, 13.103, 587.302, 22.88],
+      "size": 9.722
+    },
+    {
+      "text": "_PREDVAS3.GMX",
+      "rect": [66.96, 26.365, 119.771, 33.92],
+      "size": 6.944
+    },
+    {
+      "text": "Účtovné obdobie",
+      "rect": [377.76, 26.898, 436.501, 35.12],
+      "size": 7.777
+    },
+    {
+      "text": "Strana:",
+      "rect": [747.24, 24.138, 773.153, 32.36],
+      "size": 7.777
+    },
+    {
+      "text": "Počiatočný stav",
+      "rect": [363.84, 37.938, 418.273, 46.16],
+      "size": 7.777
+    },
+    {
+      "text": "Obrat od začiatku roka",
+      "rect": [466.68, 37.938, 545.896, 46.16],
+      "size": 7.777
+    },
+    {
+      "text": "Obrat za posledný mesiac",
+      "rect": [583.32, 37.938, 672.9, 46.16],
+      "size": 7.777
+    },
+    {
+      "text": "Zostatok účtu",
+      "rect": [722.28, 37.938, 770.067, 46.16],
+      "size": 7.777
+    },
+    {
+      "text": "Účet",
+      "rect": [66.72, 40.698, 83.006, 48.92],
+      "size": 7.777
+    },
+    {
+      "text": "Názov účtu",
+      "rect": [102.84, 40.698, 141.998, 48.92],
+      "size": 7.777
+    },
+    {
+      "text": "Firma:",
+      "rect": [66.72, 12.929, 92.721, 22.04],
+      "size": 8.888
+    }
+  ],
+  "sections": [
+    {
+      "kind": "SyntheticRow",
+      "sourceSection": "FOOT3",
+      "anchor": {
+        "rect": [86, 68.889, 275, 78.056],
+        "size": 6.8054,
+        "weight": 700,
+        "numeric": false
+      },
+      "fields": {
+        "SyntheticAccount": [66, 68.889, 85, 78.056],
+        "AccountName": [86, 68.889, 275, 78.612],
+        "OpeningDebit": [325.056, 68.889, 380.612, 78.612],
+        "OpeningCredit": [383.39, 68.889, 438.946, 78.612],
+        "TurnoverDebit": [444.501, 68.889, 500.057, 78.612],
+        "TurnoverCredit": [502.835, 68.889, 558.391, 78.612],
+        "PeriodTurnoverDebit": [563.947, 68.889, 619.503, 78.612],
+        "PeriodTurnoverCredit": [622.28, 68.889, 677.836, 78.612],
+        "ClosingDebit": [683.392, 68.889, 738.948, 78.612],
+        "ClosingCredit": [741.726, 68.889, 797.282, 78.612]
+      },
+      "amounts": [
+        "OpeningDebit",
+        "OpeningCredit",
+        "TurnoverDebit",
+        "TurnoverCredit",
+        "PeriodTurnoverDebit",
+        "PeriodTurnoverCredit",
+        "ClosingDebit",
+        "ClosingCredit"
+      ]
+    },
+    {
+      "kind": "AnalyticalRow",
+      "sourceSection": "RECORD",
+      "anchor": {
+        "rect": [66, 68.889, 85, 79.445],
+        "size": 7.7776,
+        "weight": 400
+      },
+      "fields": {
+        "AnalyticalRowAccount": [66, 68.889, 102, 79.445],
+        "AccountName": [102, 68.889, 277, 78.612],
+        "FieldT": [277, 68.889, 284, 78.612],
+        "FieldP": [285.5, 68.889, 292.5, 78.612],
+        "FieldD": [294, 68.889, 301, 78.612],
+        "FieldS": [302.3, 68.889, 309.3, 78.612],
+        "FieldZ": [310.7, 68.889, 317.7, 78.612],
+        "FieldK": [319, 68.889, 326, 78.612],
+        "OpeningDebit": [325.056, 68.889, 380.612, 78.612],
+        "OpeningCredit": [383.39, 68.889, 438.946, 78.612],
+        "TurnoverDebit": [444.501, 68.889, 500.057, 78.612],
+        "TurnoverCredit": [502.835, 68.889, 558.391, 78.612],
+        "PeriodTurnoverDebit": [563.947, 68.889, 619.503, 78.612],
+        "PeriodTurnoverCredit": [622.28, 68.889, 677.836, 78.612],
+        "ClosingDebit": [683.392, 68.889, 738.948, 78.612],
+        "ClosingCredit": [741.726, 68.889, 797.282, 78.612]
+      },
+      "amounts": [
+        "OpeningDebit",
+        "OpeningCredit",
+        "TurnoverDebit",
+        "TurnoverCredit",
+        "PeriodTurnoverDebit",
+        "PeriodTurnoverCredit",
+        "ClosingDebit",
+        "ClosingCredit"
+      ]
+    },
+    {
+      "kind": "AccountClassRow",
+      "sourceSection": "FOOT2",
+      "anchor": {
+        "rect": [91.721, 71.667, 168.388, 80.834],
+        "size": 6.8054,
+        "text": "MEDZISÚČET ZA TRIEDU"
+      },
+      "fields": {
+        "AccountClass": [66, 71.667, 72, 80.834],
+        "OpeningDebit": [325.056, 71.667, 380.612, 81.39],
+        "OpeningCredit": [383.39, 71.667, 438.946, 81.39],
+        "TurnoverDebit": [444.501, 71.667, 500.057, 81.39],
+        "TurnoverCredit": [502.835, 71.667, 558.391, 81.39],
+        "PeriodTurnoverDebit": [563.947, 71.667, 619.503, 81.39],
+        "PeriodTurnoverCredit": [622.28, 71.667, 677.836, 81.39],
+        "ClosingDebit": [683.392, 71.667, 738.948, 81.39],
+        "ClosingCredit": [741.726, 71.667, 797.282, 81.39]
+      },
+      "amounts": [
+        "OpeningDebit",
+        "OpeningCredit",
+        "TurnoverDebit",
+        "TurnoverCredit",
+        "PeriodTurnoverDebit",
+        "PeriodTurnoverCredit",
+        "ClosingDebit",
+        "ClosingCredit"
+      ]
+    },
+    {
+      "kind": "ReportLevel",
+      "sourceSection": "FOOT1",
+      "anchor": {
+        "rect": [83.387, 74.445, 144.499, 83.612],
+        "size": 6.8054,
+        "text": "KONTROLNÝ SÚČET"
+      },
+      "fields": {
+        "OpeningDebit": [325.056, 74.445, 380.612, 84.167],
+        "OpeningCredit": [383.39, 74.445, 438.946, 84.167],
+        "TurnoverDebit": [444.501, 74.445, 500.057, 84.167],
+        "TurnoverCredit": [502.835, 74.445, 558.391, 84.167],
+        "PeriodTurnoverDebit": [563.947, 74.445, 619.503, 84.167],
+        "PeriodTurnoverCredit": [622.28, 74.445, 677.836, 84.167],
+        "ClosingDebit": [683.392, 74.445, 738.948, 84.167],
+        "ClosingCredit": [741.726, 74.445, 797.282, 84.167]
+      },
+      "amounts": [
+        "OpeningDebit",
+        "OpeningCredit",
+        "TurnoverDebit",
+        "TurnoverCredit",
+        "PeriodTurnoverDebit",
+        "PeriodTurnoverCredit",
+        "ClosingDebit",
+        "ClosingCredit"
+      ]
+    },
+    {
+      "kind": "PageFooter",
+      "sourceSection": "PAGEFOOT (observed PDF)",
+      "anchor": {
+        "text": "© IFOsoft",
+        "rect": [70, 557, 114, 566],
+        "size": 7.777
+      },
+      "fields": {
+        "SoftwareVersion": [119, 557, 149, 566],
+        "SoftwareServicePack": [149, 557, 174, 566],
+        "AccountingEntityUserName": [352, 557, 600, 566]
+      }
+    }
+  ],
+  "importKinds": [
+    "ItemRow",
+    "AnalyticalRow"
+  ],
+  "requiredText": [
+    "HLAVNÁ KNIHA  ANALYTICKÝCH  ÚČTOV",
+    "_PREDVAS3.GMX",
+    "Firma:"
+  ]
+}

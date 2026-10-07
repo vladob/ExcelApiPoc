@@ -2,6 +2,7 @@ using ExcelApiPoc.AddIn.Models;
 using ExcelApiPoc.AddIn.Services;
 using System;
 using System.Net.Http;
+using System.Reflection;
 using System.Windows.Forms;
 using ExcelDna.Integration;
 using Excel = Microsoft.Office.Interop.Excel;
@@ -13,6 +14,7 @@ namespace ExcelApiPoc.AddIn.Forms
         private readonly Label _apiUrlLabel;
         private readonly Label _uiLanguageLabel;
         private readonly Label _settingsPathLabel;
+        private readonly Label _versionLabel;
         private readonly TextBox _apiBaseUrlTextBox;
         private readonly TextBox _apiKeyTextBox;
         private readonly Label _apiKeyLabel;
@@ -72,6 +74,13 @@ namespace ExcelApiPoc.AddIn.Forms
             };
             _settingsPathLabel.SetBounds(15, 160, 545, 23);
 
+            _versionLabel = new Label
+            {
+                AutoSize = true,
+                Text = "ExcelApiPoc.AddIn v" + GetDisplayVersion()
+            };
+            _versionLabel.SetBounds(15, 250, 300, 23);
+
             _testConnectionButton = new Button();
             _testConnectionButton.SetBounds(15, 205, 145, 30);
             _testConnectionButton.Click += TestConnectionButton_Click;
@@ -115,6 +124,7 @@ namespace ExcelApiPoc.AddIn.Forms
             Controls.Add(_uiLanguageComboBox);
             Controls.Add(_roundWholeEurosCheckBox);
             Controls.Add(_settingsPathLabel);
+            Controls.Add(_versionLabel);
             Controls.Add(_testConnectionButton);
             Controls.Add(_editTextsButton);
             Controls.Add(_saveButton);
@@ -246,6 +256,19 @@ namespace ExcelApiPoc.AddIn.Forms
                     UiText.Get("Settings.InvalidTitle", language),
                     exception.Message, exception, "Settings / Save", "SETTINGS-INVALID", null, language);
             }
+        }
+
+        private static string GetDisplayVersion()
+        {
+            Version version = Assembly.GetExecutingAssembly().GetName().Version;
+            if (version == null)
+                return "unknown";
+
+            return version.Build == 0 && version.Revision == 0
+                ? version.Major + "." + version.Minor
+                : version.Revision == 0
+                    ? version.Major + "." + version.Minor + "." + version.Build
+                    : version.ToString();
         }
 
         private static string ValidateAndNormalizeUrl(string value, string language)

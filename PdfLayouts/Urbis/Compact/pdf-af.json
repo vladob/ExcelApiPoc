@@ -1,0 +1,124 @@
+{
+  "version": 2,
+  "producer": "Urbis",
+  "id": "urbis-pdf-af",
+  "category": "AF",
+  "importKinds": [
+    "Record"
+  ],
+  "table": {
+    "titlePattern": "Účtový rozvrh, rok",
+    "leftLabel": "Účet",
+    "rightLabel": "Názov",
+    "left": 65.4,
+    "right": 123.4,
+    "lastHeaderLabel": "An15",
+    "columns": {
+      "Ordinal": [
+        35,
+        64
+      ],
+      "Account": [
+        64,
+        122
+      ],
+      "Name": [
+        122,
+        352
+      ],
+      "Type": [
+        352,
+        370
+      ],
+      "RS": [
+        370,
+        385
+      ],
+      "HS": [
+        385,
+        401
+      ],
+      "An1": [
+        401,
+        423
+      ],
+      "An2": [
+        423,
+        445
+      ],
+      "An3": [
+        445,
+        467
+      ],
+      "An4": [
+        467,
+        489
+      ],
+      "An5": [
+        489,
+        511
+      ],
+      "An6": [
+        511,
+        533
+      ],
+      "An7": [
+        533,
+        555
+      ],
+      "An8": [
+        555,
+        577
+      ],
+      "An9": [
+        577,
+        598
+      ],
+      "An10": [
+        598,
+        621
+      ],
+      "An11": [
+        621,
+        644
+      ],
+      "An12": [
+        644,
+        666
+      ],
+      "An13": [
+        666,
+        689
+      ],
+      "An14": [
+        689,
+        712
+      ],
+      "An15": [
+        712,
+        740
+      ]
+    },
+    "rules": [
+      {
+        "kind": "Heading",
+        "field": "Account",
+        "pattern": "^\\d{1,2}$"
+      },
+      {
+        "kind": "Record",
+        "field": "Ordinal",
+        "pattern": "^\\d+$"
+      }
+    ],
+    "amounts": [],
+    "groupPattern": "(?!)",
+    "controlMode": "export",
+    "pageNumberPattern": "Strana\\s+(?<page>\\d+)",
+    "ignorePattern": "^Vytlačené",
+    "entityWidth": 0.3,
+    "compactFields": [
+      "Account"
+    ]
+  }
+}

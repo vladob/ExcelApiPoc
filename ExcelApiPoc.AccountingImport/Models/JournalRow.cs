@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 namespace ExcelApiPoc.AccountingImport.Models
 {
@@ -18,6 +18,7 @@ namespace ExcelApiPoc.AccountingImport.Models
 
     public sealed class JournalRow
     {
+        public System.Collections.Generic.Dictionary<string,string> SourceFields { get; set; } = new System.Collections.Generic.Dictionary<string,string>();
         public int SequenceNumber { get; set; }
         public int SourceRecordNumber { get; set; }
         public int? SourceStartLineNumber { get; set; }

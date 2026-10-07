@@ -1,0 +1,48 @@
+{
+  "version": 1,
+  "id": "softip-mop-excel-aj",
+  "producer": "Softip-MOP",
+  "category": "AJ",
+  "headers": [
+    [
+      "^Účt\\.mes\\.$",
+      "^DD$",
+      "^Číslo dokladu$",
+      "^Účet$"
+    ]
+  ],
+  "namedColumns": {
+    "AccountingPeriod": "Účt.mes.",
+    "DocumentType": "DD",
+    "DocumentNumber": "Číslo dokladu",
+    "Account": "Účet",
+    "Date": "Dát.účt.",
+    "OperationDescription": "Popis zápisu",
+    "DebitAmount": "Má dať",
+    "CreditAmount": "DAL",
+    "CostCentre": "Stredisko",
+    "State": "St.",
+    "Invoice": "Faktúra",
+    "HistoricalInvoice": "Fakt.hist.",
+    "Partner": "Subjekt",
+    "AccountName": "Názov účtu",
+    "User": "Užív.",
+    "BatchCode": "kód dávky",
+    "BatchDescription": "Popis dávky"
+  },
+  "requiredFields": [
+    "AccountingPeriod",
+    "DocumentType",
+    "DocumentNumber",
+    "Account",
+    "Date",
+    "OperationDescription",
+    "DebitAmount",
+    "CreditAmount"
+  ],
+  "singleAccount": true,
+  "amounts": [
+    "DebitAmount",
+    "CreditAmount"
+  ]
+}

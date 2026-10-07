@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using iText.Kernel.Pdf;
 using iText.Kernel.Pdf.Canvas.Parser;
 using iText.Kernel.Pdf.Canvas.Parser.Data;
@@ -33,39 +35,231 @@ public sealed class ITextPdfTokenExtractor
         var pages = new List<LayoutPage>(pdf.GetNumberOfPages());
         for (var pageNumber = 1; pageNumber <= pdf.GetNumberOfPages(); pageNumber++)
         {
-            var listener = new TextTokenEventListener(pageNumber);
-            new PdfCanvasProcessor(listener).ProcessPageContent(pdf.GetPage(pageNumber));
+            var page = pdf.GetPage(pageNumber);
+            var listener = new TextTokenEventListener(pageNumber, page.GetRotation(),
+                page.GetPageSize().GetWidth(), page.GetPageSize().GetHeight());
+            new PdfCanvasProcessor(listener).ProcessPageContent(page);
             pages.Add(new LayoutPage(pageNumber, listener.Tokens));
         }
 
         return new LayoutDocument(pages);
     }
 
-    private sealed class TextTokenEventListener(int pageNumber) : IEventListener
+    // Importers that need fixed columns can request individual words. The default
+    // extraction stays unchanged for layout detection and existing journal imports.
+    public LayoutDocument ExtractWords(string filePath, double[]? columnBoundaries = null)
+    {
+        if (filePath == null) throw new ArgumentNullException(nameof(filePath));
+        using var stream = File.OpenRead(filePath);
+        using var reader = new PdfReader(stream);
+        using var pdf = new iText.Kernel.Pdf.PdfDocument(reader);
+        var pages = new List<LayoutPage>(pdf.GetNumberOfPages());
+        for (var pageNumber = 1; pageNumber <= pdf.GetNumberOfPages(); pageNumber++)
+        {
+            var page = pdf.GetPage(pageNumber);
+            var listener = new TextTokenEventListener(pageNumber, page.GetRotation(),
+                page.GetPageSize().GetWidth(), page.GetPageSize().GetHeight(), true, columnBoundaries);
+            new PdfCanvasProcessor(listener).ProcessPageContent(page);
+            pages.Add(new LayoutPage(pageNumber, listener.Tokens));
+        }
+        return new LayoutDocument(pages);
+    }
+
+    private sealed class TextTokenEventListener(int pageNumber, int rotation, double pageWidth, double pageHeight,
+        bool splitWords = false, double[]? columnBoundaries = null) : IEventListener
     {
         private static readonly ICollection<EventType> SupportedEvents = [EventType.RENDER_TEXT];
         private readonly int _pageNumber = pageNumber;
+        private readonly int _rotation = (rotation % 360 + 360) % 360;
+        private readonly double _pageWidth = pageWidth;
+        private readonly double _pageHeight = pageHeight;
         private readonly List<PdfTextToken> _tokens = [];
 
-        public IReadOnlyList<PdfTextToken> Tokens => _tokens;
+        public IReadOnlyList<PdfTextToken> Tokens => splitWords
+            ? AssembleWords(_tokens, _rotation == 90 || _rotation == 270, columnBoundaries)
+            : JoinSplitGmxMarkers(AssembleCharacterRuns(_tokens, _rotation == 90 || _rotation == 270));
 
         public void EventOccurred(IEventData data, EventType type)
         {
             if (type != EventType.RENDER_TEXT || data is not TextRenderInfo textRenderInfo) return;
 
+            if (splitWords)
+            {
+                foreach (var character in textRenderInfo.GetCharacterRenderInfos())
+                    AddToken(character);
+            }
+            else AddToken(textRenderInfo);
+        }
+
+        private void AddToken(TextRenderInfo textRenderInfo)
+        {
             var baseline = textRenderInfo.GetBaseline().GetBoundingRectangle();
             var fontName = textRenderInfo.GetFont()?.GetFontProgram()?.ToString() ?? string.Empty;
+            var left = (double)baseline.GetLeft();
+            var right = (double)baseline.GetRight();
+            var y = (double)baseline.GetTop();
+            if (_rotation == 90)
+            {
+                if (baseline.GetWidth() > 1 && baseline.GetHeight() < 0.25)
+                {
+                    // Some print drivers draw text along decreasing raw X on
+                    // a page with /Rotate 90. Applying the vertical-text
+                    // transform would collapse every glyph to zero width.
+                    left = _pageWidth - baseline.GetRight();
+                    right = _pageWidth - baseline.GetLeft();
+                    y = baseline.GetTop();
+                }
+                else
+                {
+                    left = baseline.GetBottom();
+                    right = baseline.GetTop();
+                    y = _pageWidth - baseline.GetLeft();
+                }
+            }
+            else if (_rotation == 270)
+            {
+                left = _pageHeight - baseline.GetTop();
+                right = _pageHeight - baseline.GetBottom();
+                y = baseline.GetLeft();
+            }
             _tokens.Add(new PdfTextToken(
                 _pageNumber,
                 textRenderInfo.GetText() ?? string.Empty,
-                baseline.GetLeft(),
-                baseline.GetRight(),
-                baseline.GetTop(),
+                left,
+                right,
+                y,
                 ContainsStyle(fontName, "bold"),
                 ContainsStyle(fontName, "italic") || ContainsStyle(fontName, "oblique")));
         }
 
         public ICollection<EventType> GetSupportedEvents() => SupportedEvents;
+
+        private static IReadOnlyList<PdfTextToken> AssembleWords(List<PdfTextToken> glyphs, bool rotated, double[]? columnBoundaries)
+        {
+            var words = new List<PdfTextToken>();
+            var letters = new StringBuilder();
+            PdfTextToken? first = null;
+            double right = 0;
+            void Flush()
+            {
+                if (first != null && letters.Length > 0)
+                    words.Add(new PdfTextToken(first.PageNumber, letters.ToString(), first.Left,
+                        right, first.Baseline, first.IsBold, first.IsItalic));
+                first = null;
+                letters.Clear();
+            }
+            foreach (var glyph in glyphs)
+            {
+                if (string.IsNullOrWhiteSpace(glyph.OriginalText)) { Flush(); continue; }
+                double gap = first == null ? 0 : glyph.Left - right;
+                if (first != null && (Math.Abs(glyph.Baseline - first.Baseline) > 0.75 ||
+                    gap < -1.5 || gap > (rotated ? 10 : 2) ||
+                    (columnBoundaries != null && columnBoundaries.Any(boundary =>
+                        first.Left < boundary && glyph.Left >= boundary)))) Flush();
+                if (first == null) first = glyph;
+                letters.Append(glyph.OriginalText);
+                right = glyph.Right;
+            }
+            Flush();
+            return words;
+        }
+
+        // Some accounting print drivers emit one PDF text operation per glyph.
+        // Reassemble adjacent glyphs before matching phrases in layout rules.
+        // Keep complete text operations intact, and do not join across columns
+        // or baselines. The original glyph positions still determine the run box.
+        private static IReadOnlyList<PdfTextToken> AssembleCharacterRuns(List<PdfTextToken> tokens, bool rotated)
+        {
+            var result = new List<PdfTextToken>();
+            var index = 0;
+            while (index < tokens.Count)
+            {
+                var first = tokens[index];
+                if (first.OriginalText.Length != 1)
+                {
+                    result.Add(first);
+                    index++;
+                    continue;
+                }
+
+                var text = new StringBuilder(first.OriginalText);
+                var right = first.Right;
+                var end = index + 1;
+                while (end < tokens.Count)
+                {
+                    var next = tokens[end];
+                    var gap = next.Left - right;
+                    // Some print drivers assign every glyph in one text run the
+                    // same bounding box, so consecutive glyph boxes coincide.
+                    var coincident = Math.Abs(next.Left - first.Left) <= 0.25 &&
+                                     Math.Abs(next.Right - first.Right) <= 0.25;
+                    if (next.OriginalText.Length != 1 ||
+                        Math.Abs(next.Baseline - first.Baseline) > 0.75 ||
+                        (!coincident && (gap < -1.5 || gap > (rotated ? 10 : 2))) ||
+                        next.IsBold != first.IsBold || next.IsItalic != first.IsItalic)
+                        break;
+                    text.Append(next.OriginalText);
+                    right = next.Right;
+                    end++;
+                }
+
+                result.Add(end == index + 1 ? first : new PdfTextToken(
+                    first.PageNumber, text.ToString(), first.Left, right,
+                    first.Baseline, first.IsBold, first.IsItalic));
+                index = end;
+            }
+            return result;
+        }
+
+        // Some PDF printers split the small GMX label into several text operations
+        // interleaved with other header text. Join only fragments that touch on the
+        // same baseline and form a complete marker; leave every other token intact.
+        private static IReadOnlyList<PdfTextToken> JoinSplitGmxMarkers(IReadOnlyList<PdfTextToken> tokens)
+        {
+            var result = tokens.ToList();
+            foreach (var suffix in tokens.Where(token =>
+                         token.Text.EndsWith(".GMX", StringComparison.OrdinalIgnoreCase) &&
+                         !token.Text.StartsWith("_", StringComparison.Ordinal)))
+            {
+                var i = result.IndexOf(suffix);
+                if (i < 0) continue;
+
+                var pieces = new List<int> { i };
+                var combined = suffix.Text;
+                var left = suffix.Left;
+                while (pieces.Count < 6 && !combined.StartsWith("_", StringComparison.Ordinal))
+                {
+                    var previous = -1;
+                    var bestGap = double.MaxValue;
+                    for (var j = 0; j < result.Count; j++)
+                    {
+                        if (pieces.Contains(j)) continue;
+                        var candidate = result[j];
+                        var gap = left - candidate.Right;
+                        if (candidate.PageNumber != suffix.PageNumber ||
+                            Math.Abs(candidate.Baseline - suffix.Baseline) > 0.75 ||
+                            gap < -0.5 || gap > 0.75 || gap >= bestGap ||
+                            candidate.Text.Length > 12)
+                            continue;
+                        previous = j;
+                        bestGap = gap;
+                    }
+                    if (previous < 0) break;
+                    pieces.Add(previous);
+                    combined = result[previous].Text + combined;
+                    left = result[previous].Left;
+                }
+
+                if (!Regex.IsMatch(combined, @"^_[A-Z0-9]+\.GMX$", RegexOptions.IgnoreCase))
+                    continue;
+                var merged = new PdfTextToken(suffix.PageNumber, combined, left, suffix.Right,
+                    suffix.Baseline, suffix.IsBold, suffix.IsItalic);
+                var insertAt = pieces.Min();
+                foreach (var index in pieces.OrderByDescending(x => x)) result.RemoveAt(index);
+                result.Insert(insertAt, merged);
+            }
+            return result;
+        }
 
         private static bool ContainsStyle(string fontName, string style) =>
             fontName.IndexOf(style, StringComparison.OrdinalIgnoreCase) >= 0;

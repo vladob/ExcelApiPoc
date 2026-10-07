@@ -1,0 +1,73 @@
+{
+  "version": 2,
+  "producer": "Ives",
+  "id": "ives-account-framework",
+  "category": "AF",
+  "importKinds": [
+    "Account"
+  ],
+  "table": {
+    "titlePattern": "^Účtov(?:ný|ý) rozvrh$",
+    "leftLabel": "SU",
+    "rightLabel": "Názov účtu",
+    "left": 42.2,
+    "right": 180.4,
+    "lastHeaderLabel": "od - do",
+    "headerPadding": 4,
+    "columns": {
+      "Account": [
+        41,
+        175
+      ],
+      "Name": [
+        175,
+        331
+      ],
+      "Activity": [
+        331,
+        353
+      ],
+      "Type": [
+        353,
+        374
+      ],
+      "OpeningFlag": [
+        374,
+        391
+      ],
+      "BudgetFlag": [
+        391,
+        410
+      ],
+      "PlanFlag": [
+        410,
+        428
+      ],
+      "BudgetAccountFlag": [
+        428,
+        451
+      ],
+      "Currency": [
+        451,
+        479
+      ],
+      "ValidFromTo": [
+        479,
+        556
+      ]
+    },
+    "amounts": [],
+    "compactFields": [
+      "Account"
+    ],
+    "rules": [
+      {
+        "kind": "Account",
+        "field": "Account",
+        "pattern": "^\\d{3}\\."
+      }
+    ],
+    "continuationKind": "Account",
+    "continuationField": "Name"
+  }
+}

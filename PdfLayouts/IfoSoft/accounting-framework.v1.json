@@ -1,0 +1,50 @@
+{
+  "schemaVersion": 1,
+  "id": "ifosoft-accounting-framework",
+  "name": "IfoSoft accounting framework",
+  "defaults": {
+    "horizontalTolerance": 5,
+    "baselineTolerance": 3
+  },
+  "sections": [
+    {
+      "id": "page",
+      "scope": "PerPage",
+      "mayContinueOnNextPage": true
+    }
+  ],
+  "rules": [
+    {
+      "id": "report-title",
+      "text": "ÚČTOVÝ\\s+ROZVRH\\s+ANALYTICKÝCH\\s+ÚČTOV",
+      "textMatch": "RegularExpression",
+      "pageScope": "First"
+    }
+  ],
+  "recordRules": [
+    {
+      "id": "candidate-row",
+      "sectionId": "page",
+      "text": "^\\s*\\d+\\.\\s+(?:\\d{2,3}|\\d{3})\\b",
+      "textMatch": "RegularExpression"
+    },
+    {
+      "id": "group-summary",
+      "sectionId": "page",
+      "text": "Počet účtov",
+      "textMatch": "Contains"
+    }
+  ],
+  "recordFields": [
+    {
+      "recordRuleId": "candidate-row",
+      "fields": [
+        {
+          "id": "account-candidate",
+          "text": "^\\d{2,3}$",
+          "textMatch": "RegularExpression"
+        }
+      ]
+    }
+  ]
+}

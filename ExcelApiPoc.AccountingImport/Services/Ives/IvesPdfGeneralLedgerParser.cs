@@ -309,6 +309,10 @@ namespace ExcelApiPoc.AccountingImport.Services.Ives
             BaselineRecord record,
             double anchor)
         {
+            decimal tokenAmount;
+            if (TryReadGroupedAmount(record, anchor, out tokenAmount))
+                return tokenAmount;
+
             const double commaRightOffset = 8.30;
             const double decimalAdvance = 4.104;
             const double commaToUnitsRight = 2.052;
@@ -329,9 +333,17 @@ namespace ExcelApiPoc.AccountingImport.Services.Ives
 
             if (comma == null)
             {
+                string nearby = string.Join(" ", record.SourceTokens
+                    .Where(token => token.Right >= anchor - 65.0 && token.Left <= anchor + 12.0)
+                    .OrderBy(token => token.Left)
+                    .Take(90)
+                    .Select(token => "'" + token.Text + "'@" +
+                        token.Right.ToString("F2", CultureInfo.InvariantCulture)));
                 throw new InvalidDataException(
                     "IVES general-ledger PDF contains no amount decimal separator near " +
-                    anchor.ToString("F1", CultureInfo.InvariantCulture) + ".");
+                    anchor.ToString("F1", CultureInfo.InvariantCulture) +
+                    " on page " + record.StartPageNumber +
+                    ". Record: '" + record.Text + "'. Nearby tokens: " + nearby + ".");
             }
 
             AmountGlyph decimal1 = FindNearestGlyph(
@@ -423,6 +435,48 @@ namespace ExcelApiPoc.AccountingImport.Services.Ives
             throw new InvalidDataException(
                 "IVES general-ledger PDF contains invalid amount '" +
                 amountText + "'.");
+        }
+
+        private static bool TryReadGroupedAmount(BaselineRecord record, double anchor, out decimal amount)
+        {
+            amount = 0m;
+            var tokens = record.SourceTokens
+                .Where(token => token.Right >= anchor - 70.0 && token.Left <= anchor + 1.0)
+                .OrderBy(token => token.Left)
+                .ToArray();
+            var final = tokens
+                .Where(token => Math.Abs(token.Right - anchor) <= 0.75 &&
+                    Regex.IsMatch(Trim(token.Text), @"^-?(?:\d{1,12}|\d{1,3}(?:[ \u00a0]\d{3})+),\d{2}$"))
+                .OrderBy(token => Math.Abs(token.Right - anchor))
+                .FirstOrDefault();
+            if (final == null) return false;
+
+            string value = Trim(final.Text).Replace(" ", string.Empty).Replace("\u00a0", string.Empty);
+            double left = final.Left;
+            for (int i = Array.IndexOf(tokens, final) - 1; i >= 0; i--)
+            {
+                var previous = tokens[i];
+                string part = Trim(previous.Text);
+                double gap = left - previous.Right;
+                if (Math.Abs(previous.Baseline - final.Baseline) > 1.5 ||
+                    gap < -0.3 || gap > 4.0) break;
+                string digits = part.Replace(" ", string.Empty).Replace("\u00a0", string.Empty);
+                if (Regex.IsMatch(part, @"^-?\d{1,12}(?:[ \u00a0]\d{3})*$") &&
+                    value.TrimStart('-').Split(',')[0].Length + digits.TrimStart('-').Length <= 12)
+                {
+                    value = digits + value;
+                    left = previous.Left;
+                    if (part.StartsWith("-", StringComparison.Ordinal)) break;
+                }
+                else if (part == "-" && !value.StartsWith("-", StringComparison.Ordinal))
+                {
+                    value = "-" + value;
+                    break;
+                }
+                else break;
+            }
+            return decimal.TryParse(value, NumberStyles.Number | NumberStyles.AllowLeadingSign,
+                CultureInfo.GetCultureInfo("sk-SK"), out amount);
         }
 
         private static AmountGlyph TryCreateAmountGlyph(

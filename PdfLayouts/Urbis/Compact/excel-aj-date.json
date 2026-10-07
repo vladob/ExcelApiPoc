@@ -1,0 +1,33 @@
+{
+  "version": 1,
+  "id": "urbis-aj-date",
+  "producer": "Urbis",
+  "category": "AJ",
+  "headers": [
+    [
+      "^Doklad$",
+      "^Dátum$",
+      "^Poznámka$",
+      "^Suma$",
+      "^Účet MD$",
+      "^Účet Dal$",
+      "^$"
+    ]
+  ],
+  "columns": {
+    "Ordinal": 0,
+    "Date": 1,
+    "OperationDescription": 2,
+    "Amount": 3,
+    "DebitAccount": 4,
+    "CreditAccount": 5,
+    "Structure": 6
+  },
+  "documentGroups": false,
+  "amounts": [
+    "Amount"
+  ],
+  "columnCounts": [
+    7
+  ]
+}

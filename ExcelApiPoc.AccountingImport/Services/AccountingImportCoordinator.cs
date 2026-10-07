@@ -44,6 +44,8 @@ namespace ExcelApiPoc.AccountingImport.Services
                 new IJournalImporter[]
                 {
                     new IfoSoftCsvJournalImporter(),
+                    new IfoSoftXmlJournalImporter(),
+                    new IfoSoftPdfDennik1JournalImporter(),
                     new IvesJournalImporter(),
                     new SoftipMopExcelJournalImporter(),
                     new UrbisExcelJournalImporter()
@@ -51,6 +53,7 @@ namespace ExcelApiPoc.AccountingImport.Services
                 new IGeneralLedgerImporter[]
                 {
                     new IfoSoftCsvGeneralLedgerImporter(),
+                    new IfoSoftPdfGeneralLedgerImporter(),
                     new IvesGeneralLedgerImporter(),
                     new SoftipMopPdfGeneralLedgerImporter(),
                     new UrbisExcelGeneralLedgerImporter()

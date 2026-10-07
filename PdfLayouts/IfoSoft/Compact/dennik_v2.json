@@ -1,0 +1,62 @@
+{
+  "version": 1,
+  "id": "ifosoft_dennik_v2",
+  "category": "AJ",
+  "unitsPerInch": 254,
+  "header": {"AccountingEntityUserName": [10, 10, 853, 48], "PeriodTo": [1300, 60, 1442, 103], "PageNumber": [1950, 100, 2028, 138]},
+  "anchors": [
+    {"text": "D E N N Í K  ÚČTOVNÝCH PRÍPADOV ", "rect": [930, 0, 1713, 57], "size": 12},
+    {"text": "Obdobie:", "rect": [1160, 60, 1288, 103], "size": 9},
+    {"text": "Strana:", "rect": [1850, 100, 1941, 138], "size": 8},
+    {"text": "_DENNIK.GMX", "rect": [10, 120, 146, 149], "size": 6},
+    {"text": "MÁ  DAŤ", "rect": [1180, 160, 1289, 198], "size": 8},
+    {"text": "DAL", "rect": [1440, 160, 1491, 198], "size": 8},
+    {"text": "Poradové \\n    číslo", "rect": [40, 170, 164, 246], "size": 8},
+    {"text": "Popis operácie", "rect": [190, 200, 369, 238], "size": 8},
+    {"text": "Suma / Rozdiel", "rect": [900, 200, 1087, 238], "size": 8},
+    {"text": "Účet", "rect": [1200, 200, 1256, 238], "size": 8},
+    {"text": "Účet", "rect": [1440, 200, 1496, 238], "size": 8},
+    {"text": "Organizácia", "rect": [1600, 200, 1745, 238], "size": 8}
+  ],
+  "sections": [
+    {
+      "kind": "AjRecord",
+      "sourceSection": "RECORD",
+      "anchor": {"rect": [880, 275, 1104, 313], "size": 8, "weight": 700},
+      "fields": {
+        "Description1": [190, 255, 865, 293],
+        "C1": [20, 275, 88, 313],
+        "C2": [100, 275, 168, 313],
+        "Sum": [880, 275, 1104, 313],
+        "Debit": [1170, 275, 1305, 313],
+        "Credit": [1390, 275, 1525, 313],
+        "Code": [1600, 275, 1668, 313],
+        "Description2": [1680, 275, 2018, 313],
+        "Text": [190, 295, 865, 333]
+      },
+      "amounts": ["Sum"]
+    },
+    {
+      "kind": "DocumentTotals",
+      "sourceSection": "FOOT2",
+      "anchor": {"rect": [190, 265, 284, 303], "size": 8, "text": "SPOLU:"},
+      "fields": {
+        "DocumentNo": [310, 265, 426, 303],
+        "Ordinary": [460, 265, 499, 303],
+        "Date": [510, 265, 672, 303],
+        "DebitSubtotal": [1150, 265, 1331, 303],
+        "CreditSubtotal": [1380, 265, 1561, 303]
+      },
+      "amounts": ["DebitSubtotal", "CreditSubtotal"]
+    },
+    {
+      "kind": "ReportLevel",
+      "sourceSection": "FOOT1",
+      "anchor": {"rect": [190, 255, 305, 293], "size": 8, "text": "CELKOM:"},
+      "fields": {"DebitTotal": [1150, 265, 1331, 303], "CreditTotal": [1380, 265, 1561, 303]},
+      "amounts": ["DebitTotal", "CreditTotal"]
+    }
+  ],
+  "importKinds": ["AjRecord"],
+  "requiredText": ["D E N N Í K  ÚČTOVNÝCH PRÍPADOV ", "_DENNIK.GMX"]
+}

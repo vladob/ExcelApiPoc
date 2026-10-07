@@ -64,7 +64,12 @@ namespace ExcelApiPoc.AccountingImport.Services.IfoSoft
                 Ico = detection.Ico,
                 CompanyName = detection.CompanyName,
                 FiscalYear = detection.FiscalYear ?? 0,
-                ImportedAtUtc = DateTime.UtcNow
+                ImportedAtUtc = DateTime.UtcNow,
+                ImportReport = new ExcelApiPoc.AccountingImport.Models.Reporting.ImportReport
+                {
+                    AccountingFormat = "IfoSoft", ImportType = "AccountingJournal",
+                    SourceFileName = Path.GetFileName(filePath)
+                }
             };
 
             using (IEnumerator<CsvRecord> records = ReadCsvRecords(filePath).GetEnumerator())
@@ -79,6 +84,7 @@ namespace ExcelApiPoc.AccountingImport.Services.IfoSoft
 
                 int sequenceNumber = 0;
                 int sourceRecordNumber = 0;
+                int missingDateRows = 0;
 
                 while (records.MoveNext())
                 {
@@ -101,8 +107,17 @@ namespace ExcelApiPoc.AccountingImport.Services.IfoSoft
                         throw new InvalidDataException( $"The accounting journal contains more than " + $"{MaximumJournalRows:N0} records. " + "This file size is not currently supported.");
                     }
                     JournalRow row = MapJournalRow(sourceRecord, sourceRecordNumber, sequenceNumber, journalImport);
+                    if (row.PostingDate == DateTime.MinValue) missingDateRows++;
                     journalImport.Rows.Add(row);
                 }
+                if (missingDateRows > 0)
+                    journalImport.ImportReport.Diagnostics.Add(new ExcelApiPoc.AccountingImport.Models.Reporting.ImportDiagnostic
+                    {
+                        Code = "IFOSOFT_CSV_MISSING_POSTING_DATE",
+                        Severity = ExcelApiPoc.AccountingImport.Models.Reporting.ImportDiagnosticSeverity.Warning,
+                        Message = missingDateRows + " CSV journal row(s) have no posting date. Their amounts were " +
+                            "preserved, but they are excluded from report calculation until a corrected date is entered."
+                    });
             }
 
             if (journalImport.Rows.Count == 0)
@@ -112,13 +127,16 @@ namespace ExcelApiPoc.AccountingImport.Services.IfoSoft
             return journalImport;
         }
 
-        private static JournalRow MapJournalRow(CsvRecord source,int sourceRecordNumber,int sequenceNumber,JournalImport journalImport)
+        internal static JournalRow MapJournalRow(CsvRecord source,int sourceRecordNumber,int sequenceNumber,JournalImport journalImport)
         {
             string[] fields = source.Fields;
             bool rowNormalized = false;
-            DateTime postingDate = ParseDate(fields[2], source.Location);
+            bool missingDate = string.IsNullOrWhiteSpace(fields[2]);
+            DateTime postingDate = missingDate ? DateTime.MinValue : ParseDate(fields[2], source.Location);
             if (journalImport.FiscalYear == 0)
             {
+                if (missingDate)
+                    throw new InvalidDataException($"{source.Location}: the fiscal year cannot be determined for an undated CSV row.");
                 journalImport.FiscalYear = postingDate.Year;
             }
 
@@ -128,10 +146,12 @@ namespace ExcelApiPoc.AccountingImport.Services.IfoSoft
                 SourceRecordNumber = sourceRecordNumber,
                 SourceStartLineNumber = source.StartLineNumber,
                 SourceEndLineNumber = source.EndLineNumber,
-                SourceLocation = source.Location,
+                SourceLocation = missingDate ? source.Location + " (source date missing)" : source.Location,
                 DocumentType = Normalize(fields[0], journalImport, ref rowNormalized),
                 DocumentNumber = Normalize(fields[1], journalImport, ref rowNormalized),
                 PostingDate = postingDate,
+                DateExceptionResolution = missingDate ? JournalDateExceptionResolution.Excluded :
+                    (JournalDateExceptionResolution?)null,
                 Description = Normalize(fields[3], journalImport, ref rowNormalized),
                 DebitAccount = Normalize(fields[4], journalImport, ref rowNormalized),
                 DebitItem = Normalize(fields[5], journalImport, ref rowNormalized),
@@ -281,8 +301,24 @@ namespace ExcelApiPoc.AccountingImport.Services.IfoSoft
 
             if (!match.Success)
             {
-                throw new InvalidDataException($"{record.Location}: IČO was not found in " + "the IfoSoft entity-information record.");
+                match = Regex.Match(value, @"^\d{8}_\d{4}\s+(?<name>.+)$");
+                Match file = Regex.Match(journalImport.SourceFileName,
+                    @"^U_DENNIK_(?<ico>\d{8})_\d{4}\.csv$", RegexOptions.IgnoreCase);
+                if (!match.Success || !file.Success || journalImport.Ico != file.Groups["ico"].Value)
+                    throw new InvalidDataException($"{record.Location}: IČO was not found in " + "the IfoSoft entity-information record.");
+                journalImport.Ico = file.Groups["ico"].Value;
+                journalImport.CompanyName = match.Groups["name"].Value.Trim();
+                journalImport.ImportReport.Diagnostics.Add(new ExcelApiPoc.AccountingImport.Models.Reporting.ImportDiagnostic
+                {
+                    Code = "IFOSOFT_CSV_ICO_FROM_FILENAME",
+                    Severity = ExcelApiPoc.AccountingImport.Models.Reporting.ImportDiagnosticSeverity.Warning,
+                    Message = "The CSV header does not contain IČO; '" + journalImport.Ico +
+                        "' was taken from the filename. Verify that it belongs to '" + journalImport.CompanyName + "'."
+                });
+                return;
             }
+            if (!string.IsNullOrEmpty(journalImport.Ico) && journalImport.Ico != match.Groups["ico"].Value)
+                throw new InvalidDataException($"{record.Location}: IČO conflicts with detected journal metadata.");
             journalImport.Ico = match.Groups["ico"].Value;
 
             if (match.Groups["name"].Success)
@@ -344,7 +380,7 @@ namespace ExcelApiPoc.AccountingImport.Services.IfoSoft
             }
         }
 
-        private static IEnumerable<CsvRecord> ReadCsvRecords(string filePath)
+        internal static IEnumerable<CsvRecord> ReadCsvRecords(string filePath)
         {
             using (var reader = new StreamReader(filePath,Encoding.GetEncoding(1250),true))
             {
@@ -459,8 +495,9 @@ namespace ExcelApiPoc.AccountingImport.Services.IfoSoft
             return fields.ToArray();
         }
 
-        private sealed class CsvRecord
+        internal sealed class CsvRecord
         {
+            public string RawRecord { get; set; }
             public string[] Fields { get; set; }
             public int StartLineNumber { get; set; }
             public int EndLineNumber { get; set; }

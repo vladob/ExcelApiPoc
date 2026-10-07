@@ -1,0 +1,29 @@
+{
+  "version": 1,
+  "id": "ives-xml-aj",
+  "producer": "Ives",
+  "category": "AJ",
+  "namespace": "urn:crystal-reports:schemas:report-detail",
+  "recordMarker": "{uctDennik.Obnos}",
+  "fields": {
+    "Date": "{uctDennik.Datum_vytv_pohybu}",
+    "DocumentNumber": "{uctDennik.Cislo_dokladu}",
+    "DebitAccount": "{uctDennik.aU_Text_MD}",
+    "CreditAccount": "{uctDennik.aU_Text_Dal}",
+    "Amount": "{uctDennik.Obnos}",
+    "OperationDescription": "{uctDennik.text_operacie}"
+  },
+  "amounts": [
+    "Amount"
+  ],
+  "controls": {
+    "Amount": "Sum ({uctDennik.Obnos}, {uctDennik.Kod_meny})"
+  },
+  "dateField": "{uctDennik.Datum_vytv_pohybu}",
+  "groupField": "{@cinnost}",
+  "continuationMarker": "{uctDennik.Kod_strediska}",
+  "compactFields": [
+    "DebitAccount",
+    "CreditAccount"
+  ]
+}

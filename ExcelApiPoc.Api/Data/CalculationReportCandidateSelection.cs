@@ -37,7 +37,30 @@ public static class CalculationReportCandidateSelection
                 $"for IČO '{ico}' and fiscal year {fiscalYear}.");
         }
 
-        if (candidates.Count > 1)
+        CalculationReportCandidate? selected = candidates.Count == 1 ? candidates[0] : null;
+        if (selected is null && candidates.Select(candidate =>
+                (candidate.RegisterUzTemplateId, candidate.AccountFrameworkId,
+                 candidate.FrameworkCode)).Distinct().Count() == 1)
+        {
+            // Two ordinary filings of the same report can coexist. A unique
+            // approved statement identifies the report to use for calculation.
+            // Equal or missing approval dates still need an explicit decision.
+            var approved = candidates.Where(candidate => candidate.ApprovalDate.HasValue).ToArray();
+            if (approved.Length == 1)
+                selected = approved[0];
+            else if (candidates.All(candidate => candidate.ContentMatchesFirstCandidate))
+            {
+                // Equal values at every table/row/column make these filings
+                // interchangeable for calculation. Use submission date solely
+                // to select the source identity; auditor-attachment dates do
+                // not indicate a new financial report.
+                selected = candidates.OrderByDescending(candidate => candidate.SubmissionDate)
+                    .ThenByDescending(candidate => candidate.FinancialReportId)
+                    .First();
+            }
+        }
+
+        if (selected is null)
         {
             string reportIds = string.Join(
                 ", ",
@@ -52,7 +75,7 @@ public static class CalculationReportCandidateSelection
                 $"{reportIds}. Selection is ambiguous.");
         }
 
-        CalculationReportCandidate candidate = candidates[0];
+        CalculationReportCandidate candidate = selected;
 
         if (!candidate.CalculationImplemented)
         {

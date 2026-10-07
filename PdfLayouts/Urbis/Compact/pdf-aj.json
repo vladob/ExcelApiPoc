@@ -1,0 +1,80 @@
+{
+  "version": 2,
+  "producer": "Urbis",
+  "id": "urbis-pdf-aj",
+  "category": "AJ",
+  "importKinds": [
+    "Record"
+  ],
+  "table": {
+    "titlePattern": "Účtovný denník",
+    "leftLabel": "Dátum",
+    "rightLabel": "Účet Dal",
+    "left": 52,
+    "right": 365,
+    "lastHeaderLabel": "Účet Dal",
+    "columns": {
+      "Ordinal": [
+        27,
+        51
+      ],
+      "Date": [
+        51,
+        97
+      ],
+      "OperationDescription": [
+        97,
+        293
+      ],
+      "Amount": [
+        97,
+        293
+      ],
+      "DebitAccount": [
+        293,
+        364
+      ],
+      "CreditAccount": [
+        364,
+        438
+      ],
+      "Structure": [
+        27,
+        262
+      ]
+    },
+    "rules": [
+      {
+        "kind": "DocumentStart",
+        "field": "Structure",
+        "pattern": "^Doklad:"
+      },
+      {
+        "kind": "DocumentTotal",
+        "field": "Structure",
+        "pattern": "^Spolu za doklad"
+      },
+      {
+        "kind": "ReportTotal",
+        "field": "Structure",
+        "pattern": "^Spolu$"
+      },
+      {
+        "kind": "Record",
+        "field": "Ordinal",
+        "pattern": "^\\d+$"
+      }
+    ],
+    "amounts": [
+      "Amount"
+    ],
+    "groupPattern": "(?!)",
+    "controlMode": "export",
+    "pageNumberPattern": "Strana\\s+(?<page>\\d+)",
+    "ignorePattern": "^Vytlačené",
+    "entityWidth": 0.3,
+    "documentGroups": true,
+    "continueAcrossPages": true,
+    "amountsInSourceOrder": true
+  }
+}

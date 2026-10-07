@@ -1,0 +1,97 @@
+{
+  "version": 2,
+  "id": "ives-gl-landscape",
+  "producer": "Ives",
+  "category": "GL",
+  "importKinds": [
+    "AnalyticalRow"
+  ],
+  "table": {
+    "titlePattern": "^Hlavná kniha$",
+    "requiredHeader": "Starý zostatok",
+    "forbiddenHeader": "Obraty do DATA",
+    "leftLabel": "Dátum",
+    "rightLabel": "Nový zostatok",
+    "left": 33.5,
+    "right": 765,
+    "lastHeaderLabel": "Nový zostatok",
+    "headerPadding": 4,
+    "columns": {
+      "Date": [
+        31,
+        55
+      ],
+      "DocumentNumber": [
+        55,
+        112
+      ],
+      "OpeningNetto": [
+        470,
+        536
+      ],
+      "TurnoverDebit": [
+        536,
+        629
+      ],
+      "TurnoverCredit": [
+        629,
+        727
+      ],
+      "ClosingNetto": [
+        727,
+        808
+      ],
+      "AccountName": [
+        280,
+        470
+      ],
+      "AnalyticalRowAccount": [
+        112,
+        233
+      ]
+    },
+    "amounts": [
+      "OpeningNetto",
+      "TurnoverDebit",
+      "TurnoverCredit",
+      "ClosingNetto"
+    ],
+    "compactFields": [
+      "AnalyticalRowAccount"
+    ],
+    "rules": [
+      {
+        "kind": "SyntheticSubtotal",
+        "field": "AccountName",
+        "pattern": "^Spolu za\\s*SU"
+      },
+      {
+        "kind": "DimensionSubtotal",
+        "field": "AccountName",
+        "pattern": "^Spolu za (zákazku|stredisko)"
+      },
+      {
+        "kind": "ReportTotal",
+        "field": "Date",
+        "pattern": "^C\\s*e\\s*l"
+      },
+      {
+        "kind": "SyntheticSubtotal",
+        "field": "AnalyticalRowAccount",
+        "pattern": "="
+      },
+      {
+        "kind": "AnalyticalRow",
+        "field": "Date",
+        "pattern": "^-"
+      },
+      {
+        "kind": "Transaction",
+        "field": "Date",
+        "pattern": "^\\d{1,2}\\."
+      }
+    ],
+    "orientation": "landscape",
+    "amountsInSourceOrder": true
+  }
+}

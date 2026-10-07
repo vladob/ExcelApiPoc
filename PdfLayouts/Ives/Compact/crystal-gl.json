@@ -1,0 +1,33 @@
+{
+  "version": 1,
+  "id": "ives-xml-gl",
+  "producer": "Ives",
+  "category": "GL",
+  "namespace": "urn:crystal-reports:schemas:report-detail",
+  "recordMarker": "{@spU}",
+  "fields": {
+    "Account": "{uctHlavKniha.aU_Text}",
+    "Name": "{@spoluU}",
+    "OpeningNetto": "{@spU}",
+    "TurnoverDebit": "Sum ({@MD}, {@grsuau})",
+    "TurnoverCredit": "Sum ({@DAL}, {@grsuau})",
+    "ClosingNetto": "{@ZostatokU}"
+  },
+  "amounts": [
+    "OpeningNetto",
+    "TurnoverDebit",
+    "TurnoverCredit",
+    "ClosingNetto"
+  ],
+  "controls": {
+    "OpeningNetto": "{@pocstavCelk}",
+    "TurnoverDebit": "Sum ({@MD}, {@grMena})",
+    "TurnoverCredit": "Sum ({@DAL}, {@grMena})",
+    "ClosingNetto": "{@ZostatokKomplet}"
+  },
+  "dateField": "{uctHlavKniha.Datum_vytv_pohybu}",
+  "groupField": "{@cinnost}",
+  "compactFields": [
+    "Account"
+  ]
+}

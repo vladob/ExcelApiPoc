@@ -1,0 +1,108 @@
+{
+  "version": 2,
+  "id": "softip-mop-pdf-aj-landscape",
+  "producer": "Softip-MOP",
+  "category": "AJ",
+  "importKinds": [
+    "Record"
+  ],
+  "worksheet": {
+    "pageWidth": 841.92,
+    "pageHeight": 595.32,
+    "panels": [
+      {
+        "headers": {
+          "Účt.mes.": 19.8,
+          "DD": 50.2,
+          "Číslo dokladu": 65.6,
+          "Účet": 109.1,
+          "Dát.účt.": 132,
+          "Popis zápisu": 169.9,
+          "Faktúra": 341.2,
+          "Subjekt": 392.1,
+          "Stredisko": 508.8,
+          "Má dať": 541,
+          "DAL": 577,
+          "Užív.": 613,
+          "kód dávky": 647.1,
+          "Popis dávky": 704.7
+        },
+        "columns": {
+          "AccountingPeriod": [
+            19,
+            50
+          ],
+          "DocumentType": [
+            50,
+            65
+          ],
+          "DocumentNumber": [
+            65,
+            109
+          ],
+          "Account": [
+            109,
+            131
+          ],
+          "Date": [
+            131,
+            169
+          ],
+          "OperationDescription": [
+            169,
+            340.7
+          ],
+          "Invoice": [
+            340.7,
+            391.5
+          ],
+          "Partner": [
+            391.5,
+            508
+          ],
+          "CostCentre": [
+            508,
+            540.5
+          ],
+          "DebitAmount": [
+            540.5,
+            576.5
+          ],
+          "CreditAmount": [
+            576.5,
+            612.5
+          ],
+          "User": [
+            612.5,
+            646.5
+          ],
+          "BatchCode": [
+            646.5,
+            704
+          ],
+          "BatchDescription": [
+            704,
+            825
+          ]
+        },
+        "headerFields": {
+          "AccountingPeriod": "Účt.mes.",
+          "DocumentType": "DD",
+          "DocumentNumber": "Číslo dokladu",
+          "Account": "Účet",
+          "Date": "Dát.účt.",
+          "OperationDescription": "Popis zápisu",
+          "Invoice": "Faktúra",
+          "Partner": "Subjekt",
+          "CostCentre": "Stredisko",
+          "DebitAmount": "Má dať",
+          "CreditAmount": "DAL",
+          "User": "Užív.",
+          "BatchCode": "kód dávky",
+          "BatchDescription": "Popis dávky"
+        }
+      }
+    ],
+    "dynamicHeaders": true
+  }
+}

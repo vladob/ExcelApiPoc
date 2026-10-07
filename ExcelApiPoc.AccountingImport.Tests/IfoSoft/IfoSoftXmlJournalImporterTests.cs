@@ -1,0 +1,217 @@
+using ExcelApiPoc.AccountingImport.Models;
+using ExcelApiPoc.AccountingImport.Services;
+using ExcelApiPoc.AccountingImport.Services.IfoSoft;
+using ExcelApiPoc.AccountingImport.Services.Common;
+
+namespace ExcelApiPoc.AccountingImport.Tests.IfoSoft;
+
+public sealed class IfoSoftXmlJournalImporterTests
+{
+    [Fact]
+    public void Imports_ladomirov_2024_with_other_year_and_undated_entries_excluded()
+    {
+        string? path = Environment.GetEnvironmentVariable("IFOSOFT_XML_JOURNAL_LADOMIROV_2024_TEST_FILE");
+        Assert.True(!string.IsNullOrWhiteSpace(path) && File.Exists(path),
+            "Set IFOSOFT_XML_JOURNAL_LADOMIROV_2024_TEST_FILE to U_DENNIK_00323195_2024.xml.");
+
+        JournalImport import = new IfoSoftXmlJournalImporter().Import(path!);
+        Assert.Equal("00323195", import.Ico);
+        Assert.Equal(2024, import.FiscalYear);
+        Assert.Equal(1633897.27m, import.Rows.Sum(row => row.DebitAmount ?? 0m));
+        Assert.Equal(1633897.27m, import.Rows.Sum(row => row.CreditAmount ?? 0m));
+        Assert.Contains(import.ImportReport.Diagnostics, d =>
+            d.Code == "IFOSOFT_XML_OTHER_YEAR_POSTINGS" && d.Message.Contains("8 XML source records"));
+        Assert.Contains(import.ImportReport.Diagnostics, d =>
+            d.Code == "IFOSOFT_XML_MISSING_POSTING_DATE" && d.Message.Contains("5 XML source records"));
+        Assert.Contains(import.Rows, row => row.SourceRecordNumber == 763 &&
+            row.PostingDate == new DateTime(2023, 3, 14) && row.DebitAccount == "321" &&
+            row.CreditAccount == "221" && row.DebitAmount == 45m && !row.UsedForReportCalculation);
+        Assert.Contains(import.Rows, row => row.SourceRecordNumber == 2406 &&
+            row.PostingDate == new DateTime(2026, 8, 19) && !row.UsedForReportCalculation);
+        Assert.Contains(import.Rows, row => row.SourceRecordNumber == 2207 &&
+            row.PostingDate == DateTime.MinValue && row.CreditAmount == -94.85m &&
+            !row.UsedForReportCalculation);
+        Assert.Equal(7, JournalDateExceptionService.Apply(import, 2024));
+    }
+
+    [Fact]
+    public void Imports_ladomirov_2023_without_inventing_missing_posting_dates()
+    {
+        string? path = Environment.GetEnvironmentVariable("IFOSOFT_XML_JOURNAL_LADOMIROV_2023_TEST_FILE");
+        Assert.True(!string.IsNullOrWhiteSpace(path) && File.Exists(path),
+            "Set IFOSOFT_XML_JOURNAL_LADOMIROV_2023_TEST_FILE to U_DENNIK_00323195_2023.xml.");
+
+        JournalImport import = new IfoSoftXmlJournalImporter().Import(path!);
+        Assert.Equal("00323195", import.Ico);
+        Assert.Equal(2023, import.FiscalYear);
+        Assert.Equal(1572765.50m, import.Rows.Sum(row => row.DebitAmount ?? 0m));
+        Assert.Equal(1572765.50m, import.Rows.Sum(row => row.CreditAmount ?? 0m));
+        Assert.Contains(import.ImportReport.Diagnostics, d => d.Code == "IFOSOFT_XML_EXPORT_PERIOD_DIFFERS");
+        Assert.Contains(import.ImportReport.Diagnostics, d => d.Code == "IFOSOFT_XML_MISSING_POSTING_DATE" &&
+            d.Message.Contains("10 XML source records"));
+        Assert.Contains(import.ImportReport.Diagnostics, d => d.Code == "IFOSOFT_XML_TRANSPOSED_POSTING_YEAR" &&
+            d.Message.Contains("2 XML source records"));
+        Assert.Equal(6, import.Rows.Count(row => row.PostingDate == DateTime.MinValue &&
+            row.DateExceptionResolution == JournalDateExceptionResolution.Excluded &&
+            !row.UsedForReportCalculation));
+        Assert.Contains(import.Rows, row => row.SourceRecordNumber == 443 &&
+            row.DebitAccount == "357REF" && row.CreditAccount == "693REF" &&
+            row.DebitAmount == 126.05m && row.SourceLocation.Contains("source date missing"));
+        Assert.Contains(import.Rows, row => row.SourceRecordNumber == 1016 &&
+            row.PostingDate == DateTime.MinValue &&
+            row.SourceLocation.Contains("source date 03.01.4202") &&
+            row.DateExceptionResolution == JournalDateExceptionResolution.Excluded);
+        Assert.Equal(6, JournalDateExceptionService.Apply(import, 2023));
+    }
+
+    [Fact]
+    public void Imports_kolonica_2024_with_malformed_note_text()
+    {
+        string? path = Environment.GetEnvironmentVariable("IFOSOFT_XML_JOURNAL_KOLONICA_2024_TEST_FILE");
+        Assert.True(!string.IsNullOrWhiteSpace(path) && File.Exists(path),
+            "Set IFOSOFT_XML_JOURNAL_KOLONICA_2024_TEST_FILE to U_DENNIK_00323161_2024.xml.");
+
+        var importer = new IfoSoftXmlJournalImporter();
+        Assert.True(importer.CanImport(path!, "IfoSoft"));
+        JournalImport import = importer.Import(path!);
+        Assert.Equal("00323161", import.Ico);
+        Assert.Equal(2024, import.FiscalYear);
+        Assert.Equal(4530013.43m, import.Rows.Sum(row => row.DebitAmount ?? 0m));
+        Assert.Equal(4530013.43m, import.Rows.Sum(row => row.CreditAmount ?? 0m));
+        Assert.Contains(import.ImportReport.Diagnostics, d =>
+            d.Code == "IFOSOFT_XML_DESCRIPTION_NORMALIZED" &&
+            d.Message.Contains("6 invalid XML characters"));
+    }
+
+    [Fact]
+    public void Imports_kolonica_2023_two_digit_asset_register_accounts()
+    {
+        string? path = Environment.GetEnvironmentVariable("IFOSOFT_XML_JOURNAL_KOLONICA_2023_TEST_FILE");
+        Assert.True(!string.IsNullOrWhiteSpace(path) && File.Exists(path),
+            "Set IFOSOFT_XML_JOURNAL_KOLONICA_2023_TEST_FILE to U_DENNIK_00323161_2023.xml.");
+
+        JournalImport import = new IfoSoftXmlJournalImporter().Import(path!);
+        Assert.Equal("00323161", import.Ico);
+        Assert.Equal(2023, import.FiscalYear);
+        Assert.Contains(import.Rows, row => row.SourceRecordNumber == 8398 &&
+            row.DebitAccount == "75ZŠ" && row.CreditAccount == "79ZŠ" &&
+            row.DebitAmount == 22929.45m && row.CreditAmount == 22929.45m);
+        Assert.Equal(4416448.49m, import.Rows.Sum(row => row.DebitAmount ?? 0m));
+        Assert.Equal(4416448.49m, import.Rows.Sum(row => row.CreditAmount ?? 0m));
+    }
+
+    [Fact]
+    public void Imports_kolonica_xml_with_invalid_description_characters()
+    {
+        string? path = Environment.GetEnvironmentVariable("IFOSOFT_XML_JOURNAL_KOLONICA_TEST_FILE");
+        Assert.True(!string.IsNullOrWhiteSpace(path) && File.Exists(path),
+            "Set IFOSOFT_XML_JOURNAL_KOLONICA_TEST_FILE to U_DENNIK_00323161_2022.xml.");
+        Assert.True(new IfoSoftXmlJournalImporter().CanImport(path!, "IfoSoft"));
+        JournalImport import = new IfoSoftXmlJournalImporter().Import(path!);
+        Assert.Equal("00323161", import.Ico);
+        Assert.Equal(2022, import.FiscalYear);
+        Assert.Equal(4260741.64m, import.Rows.Sum(row => row.DebitAmount ?? 0m));
+        Assert.Equal(4260741.64m, import.Rows.Sum(row => row.CreditAmount ?? 0m));
+        Assert.Contains(import.ImportReport.Diagnostics, d =>
+            d.Code == "IFOSOFT_XML_DESCRIPTION_NORMALIZED" && d.Message.Contains("4 invalid XML characters"));
+        Assert.Contains(import.Rows, row => row.Description.Contains("odvod& do VŠZP"));
+        Assert.Contains(import.ImportReport.Diagnostics, d => d.Code == "IFOSOFT_XML_MISTYPED_POSTING_YEAR" &&
+            d.Message.Contains("10 XML source records"));
+        Assert.Contains(import.Rows, row => row.PostingDate == new DateTime(2022, 2, 28) &&
+            row.SourceLocation.Contains("source date 28.02.0222"));
+        Assert.Equal(28, import.Rows.Count(row => row.PostingDate.Year == 2023));
+        Assert.Equal(28, JournalDateExceptionService.Apply(import, 2022));
+        Assert.All(import.Rows.Where(row => row.PostingDate.Year == 2023), row =>
+        {
+            Assert.Equal(JournalDateExceptionResolution.Excluded, row.DateExceptionResolution);
+            Assert.False(row.UsedForReportCalculation);
+        });
+    }
+
+    [Theory]
+    [InlineData(2023, 854, "412470.07")]
+    [InlineData(2024, 875, "419767.53")]
+    public void Imports_paired_entries_and_checks_export_total(int year, int count, string totalText)
+    {
+        string? root = Environment.GetEnvironmentVariable("IFOSOFT_PDF_GL_AF_TEST_DIR");
+        Assert.True(!string.IsNullOrWhiteSpace(root), "Set IFOSOFT_PDF_GL_AF_TEST_DIR to the IfoSoft sample folder.");
+        string path = Path.Combine(root!, $"U_DENNIK_00322857_{year}.xml");
+        Assert.True(File.Exists(path), "Missing XML sample: " + path);
+        Assert.True(AccountingJournalDetectionService.TryDetect(path, out JournalDetectionResult detection));
+        Assert.Equal("IfoSoft", detection.AccountingFormat);
+        Assert.Equal("XML", detection.TechnicalType);
+        Assert.True(new IfoSoftXmlJournalImporter().CanImport(path, "IfoSoft"));
+        Assert.False(new IfoSoftXmlJournalImporter().CanImport(path, "IVES"));
+
+        JournalImport result = new IfoSoftXmlJournalImporter().Import(path);
+        Assert.Equal("00322857", result.Ico);
+        Assert.Equal(year, result.FiscalYear);
+        Assert.Equal(count, result.Rows.Count);
+        decimal total = decimal.Parse(totalText, System.Globalization.CultureInfo.InvariantCulture);
+        Assert.Equal(total, result.Rows.Sum(row => row.DebitAmount ?? 0m));
+        Assert.Equal(total, result.Rows.Sum(row => row.CreditAmount ?? 0m));
+        Assert.Contains(result.Rows, row => row.RecordKind == JournalRecordKind.Opening);
+        Assert.Contains(result.Rows, row => row.DebitAccount == "357ŽP" || row.CreditAccount == "357ŽP");
+    }
+
+    [Fact]
+    public void Rejects_a_broken_pair_even_when_the_document_is_well_formed()
+    {
+        string path = Path.Combine(Path.GetTempPath(), "U_DENNIK_00322857_2023.xml");
+        try
+        {
+            File.WriteAllText(path, "<uctovny_vykaz><typDoc>UCT_VETA</typDoc><obdobie><rok>2023</rok></obdobie>" +
+                "<identifikacia><identifikator><ico>00322857</ico></identifikator></identifikacia><vety>" +
+                "<veta><ucDok>1</ucDok><ucSuv>221</ucSuv><ucPripDat>01.02.2023</ucPripDat><rok>2023</rok><mes>02</mes><md>10,00</md></veta>" +
+                "<veta><ucDok>1</ucDok><ucSuv>321</ucSuv><ucPripDat>01.02.2023</ucPripDat><rok>2023</rok><mes>02</mes><dal>9,00</dal></veta>" +
+                "</vety><sucetKontrola>12,00</sucetKontrola></uctovny_vykaz>");
+            var exception = Assert.Throws<InvalidDataException>(() => new IfoSoftXmlJournalImporter().Import(path));
+            Assert.Contains("control total", exception.Message);
+        }
+        finally { File.Delete(path); }
+    }
+
+    [Theory]
+    [InlineData(2022, "3688552.01", 7707)]
+    [InlineData(2023, "4848547.91", 8501)]
+    public void Imports_multi_line_Hankovce_entries(int year, string totalText, int sourceRecords)
+    {
+        string? root = Environment.GetEnvironmentVariable("IFOSOFT_XML_JOURNAL_TEST_DIR");
+        Assert.True(!string.IsNullOrWhiteSpace(root), "Set IFOSOFT_XML_JOURNAL_TEST_DIR to the Hankovce sample folder.");
+        string path = Path.Combine(root!, $"U_DENNIK_00322962_{year}.xml");
+        Assert.True(File.Exists(path), "Missing XML sample: " + path);
+        Assert.True(AccountingJournalDetectionService.TryDetect(path, out JournalDetectionResult detection));
+        Assert.Equal(year, detection.FiscalYear);
+
+        JournalImport result = new IfoSoftXmlJournalImporter().Import(path);
+        decimal total = decimal.Parse(totalText, System.Globalization.CultureInfo.InvariantCulture);
+        Assert.Equal("00322962", result.Ico);
+        Assert.Equal(total, result.Rows.Sum(row => row.DebitAmount ?? 0m));
+        Assert.Equal(total, result.Rows.Sum(row => row.CreditAmount ?? 0m));
+        Assert.True(result.Rows.Count > sourceRecords / 2);
+        Assert.True(result.Rows.Count < sourceRecords);
+        Assert.Contains(result.Rows, row => row.DebitAmount.HasValue && !row.CreditAmount.HasValue);
+        Assert.Contains(result.Rows, row => row.CreditAmount.HasValue && !row.DebitAmount.HasValue);
+        if (year == 2022)
+            Assert.Contains(result.ImportReport.Diagnostics, d => d.Code == "IFOSOFT_XML_EXPORT_PERIOD_DIFFERS");
+        else
+            Assert.Contains(result.Rows, row => row.DebitAccount == "518162" && row.TextNormalizationApplied);
+    }
+
+    [Fact]
+    public void Imports_hudcovce_accounts_with_hyphens_and_next_year_postings()
+    {
+        string? path = Environment.GetEnvironmentVariable("IFOSOFT_XML_JOURNAL_HUDCOVCE_TEST_FILE");
+        Assert.True(!string.IsNullOrWhiteSpace(path) && File.Exists(path),
+            "Set IFOSOFT_XML_JOURNAL_HUDCOVCE_TEST_FILE to U_DENNIK_00323012_2023.xml.");
+
+        JournalImport import = new IfoSoftXmlJournalImporter().Import(path!);
+        Assert.Equal("00323012", import.Ico);
+        Assert.Equal(2023, import.FiscalYear);
+        Assert.Contains(import.Rows, row => row.DebitAccount == "042MŠ-U" && row.DebitAmount == 200m);
+        Assert.Contains(import.Rows, row => row.PostingDate.Year == 2024);
+        Assert.Contains(import.ImportReport.Diagnostics, d => d.Code == "IFOSOFT_XML_NEXT_YEAR_POSTINGS");
+        Assert.Equal(4059859.81m, import.Rows.Sum(row => row.DebitAmount ?? 0m));
+        Assert.Equal(4059859.81m, import.Rows.Sum(row => row.CreditAmount ?? 0m));
+    }
+}

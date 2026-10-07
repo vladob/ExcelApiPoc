@@ -7,6 +7,9 @@ public sealed record CalculationReportCandidate
     public string? EntityName { get; init; }
     public string? LegalFormCode { get; init; }
     public long FinancialStatementId { get; init; }
+    public DateTime? ApprovalDate { get; init; }
+    public DateTime? SubmissionDate { get; init; }
+    public bool ContentMatchesFirstCandidate { get; init; }
     public long FinancialReportId { get; init; }
     public int RegisterUzTemplateId { get; init; }
     public int TemplateId { get; init; }

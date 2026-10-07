@@ -1,0 +1,119 @@
+{
+  "version": 2,
+  "id": "softip-mop-pdf-gl",
+  "producer": "Softip-MOP",
+  "category": "GL",
+  "importKinds": [
+    "Record"
+  ],
+  "table": {
+    "titlePattern": "Hlavná kniha k účtovnému mesiacu",
+    "requiredPageText": "UCT-S-201_31_0_1",
+    "leftLabel": "Účet",
+    "rightLabel": "Konečný zostatok",
+    "left": 42,
+    "right": 700.5,
+    "lastHeaderLabel": "Má dať",
+    "headerPadding": 4,
+    "columns": {
+      "Account": [
+        20,
+        80
+      ],
+      "AccountName": [
+        80,
+        295
+      ],
+      "Structure": [
+        20,
+        295
+      ],
+      "SubtotalAccount": [
+        110,
+        145
+      ],
+      "OpeningNetto": [
+        295,
+        375
+      ],
+      "PeriodTurnoverDebit": [
+        375,
+        455
+      ],
+      "PeriodTurnoverCredit": [
+        455,
+        535
+      ],
+      "TurnoverDebit": [
+        535,
+        615
+      ],
+      "TurnoverCredit": [
+        615,
+        695
+      ],
+      "ClosingNetto": [
+        695,
+        776
+      ]
+    },
+    "rules": [
+      {
+        "kind": "Record",
+        "field": "Account",
+        "pattern": "^\\d{5}$"
+      },
+      {
+        "kind": "SyntheticTotal",
+        "field": "Structure",
+        "pattern": "^Medzisúčet za\\s*:\\s*\\d{3}$"
+      },
+      {
+        "kind": "Subtotal",
+        "field": "Structure",
+        "pattern": "^Medzisúčet za"
+      },
+      {
+        "kind": "ReportTotal",
+        "field": "Structure",
+        "pattern": "^Spolu$"
+      },
+      {
+        "kind": "Summary",
+        "field": "Structure",
+        "pattern": "^(Aktíva|Pasíva|Náklady|Výnosy|Hospodársky výsledok|Podsúvahové účty)$"
+      }
+    ],
+    "amounts": [
+      "OpeningNetto",
+      "PeriodTurnoverDebit",
+      "PeriodTurnoverCredit",
+      "TurnoverDebit",
+      "TurnoverCredit",
+      "ClosingNetto"
+    ],
+    "controlMode": "accountTotals",
+    "accountPattern": "^\\d{5}$",
+    "compactFields": [
+      "Account",
+      "SubtotalAccount"
+    ],
+    "continuationKind": "Record",
+    "continuationFields": [
+      "AccountName"
+    ],
+    "continueAcrossPages": true,
+    "groupPattern": "(?!)",
+    "ignorePattern": "^(©|Autor:|Vypracoval|Schválil|Dátum)",
+    "pageNumberInFooter": true,
+    "pageNumberPattern": "Strana:\\s*(?<page>\\d+)\\s+z\\s+\\d+",
+    "identifierPatterns": {
+      "fiscalYear": "účtovnému mesiacu (?<value>\\d{4})",
+      "accountingPeriod": "účtovnému mesiacu (?<value>\\d{6})"
+    },
+    "continueAmountKinds": [
+      "SyntheticTotal",
+      "Subtotal"
+    ]
+  }
+}

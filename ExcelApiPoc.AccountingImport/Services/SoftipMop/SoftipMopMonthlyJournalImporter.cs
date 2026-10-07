@@ -15,7 +15,10 @@ namespace ExcelApiPoc.AccountingImport.Services.SoftipMop
 {
     public sealed class SoftipMopMonthlyJournalImporter
     {
-        public JournalImport Import(IEnumerable<string> filePaths)
+        public JournalImport Import(IEnumerable<string> filePaths) => Import(filePaths, null);
+
+        // Supplying a compact catalogue opts into the staged engine; existing callers keep their behavior.
+        public JournalImport Import(IEnumerable<string> filePaths, string layoutDirectory)
         {
             long memoryBefore = GC.GetTotalMemory(false);
             Stopwatch stopwatch = Stopwatch.StartNew();
@@ -65,7 +68,7 @@ namespace ExcelApiPoc.AccountingImport.Services.SoftipMop
 
             foreach (SoftipMopJournalFileDescriptor file in files)
             {
-                JournalImport monthly = new SoftipMopExcelJournalImporter().Import(file.FullPath);
+                JournalImport monthly = layoutDirectory == null ? new SoftipMopExcelJournalImporter().Import(file.FullPath) : ImportStaged(file.FullPath, layoutDirectory);
                 hashes.Add(file.AccountingPeriod + ":" + monthly.SourceFileHash);
                 sourceHashes.Add(monthly.SourceFileHash);
                 result.NormalizedTextFieldCount += monthly.NormalizedTextFieldCount;
@@ -109,6 +112,26 @@ namespace ExcelApiPoc.AccountingImport.Services.SoftipMop
             };
 
             return result;
+        }
+
+        private static JournalImport ImportStaged(string path, string catalogue)
+        {
+            using (var importer = new ExcelApiPoc.AccountingImport.Services.Layouts.CompactLayoutImporter(path, catalogue))
+            {
+                var examined = importer.Examine(PdfLayoutEngine.Simple.ImportLevel.Normalize);
+                if (examined.Status != "completed" || examined.LayoutId != "softip-mop-excel-aj" || !(importer.Canonical is JournalImport journal))
+                    throw new InvalidDataException("Staged monthly import failed for " + Path.GetFileName(path) + ": " + string.Join("; ", examined.Issues.Select(i => i.Message)));
+                var report = new ImportReport { AccountingFormat = "Softip-MOP", ImportType = "AccountingJournal", SourceFileName = journal.SourceFileName };
+                report.RecordCounts["SourceRows"] = examined.Rows.Count;
+                report.RecordCounts["Transactions"] = journal.Rows.Count;
+                report.RecordCounts["ZeroAmountRows"] = examined.Rows.Count(r => r.Kind == "ZeroPosting");
+                foreach (var issue in examined.Issues) report.Diagnostics.Add(new ImportDiagnostic { Code = issue.Code, Message = issue.Message, Severity = issue.Severity == "warning" ? ImportDiagnosticSeverity.Warning : issue.Severity == "error" ? ImportDiagnosticSeverity.Error : ImportDiagnosticSeverity.Information });
+                decimal debit = journal.Rows.Sum(r => r.DebitAmount ?? 0m), credit = journal.Rows.Sum(r => r.CreditAmount ?? 0m);
+                report.ValidationResults.Add(new ImportValidationResult { Code = "SOFTIP_MOP_DEBIT_CREDIT_BALANCE", Scope = "AccountingJournal", Description = "Debit and credit totals agree.", IsValid = Math.Abs(debit-credit) <= .01m, ExpectedAmount = debit, ActualAmount = credit, Difference = debit-credit, Tolerance = .01m });
+                foreach (var row in journal.Rows) { row.SourceFields["SourceFile"] = journal.SourceFileName; row.SourceLocation = journal.SourceFileName + ", " + row.SourceLocation; }
+                journal.ImportReport = report;
+                return journal;
+            }
         }
 
         internal static void ValidatePeriods(IReadOnlyList<SoftipMopJournalFileDescriptor> files)

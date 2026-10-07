@@ -1,0 +1,69 @@
+{
+  "version": 2,
+  "producer": "Ives",
+  "id": "ives-journal",
+  "category": "AJ",
+  "importKinds": [
+    "AjRecord"
+  ],
+  "table": {
+    "titlePattern": "^Účtovný denník$",
+    "leftLabel": "Dátum",
+    "rightLabel": "Modul",
+    "left": 45,
+    "right": 473,
+    "lastHeaderLabel": "Modul",
+    "headerPadding": 4,
+    "columns": {
+      "Date": [
+        44,
+        82
+      ],
+      "DocumentNumber": [
+        82,
+        136
+      ],
+      "DebitAccount": [
+        136,
+        264
+      ],
+      "CreditAccount": [
+        264,
+        394
+      ],
+      "Amount": [
+        394,
+        450
+      ],
+      "Currency": [
+        450,
+        472
+      ],
+      "OperationDescription": [
+        472,
+        560
+      ]
+    },
+    "amounts": [
+      "Amount"
+    ],
+    "compactFields": [
+      "DebitAccount",
+      "CreditAccount"
+    ],
+    "rules": [
+      {
+        "kind": "GroupTotal",
+        "field": "Date",
+        "pattern": "^Spolu"
+      },
+      {
+        "kind": "AjRecord",
+        "field": "Date",
+        "pattern": "^\\d{1,2}\\.\\d{1,2}\\.\\d{4}$"
+      }
+    ],
+    "continuationKind": "AjRecord",
+    "continueAcrossPages": true
+  }
+}

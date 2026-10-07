@@ -21,6 +21,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Include="..\ExcelApiPoc.AddIn\Services\IfoSoftCsvAccountingFrameworkImporter.cs"
+             Link="IfoSoft\IfoSoftCsvAccountingFrameworkImporter.cs" />
+    <None Update="TestData\IfoSoft\PreviouslyImportedPaths.txt" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Using Include="Xunit" />
   </ItemGroup>
 

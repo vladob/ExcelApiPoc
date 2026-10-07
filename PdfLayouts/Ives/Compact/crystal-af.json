@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "id": "ives-xml-af",
+  "producer": "Ives",
+  "category": "AF",
+  "namespace": "urn:crystal-reports:schemas:report-detail",
+  "recordMarker": "{uctRozvrh.Nazov_uctu}",
+  "fields": {
+    "Account": "{@au}",
+    "Name": "{uctRozvrh.Nazov_uctu}",
+    "Type": "{uctRozvrh.Typ}"
+  },
+  "amounts": [],
+  "controls": {},
+  "compactFields": [
+    "Account"
+  ]
+}

@@ -12,6 +12,7 @@ namespace ExcelApiPoc.AccountingImport.Services.IfoSoft
 {
     public sealed class IfoSoftCsvGeneralLedgerImporter : IGeneralLedgerImporter
     {
+        static IfoSoftCsvGeneralLedgerImporter() => Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
         private static readonly string[] FixedHeaders =
         {
             "Syn", "Ana", "Typ", "P", "Odd", "Polozka", "KZdroja", "Program",
@@ -50,7 +51,12 @@ namespace ExcelApiPoc.AccountingImport.Services.IfoSoft
                 SourceFilePath = Path.GetFullPath(filePath),
                 SourceFileHash = CalculateSha256(filePath),
                 TechnicalType = "CSV", AccountingFormat = "IfoSoft",
-                ImportedAtUtc = DateTime.UtcNow
+                ImportedAtUtc = DateTime.UtcNow,
+                ImportReport = new ExcelApiPoc.AccountingImport.Models.Reporting.ImportReport
+                {
+                    AccountingFormat = "IfoSoft", ImportType = "GeneralLedger",
+                    SourceFileName = Path.GetFileName(filePath)
+                }
             };
 
             using (IEnumerator<CsvRecord> records = ReadCsvRecords(filePath).GetEnumerator())
@@ -98,7 +104,24 @@ namespace ExcelApiPoc.AccountingImport.Services.IfoSoft
         {
             string value = FindSingleValue(record);
             Match match = Regex.Match(value, @"^(?<ico>\d{8})(?:\s+(?<name>.*))?$");
-            if (!match.Success) throw new InvalidDataException(record.Location + ": IČO was not found.");
+            if (!match.Success)
+            {
+                match = Regex.Match(value, @"^\d{8}_\d{4}\s+(?<name>.+)$");
+                Match file = Regex.Match(result.SourceFileName,
+                    @"^HL_KNIHA_(?<ico>\d{8})_\d{4}\.csv$", RegexOptions.IgnoreCase);
+                if (!match.Success || !file.Success)
+                    throw new InvalidDataException(record.Location + ": IČO was not found.");
+                result.Ico = file.Groups["ico"].Value;
+                result.CompanyName = match.Groups["name"].Value.Trim();
+                result.ImportReport.Diagnostics.Add(new ExcelApiPoc.AccountingImport.Models.Reporting.ImportDiagnostic
+                {
+                    Code = "IFOSOFT_CSV_ICO_FROM_FILENAME",
+                    Severity = ExcelApiPoc.AccountingImport.Models.Reporting.ImportDiagnosticSeverity.Warning,
+                    Message = "The CSV header does not contain IČO; '" + result.Ico +
+                        "' was taken from the filename. Verify that it belongs to '" + result.CompanyName + "'."
+                });
+                return;
+            }
             result.Ico = match.Groups["ico"].Value;
             result.CompanyName = match.Groups["name"].Value.Trim();
         }
@@ -178,7 +201,22 @@ namespace ExcelApiPoc.AccountingImport.Services.IfoSoft
             using (var reader = new StreamReader(path, Encoding.GetEncoding(1250), true))
             {
                 int line = 0;
-                while (!reader.EndOfStream) { line++; yield return new CsvRecord { Fields = ParseFields(reader.ReadLine()), StartLineNumber = line }; }
+                while (!reader.EndOfStream)
+                {
+                    line++;
+                    string record = reader.ReadLine();
+                    string[] fields;
+                    try
+                    {
+                        fields = ParseFields(record);
+                    }
+                    catch (InvalidDataException exception)
+                    {
+                        throw new InvalidDataException(
+                            $"CSV '{Path.GetFileName(path)}', line {line}: {exception.Message}", exception);
+                    }
+                    yield return new CsvRecord { Fields = fields, StartLineNumber = line };
+                }
             }
         }
 

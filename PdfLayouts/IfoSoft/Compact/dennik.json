@@ -1,0 +1,100 @@
+{
+  "version": 1,
+  "id": "ifosoft_dennik",
+  "category": "AJ",
+  "unitsPerInch": 254,
+  "header": {
+    "AccountingEntityName": [30, 0, 536, 38],
+    "AccountingEntityUserName": [1190, 0, 2033, 38],
+    "PeriodFrom": [1470, 50, 1627, 97],
+    "PeriodTo": [1670, 50, 1827, 97],
+    "PageNumber": [1950, 110, 2028, 148]
+  },
+  "anchors": [
+    {"text": "D E N N Í K  ÚČTOVNÝCH PRÍPADOV ", "rect": [570, 50, 1222, 97], "size": 10},
+    {"text": "po dokladoch", "rect": [1240, 50, 1448, 97], "size": 10},
+    {"text": "Strana:", "rect": [1850, 110, 1941, 148], "size": 8},
+    {"text": "_DENNIK.GMX", "rect": [30, 120, 189, 153], "size": 7},
+    {"text": "MÁ  DAŤ", "rect": [1310, 160, 1419, 198], "size": 8},
+    {"text": "DAL", "rect": [1750, 160, 1801, 198], "size": 8},
+    {"text": "Poradové číslo", "rect": [40, 170, 218, 208], "size": 8},
+    {"text": "Popis operácie", "rect": [240, 170, 419, 208], "size": 8},
+    {"text": "DUÚP", "rect": [130, 210, 202, 248], "size": 8},
+    {"text": "IČO             Názov partnera", "rect": [240, 210, 592, 248], "size": 8},
+    {"text": "Faktúra č.", "rect": [790, 210, 913, 248], "size": 8},
+    {"text": "Suma / Rozdiel", "rect": [930, 210, 1117, 248], "size": 8},
+    {"text": "Účet", "rect": [1130, 210, 1186, 248], "size": 8},
+    {"text": "OdSTP", "rect": [1270, 210, 1354, 248], "size": 8},
+    {"text": "Položka", "rect": [1360, 210, 1454, 248], "size": 8},
+    {"text": "Zdroj T", "rect": [1468, 210, 1559, 248], "size": 8},
+    {"text": "Účet", "rect": [1570, 210, 1626, 248], "size": 8},
+    {"text": "OdSTP", "rect": [1710, 210, 1794, 248], "size": 8},
+    {"text": "Položka", "rect": [1800, 210, 1894, 248], "size": 8},
+    {"text": "Zdroj T", "rect": [1910, 210, 2001, 248], "size": 8}
+  ],
+  "sections": [
+    {
+      "kind": "AjRecord",
+      "sourceSection": "RECORD",
+      "anchor": {"rect": [920, 275, 1108, 313], "size": 8, "weight": 700},
+      "fields": {
+        "DocumentOridinal": [130, 255, 198, 293],
+        "OperationDescription": [240, 255, 915, 293],
+        "DebitAccount": [1130, 255, 1265, 293],
+        "DebitZ": [1270, 255, 1355, 293],
+        "DebitK": [1360, 255, 1462, 293],
+        "DebitA": [1468, 255, 1536, 293],
+        "DebitT": [1540, 255, 1558, 293],
+        "CreditAccount": [1570, 255, 1705, 293],
+        "CreditZ": [1710, 255, 1795, 293],
+        "CreditK": [1800, 255, 1902, 293],
+        "CreditA": [1910, 255, 1978, 293],
+        "CreditT": [1990, 255, 2008, 293],
+        "Sequence": [30, 275, 98, 313],
+        "Amount": [920, 275, 1108, 313],
+        "Date": [110, 295, 220, 333],
+        "PartnerCIN": [240, 295, 388, 328],
+        "PartnerCompany": [400, 295, 784, 328],
+        "InvoiceNo": [750, 295, 912, 328],
+        "DebitS": [1230, 295, 1349, 333],
+        "DebitZakc": [1360, 295, 1531, 333],
+        "DebitTRepeated": [1540, 295, 1558, 333],
+        "CreditS": [1570, 295, 1689, 333],
+        "CreditZakc": [1690, 295, 1859, 333],
+        "SourcePROG": [1860, 295, 2029, 333]
+      },
+      "amounts": ["Amount"]
+    },
+    {
+      "kind": "DocumentTotals",
+      "sourceSection": "FOOT2",
+      "anchor": {"rect": [240, 265, 461, 303], "size": 8, "text": "SPOLU za doklad:"},
+      "fields": {
+        "DocumentNumber": [470, 265, 586, 303],
+        "DocumentSubnumber": [610, 265, 669, 303],
+        "DocumentDate": [780, 265, 906, 303],
+        "DocumentDebit": [1130, 265, 1327, 303],
+        "DocumentCredit": [1570, 265, 1767, 303]
+      },
+      "amounts": ["DocumentDebit", "DocumentCredit"]
+    },
+    {
+      "kind": "ReportLevel",
+      "sourceSection": "FOOT1",
+      "anchor": {"rect": [240, 255, 355, 293], "size": 8, "text": "CELKOM:"},
+      "fields": {
+        "TotalDebit": [1130, 255, 1327, 293],
+        "TotalCredit": [1570, 255, 1767, 293],
+        "IssuedBy": [230, 315, 652, 353],
+        "ControledBy": [920, 315, 1342, 353],
+        "ApprovedBy": [1560, 315, 1982, 353],
+        "SoftwareVersion": [430, 475, 505, 508],
+        "SoftwareServicePack": [510, 475, 585, 508],
+        "User": [1390, 475, 1980, 508]
+      },
+      "amounts": ["TotalDebit", "TotalCredit"]
+    }
+  ],
+  "importKinds": ["AjRecord"],
+  "requiredText": ["D E N N Í K  ÚČTOVNÝCH PRÍPADOV ", "_DENNIK.GMX"]
+}

@@ -12,6 +12,74 @@ namespace PdfLayoutEngine.Tests;
 public sealed class ITextPdfTokenExtractorTests
 {
     [Fact]
+    public void Normalizes_rotated_page_glyphs_into_horizontal_text_runs()
+    {
+        var stream = new MemoryStream();
+        using (var writer = CreateWriter(stream))
+        using (var pdf = new PdfDocument(writer))
+        {
+            var page = pdf.AddNewPage().SetRotation(90);
+            var canvas = new PdfCanvas(page);
+            var font = PdfFontFactory.CreateFont(StandardFonts.HELVETICA);
+            canvas.BeginText().SetFontAndSize(font, 10).SetTextMatrix(0, 1, -1, 0, 35, 50);
+            foreach (var character in "_PREDVAS3.GMX")
+                canvas.ShowText(character.ToString());
+            canvas.EndText();
+        }
+        stream.Position = 0;
+
+        var token = Assert.Single(new ITextPdfTokenExtractor().Extract(stream).Tokens);
+        Assert.Equal("_PREDVAS3.GMX", token.Text);
+        Assert.True(token.Right > token.Left);
+    }
+
+    [Fact]
+    public void Normalizes_horizontal_raw_glyphs_on_rotated_page()
+    {
+        var stream = new MemoryStream();
+        using (var writer = CreateWriter(stream))
+        using (var pdf = new PdfDocument(writer))
+        {
+            var page = pdf.AddNewPage().SetRotation(90);
+            var canvas = new PdfCanvas(page);
+            var font = PdfFontFactory.CreateFont(StandardFonts.HELVETICA);
+            canvas.BeginText().SetFontAndSize(font, 10).SetTextMatrix(-1, 0, 0, -1, 550, 35);
+            foreach (var character in "_PREDVAS3.GMX")
+                canvas.ShowText(character.ToString());
+            canvas.EndText();
+        }
+        stream.Position = 0;
+
+        var token = Assert.Single(new ITextPdfTokenExtractor().Extract(stream).Tokens);
+        Assert.Equal("_PREDVAS3.GMX", token.Text);
+        Assert.True(token.Right > token.Left);
+    }
+
+    [Fact]
+    public void Reassembles_individually_rendered_glyphs_without_joining_distant_columns()
+    {
+        var stream = new MemoryStream();
+        using (var writer = CreateWriter(stream))
+        using (var pdf = new PdfDocument(writer))
+        {
+            pdf.AddNewPage();
+            var canvas = new PdfCanvas(pdf.GetPage(1));
+            var font = PdfFontFactory.CreateFont(StandardFonts.HELVETICA);
+            canvas.BeginText().SetFontAndSize(font, 10).MoveText(20, 700);
+            foreach (var character in "_DENNIK1.GMX")
+                canvas.ShowText(character.ToString());
+            canvas.EndText().BeginText().SetFontAndSize(font, 10)
+                .MoveText(200, 700).ShowText("OTHER").EndText();
+        }
+        stream.Position = 0;
+
+        var tokens = new ITextPdfTokenExtractor().Extract(stream).Tokens;
+        Assert.Equal(2, tokens.Count);
+        Assert.Equal("_DENNIK1.GMX", tokens[0].Text);
+        Assert.Equal("OTHER", tokens[1].Text);
+    }
+
+    [Fact]
     public void Extracts_all_pages_with_fractional_coordinates_and_style()
     {
         using var stream = CreateTwoPagePdf();

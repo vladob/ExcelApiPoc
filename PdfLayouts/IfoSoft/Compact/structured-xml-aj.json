@@ -1,0 +1,23 @@
+{
+  "version": 1,
+  "id": "ifosoft-xml-aj",
+  "format": "XML",
+  "category": "AJ",
+  "root": "uctovny_vykaz",
+  "documentType": "UCT_VETA",
+  "recordsPath": "vety/veta",
+  "xmlFields": {
+    "ucDok": "ucDok",
+    "ucSuv": "ucSuv",
+    "ucAnl": "ucAnl",
+    "ucDokText": "ucDokText",
+    "rok": "rok",
+    "mes": "mes",
+    "md": "md",
+    "dal": "dal",
+    "ucPripDat": "ucPripDat",
+    "funkcKlasif": "rozpocCis/funkcKlasif",
+    "ekonKlasif": "rozpocCis/ekonKlasif",
+    "akciaCis": "rozpocCis/akciaCis"
+  }
+}

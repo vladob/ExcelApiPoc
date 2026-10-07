@@ -1,0 +1,328 @@
+using ExcelApiPoc.AccountingImport.Models;
+using ExcelApiPoc.AccountingImport.Models.Reporting;
+using System;
+using System.Globalization;
+using System.IO;
+using System.Linq;
+using System.Security.Cryptography;
+using System.Text;
+using System.Text.RegularExpressions;
+using System.Xml;
+using System.Xml.Linq;
+
+namespace ExcelApiPoc.AccountingImport.Services.IfoSoft
+{
+    /// <summary>Reads the paired accounting entries in an IfoSoft UCT_VETA XML export.</summary>
+    public sealed class IfoSoftXmlJournalImporter : IJournalImporter
+    {
+        static IfoSoftXmlJournalImporter()
+        {
+            // IfoSoft declares windows-1250 in its XML header. .NET 8 needs the
+            // code-page provider registered before XmlReader opens the file.
+            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+        }
+
+        private static readonly Regex Name = new Regex(@"^U_DENNIK_(?<ico>\d{8})_(?<year>\d{4})\.xml$", RegexOptions.IgnoreCase);
+        // Some IfoSoft exports use the two-digit 75/79 account pair for asset-register entries.
+        // Preserve those source codes rather than inventing a leading zero.
+        private static readonly Regex Account = new Regex(@"^(?:\d{3}[\p{L}\d.§]*(?:-[\p{L}\d.§]+)*|(?:75|79)[\p{L}][\p{L}\d.]*)$");
+        private static readonly CultureInfo Sk = CultureInfo.GetCultureInfo("sk-SK");
+
+        public bool CanImport(string filePath, string accountingFormat) =>
+            string.Equals(accountingFormat, "IfoSoft", StringComparison.OrdinalIgnoreCase) &&
+            TryDetect(filePath, out JournalDetectionResult _);
+
+        public static bool TryDetect(string filePath, out JournalDetectionResult detection)
+        {
+            detection = null;
+            if (string.IsNullOrWhiteSpace(filePath) || !File.Exists(filePath) ||
+                !Name.IsMatch(Path.GetFileName(filePath))) return false;
+            try
+            {
+                var root = Read(filePath, out _).Root;
+                var name = Name.Match(Path.GetFileName(filePath));
+                if (root == null || root.Name != "uctovny_vykaz" || Value(root, "typDoc") != "UCT_VETA" ||
+                    root.Element("vety") == null || root.Element("sucetKontrola") == null ||
+                    Value(root.Element("identifikacia")?.Element("identifikator"), "ico") != name.Groups["ico"].Value) return false;
+                detection = new JournalDetectionResult
+                {
+                    TechnicalType = "XML", AccountingFormat = "IfoSoft", Ico = name.Groups["ico"].Value,
+                    FiscalYear = int.Parse(name.Groups["year"].Value, CultureInfo.InvariantCulture),
+                    CompanyName = Value(root.Element("identifikacia")?.Element("identifikator"), "nazov")
+                };
+                return true;
+            }
+            catch (Exception ex) when (ex is XmlException || ex is IOException || ex is InvalidDataException || ex is ArgumentException)
+            {
+                return false;
+            }
+        }
+
+        public JournalImport Import(string filePath)
+        {
+            if (!TryDetect(filePath, out JournalDetectionResult detection))
+                throw new InvalidDataException("Expected an IfoSoft UCT_VETA journal XML with matching IČO.");
+            XElement root = Read(filePath, out int repairedTextCharacters).Root;
+            var records = root.Element("vety").Elements("veta").ToArray();
+            if (records.Length == 0 || records.Length > 1_000_000 ||
+                root.Element("vety").Elements().Count() != records.Length)
+                throw new InvalidDataException("IfoSoft XML contains no entries, too many entries, or unexpected elements.");
+            var result = new JournalImport
+            {
+                SourceFileName = Path.GetFileName(filePath), SourceFilePath = Path.GetFullPath(filePath),
+                SourceFileHash = Hash(filePath), TechnicalType = "XML", AccountingFormat = "IfoSoft",
+                Ico = detection.Ico, CompanyName = detection.CompanyName, FiscalYear = detection.FiscalYear.Value,
+                ImportedAtUtc = DateTime.UtcNow,
+                ImportReport = new ImportReport { AccountingFormat = "IfoSoft", ImportType = "AccountingJournal",
+                    SourceFileName = Path.GetFileName(filePath) }
+            };
+            if (repairedTextCharacters > 0)
+                result.ImportReport.Diagnostics.Add(new ImportDiagnostic
+                {
+                    Code = "IFOSOFT_XML_DESCRIPTION_NORMALIZED",
+                    Severity = ImportDiagnosticSeverity.Warning,
+                    Message = repairedTextCharacters + " invalid XML characters in journal text fields were normalized; " +
+                        "check the affected descriptions and notes in the source export."
+                });
+            string exportYear = Value(root.Element("obdobie"), "rok");
+            if (exportYear != result.FiscalYear.ToString(CultureInfo.InvariantCulture))
+            {
+                result.ImportReport.Diagnostics.Add(new ImportDiagnostic
+                {
+                    Code = "IFOSOFT_XML_EXPORT_PERIOD_DIFFERS",
+                    Severity = ImportDiagnosticSeverity.Warning,
+                    Message = "XML export period year " + exportYear + " differs from the filename's fiscal year " +
+                        result.FiscalYear + "; every entry date and year will be validated."
+                });
+            }
+            int mistypedYearRecords = records.Count(record =>
+                Value(record, "rok") == "0222" && Value(record, "ucPripDat") == "28.02.0222" &&
+                result.FiscalYear == 2022);
+            if (mistypedYearRecords > 0)
+                result.ImportReport.Diagnostics.Add(new ImportDiagnostic
+                {
+                    Code = "IFOSOFT_XML_MISTYPED_POSTING_YEAR",
+                    Severity = ImportDiagnosticSeverity.Warning,
+                    Message = mistypedYearRecords + " XML source records dated 28.02.0222 were interpreted as " +
+                        "28.02.2022. Their original date remains in SourceLocation; verify against the source."
+                });
+            int nextYearEntries = 0;
+            int missingDateRecords = 0;
+            int transposedYearRecords = 0;
+            int otherYearRecords = 0;
+            for (int i = 0; i < records.Length; i++)
+            {
+                if (Value(records[i], "ucPripDat").Length == 0) missingDateRecords++;
+                if (Value(records[i], "ucPripDat").EndsWith(".4202", StringComparison.Ordinal)) transposedYearRecords++;
+                if (IsDatedOutsideFiscalYear(records[i], result.FiscalYear)) otherYearRecords++;
+                JournalRow row = ReadRecord(records[i], i + 1, result.FiscalYear);
+                if (row.DebitAmount.HasValue && i + 1 < records.Length)
+                {
+                    // Preserve the compact entry representation when two adjacent
+                    // source records clearly identify the same posting.
+                    XElement next = records[i + 1];
+                    if (Value(next, "dal").Length > 0 && Value(next, "md").Length == 0 &&
+                        Value(records[i], "ucDok") == Value(next, "ucDok") &&
+                        Value(records[i], "ucPripDat") == Value(next, "ucPripDat") &&
+                        Value(records[i], "rok") == Value(next, "rok") &&
+                        Value(records[i], "mes") == Value(next, "mes"))
+                    {
+                        JournalRow credit = ReadRecord(next, i + 2, result.FiscalYear);
+                        if (row.DebitAmount == credit.CreditAmount)
+                        {
+                            if (Value(next, "ucPripDat").Length == 0) missingDateRecords++;
+                            if (Value(next, "ucPripDat").EndsWith(".4202", StringComparison.Ordinal)) transposedYearRecords++;
+                            if (IsDatedOutsideFiscalYear(next, result.FiscalYear)) otherYearRecords++;
+                            row.CreditAccount = credit.CreditAccount;
+                            row.CreditAmount = credit.CreditAmount;
+                            row.CreditSection = credit.CreditSection;
+                            row.CreditItem = credit.CreditItem;
+                            row.CreditFundingSource = credit.CreditFundingSource;
+                            row.TextNormalizationApplied |= credit.TextNormalizationApplied;
+                            row.SourceLocation = "XML records " + (i + 1) + " and " + (i + 2) +
+                                (Value(records[i], "ucPripDat").Length == 0 ? " (source date missing)" :
+                                row.SourceLocation.Contains("source date ")
+                                    ? " (source date " + Value(records[i], "ucPripDat") + ")"
+                                    : string.Empty);
+                            i++;
+                        }
+                    }
+                }
+                row.SequenceNumber = result.Rows.Count + 1;
+                if (row.PostingDate.Year == result.FiscalYear + 1) nextYearEntries++;
+                row.RecordKind = Classify(row);
+                if (row.TextNormalizationApplied) result.NormalizedTextFieldCount++;
+                result.Rows.Add(row);
+            }
+            // IfoSoft's sucetKontrola includes the sum of debit amounts and the count of source records.
+            decimal control = Amount(Value(root, "sucetKontrola"), "XML control total");
+            decimal total = result.Rows.Sum(row => row.DebitAmount ?? 0m);
+            if (total != result.Rows.Sum(row => row.CreditAmount ?? 0m) || control != total + records.Length)
+                throw new InvalidDataException("IfoSoft XML control total does not agree with the journal entries.");
+            if (nextYearEntries > 0)
+                result.ImportReport.Diagnostics.Add(new ImportDiagnostic
+                {
+                    Code = "IFOSOFT_XML_NEXT_YEAR_POSTINGS",
+                    Severity = ImportDiagnosticSeverity.Warning,
+                    Message = nextYearEntries + " entries in the " + result.FiscalYear +
+                        " journal have January " + (result.FiscalYear + 1) +
+                        " posting dates; source dates are preserved in SourceLocation when normalized."
+                });
+            if (missingDateRecords > 0)
+                result.ImportReport.Diagnostics.Add(new ImportDiagnostic
+                {
+                    Code = "IFOSOFT_XML_MISSING_POSTING_DATE",
+                    Severity = ImportDiagnosticSeverity.Warning,
+                    Message = missingDateRecords + " XML source records have no posting date, year, or month. " +
+                        "They retain their amounts but are excluded from report calculation until a corrected date is entered."
+                });
+            if (otherYearRecords > 0)
+                result.ImportReport.Diagnostics.Add(new ImportDiagnostic
+                {
+                    Code = "IFOSOFT_XML_OTHER_YEAR_POSTINGS",
+                    Severity = ImportDiagnosticSeverity.Warning,
+                    Message = otherYearRecords + " XML source records have valid dates outside fiscal year " +
+                        result.FiscalYear + ". Their original dates and amounts were preserved; " +
+                        "the entries are excluded from report calculation pending review."
+                });
+            if (transposedYearRecords > 0)
+                result.ImportReport.Diagnostics.Add(new ImportDiagnostic
+                {
+                    Code = "IFOSOFT_XML_TRANSPOSED_POSTING_YEAR",
+                    Severity = ImportDiagnosticSeverity.Warning,
+                    Message = transposedYearRecords + " XML source records have year 4202. " +
+                        "They have no trusted posting date and are excluded from report calculation pending review; " +
+                        "the original dates remain in SourceLocation."
+                });
+            result.ImportReport.RecordCounts["JournalRows"] = result.Rows.Count;
+            return result;
+        }
+
+        internal static JournalRow ReadRecord(XElement record, int sourceNumber, int year)
+        {
+            string location = "XML record " + sourceNumber;
+            string debitText = Value(record, "md"), creditText = Value(record, "dal");
+            if ((debitText.Length == 0) == (creditText.Length == 0))
+                throw new InvalidDataException(location + ": exactly one amount side is required.");
+            string rawAccount = Value(record, "ucSuv") + Value(record, "ucAnl");
+            string account = Regex.Replace(rawAccount, @"\s+", string.Empty);
+            // Asterisks can be literal analytical codes on actual journal postings.
+            bool asteriskAccount = Regex.IsMatch(account, @"^\d{3}\*{2,4}$");
+            if (!Account.IsMatch(account) && !asteriskAccount)
+                throw new InvalidDataException(location + ": invalid account code '" + account + "'.");
+            string sourceDate = Value(record, "ucPripDat");
+            string sourceYear = Value(record, "rok");
+            bool mistypedYear = year == 2022 && sourceDate == "28.02.0222" && sourceYear == "0222";
+            bool missingDate = sourceDate.Length == 0 && sourceYear.Length == 0 && Value(record, "mes").Length == 0;
+            bool transposedYear = year == 2023 && sourceDate == "03.01.4202" && sourceYear == "4202" &&
+                Value(record, "mes") == "01";
+            string postingDate = mistypedYear ? "28.02.2022" : sourceDate;
+            string postingYear = mistypedYear ? "2022" : sourceYear;
+            DateTime date = DateTime.MinValue;
+            if (!missingDate && !transposedYear && (!DateTime.TryParseExact(postingDate, "dd.MM.yyyy", CultureInfo.InvariantCulture,
+                    DateTimeStyles.None, out date) ||
+                postingYear != date.Year.ToString(CultureInfo.InvariantCulture) ||
+                Value(record, "mes") != date.Month.ToString("00", CultureInfo.InvariantCulture)))
+                throw new InvalidDataException(location + ": accounting date differs from the filename's fiscal year.");
+            XElement budget = record.Element("rozpocCis");
+            var row = new JournalRow
+            {
+                SourceRecordNumber = sourceNumber,
+                SourceLocation = missingDate ? location + " (source date missing)" :
+                    mistypedYear || transposedYear ? location + " (source date " + sourceDate + ")" : location,
+                PostingDate = date, DocumentNumber = Value(record, "ucDok"), Description = Value(record, "ucDokText"),
+                DateExceptionResolution = missingDate || transposedYear || date.Year != year ? JournalDateExceptionResolution.Excluded :
+                    (JournalDateExceptionResolution?)null,
+                TextNormalizationApplied = account != rawAccount || mistypedYear || transposedYear
+            };
+            if (debitText.Length > 0)
+            {
+                row.DebitAccount = account; row.DebitAmount = Amount(debitText, location);
+                row.DebitSection = Value(budget, "funkcKlasif"); row.DebitItem = Value(budget, "ekonKlasif");
+                row.DebitFundingSource = Value(budget, "akciaCis");
+            }
+            else
+            {
+                row.CreditAccount = account; row.CreditAmount = Amount(creditText, location);
+                row.CreditSection = Value(budget, "funkcKlasif"); row.CreditItem = Value(budget, "ekonKlasif");
+                row.CreditFundingSource = Value(budget, "akciaCis");
+            }
+            return row;
+        }
+
+        private static bool IsDatedOutsideFiscalYear(XElement record, int fiscalYear)
+        {
+            string sourceDate = Value(record, "ucPripDat");
+            return DateTime.TryParseExact(sourceDate, "dd.MM.yyyy", CultureInfo.InvariantCulture,
+                DateTimeStyles.None, out DateTime date) && date.Year != fiscalYear &&
+                !(date.Year == fiscalYear + 1 && date.Month == 1) &&
+                !(fiscalYear == 2023 && sourceDate == "03.01.4202");
+        }
+
+        internal static JournalRecordKind Classify(JournalRow row) =>
+            row.PostingDate.Month == 1 && row.PostingDate.Day == 1 &&
+                (row.DebitAccount == "701" || row.CreditAccount == "701") ? JournalRecordKind.Opening :
+            row.PostingDate.Month == 12 && row.PostingDate.Day == 31 &&
+                (row.DebitAccount == "702" || row.CreditAccount == "702" ||
+                 row.DebitAccount == "710" || row.CreditAccount == "710") ? JournalRecordKind.Closing : JournalRecordKind.Normal;
+
+        private static string Value(XElement parent, string child) =>
+            ((string)parent?.Element(child) ?? string.Empty).Trim();
+
+        private static decimal Amount(string text, string location)
+        {
+            if (text.Length == 0) return 0m;
+            if (!decimal.TryParse(text, NumberStyles.AllowLeadingSign | NumberStyles.AllowDecimalPoint,
+                    Sk, out decimal amount))
+                throw new InvalidDataException(location + ": invalid monetary amount '" + text + "'.");
+            return amount;
+        }
+
+        internal static XDocument Read(string path, out int repairedTextCharacters)
+        {
+            repairedTextCharacters = 0;
+            var settings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Prohibit, XmlResolver = null };
+            try
+            {
+                using (var reader = XmlReader.Create(path, settings)) return XDocument.Load(reader);
+            }
+            catch (XmlException)
+            {
+                // Repair malformed description and note text only; never alter structural
+                // markup, amounts, accounts, or dates.
+                string xml = File.ReadAllText(path, Encoding.GetEncoding(1250));
+                int count = 0;
+                string repaired = Regex.Replace(xml,
+                    @"<(?<tag>ucDokText|poznamka)>(?<value>[^<]*)</\k<tag>>", match =>
+                {
+                    string tag = match.Groups["tag"].Value;
+                    string value = match.Groups["value"].Value;
+                    value = Regex.Replace(value, @"&(?!amp;|lt;|gt;|quot;|apos;|#\d+;|#x[0-9a-fA-F]+;)", _ =>
+                    {
+                        count++;
+                        return "&amp;";
+                    });
+                    value = Regex.Replace(value, @"[\x00-\x08\x0B\x0C\x0E-\x1F]", _ =>
+                    {
+                        count++;
+                        return "\uFFFD";
+                    });
+                    return "<" + tag + ">" + value + "</" + tag + ">";
+                });
+                if (count == 0) throw;
+                using (var reader = XmlReader.Create(new StringReader(repaired), settings))
+                {
+                    var document = XDocument.Load(reader);
+                    repairedTextCharacters = count;
+                    return document;
+                }
+            }
+        }
+
+        private static string Hash(string path)
+        {
+            using (var stream = File.OpenRead(path)) using (var sha = SHA256.Create())
+                return BitConverter.ToString(sha.ComputeHash(stream)).Replace("-", string.Empty);
+        }
+    }
+}

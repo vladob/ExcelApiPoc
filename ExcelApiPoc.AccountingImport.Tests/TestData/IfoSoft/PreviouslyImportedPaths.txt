@@ -1,0 +1,81 @@
+f:\Audit\TESTS\TestAll\00322857 - Obec Brestov nad Laborcom\U_DENNIK_00322857_2024.xml
+f:\Audit\TESTS\TestAll\00322857 - Obec Brestov nad Laborcom\U_DENNIK_00322857_2023.xml
+f:\Audit\TESTS\TestAll\00322857 - Obec Brestov nad Laborcom\U_DENNIK_00322857_2024.pdf
+f:\Audit\TESTS\TestAll\00322857 - Obec Brestov nad Laborcom\U_DENNIK_00322857_2023.pdf
+f:\Audit\TESTS\TestAll\00322857 - Obec Brestov nad Laborcom\HL_KNIHA_00322857_2024_b.pdf
+f:\Audit\TESTS\TestAll\00322857 - Obec Brestov nad Laborcom\HL_KNIHA_00322857_2024_a.pdf
+f:\Audit\TESTS\TestAll\00322857 - Obec Brestov nad Laborcom\HL_KNIHA_00322857_2023_12.pdf
+f:\Audit\TESTS\TestAll\00322857 - Obec Brestov nad Laborcom\HL_KNIHA_00322857_2023.pdf
+f:\Audit\TESTS\TestAll\00322857 - Obec Brestov nad Laborcom\UCT_ROZVRH_00322857_2023.pdf
+f:\Audit\TESTS\TestAll\00322962 - Obec Hankovce\U_DENNIK_00322962_2023.xml
+f:\Audit\TESTS\TestAll\00322962 - Obec Hankovce\U_DENNIK_00322962_2022.xml
+f:\Audit\TESTS\TestAll\00322962 - Obec Hankovce\U_DENNIK_00322962_2023_a.pdf
+f:\Audit\TESTS\TestAll\00322962 - Obec Hankovce\U_DENNIK_00322962_2024.pdf
+f:\Audit\TESTS\TestAll\00322962 - Obec Hankovce\U_DENNIK_00322962_2022.pdf
+f:\Audit\TESTS\TestAll\00322962 - Obec Hankovce\HL_KNIHA_00322962_2023_a.pdf
+f:\Audit\TESTS\TestAll\00322962 - Obec Hankovce\HL_KNIHA_00322962_2023_b.pdf
+f:\Audit\TESTS\TestAll\00322962 - Obec Hankovce\HL_KNIHA_00322962_2024.pdf
+f:\Audit\TESTS\TestAll\00322962 - Obec Hankovce\UCT_ROZVRH_00322962_2024.pdf
+f:\Audit\TESTS\TestAll\00322962 - Obec Hankovce\UCT_ROZVRH_00322962_2022.pdf
+f:\Audit\TESTS\TestAll\00323012 - Obec Hudcovce\U_DENNIK_00323012_2023.xml
+f:\Audit\TESTS\TestAll\00323012 - Obec Hudcovce\U_DENNIK_00323012_2024.pdf
+f:\Audit\TESTS\TestAll\00323012 - Obec Hudcovce\HL_KNIHA_00323012_2024.pdf
+f:\Audit\TESTS\TestAll\00323012 - Obec Hudcovce\UCT_ROZVRH_00323012_2024.pdf
+f:\Audit\TESTS\TestAll\00323110 - Obec Kamienka\U_DENNIK_00323110_2024.xml
+f:\Audit\TESTS\TestAll\00323110 - Obec Kamienka\U_DENNIK_00323110_2025.xml
+f:\Audit\TESTS\TestAll\00323110 - Obec Kamienka\U_DENNIK_00323110_2024.pdf
+f:\Audit\TESTS\TestAll\00323110 - Obec Kamienka\U_DENNIK_00323110_2025.pdf
+f:\Audit\TESTS\TestAll\00323110 - Obec Kamienka\U_DENNIK_00323110_2024.CSV
+f:\Audit\TESTS\TestAll\00323110 - Obec Kamienka\HL_KNIHA_00323110_2025_b.pdf
+f:\Audit\TESTS\TestAll\00323110 - Obec Kamienka\HL_KNIHA_00323110_2025.pdf
+f:\Audit\TESTS\TestAll\00323110 - Obec Kamienka\HL_KNIHA_00323110_2024.pdf
+f:\Audit\TESTS\TestAll\00323110 - Obec Kamienka\HL_KNIHA_00323110_2024_b.pdf
+f:\Audit\TESTS\TestAll\00323110 - Obec Kamienka\UCT_ROZVRH_00323110_2025.pdf
+f:\Audit\TESTS\TestAll\00323110 - Obec Kamienka\UCT_ROZVRH_00323110_2024.pdf
+f:\Audit\TESTS\TestAll\00323110 - Obec Kamienka\UCT_ROZVRH_00323110_2024.CSV
+f:\Audit\TESTS\TestAll\00323110 - Obec Kamienka\HL_KNIHA_00323110_2023.CSV
+f:\Audit\TESTS\TestAll\00323110 - Obec Kamienka\HL_KNIHA_00323110_2024.CSV
+f:\Audit\TESTS\TestAll\00323161 - Obec Kolonica\HL_KNIHA_00323161_2022_b.pdf
+f:\Audit\TESTS\TestAll\00323161 - Obec Kolonica\HL_KNIHA_00323161_2022.pdf
+f:\Audit\TESTS\TestAll\00323161 - Obec Kolonica\HL_KNIHA_00323161_2023.pdf
+f:\Audit\TESTS\TestAll\00323161 - Obec Kolonica\HL_KNIHA_00323161_2024.pdf
+f:\Audit\TESTS\TestAll\00323161 - Obec Kolonica\HL_KNIHA_00323161_2025_a.pdf
+f:\Audit\TESTS\TestAll\00323161 - Obec Kolonica\HL_KNIHA_00323161_2025.pdf
+f:\Audit\TESTS\TestAll\00323161 - Obec Kolonica\HL_KNIHA_00323161_2025_b.pdf
+f:\Audit\TESTS\TestAll\00323161 - Obec Kolonica\UCT_ROZVRH_00323161_2022.pdf
+f:\Audit\TESTS\TestAll\00323161 - Obec Kolonica\UCT_ROZVRH_00323161_2023.pdf
+f:\Audit\TESTS\TestAll\00323161 - Obec Kolonica\UCT_ROZVRH_00323161_2024.pdf
+f:\Audit\TESTS\TestAll\00323161 - Obec Kolonica\UCT_ROZVRH_00323161_2025.pdf
+f:\Audit\TESTS\TestAll\00323161 - Obec Kolonica\U_DENNIK_00323161_2022.xml
+f:\Audit\TESTS\TestAll\00323161 - Obec Kolonica\U_DENNIK_00323161_2022.pdf
+f:\Audit\TESTS\TestAll\00323161 - Obec Kolonica\U_DENNIK_00323161_2023.xml
+f:\Audit\TESTS\TestAll\00323161 - Obec Kolonica\U_DENNIK_00323161_2024.xml
+f:\Audit\TESTS\TestAll\00323161 - Obec Kolonica\U_DENNIK_00323161_2025.pdf
+f:\Audit\TESTS\TestAll\00323161 - Obec Kolonica\U_DENNIK_00323161_2025.xml
+f:\Audit\TESTS\TestAll\00323195 - Obec Ladomirov\HL_KNIHA_00323195_2024_12.pdf
+f:\Audit\TESTS\TestAll\00323195 - Obec Ladomirov\HL_KNIHA_00323195_2024.pdf
+f:\Audit\TESTS\TestAll\00323195 - Obec Ladomirov\HL_KNIHA_00323195_2025.pdf
+f:\Audit\TESTS\TestAll\00323195 - Obec Ladomirov\HL_KNIHA_00323195_2025.CSV
+f:\Audit\TESTS\TestAll\00323195 - Obec Ladomirov\U_DENNIK_00323195_2023.xml
+f:\Audit\TESTS\TestAll\00323195 - Obec Ladomirov\U_DENNIK_00323195_2024.xml
+f:\Audit\TESTS\TestAll\00323195 - Obec Ladomirov\U_DENNIK_00323195_2025.CSV
+f:\Audit\TESTS\TestAll\00323195 - Obec Ladomirov\U_DENNIK_00323195_2025.pdf
+f:\Audit\TESTS\TestAll\00323233 - Mesto Medzilaborce\HL_KNIHA_00323233_2025.pdf
+f:\Audit\TESTS\TestAll\00323233 - Mesto Medzilaborce\UCT_ROZVRH_00323233_2025.pdf
+f:\Audit\TESTS\TestAll\00323233 - Mesto Medzilaborce\U_DENNIK_00323233_2025.pdf
+f:\Audit\TESTS\TestAll\00323292 - Obec Nižná Jablonka\HL_KNIHA_00323292_2023.pdf
+f:\Audit\TESTS\TestAll\00323292 - Obec Nižná Jablonka\HL_KNIHA_00323292_2024_a.pdf
+f:\Audit\TESTS\TestAll\00323292 - Obec Nižná Jablonka\HL_KNIHA_00323292_2024_b.pdf
+f:\Audit\TESTS\TestAll\00323292 - Obec Nižná Jablonka\UCT_ROZVRH_00323292_2023.pdf
+f:\Audit\TESTS\TestAll\00323292 - Obec Nižná Jablonka\UCT_ROZVRH_00323292_2024.pdf
+f:\Audit\TESTS\TestAll\00323292 - Obec Nižná Jablonka\U_DENNIK_00323292_2023.pdf
+f:\Audit\TESTS\TestAll\00323292 - Obec Nižná Jablonka\U_DENNIK_00323292_2023.xml
+f:\Audit\TESTS\TestAll\00323292 - Obec Nižná Jablonka\U_DENNIK_00323292_2024.xml
+f:\Audit\TESTS\TestAll\00323292 - Obec Nižná Jablonka\HL_KNIHA_00323292_2024.pdf
+f:\Audit\TESTS\TestAll\00323292 - Obec Nižná Jablonka\HL_KNIHA_00323292_202412.CSV
+f:\Audit\TESTS\TestAll\00323292 - Obec Nižná Jablonka\HL_KNIHA_00323292_202512.CSV
+f:\Audit\TESTS\TestAll\00323292 - Obec Nižná Jablonka\UCT_ROZVRH_00323292_2024.CSV
+f:\Audit\TESTS\TestAll\00323292 - Obec Nižná Jablonka\UCT_ROZVRH_00323292_2024.pdf
+f:\Audit\TESTS\TestAll\00323292 - Obec Nižná Jablonka\UCT_ROZVRH_00323292_2025.CSV
+f:\Audit\TESTS\TestAll\00323292 - Obec Nižná Jablonka\U_DENNIK_00323292_2024.pdf
+f:\Audit\TESTS\TestAll\00323292 - Obec Nižná Jablonka\U_DENNIK_00323292_2025.xml
