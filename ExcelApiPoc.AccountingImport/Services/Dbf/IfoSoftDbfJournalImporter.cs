@@ -35,9 +35,9 @@ public sealed class IfoSoftDbfJournalImporter : IDisposable
         if(fiscalYear.HasValue&&(fiscalYear<1900||fiscalYear>9999))throw new ArgumentOutOfRangeException(nameof(fiscalYear));
             selectedFiscalYear=fiscalYear;path=Path.GetFullPath(file);table=new DbfTable(path);
         try {
-            var matches=(Directory.Exists(definitions)?Directory.GetFiles(definitions,"dbf-*.json"):new[]{definitions}).Select(DbfJournalDefinition.Load).Where(d=>d!=null&&d.Version==1&&d.Format=="DBF"&&d.Category=="AJ"&&d.RequiredFields.Count>0&&d.RequiredFields.All(k=>table.Fields.Any(f=>f.Name==k.Key&&f.Type.ToString()==k.Value))).ToArray();
-            if(matches.Length>1)throw new InvalidDataException("Ambiguous DBF journal definition.");
-            definition=matches.SingleOrDefault();
+            var matches=LayoutFiles.Family(definitions,"dbf-").Select(DbfJournalDefinition.Load).Where(d=>d!=null&&d.Version==1&&d.Format=="DBF"&&new[]{"AJ","GL","AF"}.Contains(d.Category)&&d.RequiredFields.Count>0&&d.RequiredFields.All(k=>table.Fields.Any(f=>f.Name==k.Key&&f.Type.ToString()==k.Value))).ToArray();
+            if(matches.Length>1)throw new AmbiguousLayoutException(matches.Select(d=>d.Id));
+            definition=matches.SingleOrDefault(d=>d.Category=="AJ");
             if(definition!=null){
                 foreach(string k in new[]{"date","documentType","documentNumber","description","debitAccount","creditAccount","amount","debitAmount","creditAmount"})
                     if(!definition.Map.ContainsKey(k)||!table.Fields.Any(f=>f.Name==definition.Map[k]))throw new InvalidDataException("Missing DBF mapping: "+k);
@@ -52,7 +52,7 @@ public sealed class IfoSoftDbfJournalImporter : IDisposable
     public ImportResult Examine(ImportLevel level,CancellationToken token=default)
     {
         token.ThrowIfCancellationRequested();if(level<ImportLevel.Recognize||level>ImportLevel.Normalize)throw new ArgumentOutOfRangeException(nameof(level));result.RequestedLevel=level;
-        if(result.CompletedLevel==0){result.CompletedLevel=1;if(definition!=null){result.LayoutId=definition.Id;result.Category="AJ";}}
+        if(result.CompletedLevel==0){result.CompletedLevel=1;if(definition!=null){result.LayoutId=definition.Id;result.Producer="IfoSoft";result.Category="AJ";}}
         if(definition==null)return result;
         if(level>=ImportLevel.Identify&&result.CompletedLevel<2){
             var dates=new List<DateTime>();int active=0,deleted=0,invalid=0;

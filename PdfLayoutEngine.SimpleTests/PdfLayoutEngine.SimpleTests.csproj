@@ -11,6 +11,7 @@
     <None Include="../PdfLayouts/Urbis/Compact/*.json" Link="Urbis/%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
     <None Include="../PdfLayouts/Omega/Compact/*.json" Link="Omega/%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
     <None Include="../PdfLayouts/SoftipMop/Compact/*.json" Link="SoftipMop/%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="../PdfLayouts/**/Compact/*.json" Link="AllLayouts/%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
     <Using Include="Xunit" />
   </ItemGroup>
 </Project>

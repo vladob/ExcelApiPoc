@@ -45,7 +45,7 @@ public class CompactTests
             var gl=Assert.IsType<GeneralLedgerImport>(importer.Canonical);Assert.Equal("022",gl.Rows[0].AccountCode);Assert.Equal(7222352.15m,gl.Rows.Sum(x=>x.AnnualDebitTurnover));Assert.Equal(7222352.15m,gl.Rows.Sum(x=>x.AnnualCreditTurnover));
         }
     }
-    sealed class Fixture:IPageSource
+    internal sealed class Fixture:IPageSource
     {
         public string Format=>"fixture";public int PageCount=>1;public int DecodedPageCount{get;private set;}
         public PositionedDocument Document{get;}=new();
