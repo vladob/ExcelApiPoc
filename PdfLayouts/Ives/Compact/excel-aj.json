@@ -1,0 +1,188 @@
+{
+  "version": 1,
+  "id": "ives-excel-aj",
+  "producer": "Ives",
+  "category": "AJ",
+  "headers": [
+    [],
+    [],
+    [],
+    [],
+    [
+      ".*",
+      "^Účtovný denník$"
+    ],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [
+      ".*",
+      "^Dátum$",
+      ".*",
+      ".*",
+      "^Čís. dokladu$",
+      ".*",
+      ".*",
+      ".*",
+      ".*",
+      ".*",
+      ".*",
+      ".*",
+      ".*",
+      ".*",
+      ".*",
+      ".*",
+      ".*",
+      ".*",
+      ".*",
+      ".*",
+      ".*",
+      ".*",
+      ".*",
+      ".*",
+      "^Suma$"
+    ],
+    [],
+    [
+      ".*",
+      ".*",
+      ".*",
+      ".*",
+      ".*",
+      ".*",
+      ".*",
+      ".*",
+      ".*",
+      ".*",
+      ".*",
+      ".*",
+      ".*",
+      ".*",
+      ".*",
+      ".*",
+      ".*",
+      ".*",
+      ".*",
+      ".*",
+      ".*",
+      ".*",
+      ".*",
+      ".*",
+      ".*",
+      ".*",
+      ".*",
+      "^Modul$"
+    ],
+    [],
+    [],
+    [],
+    []
+  ],
+  "columnCounts": [
+    30
+  ],
+  "columns": {
+    "Date": 1,
+    "DocumentNumber": 4,
+    "DebitAccount": 8,
+    "CreditAccount": 17,
+    "Amount": 23,
+    "OperationDescription": 27
+  },
+  "amounts": [
+    "Amount"
+  ],
+  "report": {
+    "identifiers": [
+      {
+        "row": 2,
+        "column": 1,
+        "pattern": "^(?<AccountingEntityName>.+)$"
+      },
+      {
+        "row": 3,
+        "column": 22,
+        "pattern": "^IČO:\\s*(?<cin>\\d{8})$"
+      },
+      {
+        "row": 8,
+        "column": 1,
+        "pattern": "^Dátum vytvorenia\\s+od:\\s*(?<PeriodFrom>\\d{1,2}\\.\\d{1,2}\\.\\d{4}),\\s*do:\\s*(?<PeriodTo>\\d{1,2}\\.\\d{1,2}\\.\\d{4})$"
+      }
+    ],
+    "compactFields": [
+      "DebitAccount",
+      "CreditAccount"
+    ],
+    "totalFields": [
+      "Amount"
+    ],
+    "requiredFields": [
+      "DocumentNumber"
+    ],
+    "rules": [
+      {
+        "kind": "Record",
+        "match": {
+          "1": "^(?!Spolu).+",
+          "4": "^\\S+$"
+        },
+        "allowedColumns": [
+          1,
+          4,
+          8,
+          17,
+          23,
+          25,
+          27
+        ]
+      },
+      {
+        "kind": "Continuation",
+        "match": {
+          "1": "^$",
+          "4": "^$",
+          "23": "^$",
+          "27": "^\\S+$"
+        },
+        "allowedColumns": [
+          8,
+          13,
+          17,
+          19,
+          27,
+          28,
+          29
+        ]
+      },
+      {
+        "kind": "ReportTotal",
+        "match": {
+          "1": "^Spolu\\s*:"
+        },
+        "allowedColumns": [
+          1,
+          23,
+          25
+        ]
+      },
+      {
+        "kind": "Group",
+        "match": {
+          "1": "^(Hlavná|Podnikateľská) činnosť$",
+          "4": "^$"
+        },
+        "allowedColumns": [
+          1,
+          9
+        ],
+        "columns": {
+          "GroupName": 1
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,74 @@
+{
+  "version": 1,
+  "id": "ives-excel-af",
+  "producer": "Ives",
+  "category": "AF",
+  "headers": [
+    [
+      "^Id_uctu$",
+      "^Druh_cinnosti$",
+      ".*",
+      ".*",
+      "^SU$",
+      "^aU$",
+      "^aU_Text$",
+      "^Nazov_uctu$",
+      ".*",
+      ".*",
+      ".*",
+      ".*",
+      ".*",
+      "^Platnost_od$"
+    ]
+  ],
+  "columnCounts": [
+    20
+  ],
+  "columns": {
+    "Account": 6,
+    "Name": 7,
+    "Type": 10
+  },
+  "amounts": [],
+  "report": {
+    "compactFields": [
+      "Account"
+    ],
+    "requiredFields": [
+      "Account",
+      "Name"
+    ],
+    "rules": [
+      {
+        "kind": "Record",
+        "match": {
+          "0": "^\\d+$",
+          "4": "^\\d{3}$",
+          "6": "^\\d{3}\\."
+        },
+        "allowedColumns": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16,
+          17,
+          18,
+          19
+        ]
+      }
+    ]
+  }
+}

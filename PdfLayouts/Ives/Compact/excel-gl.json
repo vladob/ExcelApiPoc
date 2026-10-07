@@ -1,0 +1,255 @@
+{
+  "version": 1,
+  "id": "ives-excel-gl",
+  "producer": "Ives",
+  "category": "GL",
+  "headers": [
+    [],
+    [],
+    [],
+    [
+      ".*",
+      "^Hlavná kniha$"
+    ],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [
+      ".*",
+      ".*",
+      ".*",
+      ".*",
+      ".*",
+      ".*",
+      ".*",
+      ".*",
+      ".*",
+      ".*",
+      ".*",
+      ".*",
+      ".*",
+      ".*",
+      ".*",
+      ".*",
+      ".*",
+      ".*",
+      ".*",
+      ".*",
+      "^Obraty do DATA$"
+    ],
+    [],
+    [
+      ".*",
+      "^Dátum$",
+      ".*",
+      ".*",
+      ".*",
+      ".*",
+      ".*",
+      ".*",
+      ".*",
+      ".*",
+      ".*",
+      ".*",
+      ".*",
+      ".*",
+      ".*",
+      ".*",
+      "^Počiatočný stav$",
+      ".*",
+      ".*",
+      ".*",
+      ".*",
+      ".*",
+      ".*",
+      ".*",
+      ".*",
+      ".*",
+      ".*",
+      ".*",
+      ".*",
+      ".*",
+      ".*",
+      ".*",
+      ".*",
+      ".*",
+      ".*",
+      ".*",
+      "^Nový zostatok$"
+    ],
+    [],
+    [],
+    []
+  ],
+  "columnCounts": [
+    37
+  ],
+  "columns": {
+    "Date": 1,
+    "DocumentNumber": 2,
+    "Account": 7,
+    "Name": 11,
+    "OpeningNetto": 16,
+    "TurnoverToDateDebit": 18,
+    "TurnoverToDateCredit": 21,
+    "TurnoverDebitPrinted": 26,
+    "TurnoverCreditPrinted": 31,
+    "ClosingNetto": 35
+  },
+  "amounts": [
+    "OpeningNetto",
+    "TurnoverToDateDebit",
+    "TurnoverToDateCredit",
+    "TurnoverDebitPrinted",
+    "TurnoverCreditPrinted",
+    "ClosingNetto"
+  ],
+  "report": {
+    "identifiers": [
+      {
+        "row": 2,
+        "column": 1,
+        "pattern": "^(?<AccountingEntityName>.+)$"
+      },
+      {
+        "row": 3,
+        "column": 23,
+        "pattern": "^IČO:\\s*(?<cin>\\d{8})$"
+      },
+      {
+        "row": 7,
+        "column": 1,
+        "pattern": "^Dátum od:\\s*(?<PeriodFrom>\\d{1,2}\\.\\d{1,2}\\.\\d{4}),\\s*Dátum do:\\s*(?<PeriodTo>\\d{1,2}\\.\\d{1,2}\\.\\d{4})$"
+      }
+    ],
+    "compactFields": [
+      "Account"
+    ],
+    "totalFields": [
+      "OpeningNetto",
+      "TurnoverToDateDebit",
+      "TurnoverToDateCredit",
+      "TurnoverDebitPrinted",
+      "TurnoverCreditPrinted",
+      "ClosingNetto"
+    ],
+    "requiredFields": [
+      "Account",
+      "Name"
+    ],
+    "rules": [
+      {
+        "kind": "Record",
+        "match": {
+          "1": "^-$",
+          "3": "^-$",
+          "7": "^\\d{3}\\.[^=]*$",
+          "11": "^(?!Spolu za ).+"
+        },
+        "allowedColumns": [
+          1,
+          3,
+          7,
+          11
+        ],
+        "awaitAmounts": true
+      },
+      {
+        "kind": "Subtotal",
+        "match": {
+          "1": "^-$",
+          "11": "^Spolu za "
+        },
+        "allowedColumns": [
+          1,
+          3,
+          7,
+          11
+        ],
+        "awaitAmounts": true
+      },
+      {
+        "kind": "Transaction",
+        "match": {
+          "1": "^\\d",
+          "2": "^\\S+$"
+        },
+        "allowedColumns": [
+          1,
+          2,
+          7,
+          11,
+          26,
+          31
+        ]
+      },
+      {
+        "kind": "Amounts",
+        "match": {
+          "1": "^$",
+          "7": "^$",
+          "16": "^-?\\d"
+        },
+        "allowedColumns": [
+          16,
+          18,
+          21,
+          26,
+          31,
+          35
+        ]
+      },
+      {
+        "kind": "ReportTotal",
+        "match": {
+          "1": "^C\\s*e\\s*l\\s*k\\s*o\\s*m$"
+        },
+        "allowedColumns": [
+          1,
+          16,
+          18,
+          21,
+          27,
+          31,
+          35
+        ],
+        "columns": {
+          "TurnoverDebitPrinted": 27
+        }
+      },
+      {
+        "kind": "Group",
+        "match": {
+          "1": "^(Hlavná|Podnikateľská) činnosť$",
+          "2": "^$"
+        },
+        "allowedColumns": [
+          1,
+          8
+        ],
+        "columns": {
+          "GroupName": 1
+        }
+      }
+    ]
+  },
+  "amountSums": {
+    "TurnoverDebit": [
+      "TurnoverToDateDebit",
+      "TurnoverDebitPrinted"
+    ],
+    "TurnoverCredit": [
+      "TurnoverToDateCredit",
+      "TurnoverCreditPrinted"
+    ],
+    "PeriodTurnoverDebit": [
+      "TurnoverDebitPrinted"
+    ],
+    "PeriodTurnoverCredit": [
+      "TurnoverCreditPrinted"
+    ]
+  }
+}

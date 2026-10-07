@@ -28,12 +28,14 @@ namespace ExcelApiPoc.AccountingImport.Services.Layouts
         public Dictionary<string,string[]> AccountParts {get;set;}=new Dictionary<string,string[]>();
         public string UnsupportedReason {get;set;}="";
         public bool DocumentGroups {get;set;}
+        public ExcelReportDefinition Report {get;set;}
     }
     public sealed class ExcelLayoutImporter:IDisposable
     {
         readonly string path;readonly int? selectedYear;readonly ExcelLayoutDefinition[] definitions;
         readonly ImportResult result=new ImportResult{Format="Excel"};ExcelLayoutDefinition layout;
         public object Canonical {get;private set;}
+        ExcelReportSession reportSession;
         public ExcelLayoutImporter(string file,string catalogue,int? year=null){
             path=Path.GetFullPath(file);selectedYear=year;
             definitions=LayoutFiles.Family(catalogue,"excel-").Select(p=>JsonSerializer.Deserialize<ExcelLayoutDefinition>(File.ReadAllText(p),new JsonSerializerOptions{PropertyNameCaseInsensitive=true,UnmappedMemberHandling=System.Text.Json.Serialization.JsonUnmappedMemberHandling.Disallow})).ToArray();
@@ -48,7 +50,7 @@ namespace ExcelApiPoc.AccountingImport.Services.Layouts
         IEnumerable<string[]> Read(CancellationToken token){
             using(var reader=ExcelWorkbookReader.Open(path)){
                 if(reader.ResultsCount!=1)throw new InvalidDataException("Expected one original export worksheet; found "+reader.ResultsCount+". Combined/audit workbooks are not accepted.");
-                while(reader.Read()){token.ThrowIfCancellationRequested();var a=new string[reader.FieldCount];for(int i=0;i<a.Length;i++)a[i]=ExcelWorkbookReader.GetUrbisText(reader,i,Path.GetExtension(path))??"";yield return a;}
+                while(reader.Read()){token.ThrowIfCancellationRequested();var a=new string[reader.FieldCount];for(int i=0;i<a.Length;i++)a[i]=(layout?.Report!=null?ExcelWorkbookReader.GetText(reader,i):ExcelWorkbookReader.GetUrbisText(reader,i,Path.GetExtension(path)))??"";yield return a;}
             }
         }
         static bool Date(string raw,out DateTime date)=>DateTime.TryParseExact(Regex.Replace(raw,@"\s", ""),new[]{"yyyy-MM-dd","d.M.yyyy","dd.MM.yyyy"},CultureInfo.InvariantCulture,DateTimeStyles.None,out date)&&date.Year>=1900;
@@ -66,6 +68,15 @@ namespace ExcelApiPoc.AccountingImport.Services.Layouts
                 }
             }
             if(layout==null)return result;
+            if(layout.Report!=null){
+                if(reportSession==null)reportSession=new ExcelReportSession(layout,result);
+                reportSession.Examine(level,Read,token);
+                if(level>=ImportLevel.Normalize&&result.CompletedLevel<5&&result.Status=="completed"){
+                    int? reportYear=int.TryParse(CompactSession.Value(result.Identifiers,"fiscalYear"),out var knownYear)?knownYear:selectedYear;
+                    Canonical=CompactLayoutImporter.Map(result,path,reportYear,layout.Producer,new[]{"Record"});result.CompletedLevel=5;
+                }
+                return result;
+            }
             if(layout.UnsupportedReason.Length>0){if(!result.Issues.Any(v=>v.Code=="unsupportedExport"))Issue("unsupportedExport",layout.UnsupportedReason);result.Status="unsupported";return result;}
             if(level>=ImportLevel.Identify&&result.CompletedLevel<2){
                 result.Identifiers["cin"]=null;result.Identifiers["AccountingEntityName"]=null;
