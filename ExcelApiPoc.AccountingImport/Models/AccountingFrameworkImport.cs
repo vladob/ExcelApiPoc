@@ -13,6 +13,7 @@ namespace ExcelApiPoc.AccountingImport.Models
 
     public sealed class AccountingFrameworkImport
     {
+        public ExcelApiPoc.AccountingImport.Models.Reporting.ImportReport ImportReport { get; set; }
         public string SourceFileName { get; set; }
         public string SourceFilePath { get; set; }
         public string SourceFileHash { get; set; }

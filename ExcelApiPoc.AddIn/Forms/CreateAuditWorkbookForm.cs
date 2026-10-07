@@ -1,4 +1,4 @@
-﻿using ExcelApiPoc.AccountingImport.Models;
+using ExcelApiPoc.AccountingImport.Models;
 using ExcelApiPoc.AccountingImport.Services.IfoSoft;
 using ExcelApiPoc.AccountingImport.Services;
 using ExcelApiPoc.AccountingImport.Services.Ives;
@@ -106,7 +106,7 @@ namespace ExcelApiPoc.AddIn.Forms
             };
 
             _technicalTypeComboBox.SetBounds(165,172,200,25);
-            _technicalTypeComboBox.Items.AddRange(new object[] {"Unknown", "CSV", "XML", "JSON", "PDF", "Excel"});
+            _technicalTypeComboBox.Items.AddRange(new object[] {"Unknown", "CSV", "XML", "JSON", "PDF", "Excel", "XPS", "OXPS", "DBF"});
             _technicalTypeComboBox.SelectedIndex = 0;
 
             // Accounting-system format
@@ -126,6 +126,7 @@ namespace ExcelApiPoc.AddIn.Forms
                     "IVES",
                     "Softip-MOP",
                     "Urbis",
+                    "KROS OMEGA",
                     "MkSoft",
                     "Pohoda"
                 });
@@ -311,12 +312,13 @@ namespace ExcelApiPoc.AddIn.Forms
                 Multiselect = false,
                 Filter =
                     "Supported files|" +
-                    "*.csv;*.xml;*.json;*.pdf;*.xlsx;*.xls|" +
+                    "*.csv;*.xml;*.json;*.pdf;*.xlsx;*.xls;*.xps;*.oxps;*.dbf|" +
                     "CSV files|*.csv|" +
                     "XML files|*.xml|" +
                     "JSON files|*.json|" +
                     "PDF files|*.pdf|" +
                     "Excel files|*.xlsx;*.xls|" +
+                    "XPS files|*.xps;*.oxps|DBF files|*.dbf|" +
                     "All files|*.*"
             };
         }
@@ -348,6 +350,9 @@ namespace ExcelApiPoc.AddIn.Forms
                 case ".json": technicalType = "JSON";
                     break;
 
+                case ".xps": technicalType = "XPS"; break;
+                case ".oxps": technicalType = "OXPS"; break;
+                case ".dbf": technicalType = "DBF"; break;
                 case ".pdf": technicalType = "PDF";
                     break;
 
@@ -539,33 +544,8 @@ namespace ExcelApiPoc.AddIn.Forms
 
                 if (!string.IsNullOrWhiteSpace(accountsPath))
                 {
-                    if (string.Equals(
-                            importPackage.AccountingFormat,
-                            "IfoSoft",
-                            StringComparison.OrdinalIgnoreCase))
-                    {
-                        accountingFrameworkImport =
-                            (string.Equals(Path.GetExtension(accountsPath), ".pdf", StringComparison.OrdinalIgnoreCase)
-                                ? new IfoSoftPdfAccountingFrameworkImporter().Import(accountsPath)
-                                : new IfoSoftCsvAccountingFrameworkImporter().Import(accountsPath));
-                    }
-                    else if (string.Equals(
-                                 importPackage.AccountingFormat,
-                                 "IVES",
-                                 StringComparison.OrdinalIgnoreCase))
-                    {
-                        accountingFrameworkImport =
-                            new IvesAccountingFrameworkImporter()
-                                .Import(accountsPath);
-                    }
-                    else
-                    {
-                        throw new InvalidOperationException(
-                            "An entity-specific accounting-framework export " +
-                            "is currently supported for IfoSoft and IVES. " +
-                            "Leave the Accounting framework field empty for " +
-                            "the current Urbis and Softip-MOP imports.");
-                    }
+                    accountingFrameworkImport = ExcelApiPoc.AccountingImport.Services.Layouts.StagedImportRuntime
+                        .Import<AccountingFrameworkImport>(accountsPath, importPackage.AccountingFormat, "AF");
 
                     if (!string.Equals(accountingFrameworkImport.Ico, journalImport.Ico, StringComparison.Ordinal))
                     {
@@ -713,6 +693,13 @@ namespace ExcelApiPoc.AddIn.Forms
 
                 var message = new System.Text.StringBuilder();
 
+                foreach (var report in new[] { journalImport.ImportReport, generalLedgerImport?.ImportReport, accountingFrameworkImport?.ImportReport })
+                {
+                    if (report == null) continue;
+                    foreach (var diagnostic in report.Diagnostics.Where(d => d.Severity != ExcelApiPoc.AccountingImport.Models.Reporting.ImportDiagnosticSeverity.Information))
+                        message.AppendLine(report.SourceFileName + ": " + diagnostic.Message);
+                }
+                message.AppendLine();
                 message.AppendLine($"Company: {journalImport.CompanyName}");
                 message.AppendLine($"IČO: {journalImport.Ico}");
 

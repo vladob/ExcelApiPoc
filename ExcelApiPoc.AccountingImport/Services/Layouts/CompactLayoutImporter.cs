@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Threading;
+using System.Xml;
 using ExcelApiPoc.AccountingImport.Models;
 using PdfLayoutEngine.Simple;
 using PdfLayoutEngine.IText.Simple;
@@ -12,10 +13,11 @@ namespace ExcelApiPoc.AccountingImport.Services.Layouts
     public sealed class CompactLayoutImporter : IDisposable
     {
         readonly string path;
+        readonly string xmlDefinitions;
         readonly int? selectedFiscalYear;
         readonly CompactSession session;
-        readonly StructuredLayoutImporter structured;
-        readonly CrystalLayoutImporter crystal;
+        StructuredLayoutImporter structured;
+        CrystalLayoutImporter crystal;
         readonly ExcelLayoutImporter excel;
         readonly ExcelApiPoc.AccountingImport.Services.Dbf.IfoSoftDbfJournalImporter dbf;
         readonly ExcelApiPoc.AccountingImport.Services.Dbf.IfoSoftDbfAccountImporter dbfAccounts;
@@ -26,12 +28,12 @@ namespace ExcelApiPoc.AccountingImport.Services.Layouts
             selectedFiscalYear=fiscalYear;
             path=Path.GetFullPath(file);
             if(new[]{".xls",".xlsx"}.Contains(Path.GetExtension(path).ToLowerInvariant())){excel=new ExcelLayoutImporter(path,definitions,fiscalYear);return;}
-            if(Path.GetExtension(path).Equals(".xml",StringComparison.OrdinalIgnoreCase)&&((Directory.Exists(definitions)&&Directory.GetFiles(definitions,"crystal-*.json").Length>0)||Path.GetFileName(definitions).StartsWith("crystal-",StringComparison.OrdinalIgnoreCase))){crystal=new CrystalLayoutImporter(path,definitions,fiscalYear);return;}
+            if(Path.GetExtension(path).Equals(".xml",StringComparison.OrdinalIgnoreCase)){xmlDefinitions=definitions;return;}
             if(new[]{".csv",".xml"}.Contains(Path.GetExtension(path).ToLowerInvariant())){structured=new StructuredLayoutImporter(path,definitions,fiscalYear);return;}
             if(Path.GetExtension(path).Equals(".dbf",StringComparison.OrdinalIgnoreCase)){dbf=new ExcelApiPoc.AccountingImport.Services.Dbf.IfoSoftDbfJournalImporter(path,definitions,fiscalYear);
                 if(dbf.Examine(ImportLevel.Recognize).Category==null){dbf.Dispose();dbf=null;dbfAccounts=new ExcelApiPoc.AccountingImport.Services.Dbf.IfoSoftDbfAccountImporter(path,definitions,fiscalYear);}
                 return;}
-            var layouts=(Directory.Exists(definitions)?Directory.GetFiles(definitions,"*.json").Where(p=>!Path.GetFileName(p).StartsWith("dbf-",StringComparison.OrdinalIgnoreCase)&&!Path.GetFileName(p).StartsWith("structured-",StringComparison.OrdinalIgnoreCase)&&!Path.GetFileName(p).StartsWith("crystal-",StringComparison.OrdinalIgnoreCase)&&!Path.GetFileName(p).StartsWith("excel-",StringComparison.OrdinalIgnoreCase)).ToArray():new[]{definitions}).Select(CompactLayout.Load).ToArray();
+            var layouts=LayoutFiles.Family(definitions,"").Select(CompactLayout.Load).ToArray();
             IPageSource source;
             switch(Path.GetExtension(path).ToLowerInvariant()){
                 case ".pdf":source=new PdfPageSource(path,retainDecodedPages:false);break;
@@ -43,6 +45,14 @@ namespace ExcelApiPoc.AccountingImport.Services.Layouts
         public ImportResult Examine(ImportLevel level,CancellationToken token=default)
         {
             if(level<ImportLevel.Recognize||level>ImportLevel.Normalize)throw new ArgumentOutOfRangeException(nameof(level));
+            token.ThrowIfCancellationRequested();
+            if(xmlDefinitions!=null&&crystal==null&&structured==null){
+                using(var reader=XmlReader.Create(path,new XmlReaderSettings{DtdProcessing=DtdProcessing.Prohibit,XmlResolver=null})){
+                    reader.MoveToContent();
+                    if(reader.LocalName=="CrystalReport")crystal=new CrystalLayoutImporter(path,xmlDefinitions,selectedFiscalYear);
+                    else structured=new StructuredLayoutImporter(path,xmlDefinitions,selectedFiscalYear);
+                }
+            }
             if(excel!=null){var er=excel.Examine(level,token);Canonical=excel.Canonical;return er;}
             if(crystal!=null){var cr=crystal.Examine(level,token);Canonical=crystal.Canonical;return cr;}
             if(structured!=null){var sr=structured.Examine(level,token);Canonical=structured.Canonical;return sr;}
@@ -91,6 +101,6 @@ namespace ExcelApiPoc.AccountingImport.Services.Layouts
             return af;
         }
         static decimal? Get(SourceRow row,string key)=>row.Amounts.TryGetValue(key,out var v)?v:null;
-        public void Dispose(){if(excel!=null){excel.Dispose();return;}if(crystal!=null){crystal.Dispose();return;}if(structured!=null){structured.Dispose();return;}if(dbfAccounts!=null)dbfAccounts.Dispose();else if(dbf!=null)dbf.Dispose();else session.Dispose();}
+        public void Dispose(){if(excel!=null){excel.Dispose();return;}if(crystal!=null){crystal.Dispose();return;}if(structured!=null){structured.Dispose();return;}if(dbfAccounts!=null)dbfAccounts.Dispose();else if(dbf!=null)dbf.Dispose();else session?.Dispose();}
     }
 }

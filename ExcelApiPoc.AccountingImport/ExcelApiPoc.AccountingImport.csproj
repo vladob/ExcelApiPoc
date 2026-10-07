@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
@@ -34,4 +34,21 @@
     </EmbeddedResource>
   </ItemGroup>
 
+  <ItemGroup>
+    <EmbeddedResource Include="../PdfLayouts/IfoSoft/Compact/*.json">
+      <LogicalName>StagedLayouts/IfoSoft/Compact/%(Filename)%(Extension)</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="../PdfLayouts/Ives/Compact/*.json">
+      <LogicalName>StagedLayouts/Ives/Compact/%(Filename)%(Extension)</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="../PdfLayouts/Omega/Compact/*.json">
+      <LogicalName>StagedLayouts/Omega/Compact/%(Filename)%(Extension)</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="../PdfLayouts/SoftipMop/Compact/*.json">
+      <LogicalName>StagedLayouts/SoftipMop/Compact/%(Filename)%(Extension)</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="../PdfLayouts/Urbis/Compact/*.json">
+      <LogicalName>StagedLayouts/Urbis/Compact/%(Filename)%(Extension)</LogicalName>
+    </EmbeddedResource>
+  </ItemGroup>
 </Project>

@@ -7,6 +7,8 @@ public sealed class ImportResult
     public int CompletedLevel { get; set; }
     public string Status { get; set; } = "unrecognized";
     public string? LayoutId { get; set; }
+    public string? Producer { get; set; }
+    public List<string> CandidateLayouts { get; set; } = new List<string>();
     public string? Category { get; set; }
     public string Format { get; set; } = "";
     public int PageCount { get; set; }

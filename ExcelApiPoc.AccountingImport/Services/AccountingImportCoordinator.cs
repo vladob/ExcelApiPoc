@@ -1,4 +1,4 @@
-﻿using ExcelApiPoc.AccountingImport.Models;
+using ExcelApiPoc.AccountingImport.Models;
 using ExcelApiPoc.AccountingImport.Models.Reporting;
 using ExcelApiPoc.AccountingImport.Services.Common;
 using ExcelApiPoc.AccountingImport.Services.IfoSoft;
@@ -38,27 +38,16 @@ namespace ExcelApiPoc.AccountingImport.Services
             }
         }
 
-        public static AccountingImportCoordinator CreateDefault()
+        private readonly bool useStagedEngine;
+
+        private AccountingImportCoordinator()
         {
-            return new AccountingImportCoordinator(
-                new IJournalImporter[]
-                {
-                    new IfoSoftCsvJournalImporter(),
-                    new IfoSoftXmlJournalImporter(),
-                    new IfoSoftPdfDennik1JournalImporter(),
-                    new IvesJournalImporter(),
-                    new SoftipMopExcelJournalImporter(),
-                    new UrbisExcelJournalImporter()
-                },
-                new IGeneralLedgerImporter[]
-                {
-                    new IfoSoftCsvGeneralLedgerImporter(),
-                    new IfoSoftPdfGeneralLedgerImporter(),
-                    new IvesGeneralLedgerImporter(),
-                    new SoftipMopPdfGeneralLedgerImporter(),
-                    new UrbisExcelGeneralLedgerImporter()
-                });
+            journalImporters = Array.Empty<IJournalImporter>();
+            generalLedgerImporters = Array.Empty<IGeneralLedgerImporter>();
+            useStagedEngine = true;
         }
+
+        public static AccountingImportCoordinator CreateDefault() => new AccountingImportCoordinator();
 
         public AccountingImportPackage Import(AccountingImportRequest request)
         {
@@ -77,17 +66,16 @@ namespace ExcelApiPoc.AccountingImport.Services
 
             if (!string.IsNullOrWhiteSpace(request.GeneralLedgerFilePath))
             {
-                IGeneralLedgerImporter ledgerImporter =
-                    SelectExactlyOne(
-                        generalLedgerImporters,
-                        importer => importer.CanImport(
-                            request.GeneralLedgerFilePath,
-                            request.AccountingFormat),
-                        "general-ledger",
-                        request.GeneralLedgerFilePath,
-                        request.AccountingFormat);
-
-                generalLedger = ledgerImporter.Import(request.GeneralLedgerFilePath);
+                if (useStagedEngine)
+                    generalLedger = Layouts.StagedImportRuntime.Import<GeneralLedgerImport>(
+                        request.GeneralLedgerFilePath, request.AccountingFormat, "GL");
+                else
+                {
+                    var ledgerImporter = SelectExactlyOne(generalLedgerImporters,
+                        importer => importer.CanImport(request.GeneralLedgerFilePath, request.AccountingFormat),
+                        "general-ledger", request.GeneralLedgerFilePath, request.AccountingFormat);
+                    generalLedger = ledgerImporter.Import(request.GeneralLedgerFilePath);
+                }
 
                 ValidateGeneralLedger(generalLedger, journal, request);
 
@@ -113,10 +101,10 @@ namespace ExcelApiPoc.AccountingImport.Services
             AccountingImportRequest request,
             IReadOnlyList<string> journalFilePaths)
         {
-            if (IsSoftipMop(request.AccountingFormat))
+            if (IsSoftipMop(request.AccountingFormat) && journalFilePaths.All(p => Path.GetExtension(p).Equals(".xlsx", StringComparison.OrdinalIgnoreCase)))
             {
                 return new SoftipMopMonthlyJournalImporter()
-                    .Import(journalFilePaths);
+                    .Import(journalFilePaths, useStagedEngine ? Layouts.StagedImportRuntime.ProducerDirectory("Softip-MOP") : null);
             }
 
             if (journalFilePaths.Count != 1)
@@ -127,6 +115,8 @@ namespace ExcelApiPoc.AccountingImport.Services
             }
 
             string journalFilePath = journalFilePaths[0];
+            if (useStagedEngine)
+                return Layouts.StagedImportRuntime.Import<JournalImport>(journalFilePath, request.AccountingFormat, "AJ");
             IJournalImporter journalImporter = SelectExactlyOne(
                 journalImporters,
                 importer => importer.CanImport(

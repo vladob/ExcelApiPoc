@@ -25,6 +25,7 @@
     <Reference Path="Microsoft.IdentityModel.Protocols.OpenIdConnect.dll" Pack="true" />
     <Reference Path="Microsoft.IdentityModel.Tokens.dll" Pack="true" />
     <Reference Path="Newtonsoft.Json.dll" Pack="true" />
+    <Reference Path="System.Data.Common.dll" Pack="true" />
     <Reference Path="System.Buffers.dll" Pack="true" />
     <Reference Path="System.Diagnostics.DiagnosticSource.dll" Pack="true" />
     <Reference Path="System.IdentityModel.Tokens.Jwt.dll" Pack="true" />
@@ -39,6 +40,7 @@
     <Reference Path="System.Threading.Tasks.Extensions.dll" Pack="true" />
     <Reference Path="ExcelApiPoc.AccountingImport.dll" Pack="true" />
     <Reference Path="PdfLayoutEngine.dll" Pack="true" />
+    <Reference Path="PdfLayoutEngine.Xps.dll" Pack="true" />
     <Reference Path="PdfLayoutEngine.IText.dll" Pack="true" />
     <Reference Path="itext.barcodes.dll" Pack="true" />
     <Reference Path="itext.bouncy-castle-adapter.dll" Pack="true" />

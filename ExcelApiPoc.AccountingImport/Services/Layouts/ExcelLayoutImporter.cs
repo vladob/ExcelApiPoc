@@ -36,7 +36,7 @@ namespace ExcelApiPoc.AccountingImport.Services.Layouts
         public object Canonical {get;private set;}
         public ExcelLayoutImporter(string file,string catalogue,int? year=null){
             path=Path.GetFullPath(file);selectedYear=year;
-            definitions=(Directory.Exists(catalogue)?Directory.GetFiles(catalogue,"excel-*.json"):new[]{catalogue}).Select(p=>JsonSerializer.Deserialize<ExcelLayoutDefinition>(File.ReadAllText(p),new JsonSerializerOptions{PropertyNameCaseInsensitive=true,UnmappedMemberHandling=System.Text.Json.Serialization.JsonUnmappedMemberHandling.Disallow})).ToArray();
+            definitions=LayoutFiles.Family(catalogue,"excel-").Select(p=>JsonSerializer.Deserialize<ExcelLayoutDefinition>(File.ReadAllText(p),new JsonSerializerOptions{PropertyNameCaseInsensitive=true,UnmappedMemberHandling=System.Text.Json.Serialization.JsonUnmappedMemberHandling.Disallow})).ToArray();
             foreach(var d in definitions)if(d.Version!=1||!new[]{"AJ","GL","AF"}.Contains(d.Category)||d.ColumnCounts.Any(n=>n<=0)||d.AmountSums.Values.Any(v=>v.Length==0||v.Any(k=>!d.Amounts.Contains(k)))||d.Headers.Length==0||d.Columns.Values.Any(n=>n<0)||d.Amounts.Any(k=>!d.Columns.ContainsKey(k)&&!d.NamedColumns.ContainsKey(k)))throw new InvalidDataException("Invalid Excel layout "+d.Id);
             foreach(var d in definitions)if(d.RequiredFields.Any(k=>!d.NamedColumns.ContainsKey(k))||d.SingleAccount&&(d.Category!="AJ"||!new[]{"AccountingPeriod","Account","Date","DebitAmount","CreditAmount"}.All(k=>d.NamedColumns.ContainsKey(k)&&d.RequiredFields.Contains(k))))throw new InvalidDataException("Invalid named journal layout "+d.Id);
             foreach(var d in definitions)if(d.AccountParts.Values.Any(v=>v.Length!=2||v.Any(k=>!d.Columns.ContainsKey(k)))||d.IndependentAmounts&&(d.Category!="AJ"||!new[]{"DebitAmount","CreditAmount"}.All(k=>d.Amounts.Contains(k))))throw new InvalidDataException("Invalid independent journal layout "+d.Id);
@@ -57,7 +57,7 @@ namespace ExcelApiPoc.AccountingImport.Services.Layouts
             if(result.CompletedLevel==0){
                 var head=Read(token).Take(Math.Max(2,definitions.Select(d=>d.Headers.Length).DefaultIfEmpty(2).Max())).ToArray();
                 var matches=definitions.Where(d=>head.Length>=d.Headers.Length&&(d.ColumnCounts.Length==0||d.ColumnCounts.Contains(head[0].Length))&&d.Headers.Select((h,i)=>h.Select((pattern,j)=>Regex.IsMatch(Text(Cell(head[i],j)),pattern,RegexOptions.None,TimeSpan.FromSeconds(1))).All(v=>v)).All(v=>v)).ToArray();
-                if(matches.Length>1)throw new InvalidDataException("Ambiguous Excel layout.");layout=matches.SingleOrDefault();result.CompletedLevel=1;if(layout!=null){result.LayoutId=layout.Id;result.Category=layout.Category;
+                if(matches.Length>1)throw new AmbiguousLayoutException(matches.Select(d=>d.Id));layout=matches.SingleOrDefault();result.CompletedLevel=1;if(layout!=null){result.LayoutId=layout.Id;result.Producer=layout.Producer;result.Category=layout.Category;
                     if(layout.NamedColumns.Count>0){
                         var headers=head[0].Select(Text).ToArray();var named=headers.Where(v=>v.Length>0).ToArray();
                         if(named.Distinct(StringComparer.OrdinalIgnoreCase).Count()!=named.Length)throw new InvalidDataException("Duplicate worksheet headers.");

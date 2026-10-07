@@ -77,9 +77,10 @@ public sealed partial class CompactSession : IDisposable
             var p=source.ReadPage(0,token);
             if(!p.Text.Any(v=>!string.IsNullOrWhiteSpace(v.Text))){Issue("noReadableText","No readable text on the first page. Scanned/image-only documents require a text export; OCR is not supported.",1);result.Status="unsupported";result.PageCount=source.PageCount;result.DecodedPageCount=source.DecodedPageCount;result.CompletedLevel=1;extractionFailed=true;return result;}
             var candidates=layouts.Select(d=>(d,fit:Fit(p,d))).Where(x=>x.fit.HasValue&&(x.d.Worksheet==null||!x.d.Worksheet.DynamicHeaders||WorksheetPanelsMatch(x.d.Worksheet,token))).OrderByDescending(x=>x.fit!.Value.score).ToArray();
-            if(candidates.Length>0 && (candidates.Length==1 || candidates[0].fit!.Value.score>candidates[1].fit!.Value.score)){
-                Layout=candidates[0].d;frames[0]=candidates[0].fit!.Value.frame;result.LayoutId=Layout.Id;result.Category=Layout.Category;
-            } else if(candidates.Length>0)Issue("ambiguousLayout","More than one layout matches the header.");
+            result.CandidateLayouts=candidates.Select(c=>c.d.Id).ToList();
+            if(candidates.Length>0 && candidates.Select(c=>c.d.Producer).Distinct(StringComparer.OrdinalIgnoreCase).Count()==1 && (candidates.Length==1 || candidates[0].fit!.Value.score>candidates[1].fit!.Value.score)){
+                Layout=candidates[0].d;frames[0]=candidates[0].fit!.Value.frame;result.LayoutId=Layout.Id;result.Category=Layout.Category;result.Producer=Layout.Producer;
+            } else if(candidates.Length>0){result.Status="ambiguous";Issue("ambiguousLayout","More than one layout matches the header: "+string.Join(", ",result.CandidateLayouts));}
             result.CompletedLevel=1;
         }
         result.DecodedPageCount=source.DecodedPageCount;

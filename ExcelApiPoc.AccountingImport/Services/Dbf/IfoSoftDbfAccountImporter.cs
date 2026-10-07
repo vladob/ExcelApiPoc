@@ -31,9 +31,9 @@ namespace ExcelApiPoc.AccountingImport.Services.Dbf
             if(fiscalYear.HasValue&&(fiscalYear<1900||fiscalYear>9999))throw new ArgumentOutOfRangeException(nameof(fiscalYear));
             path=Path.GetFullPath(file);selectedYear=fiscalYear;table=new DbfTable(path);
             try {
-                var matches=(Directory.Exists(definitions)?Directory.GetFiles(definitions,"dbf-*.json"):new[]{definitions})
+                var matches=LayoutFiles.Family(definitions,"dbf-")
                     .Select(DbfJournalDefinition.Load).Where(d=>d!=null&&d.Version==1&&d.Format=="DBF"&&(d.Category=="GL"||d.Category=="AF")&&d.RequiredFields.Count>0&&d.RequiredFields.All(k=>table.Fields.Any(f=>f.Name==k.Key&&f.Type.ToString()==k.Value))).ToArray();
-                if(matches.Length>1)throw new InvalidDataException("Ambiguous DBF account definition.");
+                if(matches.Length>1)throw new AmbiguousLayoutException(matches.Select(d=>d.Id));
                 definition=matches.SingleOrDefault();
                 if(definition==null)return;
                 var required=definition.Category=="GL"?AmountKeys.Concat(new[]{"account","name","period"}):new[]{"account","synthetic","analytical","name"};
@@ -61,7 +61,7 @@ namespace ExcelApiPoc.AccountingImport.Services.Dbf
         {
             token.ThrowIfCancellationRequested();if(level<ImportLevel.Recognize||level>ImportLevel.Normalize)throw new ArgumentOutOfRangeException(nameof(level));
             result.RequestedLevel=level;
-            if(result.CompletedLevel==0){result.CompletedLevel=1;if(definition!=null){result.LayoutId=definition.Id;result.Category=definition.Category;}}
+            if(result.CompletedLevel==0){result.CompletedLevel=1;if(definition!=null){result.LayoutId=definition.Id;result.Producer="IfoSoft";result.Category=definition.Category;}}
             if(definition==null)return result;
             if(level>=ImportLevel.Identify&&result.CompletedLevel<2){
                 var periods=new HashSet<string>();int active=0,deleted=0;

@@ -57,7 +57,7 @@ namespace ExcelApiPoc.AccountingImport.Services.Layouts
             path=Path.GetFullPath(file);format=Path.GetExtension(path).Equals(".xml",StringComparison.OrdinalIgnoreCase)?"XML":"CSV";selectedYear=fiscalYear;
             if(fiscalYear.HasValue&&(fiscalYear<1900||fiscalYear>9999))throw new ArgumentOutOfRangeException(nameof(fiscalYear));
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);result.Format=format;
-            definitions=(Directory.Exists(layouts)?Directory.GetFiles(layouts,"structured-*.json"):new[]{layouts})
+            definitions=LayoutFiles.Family(layouts,"structured-")
                 .Select(p=>JsonSerializer.Deserialize<StructuredDefinition>(File.ReadAllText(p),new JsonSerializerOptions{PropertyNameCaseInsensitive=true,UnmappedMemberHandling=System.Text.Json.Serialization.JsonUnmappedMemberHandling.Disallow}))
                 .Where(d=>d.Version==1&&d.Format==format).ToArray();
             foreach(var d in definitions){
@@ -79,7 +79,7 @@ namespace ExcelApiPoc.AccountingImport.Services.Layouts
                 prefix=ReadCsv(token).Take(3).ToArray();
                 if(prefix.Length<3)return;
                 var candidates=definitions.Where(d=>Regex.IsMatch(Single(prefix[1]),d.TitlePattern,RegexOptions.IgnoreCase)&&prefix[2].Fields.Length==d.Headers.Length&&d.Headers.Select((h,i)=>h=="{period}"?Regex.IsMatch(prefix[2].Fields[i].Trim(),@"^\d{1,2}/\d{4}$"):string.Equals(h,prefix[2].Fields[i].Trim(),StringComparison.OrdinalIgnoreCase)).All(x=>x)).ToArray();
-                if(candidates.Length>1)throw new InvalidDataException("Ambiguous CSV layout.");definition=candidates.SingleOrDefault();
+                if(candidates.Length>1)throw new AmbiguousLayoutException(candidates.Select(d=>d.Id));definition=candidates.SingleOrDefault();
             }else{
                 using(var reader=XmlReader.Create(path,Settings())){
                     reader.MoveToContent();string root=reader.Name;if(reader.NamespaceURI.Length>0)return;
@@ -89,10 +89,10 @@ namespace ExcelApiPoc.AccountingImport.Services.Layouts
                         if(reader.NodeType==XmlNodeType.Element&&reader.Depth==1){if(reader.Name=="vety")break;xmlHeader.Add((XElement)XNode.ReadFrom(reader));}else reader.Read();
                     }
                     var matches=definitions.Where(d=>d.Root==root&&Xml(xmlHeader,"typDoc")==d.DocumentType&&reader.NodeType==XmlNodeType.Element&&reader.Name=="vety").ToArray();
-                    if(matches.Length>1)throw new InvalidDataException("Ambiguous XML layout.");definition=matches.SingleOrDefault();
+                    if(matches.Length>1)throw new AmbiguousLayoutException(matches.Select(d=>d.Id));definition=matches.SingleOrDefault();
                 }
             }
-            if(definition!=null){result.Category=definition.Category;result.LayoutId=definition.Id;}
+            if(definition!=null){result.Category=definition.Category;result.LayoutId=definition.Id;result.Producer=definition.Producer;}
         }
         // Streams records at identification level; creates no retained journal/source rows.
         IEnumerable<XElement> XmlRecords(CancellationToken token)

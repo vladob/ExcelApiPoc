@@ -37,7 +37,7 @@ namespace ExcelApiPoc.AccountingImport.Services.Layouts
         public CrystalLayoutImporter(string file,string layouts,int? year=null){
             path=Path.GetFullPath(file);selectedYear=year;
             if(year.HasValue&&(year<1900||year>9999))throw new ArgumentOutOfRangeException(nameof(year));
-            definitions=(Directory.Exists(layouts)?Directory.GetFiles(layouts,"crystal-*.json"):new[]{layouts}).Select(p=>JsonSerializer.Deserialize<CrystalDefinition>(File.ReadAllText(p),new JsonSerializerOptions{PropertyNameCaseInsensitive=true,UnmappedMemberHandling=System.Text.Json.Serialization.JsonUnmappedMemberHandling.Disallow})).ToArray();
+            definitions=LayoutFiles.Family(layouts,"crystal-").Select(p=>JsonSerializer.Deserialize<CrystalDefinition>(File.ReadAllText(p),new JsonSerializerOptions{PropertyNameCaseInsensitive=true,UnmappedMemberHandling=System.Text.Json.Serialization.JsonUnmappedMemberHandling.Disallow})).ToArray();
             foreach(var d in definitions)if(d.Version!=1||!new[]{"AJ","GL","AF"}.Contains(d.Category)||d.Namespace.Length==0||d.RecordMarker.Length==0||d.Amounts.Concat(d.CompactFields).Any(k=>!d.Fields.ContainsKey(k)))throw new InvalidDataException("Invalid Crystal layout: "+d.Id);
         }
         void Issue(string code,string message,string severity="error"){if(!result.Issues.Any(v=>v.Code==code&&v.Message==message))result.Issues.Add(new ImportIssue{Code=code,Message=message,Severity=severity});}
@@ -62,9 +62,9 @@ namespace ExcelApiPoc.AccountingImport.Services.Layouts
             if(result.CompletedLevel==0){
                 int inspected=0;foreach(var fields in Sections(token)){
                     var matches = definitions.Where(layout => fields.ContainsKey(layout.RecordMarker) && layout.Fields.Values.All(fields.ContainsKey)).ToArray();
-                    if(matches.Length>1)throw new InvalidDataException("Ambiguous Crystal layout.");if(matches.Length==1){definition=matches[0];break;}if(++inspected>=4096)break;
+                    if(matches.Length>1)throw new AmbiguousLayoutException(matches.Select(candidate=>candidate.Id));if(matches.Length==1){definition=matches[0];break;}if(++inspected>=4096)break;
                 }
-                result.CompletedLevel=1;if(definition!=null){result.LayoutId=definition.Id;result.Category=definition.Category;}
+                result.CompletedLevel=1;if(definition!=null){result.LayoutId=definition.Id;result.Producer=definition.Producer;result.Category=definition.Category;}
             }
             if(definition==null)return result;var d=definition;
             if(level>=ImportLevel.Identify&&result.CompletedLevel<2){
