@@ -69,9 +69,14 @@ namespace ExcelApiPoc.AddIn.Services
                 if (applicable.Length == 0) continue;
                 var candidate = new SignificanceValue();
                 candidates.Add(candidate);
-                if (!string.Equals(report.Report.CurrencyCode, "EUR", StringComparison.OrdinalIgnoreCase))
+                // RegisterUZ may omit this optional field (including templates 690/727).
+                // Preserve the official amounts just as the reference and multi-year sheets do.
+                // An explicitly different currency still requires a conversion policy.
+                if (!string.IsNullOrWhiteSpace(report.Report.CurrencyCode) &&
+                    !string.Equals(report.Report.CurrencyCode.Trim(), "EUR", StringComparison.OrdinalIgnoreCase))
                 {
-                    Missing(candidate, "RegisterUZ report " + report.Report.Id + " does not specify EUR.");
+                    Missing(candidate, "RegisterUZ report " + report.Report.Id + " specifies unsupported currency " +
+                        report.Report.CurrencyCode + ".");
                     continue;
                 }
                 foreach (var mapping in applicable)

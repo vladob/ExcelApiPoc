@@ -27,8 +27,10 @@ current-period amount; comparative columns are not silently substituted.
 
 All applicable rows for a source within a report are added together. Different
 filings or competing templates are not added together. Missing mappings, missing
-rows, duplicate values, ambiguous reports, and non-EUR currency produce #N/A with
-an explanatory comment. Zero is reserved for an actual official zero. The hidden
+rows, duplicate values, ambiguous reports, and explicitly non-EUR currency produce #N/A with
+an explanatory comment. An omitted optional CurrencyCode does not suppress official
+amounts; values are kept in their source units, consistent with the existing
+RegisterUZ and multi-year worksheets. No currency conversion is performed. Zero is reserved for an actual official zero. The hidden
 PerformanceMatEvidence table retains the year, report ID, mapping key, printed row,
 row ordinal, data-column ordinal, and each amount. ValuesOverview formulas sum those
 hidden official amounts, so downstream formulas and the named range update normally.

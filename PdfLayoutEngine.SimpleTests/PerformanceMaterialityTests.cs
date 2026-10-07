@@ -107,6 +107,19 @@ public sealed class PerformanceMaterialityTests
     }
 
     [Fact]
+    public void Optional_currency_field_does_not_hide_official_values()
+    {
+        foreach (string? currency in new string?[] { null, "", "  ", "EUR", " eur " })
+        {
+            var statement = Statement(2025);
+            statement.FinancialReports[0].Report.CurrencyCode = currency!;
+            var result = PerformanceMaterialityResolver.Resolve(Package(statement), Mappings, "Náklady", 2025);
+            Assert.Equal(300m, result.Value);
+            Assert.Null(result.Problem);
+        }
+    }
+
+    [Fact]
     public void Unsupported_currency_and_ambiguous_reports_are_not_silently_used()
     {
         var statement = Statement(2025);
