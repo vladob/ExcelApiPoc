@@ -178,7 +178,7 @@ public sealed class AccountingImportCoordinatorTests
     }
 
     [Fact]
-    public void Import_RejectsMultipleJournalFilesForExistingSingleFileFormat()
+    public void Import_RejectsSelectingTheSameJournalFileTwice()
     {
         var request = new AccountingImportRequest
         {
@@ -194,7 +194,7 @@ public sealed class AccountingImportCoordinatorTests
         InvalidDataException exception = Assert.Throws<InvalidDataException>(
             () => AccountingImportCoordinator.CreateDefault().Import(request));
 
-        Assert.Contains("supports exactly one", exception.Message);
+        Assert.Contains("same journal file", exception.Message);
     }
 
     [Fact]

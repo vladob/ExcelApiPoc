@@ -2,6 +2,9 @@
 
 - Integrates the staged, layout-based accounting import runtime and embedded layouts.
 - Adds IVES Excel report layouts, including the inline general-ledger variant.
+- Supports selecting multiple journal files for all supported producers. Each source
+  is validated separately; duplicate file content is rejected and source locations
+  are retained. Softip monthly-period validation remains in place.
 - Resolves entity/year metadata from content, then filename fallback, then manual context.
 - Adds PerformanceMat with five materiality tables and hidden mapping/source evidence.
 - Uses official RegisterUZ values for the audited and previous years, summing matched

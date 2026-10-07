@@ -114,6 +114,45 @@ public sealed class AddInRuntimeTests
         finally { Delete(path); }
     }
 
+    [Fact] public void Multiple_journals_preserve_provenance_and_combine_amounts()
+    {
+        var first = Save(Journal("first"), "first.csv");
+        var second = Save(Journal("second", "23,45"), "second.csv");
+        try
+        {
+            var request = Request(first); request.JournalFilePaths.AddRange(new[] { first, second });
+            var result = AccountingImportCoordinator.CreateDefault().Import(request);
+            Assert.Equal(2, result.Journal.Rows.Count);
+            Assert.Equal(35.79m, result.Journal.Rows.Sum(r => r.DebitAmount ?? 0));
+            Assert.Equal(new[] { 1, 2 }, result.Journal.Rows.Select(r => r.SequenceNumber));
+            Assert.Equal(new[] { "first.csv", "second.csv" }, result.Journal.Rows.Select(r => r.SourceFields["SourceFile"]));
+            Assert.All(result.Journal.Rows, r => Assert.Contains(r.SourceFields["SourceFile"], r.SourceLocation));
+            Assert.Equal(2, result.Journal.ImportReport.RecordCounts["SourceFiles"]);
+        }
+        finally { Delete(first); Delete(second); }
+    }
+
+    [Theory]
+    [InlineData("duplicate")]
+    [InlineData("entity")]
+    [InlineData("year")]
+    [InlineData("amount")]
+    public void Multiple_journals_reject_invalid_or_duplicate_part(string problem)
+    {
+        var first = Save(Journal("first"), "first.csv");
+        string text = Journal("first");
+        if (problem == "entity") text = text.Replace("00323110", "99999999");
+        if (problem == "year") text = text.Replace("2024", "2023");
+        if (problem == "amount") text = text.Replace("12,34", "invalid");
+        var second = Save(text, "renamed.csv");
+        try
+        {
+            var request = Request(first); request.JournalFilePaths.AddRange(new[] { first, second });
+            Assert.Throws<InvalidDataException>(() => AccountingImportCoordinator.CreateDefault().Import(request));
+        }
+        finally { Delete(first); Delete(second); }
+    }
+
     [Fact] public void Ambiguous_global_detection_does_not_guess_a_producer()
     {
         var path = Save(Journal("text"), "U_DENNIK_00323110_2024.csv");

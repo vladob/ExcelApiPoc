@@ -130,12 +130,8 @@ namespace ExcelApiPoc.AccountingImport.Services
                     .Import(journalFilePaths, useStagedEngine ? Layouts.StagedImportRuntime.ProducerDirectory("Softip-MOP") : null);
             }
 
-            if (journalFilePaths.Count != 1)
-            {
-                throw new InvalidDataException(
-                    "Accounting format '" + request.AccountingFormat +
-                    "' supports exactly one accounting-journal file per import request.");
-            }
+            if (journalFilePaths.Count > 1)
+                return ImportCombinedJournals(request, journalFilePaths);
 
             string journalFilePath = journalFilePaths[0];
             if (useStagedEngine)
@@ -150,6 +146,74 @@ namespace ExcelApiPoc.AccountingImport.Services
                 request.AccountingFormat);
 
             return journalImporter.Import(journalFilePath);
+        }
+
+        private JournalImport ImportCombinedJournals(AccountingImportRequest request, IReadOnlyList<string> paths)
+        {
+            var result = new JournalImport
+            {
+                SourceFileName = paths.Count + " accounting journal files",
+                AccountingFormat = request.AccountingFormat,
+                Ico = request.ExpectedIco,
+                FiscalYear = request.ExpectedFiscalYear,
+                ImportedAtUtc = DateTime.UtcNow,
+                ImportReport = new ImportReport { AccountingFormat = request.AccountingFormat,
+                    ImportType = "AccountingJournal", SourceFileName = paths.Count + " accounting journal files" }
+            };
+            var hashes = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            var fullPaths = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            foreach (string path in paths)
+            {
+                if (!fullPaths.Add(Path.GetFullPath(path)))
+                    throw new InvalidDataException("The same journal file was selected more than once: " + Path.GetFileName(path));
+                string hash;
+                using (var sha = System.Security.Cryptography.SHA256.Create())
+                using (var input = File.OpenRead(path))
+                    hash = BitConverter.ToString(sha.ComputeHash(input)).Replace("-", "");
+                if (!hashes.Add(hash))
+                    throw new InvalidDataException("Duplicate journal file content: " + Path.GetFileName(path));
+                // Import through the same single-file path, including identity/year and
+                // printed controls. Never merge unvalidated source rows.
+                var part = Import(new AccountingImportRequest
+                {
+                    AccountingFormat = request.AccountingFormat, JournalFilePath = path,
+                    ExpectedIco = request.ExpectedIco, ExpectedFiscalYear = request.ExpectedFiscalYear
+                }).Journal;
+                JournalImportCapacity.EnsureCanAppend(result.Rows.Count, part.Rows.Count, part.SourceFileName);
+                result.TechnicalType = result.TechnicalType == null ? part.TechnicalType :
+                    result.TechnicalType == part.TechnicalType ? result.TechnicalType : "Mixed";
+                if (result.CompanyName == null) result.CompanyName = part.CompanyName;
+                result.NormalizedTextFieldCount += part.NormalizedTextFieldCount;
+                foreach (var row in part.Rows)
+                {
+                    row.SourceFields["SourceFile"] = part.SourceFileName;
+                    row.SourceFields["SourceFileHash"] = hash;
+                    row.SourceFields["SourceFilePath"] = Path.GetFullPath(path);
+                    row.SourceLocation = part.SourceFileName + ", " + row.SourceLocation;
+                    row.SequenceNumber = result.Rows.Count + 1;
+                    result.Rows.Add(row);
+                }
+                if (part.ImportReport != null)
+                {
+                    foreach (var count in part.ImportReport.RecordCounts)
+                    {
+                        result.ImportReport.RecordCounts.TryGetValue(count.Key, out int existing);
+                        result.ImportReport.RecordCounts[count.Key] = existing + count.Value;
+                    }
+                    result.ImportReport.ValidationResults.AddRange(part.ImportReport.ValidationResults);
+                    foreach (var diagnostic in part.ImportReport.Diagnostics)
+                    {
+                        if (diagnostic.Source == null) diagnostic.Source = new SourceProvenance { SourceFileName = part.SourceFileName };
+                        result.ImportReport.Diagnostics.Add(diagnostic);
+                    }
+                }
+            }
+            using (var sha = System.Security.Cryptography.SHA256.Create())
+                result.SourceFileHash = BitConverter.ToString(sha.ComputeHash(System.Text.Encoding.UTF8.GetBytes(
+                    string.Join("\n", hashes.OrderBy(h => h, StringComparer.Ordinal))))).Replace("-", "");
+            result.ImportReport.RecordCounts["SourceFiles"] = paths.Count;
+            result.ImportReport.RecordCounts["Transactions"] = result.Rows.Count;
+            return result;
         }
 
         private static TImporter SelectExactlyOne<TImporter>(

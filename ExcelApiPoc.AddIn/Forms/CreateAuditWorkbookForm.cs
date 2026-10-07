@@ -220,18 +220,6 @@ namespace ExcelApiPoc.AddIn.Forms
                 SetBusy(true);
                 try
                 {
-                    if (selectedPaths.Length > 1 &&
-                        !AreSoftipMopJournalFiles(selectedPaths))
-                    {
-                        SetBusy(false);
-                        MessageBox.Show(
-                            UiText.Get("Create.MultipleJournalFiles", _uiLanguage),
-                            UiText.Get("Create.SelectJournal", _uiLanguage),
-                            MessageBoxButtons.OK,
-                            MessageBoxIcon.Warning);
-                        return;
-                    }
-
                     _journalFilePaths.Clear();
                     _journalFilePaths.AddRange(selectedPaths);
                     UpdateJournalPathDisplay();
@@ -242,25 +230,6 @@ namespace ExcelApiPoc.AddIn.Forms
                     SetBusy(false);
                 }
             }
-        }
-
-        private static bool AreSoftipMopJournalFiles(IEnumerable<string> filePaths)
-        {
-            foreach (string filePath in filePaths)
-            {
-                if (!AccountingJournalDetectionService.TryDetect(
-                        filePath,
-                        out JournalDetectionResult detection) ||
-                    !string.Equals(
-                        detection.AccountingFormat,
-                        "Softip-MOP",
-                        StringComparison.OrdinalIgnoreCase))
-                {
-                    return false;
-                }
-            }
-
-            return true;
         }
 
         private void UpdateJournalPathDisplay()

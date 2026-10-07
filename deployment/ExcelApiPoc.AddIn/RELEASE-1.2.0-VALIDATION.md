@@ -103,3 +103,14 @@ Build the Windows package from a clean checkout:
 ```
 
 Windows package creation and the V1.2.0 packed-XLL smoke test remain unverified here.
+
+## Multiple journals — Sobrance URBIS, 2026-10-07
+
+The five original XLS journals supplied by the user each contain one worksheet and
+individual printed document/report totals. Combined import yields 29,582 records,
+with debit and credit both 36,628,672.90. Against the supplied XLS general ledger
+(556 accounts), both turnover differences are zero. No merged workbook or relaxed
+printed-total validation is used. 262 SimpleTests passed locally, including combined
+journal provenance, duplicate-content rejection and invalid-part rejection.
+The updated Windows add-in must be rebuilt before use; the previous V1.2.0 package
+will not include multi-file support.
