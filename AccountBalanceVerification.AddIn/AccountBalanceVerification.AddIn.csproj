@@ -17,4 +17,13 @@
     <ProjectReference Include="../ExcelApiPoc.MkSoft.Client/ExcelApiPoc.MkSoft.Client.csproj" />
     <ProjectReference Include="../AccountBalanceVerification.Import/AccountBalanceVerification.Import.csproj" />
   </ItemGroup>
+  <!-- NuGet supplies the PIA as a compile reference; embed the used COM types
+       so the XLL does not require separately installed Office PIAs at runtime. -->
+  <Target Name="EmbedExcelInteropTypes" AfterTargets="ResolveReferences" BeforeTargets="FindReferenceAssembliesForReferences">
+    <ItemGroup>
+      <ReferencePath Condition="'%(ReferencePath.Filename)' == 'Microsoft.Office.Interop.Excel'">
+        <EmbedInteropTypes>true</EmbedInteropTypes>
+      </ReferencePath>
+    </ItemGroup>
+  </Target>
 </Project>
