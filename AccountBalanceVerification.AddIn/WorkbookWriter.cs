@@ -26,13 +26,12 @@ namespace AccountBalanceVerification.AddIn
                     string[] labels = { "Účtovná jednotka", "IČO", "Účtovný rok", "Dátum inventarizácie", "Vypracoval", "Zodpovedná osoba", "Zdroj", "Načítané (UTC)", "Poznámka" };
                     object[] values = { package.EntityName, package.Ico, package.FiscalYear.ToString(), "", "", "", package.Source, package.RetrievedAtUtc.ToString("yyyy-MM-dd HH:mm:ss"), "" };
                     for (int i = 0; i < labels.Length; i++) { Text(intro, "A" + (i + 3), labels[i]); Text(intro, "B" + (i + 3), Convert.ToString(values[i])); }
-                    Unlock(intro, "B3:B4"); Unlock(intro, "B6:B8"); Unlock(intro, "B11");
+                    PrepareTextInput(intro, "B3:B4"); PrepareTextInput(intro, "B6:B8"); PrepareTextInput(intro, "B11");
                     var warnings = package.Warnings.ToList();
                     warnings.AddRange(sheets.Where(s => !package.OfficialAccounts.Any(a => a.AccountLevel == 3 && a.AccountCode == s.Code)).Select(s => "Chýba oficiálny názov účtu " + s.Code));
                     warnings.AddRange(package.Rows.Where(x => x.OpeningBalance + x.MovementsDebit - x.MovementsCredit != x.ClosingBalance).Select(x => "Nesúhlasí výpočet konečného zostatku: " + x.AccountNo));
                     for (int i = 0; i < warnings.Count; i++) Text(intro, "A" + (14 + i), warnings[i]);
                     Width(intro, "A:A", 48); Width(intro, "B:B", 70);
-                    intro.Protect(AllowFiltering: true);
                 }
                 finally { Marshal.ReleaseComObject(intro); }
                 foreach (var plan in sheets)
@@ -52,24 +51,49 @@ namespace AccountBalanceVerification.AddIn
                             var amounts = sheet.Range["C" + row, "F" + row];
                             try { amounts.Value2 = new object[,] { { (double)item.OpeningBalance, (double)item.MovementsDebit, (double)item.MovementsCredit, (double)item.ClosingBalance } }; amounts.NumberFormat = "#,##0.00;-#,##0.00"; }
                             finally { Marshal.ReleaseComObject(amounts); }
-                            Text(sheet, "G" + row, ""); Unlock(sheet, "G" + row); row++;
+                            Text(sheet, "G" + row, ""); PrepareTextInput(sheet, "G" + row); row++;
                         }
                         if (plan.Rows.Count > 0)
                         {
                             var range = sheet.Range["A4", "G" + (row - 1)];
-                            try { var table = sheet.ListObjects.Add(Excel.XlListObjectSourceType.xlSrcRange, range, Type.Missing, Excel.XlYesNoGuess.xlYes); table.Name = "ABV_" + plan.Code; Marshal.ReleaseComObject(table); }
+                            try
+                            {
+                                var table = sheet.ListObjects.Add(Excel.XlListObjectSourceType.xlSrcRange, range, Type.Missing, Excel.XlYesNoGuess.xlYes);
+                                try
+                                {
+                                    table.Name = "ABV_" + plan.Code;
+                                    table.ShowTotals = true;
+                                    var columns = table.ListColumns;
+                                    try
+                                    {
+                                        for (int c = 3; c <= 6; c++)
+                                        {
+                                            var column = columns[c];
+                                            try { column.TotalsCalculation = Excel.XlTotalsCalculation.xlTotalsCalculationSum; }
+                                            finally { Marshal.ReleaseComObject(column); }
+                                        }
+                                    }
+                                    finally { Marshal.ReleaseComObject(columns); }
+                                    var totals = table.TotalsRowRange;
+                                    try { row = totals.Row; }
+                                    finally { Marshal.ReleaseComObject(totals); }
+                                    Text(sheet, "A" + row, "Total");
+                                    Text(sheet, "B" + row, "Spolu (zobrazené účty)");
+                                    var totalAmounts = sheet.Range["C" + row, "F" + row];
+                                    try { totalAmounts.NumberFormat = "#,##0.00"; }
+                                    finally { Marshal.ReleaseComObject(totalAmounts); }
+                                }
+                                finally { Marshal.ReleaseComObject(table); }
+                            }
                             finally { Marshal.ReleaseComObject(range); }
-                            Text(sheet, "B" + row, "Spolu (zobrazené účty)");
-                            for (char c = 'C'; c <= 'F'; c++) { var total = sheet.Range[c.ToString() + row]; try { total.Formula = "=SUBTOTAL(109," + c + "5:" + c + (row - 1) + ")"; total.NumberFormat = "#,##0.00"; } finally { Marshal.ReleaseComObject(total); } }
                         }
                         else { Text(sheet, "A5", "Bez zostatkov a obratov."); row = 6; }
-                        Text(sheet, "A" + (row + 2), "Poznámka k syntetickému účtu"); Text(sheet, "B" + (row + 3), ""); Unlock(sheet, "B" + (row + 3) + ":G" + (row + 5));
-                        Text(sheet, "A" + (row + 7), "Zodpovedná osoba"); Unlock(sheet, "B" + (row + 7));
-                        Text(sheet, "A" + (row + 8), "Dátum / podpis"); Unlock(sheet, "B" + (row + 8) + ":D" + (row + 8));
+                        Text(sheet, "A" + (row + 2), "Poznámka k syntetickému účtu"); Text(sheet, "B" + (row + 3), ""); PrepareTextInput(sheet, "B" + (row + 3) + ":G" + (row + 5));
+                        Text(sheet, "A" + (row + 7), "Zodpovedná osoba"); PrepareTextInput(sheet, "B" + (row + 7));
+                        Text(sheet, "A" + (row + 8), "Dátum / podpis"); PrepareTextInput(sheet, "B" + (row + 8) + ":D" + (row + 8));
                         Width(sheet, "A:A", 16); Width(sheet, "B:B", 55); Width(sheet, "C:F", 19); Width(sheet, "G:G", 60);
                         sheet.Activate(); app.ActiveWindow.SplitRow = 4; app.ActiveWindow.FreezePanes = true;
                         sheet.EnableSelection = Excel.XlEnableSelection.xlNoRestrictions;
-                        sheet.Protect(AllowFiltering: true);
                     }
                     finally { Marshal.ReleaseComObject(sheet); }
                 }
@@ -81,7 +105,7 @@ namespace AccountBalanceVerification.AddIn
         }
         // Text formatting prevents source names/comments beginning with '=' being interpreted as formulas.
         private static void Text(Excel.Worksheet sheet, string address, string value) { var cell = sheet.Range[address]; try { cell.NumberFormat = "@"; cell.Value2 = value ?? ""; } finally { Marshal.ReleaseComObject(cell); } }
-        private static void Unlock(Excel.Worksheet sheet, string address) { var cell = sheet.Range[address]; try { cell.Locked = false; cell.NumberFormat = "@"; cell.WrapText = true; } finally { Marshal.ReleaseComObject(cell); } }
+        private static void PrepareTextInput(Excel.Worksheet sheet, string address) { var cell = sheet.Range[address]; try { cell.NumberFormat = "@"; cell.WrapText = true; } finally { Marshal.ReleaseComObject(cell); } }
         private static void Width(Excel.Worksheet sheet, string address, double width) { var range = sheet.Range[address]; try { range.ColumnWidth = width; } finally { Marshal.ReleaseComObject(range); } }
     }
 }
