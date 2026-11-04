@@ -8,7 +8,7 @@ namespace AccountBalanceVerification.AddIn
 {
     internal static class WorkbookWriter
     {
-        public static void Create(VerificationPackage package, bool includeEmpty)
+        public static string Create(VerificationPackage package, bool includeEmpty)
         {
             var sheets = WorkbookPlan.Build(package, includeEmpty);
             var app = (Excel.Application)ExcelDnaUtil.Application;
@@ -99,6 +99,7 @@ namespace AccountBalanceVerification.AddIn
                 }
                 var first = (Excel.Worksheet)book.Worksheets[1]; first.Activate(); Marshal.ReleaseComObject(first);
                 book.Saved = false;
+                return book.Name;
             }
             catch { if (book != null) book.Close(false); throw; }
             finally { app.ScreenUpdating = previousScreen; if (book != null) Marshal.ReleaseComObject(book); }
