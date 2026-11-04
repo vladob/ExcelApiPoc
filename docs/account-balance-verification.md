@@ -21,19 +21,25 @@ The legal-form mapping is the supplied 119 -> 3, 801 -> 2, otherwise 1. Verify t
 
 GET /api/v1/mksoft/clients/{clientErpId}/years/{fiscalYear}/general-ledger?includeEmptyAccounts=false
 
-Uses the existing AuditAddIn connection string and API-key user lookup. Configure explicit permitted client IDs per existing user ID, for example:
+Uses the existing AuditAddIn connection string and active API-key user lookup.
+Run Database/AuditAddIn/Migrations/MkSoftVerificationV1/020_AddUserMkSoftAccess.sql
+before publishing the updated API. This idempotent migration adds
+Settings.Users.CanAccessMkSoft (bit NOT NULL, default 0); it does not grant access.
 
-```json
-{
-  "MkSoft": {
-    "ClientAccess": {
-      "123": [11, 895]
-    }
-  }
-}
+Enable each approved auditor/assistant using their Settings.Users ID:
+
+```sql
+UPDATE [AuditAddIn].[Settings].[Users]
+SET [CanAccessMkSoft] = 1
+WHERE [Id] IN (1); -- replace/add the approved user IDs
 ```
 
-Replace 123 with the actual Users ID. Missing access configuration returns 403. Invalid keys return 401. Missing entity returns 404. No keys belong in repository configuration. This is an initial explicit access policy; replace with a database-backed assignment repository if required later.
+An active user with CanAccessMkSoft = 1 may access every available MkSoft client/year.
+Unknown/inactive/invalid keys return 401; active users without permission return 403.
+The flag is read on each request: revocation takes effect on subsequent requests.
+The old MkSoft:ClientAccess configuration is no longer consulted and may be removed
+from server configuration and development user-secrets. File import framework access
+and other API endpoints are unchanged. No add-in update is required.
 
 The wrapper always limits classes to 0–4. includeEmptyAccounts affects detailed ledger rows. The add-in always requests false. Its separate UI checkbox adds empty official three-digit sheets without adding empty detail rows.
 
@@ -54,7 +60,7 @@ File mode accepts journal only, ledger only, or both through the existing import
 1. Run the tests and builds with Build.ps1.
 2. Execute both wrappers for client 11/year 2025; compare values with the underlying TVFs and confirm only classes 0–4.
 3. Check false omits only rows where all four displayed quantities are zero; true retains any additional source rows.
-4. Test API invalid key (401), unassigned client (403), valid assigned client (200), absent entity (404).
+4. Test API invalid key (401), active user without permission (403), permitted user with two different clients (200), absent entity (404).
 5. Load both XLLs in Excel 365 x64; check independent ribbons and settings.
 6. Create a workbook; test leading-zero/alphanumeric codes, movements with zero closing, empty synthetic option, filtering, copying, editing comments and amounts, and native Table Total Row settings.
 7. Save/reopen .xlsx without the add-in and confirm comments, filtering and native table totals remain and all sheets are unprotected.

@@ -28,6 +28,19 @@ public sealed class AccountDetailSettingsRepository
         return result is null ? null : (int)result;
     }
 
+    // Null means unknown/inactive key; false means an active user without MkSoft access.
+    // Read on every request so grants and revocations take effect without restarting IIS.
+    public async Task<bool?> ResolveMkSoftAccessAsync(string apiKey, CancellationToken ct)
+    {
+        await using var connection = Connect();
+        await connection.OpenAsync(ct);
+        await using var command = new SqlCommand(
+            "SELECT [CanAccessMkSoft] FROM [Settings].[Users] WHERE [ApiKey] = @Key AND [IsActive] = 1", connection);
+        command.Parameters.Add("@Key", SqlDbType.VarChar, 64).Value = apiKey;
+        var result = await command.ExecuteScalarAsync(ct);
+        return result is null || result is DBNull ? null : (bool)result;
+    }
+
     public async Task<AccountDetailTextSettings> GetTextsAsync(int userId, CancellationToken ct)
     {
         const string sql = """
