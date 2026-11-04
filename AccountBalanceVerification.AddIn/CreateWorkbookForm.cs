@@ -26,6 +26,7 @@ namespace AccountBalanceVerification.AddIn
         private readonly CheckBox empty = new CheckBox { Text = "Zahrnúť syntetické účty bez zostatkov a obratov", AutoSize = true };
         private readonly Button create = new Button { Text = "Vytvoriť", AutoSize = true };
         private bool busy;
+        public string CreatedWorkbookName { get; private set; }
         public CreateWorkbookForm()
         {
             Text = "Inventarizácia"; Width = 730; Height = 590; StartPosition = FormStartPosition.CenterScreen;
@@ -87,7 +88,7 @@ namespace AccountBalanceVerification.AddIn
                 if (!string.IsNullOrWhiteSpace(entity.Text)) package.EntityName = entity.Text.Trim();
                 if (!string.IsNullOrWhiteSpace(ico.Text)) package.Ico = ico.Text.Trim();
                 // The continuation runs on the WinForms/Excel UI thread; no COM calls run in Task.Run.
-                WorkbookWriter.Create(package, empty.Checked);
+                CreatedWorkbookName = WorkbookWriter.Create(package, empty.Checked);
                 busy = false; Close();
             }
             catch (Exception ex) { MessageBox.Show(ex.Message, "Inventarizácia", MessageBoxButtons.OK, MessageBoxIcon.Error); }
