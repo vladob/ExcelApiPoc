@@ -26,4 +26,17 @@
       </ReferencePath>
     </ItemGroup>
   </Target>
+  <!-- Excel-DNA loads XLL.config, not the SDK-generated DLL.config.
+       Copy generated redirects after XLL creation and before optional packing. -->
+  <Target Name="CopyXllBindingRedirects" AfterTargets="ExcelDnaBuild" BeforeTargets="ExcelDnaPack"
+          Condition="'$(RunExcelDnaBuild)' == 'true'">
+    <ItemGroup>
+      <VerificationXll Include="$(TargetDir)$(TargetName)-AddIn*.xll" Exclude="$(TargetDir)*-packed.xll" />
+    </ItemGroup>
+    <Error Condition="!Exists('$(TargetPath).config')" Text="Generated binding redirect configuration is missing: $(TargetPath).config" />
+    <Copy SourceFiles="$(TargetPath).config" DestinationFiles="%(VerificationXll.Identity).config" />
+    <ItemGroup>
+      <FileWrites Include="@(VerificationXll->'%(Identity).config')" />
+    </ItemGroup>
+  </Target>
 </Project>
