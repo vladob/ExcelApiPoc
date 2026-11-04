@@ -8,7 +8,8 @@ public sealed class AccountDetailApiKeyOperationFilter : IOperationFilter
     public void Apply(OpenApiOperation operation, OperationFilterContext context)
     {
         if (context.ApiDescription.RelativePath is not { } path
-            || !path.StartsWith("api/v1/account-detail/", StringComparison.OrdinalIgnoreCase))
+            || !(path.StartsWith("api/v1/account-detail/", StringComparison.OrdinalIgnoreCase)
+                 || path.StartsWith("api/v1/mksoft/", StringComparison.OrdinalIgnoreCase)))
             return;
 
         operation.Security ??= new List<OpenApiSecurityRequirement>();

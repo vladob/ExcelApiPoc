@@ -1,0 +1,10 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../AccountBalanceVerification.Core/AccountBalanceVerification.Core.csproj"/>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.4"/>
+  </ItemGroup>
+</Project>

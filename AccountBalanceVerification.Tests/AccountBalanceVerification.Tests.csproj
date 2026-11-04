@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../AccountBalanceVerification.Core/AccountBalanceVerification.Core.csproj"/>
+    <ProjectReference Include="../ExcelApiPoc.MkSoft.Client/ExcelApiPoc.MkSoft.Client.csproj"/>
+    <ProjectReference Include="../AccountBalanceVerification.Import/AccountBalanceVerification.Import.csproj"/>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0"/>
+    <PackageReference Include="xunit" Version="2.5.3"/>
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.5.3"/>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="../ExcelApiPoc.AccountingImport.Tests/TestData/Urbis/HL_KNIHA_00325791_202412.xls" Link="TestData/HL_KNIHA_00325791_202412.xls" CopyToOutputDirectory="PreserveNewest"/>
+  </ItemGroup>
+</Project>

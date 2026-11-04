@@ -30,6 +30,10 @@ builder.Services.AddScoped<AuditCalculationPackageService>();
 builder.Services.AddScoped<RegisterUzOnDemandLoadService>();
 builder.Services.AddScoped<AccountDetailSettingsRepository>();
 
+builder.Services.AddScoped(sp => new ExcelApiPoc.MkSoft.DataAccess.MkSoftRepository(
+    sp.GetRequiredService<IConfiguration>().GetConnectionString("AuditAddIn")
+    ?? throw new InvalidOperationException("Connection string AuditAddIn is not configured.")));
+
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
@@ -41,6 +45,7 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 app.MapAccountDetailSettings();
+app.MapMkSoft();
 
 app.MapGet("/api/health", () =>
 {

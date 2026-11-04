@@ -1,0 +1,10 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../AccountBalanceVerification.Core/AccountBalanceVerification.Core.csproj"/>
+    <PackageReference Include="Microsoft.Data.SqlClient" Version="7.0.2"/>
+  </ItemGroup>
+</Project>

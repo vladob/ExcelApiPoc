@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net48</TargetFramework><LangVersion>latest</LangVersion>
+    <GenerateAssemblyInfo>true</GenerateAssemblyInfo><Version>0.1.0</Version>
+    <ExcelDnaCreate32BitAddIn>false</ExcelDnaCreate32BitAddIn>
+    <ExcelDnaCreate64BitAddIn>true</ExcelDnaCreate64BitAddIn>
+    <RunExcelDnaPack>false</RunExcelDnaPack>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <GenerateBindingRedirectsOutputType>true</GenerateBindingRedirectsOutputType>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="ExcelDna.AddIn" Version="1.9.0" />
+    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.3" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.Office.Interop.Excel" Version="16.0.18925.20022" />
+    <Reference Include="System.Windows.Forms" /><Reference Include="System.Drawing" /><Reference Include="System.Net.Http" /><Reference Include="Microsoft.CSharp" />
+    <ProjectReference Include="../AccountBalanceVerification.Core/AccountBalanceVerification.Core.csproj" />
+    <ProjectReference Include="../ExcelApiPoc.MkSoft.Client/ExcelApiPoc.MkSoft.Client.csproj" />
+    <ProjectReference Include="../AccountBalanceVerification.Import/AccountBalanceVerification.Import.csproj" />
+  </ItemGroup>
+</Project>
