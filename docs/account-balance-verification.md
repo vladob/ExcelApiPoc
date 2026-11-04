@@ -43,7 +43,7 @@ Run deployment/AccountBalanceVerification.AddIn/Build.ps1 on the Windows develop
 
 The Inventarizácia ribbon opens a creation form for MkSoft or files. API settings are stored separately under %APPDATA%/AccountBalanceVerification/settings.json, matching the existing text-key approach. The workbook is a new unsaved workbook; save it as .xlsx. It requires no add-in to read or edit comments afterward.
 
-Accounting data are locked constants. Tables allow filtering and copying; comments, synthetic notes and responsible-person/signature cells are unlocked. Filtered totals use protected SUBTOTAL formulas. Worksheet protection is for accidental edits, not encryption. Account codes and names are written as text, preserving leading zeros and preventing formula interpretation. Comments use ordinary cells, not Excel threaded comments. No refresh/replacement of existing workbooks is implemented, so existing user comments cannot be overwritten by regeneration.
+Accounting data are initially written as constants, and all worksheets remain unprotected so auditors can edit data and layout. Tables allow filtering and copying. Native table Total Rows use Sum for opening balance, MD movements, Dal movements and closing balance; labels match the worksheet 343 reference (Total / Spolu (zobrazené účty)). Totals respond to filtering. Comments, synthetic notes and responsible-person/signature cells remain editable. Account codes and names are written as text, preserving leading zeros and preventing formula interpretation. Comments use ordinary cells, not Excel threaded comments. No refresh/replacement of existing workbooks is implemented, so existing user comments cannot be overwritten by regeneration.
 
 The introductory worksheet is provisional. Captions use Obrat MD / Obrat Dal. Inventory-confirmed amounts and differences are omitted pending the decision on their behaviour. Physical signature fields are text only; attachments and digital signatures are deferred.
 
@@ -56,8 +56,8 @@ File mode accepts journal only, ledger only, or both through the existing import
 3. Check false omits only rows where all four displayed quantities are zero; true retains any additional source rows.
 4. Test API invalid key (401), unassigned client (403), valid assigned client (200), absent entity (404).
 5. Load both XLLs in Excel 365 x64; check independent ribbons and settings.
-6. Create a workbook; test leading-zero/alphanumeric codes, movements with zero closing, empty synthetic option, filtering, copying, editing comments and blocked amount edits.
-7. Save/reopen .xlsx without the add-in and confirm comments, filtering and protection remain.
+6. Create a workbook; test leading-zero/alphanumeric codes, movements with zero closing, empty synthetic option, filtering, copying, editing comments and amounts, and native Table Total Row settings.
+7. Save/reopen .xlsx without the add-in and confirm comments, filtering and native table totals remain and all sheets are unprotected.
 
 No live SQL Server or Excel execution is available in the build environment. Import completeness is not yet exposed by the database contract; each MkSoft workbook explicitly records that it has not been verified.
 
