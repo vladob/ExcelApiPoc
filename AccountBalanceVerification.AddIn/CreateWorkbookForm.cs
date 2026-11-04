@@ -8,6 +8,7 @@ using Newtonsoft.Json;
 using AccountBalanceVerification.Core;
 using AccountBalanceVerification.Import;
 using ExcelApiPoc.MkSoft.Client;
+using Excel = Microsoft.Office.Interop.Excel;
 namespace AccountBalanceVerification.AddIn
 {
     internal sealed class ConnectionSettings
@@ -26,9 +27,10 @@ namespace AccountBalanceVerification.AddIn
         private readonly CheckBox empty = new CheckBox { Text = "Zahrnúť syntetické účty bez zostatkov a obratov", AutoSize = true };
         private readonly Button create = new Button { Text = "Vytvoriť", AutoSize = true };
         private bool busy;
-        public string CreatedWorkbookName { get; private set; }
-        public CreateWorkbookForm()
+        private readonly Excel.Workbook workbook;
+        public CreateWorkbookForm(Excel.Workbook workbook)
         {
+            this.workbook = workbook ?? throw new ArgumentNullException(nameof(workbook));
             Text = "Inventarizácia"; Width = 730; Height = 590; StartPosition = FormStartPosition.CenterScreen;
             source.Items.AddRange(new object[] { "MkSoft", "Súbory" }); source.SelectedIndex = 0;
             producer.Items.AddRange(new object[] { "IfoSoft", "Urbis", "IVES", "OMEGA", "Softip-MOP" }); producer.SelectedIndex = 0;
@@ -63,6 +65,7 @@ namespace AccountBalanceVerification.AddIn
         private async void Create(object sender, EventArgs e)
         {
             if (!int.TryParse(year.Text, out int fiscalYear) || fiscalYear < 1900 || fiscalYear > 9999) { MessageBox.Show("Zadajte platný rok."); return; }
+            bool populationStarted = false;
             busy = true; Controls[0].Enabled = false; UseWaitCursor = true;
             try
             {
@@ -88,10 +91,17 @@ namespace AccountBalanceVerification.AddIn
                 if (!string.IsNullOrWhiteSpace(entity.Text)) package.EntityName = entity.Text.Trim();
                 if (!string.IsNullOrWhiteSpace(ico.Text)) package.Ico = ico.Text.Trim();
                 // The continuation runs on the WinForms/Excel UI thread; no COM calls run in Task.Run.
-                CreatedWorkbookName = WorkbookWriter.Create(package, empty.Checked);
-                busy = false; Close();
+                populationStarted = true;
+                WorkbookWriter.Populate(workbook, package, empty.Checked);
+                busy = false; DialogResult = DialogResult.OK; Close();
             }
-            catch (Exception ex) { MessageBox.Show(ex.Message, "Inventarizácia", MessageBoxButtons.OK, MessageBoxIcon.Error); }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Inventarizácia", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                // Source failures leave the blank workbook available for retry.
+                // A rendering failure aborts, so the ribbon discards the partial output.
+                if (populationStarted) { busy = false; DialogResult = DialogResult.Abort; Close(); }
+            }
             finally { busy = false; Controls[0].Enabled = true; UseWaitCursor = false; }
         }
     }
