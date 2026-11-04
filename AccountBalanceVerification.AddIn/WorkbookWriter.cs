@@ -8,16 +8,15 @@ namespace AccountBalanceVerification.AddIn
 {
     internal static class WorkbookWriter
     {
-        public static string Create(VerificationPackage package, bool includeEmpty)
+        public static void Populate(Excel.Workbook book, VerificationPackage package, bool includeEmpty)
         {
+            if (book == null) throw new ArgumentNullException(nameof(book));
             var sheets = WorkbookPlan.Build(package, includeEmpty);
             var app = (Excel.Application)ExcelDnaUtil.Application;
             bool previousScreen = app.ScreenUpdating;
-            Excel.Workbook book = null;
             try
             {
                 app.ScreenUpdating = false;
-                book = app.Workbooks.Add(Excel.XlWBATemplate.xlWBATWorksheet);
                 var intro = (Excel.Worksheet)book.Worksheets[1];
                 try
                 {
@@ -99,10 +98,8 @@ namespace AccountBalanceVerification.AddIn
                 }
                 var first = (Excel.Worksheet)book.Worksheets[1]; first.Activate(); Marshal.ReleaseComObject(first);
                 book.Saved = false;
-                return book.Name;
             }
-            catch { if (book != null) book.Close(false); throw; }
-            finally { app.ScreenUpdating = previousScreen; if (book != null) Marshal.ReleaseComObject(book); }
+            finally { app.ScreenUpdating = previousScreen; }
         }
         // Text formatting prevents source names/comments beginning with '=' being interpreted as formulas.
         private static void Text(Excel.Worksheet sheet, string address, string value) { var cell = sheet.Range[address]; try { cell.NumberFormat = "@"; cell.Value2 = value ?? ""; } finally { Marshal.ReleaseComObject(cell); } }
