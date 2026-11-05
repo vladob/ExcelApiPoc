@@ -76,6 +76,46 @@ public class WorkbookPlanTests
         Assert.Contains(package.Rows, x => x.AccountNo == "431/B");
         Assert.NotEmpty(WorkbookPlan.Build(package, false));
     }
+    [Theory]
+    [InlineData(320, false)]
+    [InlineData(321, true)]
+    public void JournalOnlyAccountWithCancelledCreditDoesNotBlockInventory(int correction, bool shouldFail)
+    {
+        var folder = System.IO.Path.Combine(System.IO.Path.GetTempPath(), Guid.NewGuid().ToString("N"));
+        System.IO.Directory.CreateDirectory(folder);
+        try
+        {
+            var journal = System.IO.Path.Combine(folder, "U_DENNIK_12345678_202512.CSV");
+            var ledger = System.IO.Path.Combine(folder, "HL_KNIHA_12345678_202512.CSV");
+            System.IO.File.WriteAllText(journal,
+                "12345678 TEST\nUctovny dennik\n" +
+                "DD;CisloD;Datum;Popis operacie;Ucet_MD;Pol_MD;Zdr_MD;Str_MD;Zak_MD;Suma_MD;Ucet_D;Odd_D;Pol_D;Zdr_D;Str_D;Zak_D;Suma_D\n" +
+                "PS;0;01.01.2025;Opening;211;;;;;100;701;;;;;;100\n" +
+                "ZI;1;30.06.2025;Correction;;;;;;0;082;;;;;;-320\n" +
+                "OP;2;31.10.2025;Correction;;;;;;0;082;;;;;;" + correction + "\n",
+                new System.Text.UTF8Encoding(true));
+            System.IO.File.WriteAllText(ledger,
+                ";;12345678 TEST;\n;;Hlavna kniha k 12/2025;\n" +
+                "Syn;Ana;Typ;P;Odd;Polozka;KZdroja;Program;Stred;Zakaz;Nazov uctu;Poc_M;Poc_D;Roc_M;Roc_D;12/2025;12/2025;Kon_M;Kon_D;Plan\n" +
+                "211;;M;N;;;;;;;Cash;100;;;;;;100;;\n" +
+                "701;;D;N;;;;;;;Opening;;100;;;;;;100;\n",
+                new System.Text.UTF8Encoding(true));
+            if (shouldFail)
+            {
+                var error = Assert.Throws<InvalidOperationException>(() =>
+                    AccountBalanceVerification.Import.FileSource.Read("IfoSoft", journal, ledger, "12345678", 2025));
+                Assert.Contains("082", error.Message);
+            }
+            else
+            {
+                var package = AccountBalanceVerification.Import.FileSource.Read("IfoSoft", journal, ledger, "12345678", 2025);
+                Assert.Equal(100m, package.Rows.Single(x => x.AccountNo == "211").ClosingBalance);
+                Assert.DoesNotContain(WorkbookPlan.Build(package, false), x => x.Code == "082");
+            }
+        }
+        finally { System.IO.Directory.Delete(folder, true); }
+    }
+
     private sealed class FakeHandler : HttpMessageHandler
     {
         public string Url; public string Key;
