@@ -44,8 +44,18 @@ namespace AccountBalanceVerification.Import
                 if (package.JournalLedgerReconciliation != null)
                 {
                     var reconciliation = package.JournalLedgerReconciliation;
-                    if (!reconciliation.IsReconciled || reconciliation.JournalOnlyAccountCount != 0 || reconciliation.LedgerOnlyAccountCount != 0)
-                        throw new InvalidOperationException("Denník a hlavná kniha nesúhlasia. Rozdiely vyriešte pred vytvorením zošita.");
+                    var differences = reconciliation.Accounts.Where(x =>
+                        (!x.IsReconciled || !x.HasJournalActivity || !x.HasGeneralLedgerAccount) &&
+                        !(x.JournalOpeningDebit == 0m && x.JournalOpeningCredit == 0m &&
+                          x.JournalDebitTurnover == 0m && x.JournalCreditTurnover == 0m &&
+                          x.LedgerOpeningDebit == 0m && x.LedgerOpeningCredit == 0m &&
+                          x.LedgerDebitTurnover == 0m && x.LedgerCreditTurnover == 0m &&
+                          x.LedgerClosingDebit == 0m && x.LedgerClosingCredit == 0m)).ToList();
+                    if (differences.Count != 0)
+                        throw new InvalidOperationException("Denník a hlavná kniha nesúhlasia. Účty: " +
+                            string.Join(", ", differences.Take(20).Select(x => x.AccountCode)) +
+                            (differences.Count > 20 ? ", …" : "") +
+                            ". Rozdiely vyriešte pred vytvorením zošita.");
                     foreach (var x in reconciliation.Accounts) result.Rows.Add(new LedgerRow {
                         AccountNo = x.AccountCode, AccountName = x.GeneralLedgerAccountName,
                         OpeningDebit = x.EffectiveOpeningDebit, OpeningCredit = x.EffectiveOpeningCredit,
