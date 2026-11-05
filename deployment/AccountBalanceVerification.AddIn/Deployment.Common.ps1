@@ -61,7 +61,11 @@ function Set-ExcelAddInRegistration {
 
     $resolvedXllPath = (Resolve-Path -LiteralPath $XllPath).Path
     $optionsPath = Get-ExcelOptionsPath
-    New-Item -Path $optionsPath -Force | Out-Null
+    # Force on an existing registry key clears its values, including other add-ins.
+    # Only create the key when it is absent.
+    if (-not (Test-Path -LiteralPath $optionsPath)) {
+        New-Item -Path $optionsPath | Out-Null
+    }
 
     $registrations = @(Get-ExcelOpenRegistrations)
     $productRegistrations = @(
