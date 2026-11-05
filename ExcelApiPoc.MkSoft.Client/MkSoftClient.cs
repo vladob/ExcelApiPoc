@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
@@ -18,6 +19,22 @@ namespace ExcelApiPoc.MkSoft.Client
             if (baseUri.Scheme != "https" && baseUri.Scheme != "http") throw new ArgumentException("HTTP(S) URL required.");
             this.apiKey = apiKey;
         }
+        public async Task<System.Collections.Generic.List<MkSoftEntity>> FindEntitiesAsync(int fiscalYear, int? clientErpId, string ico, CancellationToken ct)
+        {
+            var path = "api/v1/mksoft/entities?fiscalYear=" + fiscalYear;
+            if (clientErpId.HasValue) path += "&clientErpId=" + clientErpId.Value;
+            if (!string.IsNullOrWhiteSpace(ico)) path += "&ico=" + Uri.EscapeDataString(ico.Trim());
+            using (var request = new HttpRequestMessage(HttpMethod.Get, new Uri(baseUri, path)))
+            {
+                request.Headers.Add("X-Api-Key", apiKey);
+                using (var response = await http.SendAsync(request, ct).ConfigureAwait(false))
+                {
+                    if (!response.IsSuccessStatusCode) throw new InvalidOperationException("MkSoft API: " + (int)response.StatusCode + " " + response.ReasonPhrase);
+                    return JsonConvert.DeserializeObject<System.Collections.Generic.List<MkSoftEntity>>(await response.Content.ReadAsStringAsync().ConfigureAwait(false))
+                        ?? throw new InvalidOperationException("Empty entity response.");
+                }
+            }
+        }
         public async Task ApplyFrameworkAsync(VerificationPackage package, string frameworkCode, CancellationToken ct)
         {
             var path = "api/v1/account-frameworks/" + Uri.EscapeDataString(frameworkCode)
@@ -31,6 +48,7 @@ namespace ExcelApiPoc.MkSoft.Client
                     var framework = JsonConvert.DeserializeObject<FrameworkResponse>(await response.Content.ReadAsStringAsync().ConfigureAwait(false));
                     if (framework == null || framework.Definitions == null) throw new InvalidOperationException("Missing account framework.");
                     package.AccountFrameworkVersionId = framework.FrameworkVersionId;
+                    var fallbackNames = package.OfficialAccounts.ToArray();
                     package.OfficialAccounts.Clear();
                     foreach (var item in framework.Definitions)
                         if (WorkbookPlan.InScope(item.AccountCode)) package.OfficialAccounts.Add(new OfficialAccount {
@@ -38,6 +56,8 @@ namespace ExcelApiPoc.MkSoft.Client
                             AccountLevel = item.AccountLevel,
                             ParentAccountCode = item.AccountCode.Length > 1 ? item.AccountCode.Substring(0, item.AccountCode.Length - 1) : null
                         });
+                    foreach (var fallback in fallbackNames)
+                        if (!package.OfficialAccounts.Any(x => x.AccountCode == fallback.AccountCode)) package.OfficialAccounts.Add(fallback);
                 }
             }
         }

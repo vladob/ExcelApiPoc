@@ -1,4 +1,4 @@
-INVENTARIZACIA - Account Balance Verification 0.1.0 (pilot)
+INVENTARIZACIA - Account Balance Verification 0.1.2 (pilot)
 
 Requirements: Windows, Microsoft 365 Excel 64-bit, .NET Framework 4.8.
 No administrator rights are required.
@@ -12,6 +12,10 @@ blocks unsigned add-ins, ask your administrator to approve this package.
 
 CONNECTION
 Obtain the API URL and your own API key from the administrator.
+Use Nastavenia > Ulozit to save them and the include-empty-accounts option.
+MkSoft: enter year and client ID or ICO, load details, review, then create.
+Subory: select journal and/or ledger, optionally chart of accounts; review
+detected identity/year and select the official account framework.
 Both MkSoft and file imports need API access. File imports retrieve the official
 account framework from the API. localhost refers to your own computer and is
 not the office server address. Connect to the office network/VPN as required.

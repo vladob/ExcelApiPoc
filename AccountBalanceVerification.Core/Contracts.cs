@@ -3,6 +3,15 @@ using System.Collections.Generic;
 using System.Linq;
 namespace AccountBalanceVerification.Core
 {
+    public sealed class MkSoftEntity
+    {
+        public int ClientErpId { get; set; }
+        public int FiscalYear { get; set; }
+        public string Ico { get; set; } = "";
+        public string EntityName { get; set; } = "";
+        public int LegalForm { get; set; }
+        public string FrameworkCode { get; set; } = "";
+    }
     public sealed class LedgerRow
     {
         public string AccountNo { get; set; } = "";

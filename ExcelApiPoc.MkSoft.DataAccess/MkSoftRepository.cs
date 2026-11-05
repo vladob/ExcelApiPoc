@@ -9,6 +9,39 @@ public sealed class MkSoftRepository
 {
     private readonly string connectionString;
     public MkSoftRepository(string connectionString) { this.connectionString = connectionString; }
+    public async Task<System.Collections.Generic.List<MkSoftEntity>> FindEntitiesAsync(int? clientErpId, string ico, int fiscalYear, CancellationToken ct)
+    {
+        // By ID may also carry an IČO constraint. No arbitrary TOP(1) for ambiguous IČO matches.
+        var source = clientErpId.HasValue
+            ? "[MkSoft].[EntityInfo](@ClientErpId, @FiscalYear)"
+            : "[MkSoft].[EntitiesByIco](@Ico, @FiscalYear)";
+        var sql = $"""
+            SELECT e.ClientErpId, e.ICO, e.NAZOV1, e.PRAVNAFORMA, af.Code
+            FROM {source} e
+            LEFT JOIN Accounts.AccountFrameworkVersion v ON v.Id =
+                CASE WHEN e.PRAVNAFORMA = 119 THEN 3 WHEN e.PRAVNAFORMA = 801 THEN 2 ELSE 1 END
+            LEFT JOIN Accounts.AccountFramework af ON af.Id = v.AccountFrameworkId
+            WHERE (@Ico IS NULL OR TRY_CONVERT(int, e.ICO) = @Ico)
+            ORDER BY e.ClientErpId;
+            """;
+        await using var connection = new SqlConnection(connectionString);
+        await connection.OpenAsync(ct);
+        await using var command = new SqlCommand(sql, connection) { CommandTimeout = 120 };
+        command.Parameters.Add("@ClientErpId", SqlDbType.Int).Value = (object)clientErpId ?? DBNull.Value;
+        command.Parameters.Add("@Ico", SqlDbType.Int).Value = string.IsNullOrEmpty(ico) ? DBNull.Value : (object)int.Parse(ico);
+        command.Parameters.Add("@FiscalYear", SqlDbType.Int).Value = fiscalYear;
+        var entities = new System.Collections.Generic.List<MkSoftEntity>();
+        await using var reader = await command.ExecuteReaderAsync(ct);
+        while (await reader.ReadAsync(ct)) entities.Add(new MkSoftEntity {
+            ClientErpId = reader.GetInt32(0), FiscalYear = fiscalYear,
+            Ico = reader.IsDBNull(1) ? "" : Convert.ToString(reader.GetValue(1)).Trim().PadLeft(8, '0'),
+            EntityName = reader.IsDBNull(2) ? "" : Convert.ToString(reader.GetValue(2)).Trim(),
+            LegalForm = reader.IsDBNull(3) ? 0 : Convert.ToInt32(reader.GetValue(3)),
+            FrameworkCode = reader.IsDBNull(4) ? "" : reader.GetString(4)
+        });
+        return entities;
+    }
+
     public async Task<VerificationPackage> GetAsync(int clientErpId, int fiscalYear, bool includeEmptyAccounts, CancellationToken ct)
     {
         const string sql = """

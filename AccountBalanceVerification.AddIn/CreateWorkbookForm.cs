@@ -1,108 +1,207 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using Newtonsoft.Json;
 using AccountBalanceVerification.Core;
 using AccountBalanceVerification.Import;
 using ExcelApiPoc.MkSoft.Client;
 using Excel = Microsoft.Office.Interop.Excel;
 namespace AccountBalanceVerification.AddIn
 {
-    internal sealed class ConnectionSettings
-    {
-        public string ApiBaseUrl { get; set; } = "";
-        public string ApiKey { get; set; } = "";
-    }
     internal sealed class CreateWorkbookForm : Form
     {
         private static readonly HttpClient Http = new HttpClient { Timeout = TimeSpan.FromMinutes(3) };
-        private static readonly string SettingsPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "AccountBalanceVerification", "settings.json");
-        private readonly TextBox url = new TextBox(), key = new TextBox { UseSystemPasswordChar = true }, client = new TextBox(), year = new TextBox { Text = DateTime.Today.Year.ToString() }, entity = new TextBox(), ico = new TextBox();
-        private readonly TextBox journal = new TextBox(), ledger = new TextBox();
-        private readonly ComboBox framework = new ComboBox { DropDownStyle = ComboBoxStyle.DropDownList };
-        private readonly ComboBox source = new ComboBox { DropDownStyle = ComboBoxStyle.DropDownList }, producer = new ComboBox { DropDownStyle = ComboBoxStyle.DropDownList };
-        private readonly CheckBox empty = new CheckBox { Text = "Zahrnúť syntetické účty bez zostatkov a obratov", AutoSize = true };
-        private readonly Button create = new Button { Text = "Vytvoriť", AutoSize = true };
-        private bool busy;
         private readonly Excel.Workbook workbook;
+        private ConnectionSettings settings;
+        private readonly TabControl tabs = new TabControl { Dock = DockStyle.Fill };
+        private readonly TextBox mkYear = new TextBox { Text = DateTime.Today.Year.ToString() }, client = new TextBox(), mkIco = new TextBox(), mkEntity = new TextBox();
+        private readonly TextBox journal = new TextBox(), chart = new TextBox(), ledger = new TextBox(), fileYear = new TextBox(), fileIco = new TextBox(), fileEntity = new TextBox();
+        private readonly ComboBox mkFramework = FrameworkBox(), fileFramework = FrameworkBox();
+        private readonly ComboBox producer = new ComboBox { DropDownStyle = ComboBoxStyle.DropDownList };
+        private readonly Label mkStatus = new Label { AutoSize = true }, fileStatus = new Label { AutoSize = true };
+        private readonly Button create = new Button { Text = "Vytvoriť", AutoSize = true }, preferences = new Button { Text = "Nastavenia", AutoSize = true };
+        private readonly Dictionary<Control, string> automatic = new Dictionary<Control, string>();
+        private bool busy;
+        private MkSoftEntity resolved;
+        private string metadataSignature;
+
         public CreateWorkbookForm(Excel.Workbook workbook)
         {
             this.workbook = workbook ?? throw new ArgumentNullException(nameof(workbook));
-            Text = "Inventarizácia"; Width = 730; Height = 590; StartPosition = FormStartPosition.CenterScreen;
-            source.Items.AddRange(new object[] { "MkSoft", "Súbory" }); source.SelectedIndex = 0;
-            producer.Items.AddRange(new object[] { "IfoSoft", "Urbis", "IVES", "OMEGA", "Softip-MOP" }); producer.SelectedIndex = 0;
-            framework.Items.AddRange(new object[] { "PROFIT", "NONPROFIT", "GOV_LOCAL" }); framework.SelectedIndex = 0;
-            var grid = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 3, AutoScroll = true, Padding = new Padding(12) };
-            grid.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 160)); grid.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100)); grid.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 40));
-            Controls.Add(grid);
-            Add(grid, "Zdroj", source); Add(grid, "API URL", url); Add(grid, "API kľúč", key);
-            Add(grid, "MkSoft klient ID", client); Add(grid, "Účtovný rok", year); Add(grid, "Názov účtovnej jednotky", entity); Add(grid, "IČO", ico);
-            Add(grid, "Účtovná osnova (súbory)", framework); Add(grid, "Účtovný systém", producer); Add(grid, "Účtovný denník", journal, true); Add(grid, "Hlavná kniha", ledger, true);
-            grid.Controls.Add(empty, 1, grid.RowCount++); grid.Controls.Add(create, 1, grid.RowCount++);
+            settings = ConnectionSettings.Load();
+            Text = "Inventarizácia"; Width = 800; Height = 520; MinimumSize = new System.Drawing.Size(700, 500); StartPosition = FormStartPosition.CenterScreen;
+            producer.Items.AddRange(new object[] { "IfoSoft", "Urbis", "IVES", "OMEGA", "Softip-MOP" });
+            var mkPage = new TabPage("MkSoft"); var filePage = new TabPage("Súbory");
+            tabs.TabPages.Add(mkPage); tabs.TabPages.Add(filePage); Controls.Add(tabs);
+            var mk = NewGrid(); mkPage.Controls.Add(mk);
+            Add(mk, "Účtovný rok", mkYear); Add(mk, "MkSoft klient ID", client); Add(mk, "IČO", mkIco);
+            Add(mk, "Názov účtovnej jednotky", mkEntity); Add(mk, "Účtovná osnova", mkFramework);
+            var lookup = new Button { Text = "Načítať údaje", AutoSize = true };
+            Add(mk, "", lookup); Add(mk, "", mkStatus);
+            lookup.Click += async (s, e) => await RunAsync(LoadEntityAsync);
+            mkYear.TextChanged += (s, e) => InvalidateEntity(); client.TextChanged += (s, e) => InvalidateEntity();
+            var files = NewGrid(); filePage.Controls.Add(files);
+            AddFile(files, "Účtovný denník", journal); AddFile(files, "Účtový rozvrh", chart); AddFile(files, "Hlavná kniha", ledger);
+            Add(files, "Účtovný systém", producer); Add(files, "Účtovný rok", fileYear); Add(files, "IČO", fileIco);
+            Add(files, "Názov účtovnej jednotky", fileEntity); Add(files, "Účtovná osnova", fileFramework);
+            Add(files, "", fileStatus);
+            producer.SelectionChangeCommitted += async (s, e) => await DetectAsync();
+            var buttons = new FlowLayoutPanel { Dock = DockStyle.Bottom, AutoSize = true, Padding = new Padding(12) };
+            buttons.Controls.Add(create); buttons.Controls.Add(preferences); Controls.Add(buttons);
             create.Click += Create;
+            preferences.Click += (s, e) => {
+                using (var dialog = new SettingsForm(settings))
+                    if (dialog.ShowDialog(this) == DialogResult.OK) { settings = dialog.Settings; InvalidateEntity(); }
+            };
             FormClosing += (s, e) => { if (busy) e.Cancel = true; };
-            if (File.Exists(SettingsPath))
-            {
-                var settings = JsonConvert.DeserializeObject<ConnectionSettings>(File.ReadAllText(SettingsPath));
-                if (settings != null) { url.Text = settings.ApiBaseUrl; key.Text = settings.ApiKey; }
-            }
         }
-        private static void Add(TableLayoutPanel grid, string label, Control control, bool browse = false)
+        private static ComboBox FrameworkBox()
+        {
+            var box = new ComboBox { DropDownStyle = ComboBoxStyle.DropDownList };
+            box.Items.AddRange(new object[] { "PROFIT", "NONPROFIT", "GOV_LOCAL" }); return box;
+        }
+        internal static TableLayoutPanel NewGrid()
+        {
+            var grid = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 3, AutoScroll = true, Padding = new Padding(12) };
+            grid.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 170)); grid.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100)); grid.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 40));
+            return grid;
+        }
+        internal static void Add(TableLayoutPanel grid, string label, Control control)
         {
             int row = grid.RowCount++;
-            grid.Controls.Add(new Label { Text = label, AutoSize = true }, 0, row);
+            grid.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+            grid.Controls.Add(new Label { Text = label, AutoSize = true, Margin = new Padding(3, 6, 3, 6) }, 0, row);
             control.Dock = DockStyle.Top; grid.Controls.Add(control, 1, row);
-            if (browse)
+        }
+        private void AddFile(TableLayoutPanel grid, string label, TextBox control)
+        {
+            Add(grid, label, control);
+            var browse = new Button { Text = "…", Width = 32 };
+            grid.Controls.Add(browse, 2, grid.RowCount - 1);
+            browse.Click += async (s, e) => {
+                using (var dialog = new OpenFileDialog())
+                    if (dialog.ShowDialog(this) == DialogResult.OK) { control.Text = dialog.FileName; await DetectAsync(); }
+            };
+            control.Leave += async (s, e) => await DetectAsync();
+        }
+        private void InvalidateEntity()
+        {
+            if (resolved != null)
             {
-                var button = new Button { Text = "…", Width = 32 };
-                button.Click += (s, e) => { using (var dialog = new OpenFileDialog()) if (dialog.ShowDialog() == DialogResult.OK) control.Text = dialog.FileName; };
-                grid.Controls.Add(button, 2, row);
+                if (mkIco.Text == resolved.Ico) mkIco.Clear();
+                if (mkEntity.Text == resolved.EntityName) mkEntity.Clear();
+                if (mkFramework.Text == resolved.FrameworkCode) mkFramework.SelectedIndex = -1;
             }
+            resolved = null; mkStatus.Text = "Zadajte rok a klient ID alebo IČO, potom načítajte údaje.";
+        }
+        private void SetBusy(bool value)
+        {
+            busy = value; tabs.Enabled = !value; create.Enabled = !value; preferences.Enabled = !value; UseWaitCursor = value;
+        }
+        private async Task RunAsync(Func<Task> action)
+        {
+            if (busy) return;
+            SetBusy(true);
+            try { await action(); }
+            catch (Exception ex) { MessageBox.Show(this, ex.Message, Text, MessageBoxButtons.OK, MessageBoxIcon.Error); }
+            finally { if (!IsDisposed) SetBusy(false); }
+        }
+        private MkSoftClient Api()
+        {
+            if (string.IsNullOrWhiteSpace(settings.ApiBaseUrl) || string.IsNullOrWhiteSpace(settings.ApiKey))
+                throw new InvalidOperationException("V Nastaveniach zadajte API URL a API kľúč.");
+            return new MkSoftClient(Http, settings.ApiBaseUrl, settings.ApiKey);
+        }
+        private static int Year(TextBox box)
+        {
+            if (!int.TryParse(box.Text.Trim(), out var year) || year < 1900 || year > 9999) throw new InvalidOperationException("Zadajte platný účtovný rok.");
+            return year;
+        }
+        private static void CheckIco(string ico)
+        {
+            if (ico.Length != 8 || ico.Any(c => c < '0' || c > '9')) throw new InvalidOperationException("IČO musí obsahovať 8 číslic.");
+        }
+        private async Task LoadEntityAsync()
+        {
+            resolved = null;
+            int year = Year(mkYear); int? clientId = null;
+            if (!string.IsNullOrWhiteSpace(client.Text))
+            {
+                if (!int.TryParse(client.Text.Trim(), out var id) || id <= 0) throw new InvalidOperationException("Zadajte platné ID klienta.");
+                clientId = id;
+            }
+            string ico = mkIco.Text.Trim();
+            if (!string.IsNullOrEmpty(ico)) CheckIco(ico);
+            if (!clientId.HasValue && ico.Length == 0) throw new InvalidOperationException("Zadajte MkSoft klient ID alebo IČO.");
+            var matches = await Api().FindEntitiesAsync(year, clientId, ico, CancellationToken.None);
+            if (matches.Count == 0) throw new InvalidOperationException("Pre zadaný rok a identifikátory sa nenašla účtovná jednotka.");
+            if (matches.Count != 1) throw new InvalidOperationException("IČO má viac účtovných databáz. Zadajte MkSoft klient ID: " + string.Join(", ", matches.Select(x => x.ClientErpId)));
+            var found = matches[0];
+            client.Text = found.ClientErpId.ToString(); mkIco.Text = found.Ico; mkEntity.Text = found.EntityName; mkFramework.SelectedItem = found.FrameworkCode;
+            resolved = found;
+            mkStatus.Text = "Údaje načítané. Skontrolujte ich a kliknite na Vytvoriť.";
+        }
+        private void Fill(Control control, string value)
+        {
+            if (string.IsNullOrWhiteSpace(value)) return;
+            if (string.IsNullOrWhiteSpace(control.Text) || (automatic.TryGetValue(control, out var previous) && control.Text == previous))
+            { control.Text = value; automatic[control] = control.Text; }
+        }
+        private async Task DetectAsync()
+        {
+            if (busy) return;
+            string j = journal.Text.Trim(), c = chart.Text.Trim(), l = ledger.Text.Trim(), p = producer.Text;
+            string signature = j + "|" + c + "|" + l + "|" + p;
+            if (signature == metadataSignature || (j + c + l).Length == 0) return;
+            await RunAsync(async () => {
+                var metadata = await Task.Run(() => FileMetadata.Read(j, c, l, p));
+                Fill(fileIco, metadata.Ico); Fill(fileYear, metadata.FiscalYear?.ToString()); Fill(fileEntity, metadata.EntityName); Fill(producer, metadata.Producer);
+                fileStatus.Text = metadata.Warnings.Count == 0 ? "Údaje načítané zo súborov. Skontrolujte účtovnú osnovu." : string.Join(Environment.NewLine, metadata.Warnings.Distinct());
+                metadataSignature = j + "|" + c + "|" + l + "|" + producer.Text;
+            });
         }
         private async void Create(object sender, EventArgs e)
         {
-            if (!int.TryParse(year.Text, out int fiscalYear) || fiscalYear < 1900 || fiscalYear > 9999) { MessageBox.Show("Zadajte platný rok."); return; }
             bool populationStarted = false;
-            busy = true; Controls[0].Enabled = false; UseWaitCursor = true;
-            try
-            {
-                VerificationPackage package;
-                if (source.SelectedIndex == 0)
+            await RunAsync(async () => {
+                try
                 {
-                    if (!int.TryParse(client.Text, out int clientId) || clientId <= 0) throw new InvalidOperationException("Zadajte platné ID klienta.");
-                    if (string.IsNullOrWhiteSpace(key.Text)) throw new InvalidOperationException("Zadajte API kľúč.");
-                    var api = new MkSoftClient(Http, url.Text.Trim(), key.Text.Trim());
-                    package = await api.GetAsync(clientId, fiscalYear, false, CancellationToken.None);
-                    Directory.CreateDirectory(Path.GetDirectoryName(SettingsPath));
-                    File.WriteAllText(SettingsPath, JsonConvert.SerializeObject(new ConnectionSettings { ApiBaseUrl = url.Text.Trim(), ApiKey = key.Text.Trim() }, Formatting.Indented));
+                    VerificationPackage package;
+                    string selectedIco, selectedName, selectedFramework;
+                    if (tabs.SelectedIndex == 0)
+                    {
+                        if (resolved == null) { await LoadEntityAsync(); return; } // Review before creation.
+                        selectedIco = mkIco.Text.Trim(); selectedName = mkEntity.Text.Trim(); selectedFramework = mkFramework.Text;
+                        CheckIco(selectedIco);
+                        if (selectedFramework.Length == 0) throw new InvalidOperationException("Vyberte účtovnú osnovu.");
+                        package = await Api().GetAsync(resolved.ClientErpId, Year(mkYear), false, CancellationToken.None);
+                        package.OfficialAccounts.Clear(); // The reviewed framework selection replaces the default.
+                    }
+                    else
+                    {
+                        int year = Year(fileYear); selectedIco = fileIco.Text.Trim(); CheckIco(selectedIco);
+                        selectedName = fileEntity.Text.Trim(); selectedFramework = fileFramework.Text;
+                        string p = producer.Text, j = journal.Text.Trim(), l = ledger.Text.Trim(), c = chart.Text.Trim();
+                        if (p.Length == 0 || selectedFramework.Length == 0) throw new InvalidOperationException("Vyberte účtovný systém a účtovnú osnovu.");
+                        package = await Task.Run(() => FileSource.Read(p, j, l, selectedIco, year, c));
+                    }
+                    await Api().ApplyFrameworkAsync(package, selectedFramework, CancellationToken.None);
+                    package.Ico = selectedIco;
+                    if (!string.IsNullOrWhiteSpace(selectedName)) package.EntityName = selectedName;
+                    populationStarted = true;
+                    WorkbookWriter.Populate(workbook, package, settings.IncludeEmptySyntheticAccounts);
+                    busy = false; DialogResult = DialogResult.OK; Close();
                 }
-                else
+                catch
                 {
-                    string selectedProducer = producer.Text, journalPath = journal.Text.Trim(), ledgerPath = ledger.Text.Trim(), selectedIco = ico.Text.Trim();
-                    if (selectedIco.Length == 0) throw new InvalidOperationException("Zadajte IČO.");
-                    string selectedFramework = framework.Text;
-                    var api = new MkSoftClient(Http, url.Text.Trim(), key.Text.Trim());
-                    package = await Task.Run(() => FileSource.Read(selectedProducer, journalPath, ledgerPath, selectedIco, fiscalYear));
-                    await api.ApplyFrameworkAsync(package, selectedFramework, CancellationToken.None);
+                    if (populationStarted) { busy = false; DialogResult = DialogResult.Abort; Close(); }
+                    throw;
                 }
-                if (!string.IsNullOrWhiteSpace(entity.Text)) package.EntityName = entity.Text.Trim();
-                if (!string.IsNullOrWhiteSpace(ico.Text)) package.Ico = ico.Text.Trim();
-                // The continuation runs on the WinForms/Excel UI thread; no COM calls run in Task.Run.
-                populationStarted = true;
-                WorkbookWriter.Populate(workbook, package, empty.Checked);
-                busy = false; DialogResult = DialogResult.OK; Close();
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.Message, "Inventarizácia", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                // Source failures leave the blank workbook available for retry.
-                // A rendering failure aborts, so the ribbon discards the partial output.
-                if (populationStarted) { busy = false; DialogResult = DialogResult.Abort; Close(); }
-            }
-            finally { busy = false; Controls[0].Enabled = true; UseWaitCursor = false; }
+            });
         }
     }
 }

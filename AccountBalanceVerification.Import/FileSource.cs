@@ -9,7 +9,7 @@ namespace AccountBalanceVerification.Import
 {
     public static class FileSource
     {
-        public static VerificationPackage Read(string producer, string journalPath, string ledgerPath, string ico, int year)
+        public static VerificationPackage Read(string producer, string journalPath, string ledgerPath, string ico, int year, string chartPath = null)
         {
             var result = new VerificationPackage { Ico = ico, FiscalYear = year, Source = "Súbory", RetrievedAtUtc = DateTime.UtcNow };
             if (string.IsNullOrWhiteSpace(journalPath))
@@ -71,8 +71,27 @@ namespace AccountBalanceVerification.Import
                 });
                 if (package.Journal.ImportReport != null) result.Warnings.AddRange(package.Journal.ImportReport.Diagnostics.Where(d => d.Severity != ExcelApiPoc.AccountingImport.Models.Reporting.ImportDiagnosticSeverity.Information).Select(d => d.Message));
             }
-            result.Source = string.Join("; ", new[] { journalPath, ledgerPath }.Where(x => !string.IsNullOrWhiteSpace(x)).Select(Path.GetFileName));
+            result.Source = string.Join("; ", new[] { journalPath, chartPath, ledgerPath }.Where(x => !string.IsNullOrWhiteSpace(x)).Select(Path.GetFileName));
+            if (!string.IsNullOrWhiteSpace(chartPath)) ApplyChart(result, producer, chartPath, ico, year);
             return result;
+        }
+        public static void ApplyChart(VerificationPackage result, string producer, string path, string ico, int year)
+        {
+            var chart = StagedImportRuntime.Import<AccountingFrameworkImport>(path, producer, "AF", year);
+            if ((chart.FiscalYear != 0 && chart.FiscalYear != year) ||
+                (!string.IsNullOrWhiteSpace(chart.Ico) && chart.Ico != ico))
+                throw new InvalidOperationException("IČO alebo rok účtového rozvrhu nesúhlasí.");
+            if (string.IsNullOrWhiteSpace(result.EntityName)) result.EntityName = chart.CompanyName;
+            var names = chart.Rows.Where(x => !string.IsNullOrWhiteSpace(x.AccountCode) && !string.IsNullOrWhiteSpace(x.AccountName))
+                .GroupBy(x => x.AccountCode.Trim()).ToDictionary(g => g.Key, g => g.First().AccountName.Trim());
+            foreach (var row in result.Rows)
+                if (names.TryGetValue(row.AccountNo, out var name)) row.AccountName = name;
+            // Keep chart synthetic names as fallback; never invent balances or analytical rows.
+            foreach (var item in names.Where(x => x.Key.Length == 3 && WorkbookPlan.InScope(x.Key)))
+                if (!result.OfficialAccounts.Any(x => x.AccountCode == item.Key))
+                    result.OfficialAccounts.Add(new OfficialAccount { AccountCode = item.Key, AccountName = item.Value, AccountLevel = 3 });
+            if (chart.ImportReport != null) result.Warnings.AddRange(chart.ImportReport.Diagnostics
+                .Where(d => d.Severity != ExcelApiPoc.AccountingImport.Models.Reporting.ImportDiagnosticSeverity.Information).Select(d => d.Message));
         }
     }
 }
