@@ -200,6 +200,7 @@ namespace AccountBalanceVerification.AddIn
                 Formula(parameters, "N2", "=SUMPRODUCT(" + PeopleMask(true) + ")");
                 Anchor(book, parameters, "ABV_AccountPeopleCount", "$M$2");
                 Anchor(book, parameters, "ABV_TitlePeopleCount", "$N$2");
+                int reservedPeopleRows = Math.Max(1, People(parameters).Count);
                 foreach (var item in sheets) {
                     var sheet = item.Sheet; var key = item.Title ? "Title" : item.Code;
                     var anchor = NamedRange(book, "_ABV_Start_" + key); int row;
@@ -208,15 +209,22 @@ namespace AccountBalanceVerification.AddIn
                     string mask = PeopleMask(item.Title);
                     string count = item.Title ? "ABV_TitlePeopleCount" : "ABV_AccountPeopleCount";
                     int body = row + 1;
-                    // Footer must be in the same spill to move when the list grows.
-                    Formula(sheet, "A" + body, "=VSTACK(FILTER(ABV_People[Funkcia]," + mask + ",\"\"),\"\",IF(Location=\"\",\"\",Location))");
+                    Formula(sheet, "A" + body, "=FILTER(ABV_People[Funkcia]," + mask + ",\"\")");
                     Formula(sheet, "B" + body, "=FILTER(ABV_People[Meno]," + mask + ",\"\")");
-                    Formula(sheet, "E" + body, "=VSTACK(IF(" + count + "=0,\"\",IF(SEQUENCE(MAX(1," + count + ")),\"........................................\")),\"\",IF(ProcessDate>0,\"dňa: \"&TEXT(ProcessDate,\"d.m.yyyy\"),\"dňa: __________________\"))");
+                    Formula(sheet, "E" + body, "=IF(" + count + "=0,\"\",IF(SEQUENCE(MAX(1," + count + ")),\"........................................\"))");
+                    // Reserve the existing people-table capacity. Insert worksheet rows
+                    // above the footer for more people or free-form auditor notes.
+                    int footerRow = row + reservedPeopleRows + 2;
+                    Formula(sheet, "A" + footerRow, "=IF(Location=\"\",\"\",Location)");
+                    Formula(sheet, "E" + footerRow, "=IF(ProcessDate>0,\"dňa: \"&TEXT(ProcessDate,\"d.m.yyyy\"),\"dňa: __________________\")");
+                    Anchor(book, sheet, "_ABV_Footer_" + key, "$A$" + footerRow);
                     // Format future spill rows in one operation; no per-person COM calls.
                     var space = sheet.Range["A" + row, "G" + (row + 1002)];
                     try { space.WrapText = false; space.RowHeight = 32; } finally { Release(space); }
                     var roles = sheet.Range["A" + row, "A" + (row + 1002)];
                     try { roles.WrapText = true; } finally { Release(roles); }
+                    var footerLine = sheet.Range["A" + footerRow, "G" + footerRow];
+                    try { footerLine.WrapText = false; } finally { Release(footerLine); }
                     if (item.Title) {
                         Formula(sheet, "B6", "=" + DateFormula("InventoryBeginning"));
                         Formula(sheet, "B7", "=" + DateFormula("InventoryEnd"));
@@ -234,7 +242,7 @@ namespace AccountBalanceVerification.AddIn
                     // Use a literal print range rather than a formula-valued Print_Area.
                     // Ribbon output sizes its temporary copies to the current people count.
                     var printSetup = sheet.PageSetup;
-                    try { printSetup.PrintArea = "$A$1:$G$" + (row + 3); }
+                    try { printSetup.PrintArea = "$A$1:$G$" + footerRow; }
                     finally { Release(printSetup); }
                 }
             } catch (Exception ex) { originalFailure = ex; throw; }
@@ -298,6 +306,10 @@ namespace AccountBalanceVerification.AddIn
                     var sourceSheet = sheets[i]; var copy = (Excel.Worksheet)output.Worksheets[i + 1];
                     var anchor = NamedRange(source, "_ABV_Start_" + (sourceSheet.Title ? "Title" : sourceSheet.Code));
                     int last; try { last = anchor.Row + Math.Max(1, PrintPlan.Select(people, sourceSheet.Title).Count) + 2; } finally { Release(anchor); }
+                    Excel.Range footer = null;
+                    try { footer = NamedRange(source, "_ABV_Footer_" + (sourceSheet.Title ? "Title" : sourceSheet.Code)); last = Math.Max(last, footer.Row); }
+                    catch (COMException) { /* Older workbooks have a spill footer. */ }
+                    finally { Release(footer); }
                     var original = sourceSheet.Sheet.Range["A1:G" + last];
                     var destination = copy.Range["A1:G" + last];
                     try {

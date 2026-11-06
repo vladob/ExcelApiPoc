@@ -101,10 +101,14 @@ namespace AccountBalanceVerification.AddIn
                                         }
                                     }
                                     finally { Marshal.ReleaseComObject(columns); }
+                                    var notesColumn = table.ListColumns[7];
+                                    try { notesColumn.TotalsCalculation = Excel.XlTotalsCalculation.xlTotalsCalculationNone; }
+                                    finally { Marshal.ReleaseComObject(notesColumn); }
                                     var totals = table.TotalsRowRange;
                                     try { row = totals.Row; }
                                     finally { Marshal.ReleaseComObject(totals); }
                                     Text(sheet, "A" + row, "");
+                                    Text(sheet, "G" + row, "");
                                     Text(sheet, "B" + row, "Spolu (zobrazené účty)");
                                     var totalAmounts = sheet.Range["C" + row, "F" + row];
                                     try { totalAmounts.NumberFormat = "#,##0.00"; }

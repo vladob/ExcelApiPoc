@@ -1,4 +1,4 @@
-INVENTARIZACIA - Account Balance Verification 0.1.9 (pilot)
+INVENTARIZACIA - Account Balance Verification 0.1.10 (pilot)
 
 Requirements: Windows, Microsoft 365 Excel 64-bit, .NET Framework 4.8.
 No administrator rights are required.
@@ -35,7 +35,7 @@ Tlacit validates the inputs and opens print preview; Exportovat do PDF creates
 one PDF. Both include Titulna strana, then accounts in order; Parametre and
 unrelated sheets are excluded. Signatures appear once at each account's end,
 followed by location/date. Ordinary Excel printing does not apply this selection.
-Create a new workbook with 0.1.9 for formula-driven signatures. Older workbooks
+Create a new workbook with 0.1.10 for formula-driven signatures. Older workbooks
 are not automatically migrated. Ribbon output requires these new workbooks.
 Parametre is first. Account output uses unmerged, monochrome portrait A4 layout.
 
@@ -54,7 +54,7 @@ Deploy compatible API endpoints/database wrappers separately before MkSoft use.
 Local files: %LOCALAPPDATA%\AccountBalanceVerification\AddIn
 User settings: %APPDATA%\AccountBalanceVerification\settings.json
 
-VERSION 0.1.9 CHECKS IN EXCEL
+VERSION 0.1.10 CHECKS IN EXCEL
 - Create a workbook: Parametre first, then Titulna strana and account tabs.
 - Check black headers, white body/totals, no striping, and blank first total cell.
 - Edit a name, role, print placement, location and dates on Parametre.
@@ -73,3 +73,7 @@ VERSION 0.1.9 CHECKS IN EXCEL
 Use ribbon Tlacit / Exportovat do PDF after changing people. These commands
 size the print range to the current signature list. Ordinary Excel printing
 uses the initial print range unless you adjust it manually.
+
+Location/date are separate footer formulas. Insert entire worksheet rows above
+them to add notes or accommodate more signatures than the reserved people rows.
+Ribbon output follows the footer when rows are inserted. Location does not wrap.
