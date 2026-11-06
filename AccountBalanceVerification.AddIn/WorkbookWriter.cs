@@ -13,10 +13,10 @@ namespace AccountBalanceVerification.AddIn
             if (book == null) throw new ArgumentNullException(nameof(book));
             var sheets = WorkbookPlan.Build(package, includeEmpty);
             var app = (Excel.Application)ExcelDnaUtil.Application;
-            bool previousScreen = app.ScreenUpdating;
+            bool previousScreen = app.ScreenUpdating, previousEvents = app.EnableEvents;
             try
             {
-                app.ScreenUpdating = false;
+                app.ScreenUpdating = false; app.EnableEvents = false;
                 var intro = (Excel.Worksheet)book.Worksheets[1];
                 try
                 {
@@ -27,9 +27,8 @@ namespace AccountBalanceVerification.AddIn
                     string[] values = { package.EntityName, package.Ico, package.FiscalYear.ToString(), "", "" };
                     for (int i = 0; i < labels.Length; i++) { Text(intro, "A" + (i + 3), labels[i]); Text(intro, "B" + (i + 3), values[i]); }
                     Width(intro, "A:A", 30); Width(intro, "B:D", 12); Width(intro, "E:G", 10);
-                    for (int r = 3; r <= 7; r++) { var merged = intro.Range["B" + r, "G" + r]; try { merged.Merge(); } finally { Marshal.ReleaseComObject(merged); } }
-                    var title = intro.Range["A1:G1"]; try { title.Merge(); title.Font.Bold = true; title.Font.Size = 16; title.RowHeight = 32; } finally { Marshal.ReleaseComObject(title); }
-                    var entityLine = intro.Range["B3:G3"]; try { entityLine.WrapText = true; entityLine.RowHeight = 42; } finally { Marshal.ReleaseComObject(entityLine); }
+                    var title = intro.Range["A1:G1"]; try { title.Font.Bold = true; title.Font.Size = 16; title.RowHeight = 32; } finally { Marshal.ReleaseComObject(title); }
+                    var entityLine = intro.Range["B3:G3"]; try { entityLine.WrapText = false; entityLine.RowHeight = 42; } finally { Marshal.ReleaseComObject(entityLine); }
                     WorkbookOutput.SignatureAnchor(book, intro, "Title", 11);
                 }
                 finally { Marshal.ReleaseComObject(intro); }
@@ -44,7 +43,7 @@ namespace AccountBalanceVerification.AddIn
                         Text(sheet, "A2", package.EntityName + " | " + package.FiscalYear);
                         for (int h = 1; h <= 3; h++) {
                             var heading = sheet.Range["A" + h, "G" + h];
-                            try { heading.Merge(); heading.WrapText = true; heading.RowHeight = h == 1 ? 28 : 24; if (h == 1) heading.Font.Bold = true; }
+                            try { heading.WrapText = false; heading.RowHeight = h == 1 ? 28 : 24; if (h == 1) heading.Font.Bold = true; }
                             finally { Marshal.ReleaseComObject(heading); }
                         }
                         string[] captions = { "Účet", "Názov účtu", "Začiatočný stav", "Obrat MD", "Obrat Dal", "Konečný zostatok", "Poznámka" };
@@ -68,6 +67,18 @@ namespace AccountBalanceVerification.AddIn
                                 {
                                     table.Name = "ABV_" + plan.Code;
                                     table.ShowTotals = true;
+                                    table.TableStyle = "TableStyleLight8";
+                                    table.ShowTableStyleRowStripes = false;
+                                    table.ShowTableStyleColumnStripes = false;
+                                    var all = table.Range; var header = table.HeaderRowRange;
+                                    var body = table.DataBodyRange; var summary = table.TotalsRowRange;
+                                    try {
+                                        all.Font.Color = 0; all.Interior.Color = 16777215;
+                                        body.Font.Bold = false; body.WrapText = true;
+                                        header.Font.Color = 16777215; header.Interior.Color = 0;
+                                        header.Font.Bold = true; header.WrapText = true; header.RowHeight = 32;
+                                        summary.Font.Bold = true; summary.WrapText = true;
+                                    } finally { Marshal.ReleaseComObject(summary); Marshal.ReleaseComObject(body); Marshal.ReleaseComObject(header); Marshal.ReleaseComObject(all); }
                                     var columns = table.ListColumns;
                                     try
                                     {
@@ -82,7 +93,7 @@ namespace AccountBalanceVerification.AddIn
                                     var totals = table.TotalsRowRange;
                                     try { row = totals.Row; }
                                     finally { Marshal.ReleaseComObject(totals); }
-                                    Text(sheet, "A" + row, "Total");
+                                    Text(sheet, "A" + row, "");
                                     Text(sheet, "B" + row, "Spolu (zobrazené účty)");
                                     var totalAmounts = sheet.Range["C" + row, "F" + row];
                                     try { totalAmounts.NumberFormat = "#,##0.00"; }
@@ -95,7 +106,9 @@ namespace AccountBalanceVerification.AddIn
                         else { Text(sheet, "A5", "Bez zostatkov a obratov."); row = 6; }
                         Text(sheet, "A" + (row + 2), "Poznámka k syntetickému účtu"); Text(sheet, "B" + (row + 3), ""); PrepareTextInput(sheet, "B" + (row + 3) + ":G" + (row + 5));
                         WorkbookOutput.SignatureAnchor(book, sheet, plan.Code, row + 7);
-                        Width(sheet, "A:A", 16); Width(sheet, "B:B", 55); Width(sheet, "C:F", 19); Width(sheet, "G:G", 60);
+                        Width(sheet, "A:A", 12); Width(sheet, "B:B", 28); Width(sheet, "C:F", 15); Width(sheet, "G:G", 24);
+                        var detailRows = sheet.Range["A5:G" + row];
+                        try { detailRows.Rows.AutoFit(); } finally { Marshal.ReleaseComObject(detailRows); }
                         sheet.Activate(); app.ActiveWindow.SplitRow = 4; app.ActiveWindow.FreezePanes = true;
                         sheet.EnableSelection = Excel.XlEnableSelection.xlNoRestrictions;
                     }
@@ -104,14 +117,14 @@ namespace AccountBalanceVerification.AddIn
                 var warnings = package.Warnings.ToList();
                 warnings.AddRange(sheets.Where(s => !package.OfficialAccounts.Any(a => a.AccountLevel == 3 && a.AccountCode == s.Code && !string.IsNullOrWhiteSpace(a.AccountName))).Select(s => "Chýba názov syntetického účtu " + s.Code + ". Doplňte účtový rozvrh alebo skontrolujte zdrojové údaje."));
                 warnings.AddRange(package.Rows.Where(x => x.OpeningBalance + x.MovementsDebit - x.MovementsCredit != x.ClosingBalance).Select(x => "Nesúhlasí výpočet konečného zostatku: " + x.AccountNo));
-                var parameters = (Excel.Worksheet)book.Worksheets.Add(After: book.Worksheets[book.Worksheets.Count]);
+                var parameters = (Excel.Worksheet)book.Worksheets.Add(Before: book.Worksheets[1]);
                 try { WorkbookOutput.CreateParameters(book, parameters, warnings, package); }
                 finally { Marshal.ReleaseComObject(parameters); }
                 WorkbookOutput.Refresh(book);
                 var first = (Excel.Worksheet)book.Worksheets[1]; first.Activate(); Marshal.ReleaseComObject(first);
                 book.Saved = false;
             }
-            finally { app.ScreenUpdating = previousScreen; }
+            finally { app.EnableEvents = previousEvents; app.ScreenUpdating = previousScreen; }
         }
         // Text formatting prevents source names/comments beginning with '=' being interpreted as formulas.
         private static void Text(Excel.Worksheet sheet, string address, string value) { var cell = sheet.Range[address]; try { cell.NumberFormat = "@"; cell.Value2 = value ?? ""; } finally { Marshal.ReleaseComObject(cell); } }

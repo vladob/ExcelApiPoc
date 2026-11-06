@@ -26,7 +26,7 @@ namespace AccountBalanceVerification.AddIn
             try { Release(properties.Add(RoleKey, role)); if (code.Length > 0) Release(properties.Add(CodeKey, code)); }
             finally { Release(properties); }
         }
-        private static string Property(Excel.Worksheet sheet, string key)
+        internal static string Property(Excel.Worksheet sheet, string key)
         {
             var properties = sheet.CustomProperties;
             try {
@@ -69,7 +69,7 @@ namespace AccountBalanceVerification.AddIn
                 finally { Release(cell); }
                 Anchor(book, sheet, "_ABV_" + keys[i], "$B$" + (i + 2));
             }
-            Text(sheet, "A7", "Vyplňte mená a výber tlače. Tlačiť / Exportovať do PDF aktualizuje podpisové časti.");
+            Text(sheet, "A7", "Vyplňte mená a výber tlače. Doplnok priebežne aktualizuje podpisové časti.");
             Text(sheet, "A8", "Ďalšie osoby pridajte rozšírením tabuľky. Prázdne mená sa netlačia.");
             Text(sheet, "A10", "Funkcia"); Text(sheet, "B10", "Meno"); Text(sheet, "C10", "Vytlačiť na strane");
             var roles = Roles();
@@ -111,8 +111,6 @@ namespace AccountBalanceVerification.AddIn
             try { validation.Delete(); validation.Add(Excel.XlDVType.xlValidateList, Excel.XlDVAlertStyle.xlValidAlertStop, Formula1: source); validation.InCellDropdown = true; validation.IgnoreBlank = true; validation.ShowError = true; }
             finally { Release(validation); Release(range); }
         }
-        private static void Merge(Excel.Worksheet sheet, string address)
-        { var range = sheet.Range[address]; try { range.Merge(); } finally { Release(range); } }
         private static string Read(Excel.Workbook book, string key, bool date = false)
         {
             var range = NamedRange(book, "_ABV_" + key);
@@ -164,6 +162,15 @@ namespace AccountBalanceVerification.AddIn
         }
         internal static void Refresh(Excel.Workbook book)
         {
+            var app = book.Application;
+            bool events = app.EnableEvents, screen = app.ScreenUpdating;
+            try {
+                app.EnableEvents = false; app.ScreenUpdating = false;
+                RefreshCore(book);
+            } finally { app.EnableEvents = events; app.ScreenUpdating = screen; }
+        }
+        private static void RefreshCore(Excel.Workbook book)
+        {
             Excel.Worksheet parameters; var sheets = Sheets(book, out parameters);
             try {
                 SetLists(book, parameters);
@@ -177,17 +184,17 @@ namespace AccountBalanceVerification.AddIn
                     var anchor = NamedRange(book, "_ABV_Start_" + key); int row;
                     try { row = anchor.Row; } finally { Release(anchor); }
                     var old = NamedRange(book, "_ABV_Output_" + key);
-                    try { old.UnMerge(); old.ClearContents(); } finally { Release(old); }
+                    try { old.UnMerge(); old.ClearContents(); old.WrapText = false; old.RowHeight = 15; } finally { Release(old); }
                     int first = row;
                     Text(sheet, "A" + row, "Funkcia"); Text(sheet, "B" + row, "Meno"); Text(sheet, "E" + row++, "Podpis");
                     foreach (var person in PrintPlan.Select(people, item.Title)) {
                         Text(sheet, "A" + row, person.Role); Text(sheet, "B" + row, person.Name); Text(sheet, "E" + row, "........................................");
-                        var line = sheet.Range["A" + row, "G" + row]; try { line.RowHeight = 42; line.WrapText = true; } finally { Release(line); }
-                        Merge(sheet, "B" + row + ":D" + row); Merge(sheet, "E" + row + ":G" + row);
+                        var line = sheet.Range["A" + row, "G" + row]; try { line.RowHeight = 42; line.WrapText = false; } finally { Release(line); }
+                        var role = sheet.Range["A" + row];
+                        try { role.WrapText = true; } finally { Release(role); }
                         row++;
                     }
                     row++; Text(sheet, "A" + row, location); Text(sheet, "E" + row, date.Length > 0 ? "dňa " + date : "dňa: __________________");
-                    Merge(sheet, "A" + row + ":D" + row); Merge(sheet, "E" + row + ":G" + row);
                     Anchor(book, sheet, "_ABV_Output_" + key, "$A$" + first + ":$G$" + row);
                     if (item.Title) { Text(sheet, "B6", start); Text(sheet, "B7", end); }
                     else Text(sheet, "A3", "Deň začatia inventúry: " + start + "    Deň skončenia inventúry: " + end);
@@ -195,7 +202,9 @@ namespace AccountBalanceVerification.AddIn
                     try {
                         setup.PrintArea = "$A$1:$G$" + row;
                         setup.Zoom = false; setup.FitToPagesWide = 1; setup.FitToPagesTall = false;
-                        setup.Orientation = item.Title ? Excel.XlPageOrientation.xlPortrait : Excel.XlPageOrientation.xlLandscape;
+                        setup.Orientation = Excel.XlPageOrientation.xlPortrait;
+                        setup.PaperSize = Excel.XlPaperSize.xlPaperA4;
+                        setup.LeftMargin = 18; setup.RightMargin = 18;
                         setup.PrintTitleRows = item.Title ? "" : "$1:$4";
                         setup.CenterFooter = "Strana &P / &N";
                     } finally { Release(setup); }

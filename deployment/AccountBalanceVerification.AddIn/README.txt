@@ -1,4 +1,4 @@
-INVENTARIZACIA - Account Balance Verification 0.1.4 (pilot)
+INVENTARIZACIA - Account Balance Verification 0.1.5 (pilot)
 
 Requirements: Windows, Microsoft 365 Excel 64-bit, .NET Framework 4.8.
 No administrator rights are required.
@@ -30,9 +30,11 @@ Default roles can be changed in Nastavenia (one role per line).
 Tlacit refreshes signatures and opens print preview. Exportovat do PDF refreshes
 them and creates one PDF. Both include Titulna strana, then accounts in order;
 Parametre and unrelated sheets are excluded. Signatures appear once at each
-account's end, followed by location/date. Ordinary Excel printing does not
-refresh these sections or apply this worksheet selection.
-These output commands require a workbook created with version 0.1.4 or later.
+account's end, followed by location/date. Edits on Parametre refresh signatures while the add-in is loaded.
+Ordinary Excel printing does not apply this worksheet selection.
+These output commands require a workbook created with version 0.1.3 or later.
+Create a new workbook with 0.1.5 for the new unmerged, monochrome portrait A4 layout.
+Parametre is first; it remains excluded from ribbon Print/PDF.
 
 FIRST CHECK
 Import a known journal/general ledger. Select its correct fiscal year and
@@ -48,3 +50,15 @@ The package installs only the Excel add-in, not the API or SQL database.
 Deploy compatible API endpoints/database wrappers separately before MkSoft use.
 Local files: %LOCALAPPDATA%\AccountBalanceVerification\AddIn
 User settings: %APPDATA%\AccountBalanceVerification\settings.json
+
+VERSION 0.1.5 CHECKS IN EXCEL
+- Create a workbook: Parametre first, then Titulna strana and account tabs.
+- Check black headers, white body/totals, no striping, and blank first total cell.
+- Edit a name, role, print placement, location and dates on Parametre.
+- Add/delete a people-table row; confirm signatures resize on title/accounts.
+- An incomplete person shows a pending-refresh message in A9. Complete the row
+  and confirm the message changes to successful refresh.
+- Check portrait A4 Print Preview/PDF with long account names and large amounts.
+  Width fits one page; long accounts may continue onto further pages.
+- Names overflow into blank adjacent cells; very long names may still need
+  manual column/font adjustment. There are no merged cells.
