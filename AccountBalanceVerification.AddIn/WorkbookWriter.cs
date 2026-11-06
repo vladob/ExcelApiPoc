@@ -14,6 +14,7 @@ namespace AccountBalanceVerification.AddIn
             var sheets = WorkbookPlan.Build(package, includeEmpty);
             var app = (Excel.Application)ExcelDnaUtil.Application;
             bool previousScreen = app.ScreenUpdating, previousEvents = app.EnableEvents;
+            Exception originalFailure = null;
             try
             {
                 app.ScreenUpdating = false; app.EnableEvents = false;
@@ -134,7 +135,21 @@ namespace AccountBalanceVerification.AddIn
                 var first = (Excel.Worksheet)book.Worksheets[1]; first.Activate(); Marshal.ReleaseComObject(first);
                 book.Saved = false;
             }
-            finally { app.EnableEvents = previousEvents; app.ScreenUpdating = previousScreen; }
+            catch (Exception ex) { originalFailure = ex; throw; }
+            finally {
+                try { app.EnableEvents = previousEvents; }
+                catch (Exception ex) {
+                    if (originalFailure == null) throw new InvalidOperationException("Obnovenie Application.EnableEvents: " + ex.Message, ex);
+                    System.Diagnostics.Trace.WriteLine(ex);
+                }
+                finally {
+                    try { app.ScreenUpdating = previousScreen; }
+                    catch (Exception ex) {
+                        if (originalFailure == null) throw new InvalidOperationException("Obnovenie Application.ScreenUpdating: " + ex.Message, ex);
+                        System.Diagnostics.Trace.WriteLine(ex);
+                    }
+                }
+            }
         }
         // Text formatting prevents source names/comments beginning with '=' being interpreted as formulas.
         private static void Text(Excel.Worksheet sheet, string address, string value) { var cell = sheet.Range[address]; try { cell.NumberFormat = "@"; cell.Value2 = value ?? ""; } finally { Marshal.ReleaseComObject(cell); } }

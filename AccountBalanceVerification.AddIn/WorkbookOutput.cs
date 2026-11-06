@@ -41,8 +41,16 @@ namespace AccountBalanceVerification.AddIn
         internal static void Anchor(Excel.Workbook book, Excel.Worksheet sheet, string name, string address)
         {
             var names = book.Names;
-            try { Release(names.Add(name, "='" + sheet.Name.Replace("'", "''") + "'!" + address, Visible: false)); }
+            string formula = "='" + sheet.Name.Replace("'", "''") + "'!" + address;
+            try { AddName(names, name, formula, false); }
             finally { Release(names); }
+        }
+        private static void AddName(Excel.Names names, string name, string formula, bool visible = true)
+        {
+            try { Release(names.Add(name, formula, Visible: visible)); }
+            catch (Exception ex) {
+                throw new InvalidOperationException("Definovaný názov: " + name + "\nVzorec: " + formula + "\n" + ex.Message, ex);
+            }
         }
         private static Excel.Range NamedRange(Excel.Workbook book, string name)
         {
@@ -164,7 +172,7 @@ namespace AccountBalanceVerification.AddIn
         {
             var cell = sheet.Range[address];
             try { cell.NumberFormat = "General"; ((dynamic)cell).Formula2 = formula; }
-            catch (Exception ex) { throw new InvalidOperationException("Vzorec: " + sheet.Name + "!" + address + " = " + formula, ex); }
+            catch (Exception ex) { throw new InvalidOperationException("Vzorec: " + sheet.Name + "!" + address + " = " + formula + "\n" + ex.Message, ex); }
             finally { Release(cell); }
         }
         private static string PeopleMask(bool title) =>
@@ -179,14 +187,15 @@ namespace AccountBalanceVerification.AddIn
             Excel.Worksheet parameters; var sheets = Sheets(book, out parameters);
             var app = book.Application;
             bool communication = app.PrintCommunication;
+            Exception originalFailure = null;
             try {
                 app.PrintCommunication = false;
                 string[] readable = { "Location", "ProcessDate", "InventoryBeginning", "InventoryEnd" };
                 for (int i = 0; i < readable.Length; i++) Anchor(book, parameters, readable[i], "$B$" + (i + 2));
                 var sharedNames = book.Names;
                 try {
-                    Release(sharedNames.Add("ABV_AccountPeopleCount", "=SUMPRODUCT(" + PeopleMask(false) + ")"));
-                    Release(sharedNames.Add("ABV_TitlePeopleCount", "=SUMPRODUCT(" + PeopleMask(true) + ")"));
+                    AddName(sharedNames, "ABV_AccountPeopleCount", "=SUMPRODUCT(" + PeopleMask(false) + ")");
+                    AddName(sharedNames, "ABV_TitlePeopleCount", "=SUMPRODUCT(" + PeopleMask(true) + ")");
                 } finally { Release(sharedNames); }
                 foreach (var item in sheets) {
                     var sheet = item.Sheet; var key = item.Title ? "Title" : item.Code;
@@ -227,9 +236,15 @@ namespace AccountBalanceVerification.AddIn
                     catch (Exception ex) { throw new InvalidOperationException("Oblasť tlače: " + sheet.Name, ex); }
                     finally { Release(names); }
                 }
-            } finally {
-                app.PrintCommunication = communication;
-                foreach (var item in sheets) Release(item.Sheet); Release(parameters);
+            } catch (Exception ex) { originalFailure = ex; throw; }
+            finally {
+                try { app.PrintCommunication = communication; }
+                catch (Exception ex) {
+                    var flushFailure = new InvalidOperationException("Excel odmietol uložiť nastavenia tlače pri obnovení Application.PrintCommunication.\n" + ex.Message, ex);
+                    if (originalFailure == null) throw flushFailure;
+                    throw new AggregateException(originalFailure.Message + "\n" + flushFailure.Message, originalFailure, flushFailure);
+                }
+                finally { foreach (var item in sheets) Release(item.Sheet); Release(parameters); }
             }
         }
         private static void ValidateForOutput(Excel.Workbook book, List<OutputSheet> sheets, Excel.Worksheet parameters)
