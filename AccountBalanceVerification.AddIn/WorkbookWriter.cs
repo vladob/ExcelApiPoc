@@ -49,13 +49,23 @@ namespace AccountBalanceVerification.AddIn
                         string[] captions = { "Účet", "Názov účtu", "Začiatočný stav", "Obrat MD", "Obrat Dal", "Konečný zostatok", "Poznámka" };
                         for (int c = 0; c < captions.Length; c++) Text(sheet, ((char)('A' + c)).ToString() + "4", captions[c]);
                         int row = 5;
-                        foreach (var item in plan.Rows)
-                        {
-                            Text(sheet, "A" + row, item.AccountNo); Text(sheet, "B" + row, item.AccountName);
-                            var amounts = sheet.Range["C" + row, "F" + row];
-                            try { amounts.Value2 = new object[,] { { (double)item.OpeningBalance, (double)item.MovementsDebit, (double)item.MovementsCredit, (double)item.ClosingBalance } }; amounts.NumberFormat = "#,##0.00;-#,##0.00"; }
-                            finally { Marshal.ReleaseComObject(amounts); }
-                            Text(sheet, "G" + row, ""); PrepareTextInput(sheet, "G" + row); row++;
+                        if (plan.Rows.Count > 0) {
+                            var values = new object[plan.Rows.Count, 7];
+                            for (int i = 0; i < plan.Rows.Count; i++) {
+                                var item = plan.Rows[i];
+                                values[i, 0] = item.AccountNo; values[i, 1] = item.AccountName;
+                                values[i, 2] = (double)item.OpeningBalance; values[i, 3] = (double)item.MovementsDebit;
+                                values[i, 4] = (double)item.MovementsCredit; values[i, 5] = (double)item.ClosingBalance;
+                                values[i, 6] = "";
+                            }
+                            row += plan.Rows.Count;
+                            var data = sheet.Range["A5:G" + (row - 1)];
+                            var amounts = sheet.Range["C5:F" + (row - 1)];
+                            try {
+                                data.NumberFormat = "@";
+                                amounts.NumberFormat = "#,##0.00;-#,##0.00";
+                                data.Value2 = values;
+                            } finally { Marshal.ReleaseComObject(amounts); Marshal.ReleaseComObject(data); }
                         }
                         if (plan.Rows.Count > 0)
                         {
@@ -115,12 +125,12 @@ namespace AccountBalanceVerification.AddIn
                     finally { Marshal.ReleaseComObject(sheet); }
                 }
                 var warnings = package.Warnings.ToList();
-                warnings.AddRange(sheets.Where(s => !package.OfficialAccounts.Any(a => a.AccountLevel == 3 && a.AccountCode == s.Code && !string.IsNullOrWhiteSpace(a.AccountName))).Select(s => "Chýba názov syntetického účtu " + s.Code + ". Doplňte účtový rozvrh alebo skontrolujte zdrojové údaje."));
+                warnings.AddRange(sheets.Where(s => !package.OfficialAccounts.Any(a => a.AccountLevel == 3 && a.AccountCode == s.Code && !string.IsNullOrWhiteSpace(a.AccountName))).Select(s => "Chýba názov pre syntetický účet " + s.Code + ". Zadajte názov do bunky A1 na hárku " + s.Code + "."));
                 warnings.AddRange(package.Rows.Where(x => x.OpeningBalance + x.MovementsDebit - x.MovementsCredit != x.ClosingBalance).Select(x => "Nesúhlasí výpočet konečného zostatku: " + x.AccountNo));
                 var parameters = (Excel.Worksheet)book.Worksheets.Add(Before: book.Worksheets[1]);
                 try { WorkbookOutput.CreateParameters(book, parameters, warnings, package); }
                 finally { Marshal.ReleaseComObject(parameters); }
-                WorkbookOutput.Refresh(book);
+                WorkbookOutput.InitializeFormulas(book);
                 var first = (Excel.Worksheet)book.Worksheets[1]; first.Activate(); Marshal.ReleaseComObject(first);
                 book.Saved = false;
             }

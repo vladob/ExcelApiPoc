@@ -69,7 +69,7 @@ namespace AccountBalanceVerification.AddIn
                 finally { Release(cell); }
                 Anchor(book, sheet, "_ABV_" + keys[i], "$B$" + (i + 2));
             }
-            Text(sheet, "A7", "Vyplňte mená a výber tlače. Doplnok priebežne aktualizuje podpisové časti.");
+            Text(sheet, "A7", "Vyplňte mená a výber tlače. Podpisové časti sa prepočítajú pomocou vzorcov.");
             Text(sheet, "A8", "Ďalšie osoby pridajte rozšírením tabuľky. Prázdne mená sa netlačia.");
             Text(sheet, "A10", "Funkcia"); Text(sheet, "B10", "Meno"); Text(sheet, "C10", "Vytlačiť na strane");
             var roles = Roles();
@@ -160,47 +160,49 @@ namespace AccountBalanceVerification.AddIn
             } catch { foreach (var item in result) Release(item.Sheet); Release(parameters); parameters = null; throw; }
             finally { Release(sheets); }
         }
-        internal static void Refresh(Excel.Workbook book)
+        private static void Formula(Excel.Worksheet sheet, string address, string formula)
         {
-            var app = book.Application;
-            bool events = app.EnableEvents, screen = app.ScreenUpdating;
-            try {
-                app.EnableEvents = false; app.ScreenUpdating = false;
-                RefreshCore(book);
-            } finally { app.EnableEvents = events; app.ScreenUpdating = screen; }
+            var cell = sheet.Range[address];
+            try { cell.NumberFormat = "General"; ((dynamic)cell).Formula2 = formula; }
+            finally { Release(cell); }
         }
-        private static void RefreshCore(Excel.Workbook book)
+        private static string DateFormula(string key) =>
+            "IF(_ABV_" + key + "=\"\",\"\",TEXT(_ABV_" + key + ",\"d.m.yyyy\"))";
+
+        // Written once. Excel recalculates these spills without any SheetChange handler.
+        internal static void InitializeFormulas(Excel.Workbook book)
         {
             Excel.Worksheet parameters; var sheets = Sheets(book, out parameters);
+            var app = book.Application;
+            bool communication = app.PrintCommunication;
             try {
-                SetLists(book, parameters);
-                var people = People(parameters);
-                // Validate all inputs before changing output areas.
-                PrintPlan.Select(people, true); PrintPlan.Select(people, false);
-                var location = Read(book, "Location"); var date = Read(book, "Date", true);
-                var start = Read(book, "StartDate", true); var end = Read(book, "EndDate", true);
+                app.PrintCommunication = false;
                 foreach (var item in sheets) {
                     var sheet = item.Sheet; var key = item.Title ? "Title" : item.Code;
                     var anchor = NamedRange(book, "_ABV_Start_" + key); int row;
                     try { row = anchor.Row; } finally { Release(anchor); }
-                    var old = NamedRange(book, "_ABV_Output_" + key);
-                    try { old.UnMerge(); old.ClearContents(); old.WrapText = false; old.RowHeight = 15; } finally { Release(old); }
-                    int first = row;
-                    Text(sheet, "A" + row, "Funkcia"); Text(sheet, "B" + row, "Meno"); Text(sheet, "E" + row++, "Podpis");
-                    foreach (var person in PrintPlan.Select(people, item.Title)) {
-                        Text(sheet, "A" + row, person.Role); Text(sheet, "B" + row, person.Name); Text(sheet, "E" + row, "........................................");
-                        var line = sheet.Range["A" + row, "G" + row]; try { line.RowHeight = 42; line.WrapText = false; } finally { Release(line); }
-                        var role = sheet.Range["A" + row];
-                        try { role.WrapText = true; } finally { Release(role); }
-                        row++;
-                    }
-                    row++; Text(sheet, "A" + row, location); Text(sheet, "E" + row, date.Length > 0 ? "dňa " + date : "dňa: __________________");
-                    Anchor(book, sheet, "_ABV_Output_" + key, "$A$" + first + ":$G$" + row);
-                    if (item.Title) { Text(sheet, "B6", start); Text(sheet, "B7", end); }
-                    else Text(sheet, "A3", "Deň začatia inventúry: " + start + "    Deň skončenia inventúry: " + end);
+                    string placement = item.Title ? PrintPlan.FirstPage : PrintPlan.Accounts;
+                    string prefix = "=LET(keep,IFERROR((LEN(TRIM(ABV_People[Meno]))>0)*" +
+                        "((ABV_People[Vytlačiť na strane]=\"" + placement + "\")+(ABV_People[Vytlačiť na strane]=\"" + PrintPlan.All + "\")),0)," +
+                        "peopleCount,SUM(keep),";
+                    Formula(sheet, "A" + row, prefix +
+                        "VSTACK(IF(peopleCount=0,\"Funkcia\",VSTACK(\"Funkcia\",FILTER(ABV_People[Funkcia],keep,\"\"))),\"\",IF(_ABV_Location=\"\",\"\",_ABV_Location)))");
+                    Formula(sheet, "B" + row, prefix +
+                        "IF(peopleCount=0,\"Meno\",VSTACK(\"Meno\",FILTER(ABV_People[Meno],keep,\"\"))))");
+                    Formula(sheet, "E" + row, prefix +
+                        "VSTACK(EXPAND(\"Podpis\",peopleCount+1,1,\"........................................\"),\"\",IF(_ABV_Date=\"\",\"dňa: __________________\",\"dňa \"&" + DateFormula("Date") + ")))");
+                    // Format future spill rows in one operation; no per-person COM calls.
+                    var space = sheet.Range["A" + row, "G" + (row + 1002)];
+                    try { space.WrapText = false; space.RowHeight = 32; } finally { Release(space); }
+                    var roles = sheet.Range["A" + row, "A" + (row + 1002)];
+                    try { roles.WrapText = true; } finally { Release(roles); }
+                    if (item.Title) {
+                        Formula(sheet, "B6", "=" + DateFormula("StartDate"));
+                        Formula(sheet, "B7", "=" + DateFormula("EndDate"));
+                    } else Formula(sheet, "A3", "=\"Deň začatia inventúry: \"&" + DateFormula("StartDate") +
+                        "&\"    Deň skončenia inventúry: \"&" + DateFormula("EndDate"));
                     var setup = sheet.PageSetup;
                     try {
-                        setup.PrintArea = "$A$1:$G$" + row;
                         setup.Zoom = false; setup.FitToPagesWide = 1; setup.FitToPagesTall = false;
                         setup.Orientation = Excel.XlPageOrientation.xlPortrait;
                         setup.PaperSize = Excel.XlPaperSize.xlPaperA4;
@@ -208,8 +210,37 @@ namespace AccountBalanceVerification.AddIn
                         setup.PrintTitleRows = item.Title ? "" : "$1:$4";
                         setup.CenterFooter = "Strana &P / &N";
                     } finally { Release(setup); }
+                    // Local dynamic Print_Area also follows the spill during ordinary Excel printing.
+                    string quoted = "'" + sheet.Name.Replace("'", "''") + "'!";
+                    var names = sheet.Names;
+                    try { Release(names.Add("Print_Area", "=" + quoted + "$A$1:INDEX(" + quoted +
+                        "$G:$G,ROW(" + quoted + "$E$" + row + ")+ROWS(" + quoted + "$E$" + row + "#)-1)")); }
+                    finally { Release(names); }
                 }
-            } finally { foreach (var item in sheets) Release(item.Sheet); Release(parameters); }
+            } finally {
+                app.PrintCommunication = communication;
+                foreach (var item in sheets) Release(item.Sheet); Release(parameters);
+            }
+        }
+        private static void ValidateForOutput(Excel.Workbook book, List<OutputSheet> sheets, Excel.Worksheet parameters)
+        {
+            var people = People(parameters);
+            PrintPlan.Select(people, true); PrintPlan.Select(people, false);
+            Read(book, "Date", true); Read(book, "StartDate", true); Read(book, "EndDate", true);
+            foreach (var item in sheets) {
+                item.Sheet.Calculate();
+                var anchor = NamedRange(book, "_ABV_Start_" + (item.Title ? "Title" : item.Code));
+                int row; try { row = anchor.Row; } finally { Release(anchor); }
+                var formulaAnchor = item.Sheet.Range["E" + row];
+                try {
+                    if (!Convert.ToBoolean(formulaAnchor.HasFormula))
+                        throw new InvalidOperationException("Vytvorte nový zošit vo verzii 0.1.6 alebo novšej, ktorá používa vzorce pre podpisy.");
+                } finally { Release(formulaAnchor); }
+                foreach (string column in new[] { "A", "B", "E" })
+                    if (Convert.ToBoolean(item.Sheet.Evaluate("ISERROR(" + column + row + ")")))
+                        throw new InvalidOperationException("Skontrolujte podpisovú časť na hárku " + item.Sheet.Name +
+                            ". Uvoľnite bunky pre vzorce alebo použite aktuálny Microsoft 365 Excel.");
+            }
         }
         internal static void Output(bool pdf)
         {
@@ -225,7 +256,7 @@ namespace AccountBalanceVerification.AddIn
                 if (pdf) using (var dialog = new SaveFileDialog { Filter = "PDF (*.pdf)|*.pdf", DefaultExt = "pdf", AddExtension = true, OverwritePrompt = true, FileName = "Inventarizacia.pdf" }) {
                     if (dialog.ShowDialog() != DialogResult.OK) return; filename = dialog.FileName;
                 }
-                Refresh(source);
+                ValidateForOutput(source, sheets, parameters);
                 app.ScreenUpdating = false; app.DisplayAlerts = false;
                 // A temporary workbook gives both actions exactly the same ordered selection,
                 // without leaving worksheets grouped or changing source tab order.
@@ -235,6 +266,23 @@ namespace AccountBalanceVerification.AddIn
                         var copies = output.Worksheets; var last = (Excel.Worksheet)copies[copies.Count];
                         try { item.Sheet.Copy(After: last); } finally { Release(last); Release(copies); }
                     }
+                }
+                var people = People(parameters);
+                for (int i = 0; i < sheets.Count; i++) {
+                    var sourceSheet = sheets[i]; var copy = (Excel.Worksheet)output.Worksheets[i + 1];
+                    var anchor = NamedRange(source, "_ABV_Start_" + (sourceSheet.Title ? "Title" : sourceSheet.Code));
+                    int last; try { last = anchor.Row + PrintPlan.Select(people, sourceSheet.Title).Count + 2; } finally { Release(anchor); }
+                    var original = sourceSheet.Sheet.Range["A1:G" + last];
+                    var destination = copy.Range["A1:G" + last];
+                    try {
+                        // Clear spill anchors before replacing the temporary copy with values.
+                        destination.ClearContents();
+                        original.Copy();
+                        destination.PasteSpecial(Excel.XlPasteType.xlPasteValues);
+                        app.CutCopyMode = (Excel.XlCutCopyMode)0;
+                        var setup = copy.PageSetup;
+                        try { setup.PrintArea = "$A$1:$G$" + last; } finally { Release(setup); }
+                    } finally { Release(destination); Release(original); Release(copy); }
                 }
                 app.ScreenUpdating = true; app.DisplayAlerts = oldAlerts;
                 if (pdf) output.ExportAsFixedFormat(Excel.XlFixedFormatType.xlTypePDF, filename, IgnorePrintAreas: false, OpenAfterPublish: true);
