@@ -231,13 +231,11 @@ namespace AccountBalanceVerification.AddIn
                         setup.PrintTitleRows = item.Title ? "" : "$1:$4";
                         setup.CenterFooter = "Strana &P / &N";
                     } finally { Release(setup); }
-                    // Local dynamic Print_Area also follows the spill during ordinary Excel printing.
-                    string quoted = "'" + sheet.Name.Replace("'", "''") + "'!";
-                    var names = sheet.Names;
-                    try { Release(names.Add(quoted + "Print_Area", "=" + quoted + "$A$1:INDEX(" + quoted +
-                        "$G:$G,ROW(" + quoted + "$E$" + row + ")+MAX(1," + count + ")+2)")); }
-                    catch (Exception ex) { throw new InvalidOperationException("Oblasť tlače: " + sheet.Name, ex); }
-                    finally { Release(names); }
+                    // Use a literal print range rather than a formula-valued Print_Area.
+                    // Ribbon output sizes its temporary copies to the current people count.
+                    var printSetup = sheet.PageSetup;
+                    try { printSetup.PrintArea = "$A$1:$G$" + (row + 3); }
+                    finally { Release(printSetup); }
                 }
             } catch (Exception ex) { originalFailure = ex; throw; }
             finally {
