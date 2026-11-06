@@ -20,7 +20,6 @@ namespace AccountBalanceVerification.AddIn
         private readonly TabControl tabs = new TabControl { Dock = DockStyle.Fill };
         private readonly TextBox mkYear = new TextBox { Text = DateTime.Today.Year.ToString() }, client = new TextBox(), mkIco = new TextBox(), mkEntity = new TextBox();
         private readonly TextBox journal = new TextBox(), chart = new TextBox(), ledger = new TextBox(), fileYear = new TextBox(), fileIco = new TextBox(), fileEntity = new TextBox();
-        private readonly ComboBox mkFramework = FrameworkBox(), fileFramework = FrameworkBox();
         private readonly ComboBox producer = new ComboBox { DropDownStyle = ComboBoxStyle.DropDownList };
         private readonly Label mkStatus = new Label { AutoSize = true }, fileStatus = new Label { AutoSize = true };
         private readonly Button create = new Button { Text = "Vytvoriť", AutoSize = true }, preferences = new Button { Text = "Nastavenia", AutoSize = true };
@@ -39,7 +38,7 @@ namespace AccountBalanceVerification.AddIn
             tabs.TabPages.Add(mkPage); tabs.TabPages.Add(filePage); Controls.Add(tabs);
             var mk = NewGrid(); mkPage.Controls.Add(mk);
             Add(mk, "Účtovný rok", mkYear); Add(mk, "MkSoft klient ID", client); Add(mk, "IČO", mkIco);
-            Add(mk, "Názov účtovnej jednotky", mkEntity); Add(mk, "Účtovná osnova", mkFramework);
+            Add(mk, "Názov účtovnej jednotky", mkEntity);
             var lookup = new Button { Text = "Načítať údaje", AutoSize = true };
             Add(mk, "", lookup); Add(mk, "", mkStatus);
             lookup.Click += async (s, e) => await RunAsync(LoadEntityAsync);
@@ -47,7 +46,7 @@ namespace AccountBalanceVerification.AddIn
             var files = NewGrid(); filePage.Controls.Add(files);
             AddFile(files, "Účtovný denník", journal); AddFile(files, "Účtový rozvrh", chart); AddFile(files, "Hlavná kniha", ledger);
             Add(files, "Účtovný systém", producer); Add(files, "Účtovný rok", fileYear); Add(files, "IČO", fileIco);
-            Add(files, "Názov účtovnej jednotky", fileEntity); Add(files, "Účtovná osnova", fileFramework);
+            Add(files, "Názov účtovnej jednotky", fileEntity);
             Add(files, "", fileStatus);
             producer.SelectionChangeCommitted += async (s, e) => await DetectAsync();
             var buttons = new FlowLayoutPanel { Dock = DockStyle.Bottom, AutoSize = true, Padding = new Padding(12) };
@@ -58,11 +57,6 @@ namespace AccountBalanceVerification.AddIn
                     if (dialog.ShowDialog(this) == DialogResult.OK) { settings = dialog.Settings; InvalidateEntity(); }
             };
             FormClosing += (s, e) => { if (busy) e.Cancel = true; };
-        }
-        private static ComboBox FrameworkBox()
-        {
-            var box = new ComboBox { DropDownStyle = ComboBoxStyle.DropDownList };
-            box.Items.AddRange(new object[] { "PROFIT", "NONPROFIT", "GOV_LOCAL" }); return box;
         }
         internal static TableLayoutPanel NewGrid()
         {
@@ -94,7 +88,6 @@ namespace AccountBalanceVerification.AddIn
             {
                 if (mkIco.Text == resolved.Ico) mkIco.Clear();
                 if (mkEntity.Text == resolved.EntityName) mkEntity.Clear();
-                if (mkFramework.Text == resolved.FrameworkCode) mkFramework.SelectedIndex = -1;
             }
             resolved = null; mkStatus.Text = "Zadajte rok a klient ID alebo IČO, potom načítajte údaje.";
         }
@@ -141,7 +134,7 @@ namespace AccountBalanceVerification.AddIn
             if (matches.Count == 0) throw new InvalidOperationException("Pre zadaný rok a identifikátory sa nenašla účtovná jednotka.");
             if (matches.Count != 1) throw new InvalidOperationException("IČO má viac účtovných databáz. Zadajte MkSoft klient ID: " + string.Join(", ", matches.Select(x => x.ClientErpId)));
             var found = matches[0];
-            client.Text = found.ClientErpId.ToString(); mkIco.Text = found.Ico; mkEntity.Text = found.EntityName; mkFramework.SelectedItem = found.FrameworkCode;
+            client.Text = found.ClientErpId.ToString(); mkIco.Text = found.Ico; mkEntity.Text = found.EntityName;
             resolved = found;
             mkStatus.Text = "Údaje načítané. Skontrolujte ich a kliknite na Vytvoriť.";
         }
@@ -160,7 +153,7 @@ namespace AccountBalanceVerification.AddIn
             await RunAsync(async () => {
                 var metadata = await Task.Run(() => FileMetadata.Read(j, c, l, p));
                 Fill(fileIco, metadata.Ico); Fill(fileYear, metadata.FiscalYear?.ToString()); Fill(fileEntity, metadata.EntityName); Fill(producer, metadata.Producer);
-                fileStatus.Text = metadata.Warnings.Count == 0 ? "Údaje načítané zo súborov. Skontrolujte účtovnú osnovu." : string.Join(Environment.NewLine, metadata.Warnings.Distinct());
+                fileStatus.Text = metadata.Warnings.Count == 0 ? "Údaje načítané zo súborov. Skontrolujte ich pred vytvorením zošita." : string.Join(Environment.NewLine, metadata.Warnings.Distinct());
                 metadataSignature = j + "|" + c + "|" + l + "|" + producer.Text;
             });
         }
@@ -171,25 +164,22 @@ namespace AccountBalanceVerification.AddIn
                 try
                 {
                     VerificationPackage package;
-                    string selectedIco, selectedName, selectedFramework;
+                    string selectedIco, selectedName;
                     if (tabs.SelectedIndex == 0)
                     {
                         if (resolved == null) { await LoadEntityAsync(); return; } // Review before creation.
-                        selectedIco = mkIco.Text.Trim(); selectedName = mkEntity.Text.Trim(); selectedFramework = mkFramework.Text;
+                        selectedIco = mkIco.Text.Trim(); selectedName = mkEntity.Text.Trim();
                         CheckIco(selectedIco);
-                        if (selectedFramework.Length == 0) throw new InvalidOperationException("Vyberte účtovnú osnovu.");
                         package = await Api().GetAsync(resolved.ClientErpId, Year(mkYear), false, CancellationToken.None);
-                        package.OfficialAccounts.Clear(); // The reviewed framework selection replaces the default.
                     }
                     else
                     {
                         int year = Year(fileYear); selectedIco = fileIco.Text.Trim(); CheckIco(selectedIco);
-                        selectedName = fileEntity.Text.Trim(); selectedFramework = fileFramework.Text;
+                        selectedName = fileEntity.Text.Trim();
                         string p = producer.Text, j = journal.Text.Trim(), l = ledger.Text.Trim(), c = chart.Text.Trim();
-                        if (p.Length == 0 || selectedFramework.Length == 0) throw new InvalidOperationException("Vyberte účtovný systém a účtovnú osnovu.");
+                        if (p.Length == 0) throw new InvalidOperationException("Vyberte účtovný systém.");
                         package = await Task.Run(() => FileSource.Read(p, j, l, selectedIco, year, c));
                     }
-                    await Api().ApplyFrameworkAsync(package, selectedFramework, CancellationToken.None);
                     package.Ico = selectedIco;
                     if (!string.IsNullOrWhiteSpace(selectedName)) package.EntityName = selectedName;
                     populationStarted = true;

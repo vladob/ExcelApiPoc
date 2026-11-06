@@ -42,6 +42,26 @@ public sealed class MkSoftRepository
         return entities;
     }
 
+    public async Task<System.Collections.Generic.List<OfficialAccount>> GetAccountingFrameworkAsync(int clientErpId, int fiscalYear, CancellationToken ct)
+    {
+        await using var connection = new SqlConnection(connectionString);
+        await connection.OpenAsync(ct);
+        await using var command = new SqlCommand("SELECT UCET, NAZOV FROM [MkSoft].[AccountingFramework](@ClientErpId, @FiscalYear) ORDER BY UCET", connection) { CommandTimeout = 120 };
+        command.Parameters.Add("@ClientErpId", SqlDbType.Int).Value = clientErpId;
+        command.Parameters.Add("@FiscalYear", SqlDbType.Int).Value = fiscalYear;
+        var result = new System.Collections.Generic.List<OfficialAccount>();
+        await using var reader = await command.ExecuteReaderAsync(ct);
+        while (await reader.ReadAsync(ct))
+        {
+            var code = Convert.ToString(reader.GetValue(0)).Trim();
+            if (string.IsNullOrEmpty(code)) continue;
+            result.Add(new OfficialAccount { AccountCode = code, AccountName = reader.IsDBNull(1) ? "" : Convert.ToString(reader.GetValue(1)).Trim(),
+                AccountLevel = code.Length, ParentAccountCode = code.Length > 1 ? code.Substring(0, code.Length - 1) : null });
+        }
+        if (result.Count == 0) throw new InvalidOperationException("POSNOVA neobsahuje účtovnú osnovu pre zvoleného klienta a rok. Skontrolujte synchronizáciu.");
+        return result;
+    }
+
     public async Task<VerificationPackage> GetAsync(int clientErpId, int fiscalYear, bool includeEmptyAccounts, CancellationToken ct)
     {
         const string sql = """
@@ -71,18 +91,7 @@ public sealed class MkSoftRepository
                 ClosingDebit = reader.GetDecimal(6), ClosingCredit = reader.GetDecimal(7)
             });
         }
-        await using var framework = new SqlCommand("""
-            SELECT AccountCode, AccountName_sk, AccountLevel, ParentAccountCode
-            FROM Accounts.OfficialAccounts WHERE AccountFrameworkVersionId = @Version
-            AND LEFT(AccountCode, 1) IN ('0','1','2','3','4') ORDER BY SortOrder;
-            """, connection);
-        framework.Parameters.Add("@Version", SqlDbType.Int).Value = result.AccountFrameworkVersionId;
-        await using var definitions = await framework.ExecuteReaderAsync(ct);
-        while (await definitions.ReadAsync(ct)) result.OfficialAccounts.Add(new OfficialAccount {
-            AccountCode = definitions.GetString(0), AccountName = definitions.GetString(1),
-            AccountLevel = Convert.ToInt32(definitions.GetValue(2)), ParentAccountCode = definitions.IsDBNull(3) ? null : definitions.GetString(3)
-        });
-        if (result.OfficialAccounts.Count == 0) throw new InvalidOperationException("No official account framework found.");
+        result.OfficialAccounts = await GetAccountingFrameworkAsync(clientErpId, fiscalYear, ct);
         result.Warnings.Add("Úplnosť importu MkSoftRaw nebola automaticky overená.");
         return result;
     }

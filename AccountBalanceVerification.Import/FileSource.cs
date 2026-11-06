@@ -19,6 +19,7 @@ namespace AccountBalanceVerification.Import
                 if (ledger.FiscalYear != 0 && ledger.FiscalYear != year || !string.IsNullOrWhiteSpace(ledger.Ico) && ledger.Ico != ico)
                     throw new InvalidOperationException("IČO alebo rok hlavnej knihy nesúhlasí.");
                 result.EntityName = ledger.CompanyName;
+                AddNames(result, ledger.SyntheticAccountNames);
                 // Preserve imported net balances when the source does not expose gross sides.
                 foreach (var x in ledger.Rows) result.Rows.Add(new LedgerRow {
                     AccountNo = x.AccountCode, AccountName = x.AccountName,
@@ -37,6 +38,7 @@ namespace AccountBalanceVerification.Import
                     ExpectedIco = ico, ExpectedFiscalYear = year
                 });
                 result.EntityName = package.Journal.CompanyName;
+                if (package.GeneralLedger != null) AddNames(result, package.GeneralLedger.SyntheticAccountNames);
                 if (package.Journal.Rows.Any(x => x.RecordKind == JournalRecordKind.Normal && x.EffectivePostingDate.Year != year))
                     throw new InvalidOperationException("Denník obsahuje pohyby mimo zvoleného roka. Skontrolujte vstupný súbor.");
                 if (package.GeneralLedger == null && !package.CalculatedGeneralLedger.JournalContainsOpeningRecords)
@@ -72,8 +74,19 @@ namespace AccountBalanceVerification.Import
                 if (package.Journal.ImportReport != null) result.Warnings.AddRange(package.Journal.ImportReport.Diagnostics.Where(d => d.Severity != ExcelApiPoc.AccountingImport.Models.Reporting.ImportDiagnosticSeverity.Information).Select(d => d.Message));
             }
             result.Source = string.Join("; ", new[] { journalPath, chartPath, ledgerPath }.Where(x => !string.IsNullOrWhiteSpace(x)).Select(Path.GetFileName));
+            // Only an explicit three-digit GL account supplies a synthetic name.
+            foreach (var row in result.Rows.Where(x => x.AccountNo.Length == 3 && !string.IsNullOrWhiteSpace(x.AccountName)))
+                if (!result.OfficialAccounts.Any(x => x.AccountCode == row.AccountNo)) result.OfficialAccounts.Add(new OfficialAccount { AccountCode = row.AccountNo, AccountName = row.AccountName, AccountLevel = 3 });
             if (!string.IsNullOrWhiteSpace(chartPath)) ApplyChart(result, producer, chartPath, ico, year);
             return result;
+        }
+        private static void AddNames(VerificationPackage result, System.Collections.Generic.IDictionary<string, string> names)
+        {
+            foreach (var item in names.Where(x => WorkbookPlan.InScope(x.Key)))
+            {
+                result.OfficialAccounts.RemoveAll(x => x.AccountCode == item.Key);
+                result.OfficialAccounts.Add(new OfficialAccount { AccountCode = item.Key, AccountName = item.Value, AccountLevel = 3 });
+            }
         }
         public static void ApplyChart(VerificationPackage result, string producer, string path, string ico, int year)
         {
@@ -86,10 +99,13 @@ namespace AccountBalanceVerification.Import
                 .GroupBy(x => x.AccountCode.Trim()).ToDictionary(g => g.Key, g => g.First().AccountName.Trim());
             foreach (var row in result.Rows)
                 if (names.TryGetValue(row.AccountNo, out var name)) row.AccountName = name;
-            // Keep chart synthetic names as fallback; never invent balances or analytical rows.
+            AddNames(result, chart.SyntheticAccountNames);
+            // AF names take precedence over GL names; balances remain unchanged.
             foreach (var item in names.Where(x => x.Key.Length == 3 && WorkbookPlan.InScope(x.Key)))
-                if (!result.OfficialAccounts.Any(x => x.AccountCode == item.Key))
-                    result.OfficialAccounts.Add(new OfficialAccount { AccountCode = item.Key, AccountName = item.Value, AccountLevel = 3 });
+            {
+                result.OfficialAccounts.RemoveAll(x => x.AccountCode == item.Key);
+                result.OfficialAccounts.Add(new OfficialAccount { AccountCode = item.Key, AccountName = item.Value, AccountLevel = 3 });
+            }
             if (chart.ImportReport != null) result.Warnings.AddRange(chart.ImportReport.Diagnostics
                 .Where(d => d.Severity != ExcelApiPoc.AccountingImport.Models.Reporting.ImportDiagnosticSeverity.Information).Select(d => d.Message));
         }

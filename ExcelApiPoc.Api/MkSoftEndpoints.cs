@@ -23,6 +23,18 @@ public static class MkSoftEndpoints
                 return Results.Ok(matches);
             }).WithTags("MkSoft").WithName("FindMkSoftEntitiesV1").WithOpenApi();
 
+        app.MapGet("/api/v1/mksoft/clients/{clientErpId:int}/years/{fiscalYear:int}/accounting-framework",
+            async (int clientErpId, int fiscalYear, HttpContext http, AccountDetailSettingsRepository users, MkSoftRepository repository, CancellationToken ct) =>
+            {
+                string? key = http.Request.Headers["X-Api-Key"].FirstOrDefault();
+                if (key is null || key.Length != 64 || key.Any(c => !Uri.IsHexDigit(c))) return Results.Unauthorized();
+                var access = await users.ResolveMkSoftAccessAsync(key, ct);
+                if (access is null) return Results.Unauthorized();
+                if (access != true) return Results.StatusCode(StatusCodes.Status403Forbidden);
+                if (clientErpId <= 0 || fiscalYear < 1900 || fiscalYear > 9999) return Results.BadRequest();
+                return Results.Ok(await repository.GetAccountingFrameworkAsync(clientErpId, fiscalYear, ct));
+            }).WithTags("MkSoft").WithName("GetMkSoftAccountingFrameworkV1").WithOpenApi();
+
         app.MapGet("/api/v1/mksoft/clients/{clientErpId:int}/years/{fiscalYear:int}/general-ledger",
             async (int clientErpId, int fiscalYear, bool? includeEmptyAccounts, HttpContext http,
                 AccountDetailSettingsRepository users, MkSoftRepository repository, CancellationToken ct) =>

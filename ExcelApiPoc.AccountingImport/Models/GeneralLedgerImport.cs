@@ -6,6 +6,8 @@ namespace ExcelApiPoc.AccountingImport.Models
 {
     public sealed class GeneralLedgerImport
     {
+        // Names from explicit synthetic headings, separate from monetary rows.
+        public Dictionary<string, string> SyntheticAccountNames { get; } = new Dictionary<string, string>();
         public string SourceFileName { get; set; }
         public string SourceFilePath { get; set; }
         public string SourceFileHash { get; set; }

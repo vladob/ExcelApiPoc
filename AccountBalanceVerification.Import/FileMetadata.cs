@@ -52,6 +52,7 @@ namespace AccountBalanceVerification.Import
                         result.Producer = Merge(result.Producer, data.Producer == "Ives" ? "IVES" : data.Producer == "KROS OMEGA" || data.Producer == "Omega" ? "OMEGA" : data.Producer, "účtovný systém", result.Warnings);
                     }
                 }
+                catch (AmbiguousLayoutException) { result.Warnings.Add(Path.GetFileName(path) + ": Vyberte účtovný systém; formát súboru zodpovedá viacerým systémom."); }
                 catch (Exception ex) { result.Warnings.Add(Path.GetFileName(path) + ": " + ex.Message); }
             }
             foreach (var name in names)

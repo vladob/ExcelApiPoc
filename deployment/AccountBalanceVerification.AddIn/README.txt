@@ -1,4 +1,4 @@
-INVENTARIZACIA - Account Balance Verification 0.1.2 (pilot)
+INVENTARIZACIA - Account Balance Verification 0.1.3 (pilot)
 
 Requirements: Windows, Microsoft 365 Excel 64-bit, .NET Framework 4.8.
 No administrator rights are required.
@@ -15,15 +15,28 @@ Obtain the API URL and your own API key from the administrator.
 Use Nastavenia > Ulozit to save them and the include-empty-accounts option.
 MkSoft: enter year and client ID or ICO, load details, review, then create.
 Subory: select journal and/or ledger, optionally chart of accounts; review
-detected identity/year and select the official account framework.
-Both MkSoft and file imports need API access. File imports retrieve the official
-account framework from the API. localhost refers to your own computer and is
-not the office server address. Connect to the office network/VPN as required.
+identity/year and choose the accounting system if detection is ambiguous.
+File imports use names from AF, then GL, and do not require an API connection.
+MkSoft requires the API URL, your API key, MkSoft permission and synchronized
+POSNOVA for the selected client/year. localhost means your own computer.
+Connect to the office network/VPN as required.
 No API keys or personal settings are included in this package.
+
+PARAMETERS AND OUTPUT
+Parametre contains location/date, inventory start/end dates, messages and the
+people table. Choose a role, enter a name and select where signatures appear.
+Blank names are omitted. Add more people by extending the Excel table.
+Default roles can be changed in Nastavenia (one role per line).
+Tlacit refreshes signatures and opens print preview. Exportovat do PDF refreshes
+them and creates one PDF. Both include Titulna strana, then accounts in order;
+Parametre and unrelated sheets are excluded. Signatures appear once at each
+account's end, followed by location/date. Ordinary Excel printing does not
+refresh these sections or apply this worksheet selection.
+These output commands require a workbook created with version 0.1.3 or later.
 
 FIRST CHECK
 Import a known journal/general ledger. Select its correct fiscal year and
-account framework. Check account balances, filtered table totals and comments.
+account names. Check account balances, filtered table totals and comments.
 Workbooks are editable and are not protected. Save the resulting workbook.
 
 UNINSTALL

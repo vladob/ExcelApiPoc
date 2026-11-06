@@ -13,6 +13,8 @@ namespace ExcelApiPoc.AccountingImport.Models
 
     public sealed class AccountingFrameworkImport
     {
+        // Names from explicit synthetic headings, separate from monetary rows.
+        public Dictionary<string, string> SyntheticAccountNames { get; } = new Dictionary<string, string>();
         public ExcelApiPoc.AccountingImport.Models.Reporting.ImportReport ImportReport { get; set; }
         public string SourceFileName { get; set; }
         public string SourceFilePath { get; set; }

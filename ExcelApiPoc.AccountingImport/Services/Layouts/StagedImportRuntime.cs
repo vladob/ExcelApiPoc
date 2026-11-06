@@ -104,6 +104,20 @@ namespace ExcelApiPoc.AccountingImport.Services.Layouts
                     journal.FiscalYear = CompactSession.Value(result.Identifiers, "fiscalYearBasis") != "transaction dates" &&
                         int.TryParse(CompactSession.Value(result.Identifiers, "fiscalYear"), out int reportedYear) ? reportedYear : 0;
                 }
+                var syntheticNames = canonical is GeneralLedgerImport glNames ? glNames.SyntheticAccountNames :
+                    canonical is AccountingFrameworkImport afNames ? afNames.SyntheticAccountNames : null;
+                if (syntheticNames != null)
+                {
+                    foreach (var row in result.Rows)
+                    {
+                        string code = row.Account ?? "", name = row.Name ?? "";
+                        if (row.Kind == "SyntheticRow") { code = CompactSession.Value(row.Fields, "SyntheticAccount"); name = CompactSession.Value(row.Fields, "AccountName"); }
+                        if (row.Kind == "AccountHeading") { code = CompactSession.Value(row.Fields, "SyntheticCode"); name = CompactSession.Value(row.Fields, "AccountName"); }
+                        code = code.Trim(); name = name.Trim();
+                        if (code.Length != 3 || !code.All(char.IsDigit) || name.Length == 0) continue;
+                        if (!syntheticNames.ContainsKey(code)) syntheticNames.Add(code, name);
+                    }
+                }
                 if (canonical is GeneralLedgerImport ledger) { ledger.ImportReport = report; ledger.AccountingFormat = producer; }
                 if (canonical is AccountingFrameworkImport framework) { framework.ImportReport = report; framework.AccountingFormat = producer; }
                 return canonical;

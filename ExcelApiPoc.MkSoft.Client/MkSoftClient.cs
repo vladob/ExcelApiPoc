@@ -35,6 +35,20 @@ namespace ExcelApiPoc.MkSoft.Client
                 }
             }
         }
+        public async Task<System.Collections.Generic.List<OfficialAccount>> GetAccountingFrameworkAsync(int clientErpId, int fiscalYear, CancellationToken ct)
+        {
+            var path = $"api/v1/mksoft/clients/{clientErpId}/years/{fiscalYear}/accounting-framework";
+            using (var request = new HttpRequestMessage(HttpMethod.Get, new Uri(baseUri, path)))
+            {
+                request.Headers.Add("X-Api-Key", apiKey);
+                using (var response = await http.SendAsync(request, ct).ConfigureAwait(false))
+                {
+                    if (!response.IsSuccessStatusCode) throw new InvalidOperationException("MkSoft POSNOVA API: " + (int)response.StatusCode + " " + response.ReasonPhrase);
+                    return JsonConvert.DeserializeObject<System.Collections.Generic.List<OfficialAccount>>(await response.Content.ReadAsStringAsync().ConfigureAwait(false))
+                        ?? throw new InvalidOperationException("Missing POSNOVA response.");
+                }
+            }
+        }
         public async Task ApplyFrameworkAsync(VerificationPackage package, string frameworkCode, CancellationToken ct)
         {
             var path = "api/v1/account-frameworks/" + Uri.EscapeDataString(frameworkCode)

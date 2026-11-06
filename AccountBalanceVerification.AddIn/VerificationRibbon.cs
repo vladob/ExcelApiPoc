@@ -10,7 +10,9 @@ namespace AccountBalanceVerification.AddIn
     public sealed class VerificationRibbon : ExcelRibbon
     {
         public override string GetCustomUI(string ribbonId) =>
-            "<customUI xmlns='http://schemas.microsoft.com/office/2009/07/customui'><ribbon><tabs><tab id='abvTab' label='Inventarizácia'><group id='abvCreate' label='Zošit'><button id='abvNew' label='Vytvoriť inventarizáciu' size='large' onAction='CreateWorkbook'/></group></tab></tabs></ribbon></customUI>";
+            "<customUI xmlns='http://schemas.microsoft.com/office/2009/07/customui'><ribbon><tabs><tab id='abvTab' label='Inventarizácia'><group id='abvCreate' label='Zošit'><button id='abvNew' label='Vytvoriť inventarizačný zošit' size='large' imageMso='FileNew' onAction='CreateWorkbook'/><button id='abvPrint' label='Tlačiť' size='large' imageMso='PrintPreviewAndPrint' onAction='PrintWorkbook'/><button id='abvPdf' label='Exportovať do PDF' size='large' imageMso='FileSaveAsPdfOrXps' onAction='ExportPdf'/></group></tab></tabs></ribbon></customUI>";
+        public void PrintWorkbook(IRibbonControl control) => WorkbookOutput.Output(false);
+        public void ExportPdf(IRibbonControl control) => WorkbookOutput.Output(true);
         public void CreateWorkbook(IRibbonControl control)
         {
             Excel.Workbooks books = null;
