@@ -192,11 +192,14 @@ namespace AccountBalanceVerification.AddIn
                 app.PrintCommunication = false;
                 string[] readable = { "Location", "ProcessDate", "InventoryBeginning", "InventoryEnd" };
                 for (int i = 0; i < readable.Length; i++) Anchor(book, parameters, readable[i], "$B$" + (i + 2));
-                var sharedNames = book.Names;
-                try {
-                    AddName(sharedNames, "ABV_AccountPeopleCount", "=SUMPRODUCT(" + PeopleMask(false) + ")");
-                    AddName(sharedNames, "ABV_TitlePeopleCount", "=SUMPRODUCT(" + PeopleMask(true) + ")");
-                } finally { Release(sharedNames); }
+                // Store calculations through Formula2; defined names only reference cells.
+                // Names.Add rejects the full structured-reference count formula on some Excel installations.
+                Text(parameters, "M1", "Počet podpisov – účty");
+                Text(parameters, "N1", "Počet podpisov – titulná strana");
+                Formula(parameters, "M2", "=SUMPRODUCT(" + PeopleMask(false) + ")");
+                Formula(parameters, "N2", "=SUMPRODUCT(" + PeopleMask(true) + ")");
+                Anchor(book, parameters, "ABV_AccountPeopleCount", "$M$2");
+                Anchor(book, parameters, "ABV_TitlePeopleCount", "$N$2");
                 foreach (var item in sheets) {
                     var sheet = item.Sheet; var key = item.Title ? "Title" : item.Code;
                     var anchor = NamedRange(book, "_ABV_Start_" + key); int row;
