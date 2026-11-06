@@ -1,4 +1,4 @@
-INVENTARIZACIA - Account Balance Verification 0.1.6 (pilot)
+INVENTARIZACIA - Account Balance Verification 0.1.7 (pilot)
 
 Requirements: Windows, Microsoft 365 Excel 64-bit, .NET Framework 4.8.
 No administrator rights are required.
@@ -28,14 +28,14 @@ people table. Choose a role, enter a name and select where signatures appear.
 Blank names are omitted. Add more people by extending the Excel table.
 Default roles can be changed in Nastavenia (one role per line).
 Names, roles, signatures, location and dates use native Excel spill formulas.
-Use a Microsoft 365 Excel version with FILTER, LET, VSTACK and EXPAND.
+Use a Microsoft 365 Excel version with FILTER, VSTACK and SEQUENCE.
 With automatic calculation, changes update immediately, even without the add-in.
 In manual calculation mode press F9. Keep spill areas below the signatures empty.
 Tlacit validates the inputs and opens print preview; Exportovat do PDF creates
 one PDF. Both include Titulna strana, then accounts in order; Parametre and
 unrelated sheets are excluded. Signatures appear once at each account's end,
 followed by location/date. Ordinary Excel printing does not apply this selection.
-Create a new workbook with 0.1.6 for formula-driven signatures. Older workbooks
+Create a new workbook with 0.1.7 for formula-driven signatures. Older workbooks
 are not automatically migrated. Ribbon output requires these new workbooks.
 Parametre is first. Account output uses unmerged, monochrome portrait A4 layout.
 
@@ -54,7 +54,7 @@ Deploy compatible API endpoints/database wrappers separately before MkSoft use.
 Local files: %LOCALAPPDATA%\AccountBalanceVerification\AddIn
 User settings: %APPDATA%\AccountBalanceVerification\settings.json
 
-VERSION 0.1.6 CHECKS IN EXCEL
+VERSION 0.1.7 CHECKS IN EXCEL
 - Create a workbook: Parametre first, then Titulna strana and account tabs.
 - Check black headers, white body/totals, no striping, and blank first total cell.
 - Edit a name, role, print placement, location and dates on Parametre.

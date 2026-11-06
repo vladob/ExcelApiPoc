@@ -164,10 +164,14 @@ namespace AccountBalanceVerification.AddIn
         {
             var cell = sheet.Range[address];
             try { cell.NumberFormat = "General"; ((dynamic)cell).Formula2 = formula; }
+            catch (Exception ex) { throw new InvalidOperationException("Vzorec: " + sheet.Name + "!" + address + " = " + formula, ex); }
             finally { Release(cell); }
         }
+        private static string PeopleMask(bool title) =>
+            "IFERROR((LEN(TRIM(ABV_People[Meno]))>0)*((ABV_People[Vytlačiť na strane]=\"" +
+            (title ? PrintPlan.FirstPage : PrintPlan.Accounts) + "\")+(ABV_People[Vytlačiť na strane]=\"" + PrintPlan.All + "\")),0)";
         private static string DateFormula(string key) =>
-            "IF(_ABV_" + key + "=\"\",\"\",TEXT(_ABV_" + key + ",\"d.m.yyyy\"))";
+            "IF(" + key + "=\"\",\"\",TEXT(" + key + ",\"d.m.yyyy\"))";
 
         // Written once. Excel recalculates these spills without any SheetChange handler.
         internal static void InitializeFormulas(Excel.Workbook book)
@@ -177,30 +181,35 @@ namespace AccountBalanceVerification.AddIn
             bool communication = app.PrintCommunication;
             try {
                 app.PrintCommunication = false;
+                string[] readable = { "Location", "ProcessDate", "InventoryBeginning", "InventoryEnd" };
+                for (int i = 0; i < readable.Length; i++) Anchor(book, parameters, readable[i], "$B$" + (i + 2));
+                var sharedNames = book.Names;
+                try {
+                    Release(sharedNames.Add("ABV_AccountPeopleCount", "=SUMPRODUCT(" + PeopleMask(false) + ")"));
+                    Release(sharedNames.Add("ABV_TitlePeopleCount", "=SUMPRODUCT(" + PeopleMask(true) + ")"));
+                } finally { Release(sharedNames); }
                 foreach (var item in sheets) {
                     var sheet = item.Sheet; var key = item.Title ? "Title" : item.Code;
                     var anchor = NamedRange(book, "_ABV_Start_" + key); int row;
                     try { row = anchor.Row; } finally { Release(anchor); }
-                    string placement = item.Title ? PrintPlan.FirstPage : PrintPlan.Accounts;
-                    string prefix = "=LET(keep,IFERROR((LEN(TRIM(ABV_People[Meno]))>0)*" +
-                        "((ABV_People[Vytlačiť na strane]=\"" + placement + "\")+(ABV_People[Vytlačiť na strane]=\"" + PrintPlan.All + "\")),0)," +
-                        "peopleCount,SUM(keep),";
-                    Formula(sheet, "A" + row, prefix +
-                        "VSTACK(IF(peopleCount=0,\"Funkcia\",VSTACK(\"Funkcia\",FILTER(ABV_People[Funkcia],keep,\"\"))),\"\",IF(_ABV_Location=\"\",\"\",_ABV_Location)))");
-                    Formula(sheet, "B" + row, prefix +
-                        "IF(peopleCount=0,\"Meno\",VSTACK(\"Meno\",FILTER(ABV_People[Meno],keep,\"\"))))");
-                    Formula(sheet, "E" + row, prefix +
-                        "VSTACK(EXPAND(\"Podpis\",peopleCount+1,1,\"........................................\"),\"\",IF(_ABV_Date=\"\",\"dňa: __________________\",\"dňa \"&" + DateFormula("Date") + ")))");
+                    Text(sheet, "A" + row, "Funkcia"); Text(sheet, "B" + row, "Meno"); Text(sheet, "E" + row, "Podpis");
+                    string mask = PeopleMask(item.Title);
+                    string count = item.Title ? "ABV_TitlePeopleCount" : "ABV_AccountPeopleCount";
+                    int body = row + 1;
+                    // Footer must be in the same spill to move when the list grows.
+                    Formula(sheet, "A" + body, "=VSTACK(FILTER(ABV_People[Funkcia]," + mask + ",\"\"),\"\",IF(Location=\"\",\"\",Location))");
+                    Formula(sheet, "B" + body, "=FILTER(ABV_People[Meno]," + mask + ",\"\")");
+                    Formula(sheet, "E" + body, "=VSTACK(IF(" + count + "=0,\"\",IF(SEQUENCE(MAX(1," + count + ")),\"........................................\")),\"\",IF(ProcessDate>0,\"dňa: \"&TEXT(ProcessDate,\"d.m.yyyy\"),\"dňa: __________________\"))");
                     // Format future spill rows in one operation; no per-person COM calls.
                     var space = sheet.Range["A" + row, "G" + (row + 1002)];
                     try { space.WrapText = false; space.RowHeight = 32; } finally { Release(space); }
                     var roles = sheet.Range["A" + row, "A" + (row + 1002)];
                     try { roles.WrapText = true; } finally { Release(roles); }
                     if (item.Title) {
-                        Formula(sheet, "B6", "=" + DateFormula("StartDate"));
-                        Formula(sheet, "B7", "=" + DateFormula("EndDate"));
-                    } else Formula(sheet, "A3", "=\"Deň začatia inventúry: \"&" + DateFormula("StartDate") +
-                        "&\"    Deň skončenia inventúry: \"&" + DateFormula("EndDate"));
+                        Formula(sheet, "B6", "=" + DateFormula("InventoryBeginning"));
+                        Formula(sheet, "B7", "=" + DateFormula("InventoryEnd"));
+                    } else Formula(sheet, "A3", "=\"Deň začatia inventúry: \"&" + DateFormula("InventoryBeginning") +
+                        "&\"    Deň skončenia inventúry: \"&" + DateFormula("InventoryEnd"));
                     var setup = sheet.PageSetup;
                     try {
                         setup.Zoom = false; setup.FitToPagesWide = 1; setup.FitToPagesTall = false;
@@ -213,8 +222,9 @@ namespace AccountBalanceVerification.AddIn
                     // Local dynamic Print_Area also follows the spill during ordinary Excel printing.
                     string quoted = "'" + sheet.Name.Replace("'", "''") + "'!";
                     var names = sheet.Names;
-                    try { Release(names.Add("Print_Area", "=" + quoted + "$A$1:INDEX(" + quoted +
-                        "$G:$G,ROW(" + quoted + "$E$" + row + ")+ROWS(" + quoted + "$E$" + row + "#)-1)")); }
+                    try { Release(names.Add(quoted + "Print_Area", "=" + quoted + "$A$1:INDEX(" + quoted +
+                        "$G:$G,ROW(" + quoted + "$E$" + row + ")+MAX(1," + count + ")+2)")); }
+                    catch (Exception ex) { throw new InvalidOperationException("Oblasť tlače: " + sheet.Name, ex); }
                     finally { Release(names); }
                 }
             } finally {
@@ -231,13 +241,13 @@ namespace AccountBalanceVerification.AddIn
                 item.Sheet.Calculate();
                 var anchor = NamedRange(book, "_ABV_Start_" + (item.Title ? "Title" : item.Code));
                 int row; try { row = anchor.Row; } finally { Release(anchor); }
-                var formulaAnchor = item.Sheet.Range["E" + row];
+                var formulaAnchor = item.Sheet.Range["E" + (row + 1)];
                 try {
                     if (!Convert.ToBoolean(formulaAnchor.HasFormula))
-                        throw new InvalidOperationException("Vytvorte nový zošit vo verzii 0.1.6 alebo novšej, ktorá používa vzorce pre podpisy.");
+                        throw new InvalidOperationException("Vytvorte nový zošit vo verzii 0.1.7 alebo novšej, ktorá používa vzorce pre podpisy.");
                 } finally { Release(formulaAnchor); }
                 foreach (string column in new[] { "A", "B", "E" })
-                    if (Convert.ToBoolean(item.Sheet.Evaluate("ISERROR(" + column + row + ")")))
+                    if (Convert.ToBoolean(item.Sheet.Evaluate("ISERROR(" + column + (row + 1) + ")")))
                         throw new InvalidOperationException("Skontrolujte podpisovú časť na hárku " + item.Sheet.Name +
                             ". Uvoľnite bunky pre vzorce alebo použite aktuálny Microsoft 365 Excel.");
             }
@@ -271,7 +281,7 @@ namespace AccountBalanceVerification.AddIn
                 for (int i = 0; i < sheets.Count; i++) {
                     var sourceSheet = sheets[i]; var copy = (Excel.Worksheet)output.Worksheets[i + 1];
                     var anchor = NamedRange(source, "_ABV_Start_" + (sourceSheet.Title ? "Title" : sourceSheet.Code));
-                    int last; try { last = anchor.Row + PrintPlan.Select(people, sourceSheet.Title).Count + 2; } finally { Release(anchor); }
+                    int last; try { last = anchor.Row + Math.Max(1, PrintPlan.Select(people, sourceSheet.Title).Count) + 2; } finally { Release(anchor); }
                     var original = sourceSheet.Sheet.Range["A1:G" + last];
                     var destination = copy.Range["A1:G" + last];
                     try {
