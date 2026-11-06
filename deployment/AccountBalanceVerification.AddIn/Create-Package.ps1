@@ -1,5 +1,5 @@
 param(
-    [ValidatePattern('^\d+\.\d+\.\d+$')][string]$Version = '0.1.3'
+    [ValidatePattern('^\d+\.\d+\.\d+$')][string]$Version = '0.1.4'
 )
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'

@@ -1,4 +1,4 @@
-INVENTARIZACIA - Account Balance Verification 0.1.3 (pilot)
+INVENTARIZACIA - Account Balance Verification 0.1.4 (pilot)
 
 Requirements: Windows, Microsoft 365 Excel 64-bit, .NET Framework 4.8.
 No administrator rights are required.
@@ -32,7 +32,7 @@ them and creates one PDF. Both include Titulna strana, then accounts in order;
 Parametre and unrelated sheets are excluded. Signatures appear once at each
 account's end, followed by location/date. Ordinary Excel printing does not
 refresh these sections or apply this worksheet selection.
-These output commands require a workbook created with version 0.1.3 or later.
+These output commands require a workbook created with version 0.1.4 or later.
 
 FIRST CHECK
 Import a known journal/general ledger. Select its correct fiscal year and

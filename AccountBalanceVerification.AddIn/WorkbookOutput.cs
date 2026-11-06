@@ -102,7 +102,8 @@ namespace AccountBalanceVerification.AddIn
             Anchor(book, sheet, "_ABV_Roles", "$J$1:$J$" + roles.Length);
             Anchor(book, sheet, "_ABV_Placements", "$K$1:$K$3");
             Validate(sheet, "A11:A1010", "=_ABV_Roles"); Validate(sheet, "C11:C1010", "=_ABV_Placements");
-            var helper = sheet.Range["J:K"]; try { helper.Hidden = true; } finally { Release(helper); }
+            // Keep validation sources visible on Parametre. Hiding columns can fail
+            // in Excel; this administrative sheet is excluded from ribbon output.
         }
         private static void Validate(Excel.Worksheet sheet, string address, string source)
         {
