@@ -29,6 +29,16 @@ namespace AccountBalanceVerification.Import
                     ClosingDebit = x.SourceClosingNet.HasValue ? Math.Max(x.SourceClosingNet.Value, 0) : x.ClosingDebit,
                     ClosingCredit = x.SourceClosingNet.HasValue ? Math.Max(-x.SourceClosingNet.Value, 0) : x.ClosingCredit
                 });
+                // IfoSoft CSV partitions an analytical account by budget dimensions.
+                // Inventory account sheets need one additive balance per account.
+                if (string.Equals(producer, "IfoSoft", StringComparison.OrdinalIgnoreCase) &&
+                    string.Equals(Path.GetExtension(ledgerPath), ".csv", StringComparison.OrdinalIgnoreCase))
+                    result.Rows = result.Rows.GroupBy(x => x.AccountNo, StringComparer.Ordinal).Select(g => new LedgerRow {
+                        AccountNo = g.Key, AccountName = g.Select(x => x.AccountName).FirstOrDefault(x => !string.IsNullOrWhiteSpace(x)) ?? "",
+                        OpeningDebit = g.Sum(x => x.OpeningDebit), OpeningCredit = g.Sum(x => x.OpeningCredit),
+                        MovementsDebit = g.Sum(x => x.MovementsDebit), MovementsCredit = g.Sum(x => x.MovementsCredit),
+                        ClosingDebit = g.Sum(x => x.ClosingDebit), ClosingCredit = g.Sum(x => x.ClosingCredit)
+                    }).ToList();
                 if (ledger.ImportReport != null) result.Warnings.AddRange(ledger.ImportReport.Diagnostics.Where(d => d.Severity != ExcelApiPoc.AccountingImport.Models.Reporting.ImportDiagnosticSeverity.Information).Select(d => d.Message));
             }
             else

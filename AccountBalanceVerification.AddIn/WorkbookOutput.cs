@@ -10,7 +10,7 @@ using Excel = Microsoft.Office.Interop.Excel;
 
 namespace AccountBalanceVerification.AddIn
 {
-    internal static class WorkbookOutput
+    internal static partial class WorkbookOutput
     {
         private const string RoleKey = "ABVRole", CodeKey = "ABVCode";
         internal static void Release(object value) { if (value != null && Marshal.IsComObject(value)) Marshal.ReleaseComObject(value); }
@@ -92,16 +92,17 @@ namespace AccountBalanceVerification.AddIn
             finally { Release(tables); Release(area); }
             SetLists(book, sheet);
             var fields = sheet.Range["A11:B1010"]; try { fields.NumberFormat = "@"; } finally { Release(fields); }
-            Text(sheet, "E2", "Zdroj"); Text(sheet, "F2", package.Source);
-            Text(sheet, "E3", "Načítané (UTC)"); Text(sheet, "F3", package.RetrievedAtUtc.ToString("yyyy-MM-dd HH:mm:ss"));
-            Text(sheet, "E5", "Správy a upozornenia");
-            int r = 6; foreach (var message in warnings.Distinct()) Text(sheet, "E" + r++, message);
+            UpgradeParameters(book, sheet);
+            Text(sheet, "P2", "Zdroj"); Text(sheet, "Q2", package.Source);
+            Text(sheet, "P3", "Načítané (UTC)"); Text(sheet, "Q3", package.RetrievedAtUtc.ToString("yyyy-MM-dd HH:mm:ss"));
+            Text(sheet, "P5", "Správy a upozornenia");
+            int r = 6; foreach (var message in warnings.Distinct()) Text(sheet, "P" + r++, message);
             var a = sheet.Range["A:C"]; try { a.ColumnWidth = 29; } finally { Release(a); }
             var b = sheet.Range["B:B"]; try { b.ColumnWidth = 36; } finally { Release(b); }
-            var e = sheet.Range["E:F"]; try { e.ColumnWidth = 55; e.WrapText = true; } finally { Release(e); }
+            var e = sheet.Range["P:Q"]; try { e.ColumnWidth = 55; e.WrapText = true; } finally { Release(e); }
         }
         private static string[] Roles() => (ConnectionSettings.Load().SignatureRoles ?? PrintPlan.DefaultRoles)
-            .Where(x => !string.IsNullOrWhiteSpace(x)).Select(x => x.Trim()).Distinct().DefaultIfEmpty("Člen").ToArray();
+            .Concat(new[] { "Predsedníčka", "Členka" }).Where(x => !string.IsNullOrWhiteSpace(x)).Select(x => x.Trim()).Distinct().DefaultIfEmpty("Člen").ToArray();
         private static void SetLists(Excel.Workbook book, Excel.Worksheet sheet)
         {
             var roles = Roles();
@@ -143,14 +144,23 @@ namespace AccountBalanceVerification.AddIn
                 table = tables["ABV_People"]; body = table.DataBodyRange;
                 var result = new List<Signatory>(); if (body == null) return result;
                 var data = (object[,])body.Value2;
-                for (int row = 1; row <= data.GetLength(0); row++) result.Add(new Signatory {
-                    Role = Convert.ToString(data[row, 1]), Name = Convert.ToString(data[row, 2]), Placement = Convert.ToString(data[row, 3]) });
+                for (int row = 1; row <= data.GetLength(0); row++) {
+                    var person = new Signatory { Role = Convert.ToString(data[row, 1]), Name = Convert.ToString(data[row, 2]) };
+                    if (data.GetLength(1) == 3) person.Placement = Convert.ToString(data[row, 3]);
+                    else {
+                        person.OnTitle = ReadFlag(data[row, 3], person.Name);
+                        person.OnAccounts = ReadFlag(data[row, 4], person.Name);
+                        person.DecreeRole = Convert.ToString(data[row, 5]).Trim();
+                        person.RecapRole = Convert.ToString(data[row, 6]).Trim();
+                    }
+                    result.Add(person);
+                }
                 return result;
             } finally { Release(body); Release(table); Release(tables); }
         }
         private sealed class OutputSheet
         {
-            public Excel.Worksheet Sheet; public string Code; public bool Title;
+            public Excel.Worksheet Sheet; public string Code; public bool Title; public bool Recap;
         }
         private static List<OutputSheet> Sheets(Excel.Workbook book, out Excel.Worksheet parameters)
         {
@@ -159,14 +169,42 @@ namespace AccountBalanceVerification.AddIn
                 for (int i = 1; i <= sheets.Count; i++) {
                     var sheet = (Excel.Worksheet)sheets[i]; string role = Property(sheet, RoleKey);
                     if (role == "Parameters") { if (parameters != null) { Release(sheet); throw new InvalidOperationException("Duplicitný hárok Parametre."); } parameters = sheet; }
-                    else if (role == "Title" || role == "Account") result.Add(new OutputSheet { Sheet = sheet, Title = role == "Title", Code = Property(sheet, CodeKey) });
+                    else if (role == "Title" || role == "Account" || role == "Recap") result.Add(new OutputSheet { Sheet = sheet, Title = role == "Title", Recap = role == "Recap", Code = Property(sheet, CodeKey) });
                     else Release(sheet);
                 }
-                if (parameters == null || result.Count(x => x.Title) != 1 || result.Where(x => !x.Title).GroupBy(x => x.Code).Any(g => g.Count() > 1))
+                if (parameters == null || result.Count(x => x.Title) != 1 || result.Count(x => x.Recap) > 1 || result.Where(x => !x.Title && !x.Recap).GroupBy(x => x.Code).Any(g => g.Count() > 1))
                     throw new InvalidOperationException("Otvorte inventarizačný zošit vytvorený touto verziou doplnku. Chýbajú alebo sú duplicitné interné údaje hárkov.");
-                return result.OrderByDescending(x => x.Title).ThenBy(x => x.Code, StringComparer.Ordinal).ToList();
+                return result.OrderBy(x => x.Title ? 0 : x.Recap ? 2 : 1).ThenBy(x => x.Code, StringComparer.Ordinal).ToList();
             } catch { foreach (var item in result) Release(item.Sheet); Release(parameters); parameters = null; throw; }
             finally { Release(sheets); }
+        }
+        internal static bool OutputAvailable(Excel.Workbook book, out bool decrees, out bool recap)
+        {
+            decrees = false; recap = false;
+            if (book == null) return false;
+            Excel.Worksheet parameters = null; List<OutputSheet> outputs = null;
+            try {
+                outputs = Sheets(book, out parameters);
+                if (!HasName(book, "_ABV_Start_Title") || !outputs.Any(x => !x.Title && !x.Recap)) return false;
+                var sheets = book.Worksheets;
+                try {
+                    for (int i = 1; i <= sheets.Count; i++) {
+                        var sheet = (Excel.Worksheet)sheets[i];
+                        try {
+                            if (Property(sheet, RoleKey) == "Decree") {
+                                var first = sheet.Range["A1"];
+                                try { decrees = Convert.ToBoolean(first.HasFormula); } finally { Release(first); }
+                            }
+                        } finally { Release(sheet); }
+                    }
+                } finally { Release(sheets); }
+                recap = outputs.Any(x => x.Recap) && HasName(book, "_ABV_RecapEnd");
+                return true;
+            } catch { return false; }
+            finally {
+                if (outputs != null) foreach (var output in outputs) Release(output.Sheet);
+                Release(parameters);
+            }
         }
         private static void Formula(Excel.Worksheet sheet, string address, string formula)
         {
@@ -176,8 +214,7 @@ namespace AccountBalanceVerification.AddIn
             finally { Release(cell); }
         }
         private static string PeopleMask(bool title) =>
-            "IFERROR((LEN(TRIM(ABV_People[Meno]))>0)*((ABV_People[Vytlačiť na strane]=\"" +
-            (title ? PrintPlan.FirstPage : PrintPlan.Accounts) + "\")+(ABV_People[Vytlačiť na strane]=\"" + PrintPlan.All + "\")),0)";
+            "IFERROR((LEN(TRIM(ABV_People[Meno]))>0)*(ABV_People[" + (title ? "Prvá" : "Účty") + "]=TRUE),0)";
         private static string DateFormula(string key) =>
             "IF(" + key + "=\"\",\"\",TEXT(" + key + ",\"d.m.yyyy\"))";
 
@@ -190,6 +227,7 @@ namespace AccountBalanceVerification.AddIn
             Exception originalFailure = null;
             try {
                 app.PrintCommunication = false;
+                if (!HasName(book, "P_EntityName")) {
                 string[] readable = { "Location", "ProcessDate", "InventoryBeginning", "InventoryEnd" };
                 for (int i = 0; i < readable.Length; i++) Anchor(book, parameters, readable[i], "$B$" + (i + 2));
                 // Store calculations through Formula2; defined names only reference cells.
@@ -200,8 +238,10 @@ namespace AccountBalanceVerification.AddIn
                 Formula(parameters, "N2", "=SUMPRODUCT(" + PeopleMask(true) + ")");
                 Anchor(book, parameters, "ABV_AccountPeopleCount", "$M$2");
                 Anchor(book, parameters, "ABV_TitlePeopleCount", "$N$2");
+                }
                 int reservedPeopleRows = Math.Max(1, People(parameters).Count);
                 foreach (var item in sheets) {
+                    if (item.Recap) continue;
                     var sheet = item.Sheet; var key = item.Title ? "Title" : item.Code;
                     var anchor = NamedRange(book, "_ABV_Start_" + key); int row;
                     try { row = anchor.Row; } finally { Release(anchor); }
@@ -226,10 +266,16 @@ namespace AccountBalanceVerification.AddIn
                     var footerLine = sheet.Range["A" + footerRow, "G" + footerRow];
                     try { footerLine.WrapText = false; } finally { Release(footerLine); }
                     if (item.Title) {
+                        if (HasName(book, "P_EntityName")) {
+                            Formula(sheet, "B3", "=P_EntityName"); Formula(sheet, "B4", "=P_ICO"); Formula(sheet, "B5", "=P_FiscalYear");
+                        }
                         Formula(sheet, "B6", "=" + DateFormula("InventoryBeginning"));
                         Formula(sheet, "B7", "=" + DateFormula("InventoryEnd"));
-                    } else Formula(sheet, "A3", "=\"Deň začatia inventúry: \"&" + DateFormula("InventoryBeginning") +
+                    } else {
+                        if (HasName(book, "P_EntityName")) Formula(sheet, "A2", "=P_EntityName&\" | \"&P_FiscalYear");
+                        Formula(sheet, "A3", "=\"Deň začatia inventúry: \"&" + DateFormula("InventoryBeginning") +
                         "&\"    Deň skončenia inventúry: \"&" + DateFormula("InventoryEnd"));
+                    }
                     var setup = sheet.PageSetup;
                     try {
                         setup.Zoom = false; setup.FitToPagesWide = 1; setup.FitToPagesTall = false;
@@ -258,11 +304,15 @@ namespace AccountBalanceVerification.AddIn
         }
         private static void ValidateForOutput(Excel.Workbook book, List<OutputSheet> sheets, Excel.Worksheet parameters)
         {
+            book.Application.Calculate();
             var people = People(parameters);
-            PrintPlan.Select(people, true); PrintPlan.Select(people, false);
-            Read(book, "Date", true); Read(book, "StartDate", true); Read(book, "EndDate", true);
+            if (sheets.Any(x => !x.Recap)) {
+                PrintPlan.Select(people, true); PrintPlan.Select(people, false);
+                Read(book, "Date", true); Read(book, "StartDate", true); Read(book, "EndDate", true);
+            }
             foreach (var item in sheets) {
                 item.Sheet.Calculate();
+                if (item.Recap) { ValidateRecap(book, item.Sheet, people); continue; }
                 var anchor = NamedRange(book, "_ABV_Start_" + (item.Title ? "Title" : item.Code));
                 int row; try { row = anchor.Row; } finally { Release(anchor); }
                 var formulaAnchor = item.Sheet.Range["E" + (row + 1)];
@@ -276,7 +326,34 @@ namespace AccountBalanceVerification.AddIn
                             ". Uvoľnite bunky pre vzorce alebo použite aktuálny Microsoft 365 Excel.");
             }
         }
-        internal static void Output(bool pdf)
+        private static void ExportPdfWithRetry(Excel.Workbook output, string filename)
+        {
+            while (true) {
+                try {
+                    output.ExportAsFixedFormat(Excel.XlFixedFormatType.xlTypePDF, filename,
+                        IgnorePrintAreas: false, OpenAfterPublish: true);
+                    return;
+                } catch (Exception ex) when (ex is COMException || ex is System.IO.IOException || ex is UnauthorizedAccessException) {
+                    var choice = MessageBox.Show(
+                        "PDF sa nepodarilo uložiť:\n" + filename +
+                        "\n\nAk je tento súbor otvorený v prehliadači PDF, zatvorte ho. Skontrolujte tiež oprávnenie na zápis do priečinka." +
+                        "\n\nOpakovať: znovu vybrať názov súboru a skúsiť uloženie. Môžete ponechať rovnaký názov alebo zadať iný." +
+                        "\nZrušiť: ukončiť export." + "\n\nPodrobnosti: " + ex.Message,
+                        "Inventarizácia – export PDF", MessageBoxButtons.RetryCancel, MessageBoxIcon.Warning);
+                    if (choice != DialogResult.Retry) return;
+                    using (var dialog = new SaveFileDialog {
+                        Filter = "PDF (*.pdf)|*.pdf", DefaultExt = "pdf", AddExtension = true,
+                        OverwritePrompt = true, FileName = System.IO.Path.GetFileName(filename),
+                        InitialDirectory = System.IO.Path.GetDirectoryName(filename)
+                    }) {
+                        if (dialog.ShowDialog() != DialogResult.OK) return;
+                        filename = dialog.FileName;
+                        PdfExportLocation.Remember(System.IO.Path.GetDirectoryName(filename));
+                    }
+                }
+            }
+        }
+        internal static void Output(bool pdf, bool recapOnly)
         {
             var app = (Excel.Application)ExcelDnaUtil.Application;
             Excel.Workbook source = null, output = null;
@@ -286,9 +363,14 @@ namespace AccountBalanceVerification.AddIn
                 source = app.ActiveWorkbook; active = app.ActiveSheet;
                 if (source == null) throw new InvalidOperationException("Najprv otvorte inventarizačný zošit.");
                 sheets = Sheets(source, out parameters); // Reject unrelated workbooks before prompting.
+                var selected = sheets.Where(x => x.Recap == recapOnly).ToList();
+                foreach (var excluded in sheets.Where(x => x.Recap != recapOnly)) Release(excluded.Sheet);
+                sheets = selected;
+                if (sheets.Count == 0) throw new InvalidOperationException("Vybraný dokument nie je v tomto zošite dostupný.");
                 string filename = null;
-                if (pdf) using (var dialog = new SaveFileDialog { Filter = "PDF (*.pdf)|*.pdf", DefaultExt = "pdf", AddExtension = true, OverwritePrompt = true, FileName = "Inventarizacia.pdf" }) {
+                if (pdf) using (var dialog = new SaveFileDialog { Filter = "PDF (*.pdf)|*.pdf", DefaultExt = "pdf", AddExtension = true, OverwritePrompt = true, InitialDirectory = PdfExportLocation.InitialDirectory, FileName = recapOnly ? "Rekapitulacia.pdf" : "Inventarizacia.pdf" }) {
                     if (dialog.ShowDialog() != DialogResult.OK) return; filename = dialog.FileName;
+                        PdfExportLocation.Remember(System.IO.Path.GetDirectoryName(filename));
                 }
                 ValidateForOutput(source, sheets, parameters);
                 app.ScreenUpdating = false; app.DisplayAlerts = false;
@@ -304,10 +386,35 @@ namespace AccountBalanceVerification.AddIn
                 var people = People(parameters);
                 for (int i = 0; i < sheets.Count; i++) {
                     var sourceSheet = sheets[i]; var copy = (Excel.Worksheet)output.Worksheets[i + 1];
+                    if (sourceSheet.Recap) {
+                        try { PrepareRecapCopy(source, sourceSheet.Sheet, copy, people); app.CutCopyMode = (Excel.XlCutCopyMode)0; } finally { Release(copy); }
+                        continue;
+                    }
                     var anchor = NamedRange(source, "_ABV_Start_" + (sourceSheet.Title ? "Title" : sourceSheet.Code));
                     int last; try { last = anchor.Row + Math.Max(1, PrintPlan.Select(people, sourceSheet.Title).Count) + 2; } finally { Release(anchor); }
                     Excel.Range footer = null;
-                    try { footer = NamedRange(source, "_ABV_Footer_" + (sourceSheet.Title ? "Title" : sourceSheet.Code)); last = Math.Max(last, footer.Row); }
+                    try {
+                        footer = NamedRange(source, "_ABV_Footer_" + (sourceSheet.Title ? "Title" : sourceSheet.Code));
+                        last = Math.Max(last, footer.Row);
+                        // Omit reserved signature slots and spacing only in the output
+                        // copy. Keep any auditor notes entered between signatures and footer.
+                        var start = NamedRange(source, "_ABV_Start_" + (sourceSheet.Title ? "Title" : sourceSheet.Code));
+                        int firstUnused;
+                        try { firstUnused = start.Row + PrintPlan.Select(people, sourceSheet.Title).Count + 1; }
+                        finally { Release(start); }
+                        for (int r = firstUnused; r < footer.Row; r++) {
+                            var line = copy.Range["A" + r + ":G" + r];
+                            try {
+                                var values = (object[,])line.Value2;
+                                bool empty = true;
+                                foreach (object value in values) if (!string.IsNullOrEmpty(Convert.ToString(value))) { empty = false; break; }
+                                if (empty) {
+                                    var rows = line.EntireRow;
+                                    try { rows.Hidden = true; } finally { Release(rows); }
+                                }
+                            } finally { Release(line); }
+                        }
+                    }
                     catch (COMException) { /* Older workbooks have a spill footer. */ }
                     finally { Release(footer); }
                     var original = sourceSheet.Sheet.Range["A1:G" + last];
@@ -323,7 +430,7 @@ namespace AccountBalanceVerification.AddIn
                     } finally { Release(destination); Release(original); Release(copy); }
                 }
                 app.ScreenUpdating = true; app.DisplayAlerts = oldAlerts;
-                if (pdf) output.ExportAsFixedFormat(Excel.XlFixedFormatType.xlTypePDF, filename, IgnorePrintAreas: false, OpenAfterPublish: true);
+                if (pdf) ExportPdfWithRetry(output, filename);
                 else output.PrintPreview(EnableChanges: true);
             } catch (Exception ex) { MessageBox.Show(ex.Message, "Inventarizácia", MessageBoxButtons.OK, MessageBoxIcon.Error); }
             finally {

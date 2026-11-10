@@ -1,79 +1,83 @@
-INVENTARIZACIA - Account Balance Verification 0.1.10 (pilot)
+INVENTARIZACIA - Account Balance Verification 0.1.12 (auditor test release)
 
-Requirements: Windows, Microsoft 365 Excel 64-bit, .NET Framework 4.8.
-No administrator rights are required.
-
-INSTALLATION
-1. Extract the entire ZIP to a local folder (do not run inside the ZIP).
+REQUIREMENTS AND INSTALLATION
+Windows, Microsoft 365 Excel 64-bit, .NET Framework 4.8.
+1. Extract the entire ZIP to a local folder.
 2. Close all Excel windows.
-3. Run Install.cmd. Start Excel and use the Inventarizacia ribbon.
-Do not change global Excel security settings. If your organization's policy
-blocks unsigned add-ins, ask your administrator to approve this package.
+3. Run Install.cmd, then start Excel and open the Inventarizacia ribbon.
+No administrator rights are required. Keep the complete extracted package
+until installation finishes. If organizational policy blocks unsigned add-ins,
+ask your administrator to approve this package.
 
-CONNECTION
-Obtain the API URL and your own API key from the administrator.
-Use Nastavenia > Ulozit to save them and the include-empty-accounts option.
-MkSoft: enter year and client ID or ICO, load details, review, then create.
-Subory: select journal and/or ledger, optionally chart of accounts; review
-identity/year and choose the accounting system if detection is ambiguous.
-File imports use names from AF, then GL, and do not require an API connection.
-MkSoft requires the API URL, your API key, MkSoft permission and synchronized
-POSNOVA for the selected client/year. localhost means your own computer.
-Connect to the office network/VPN as required.
-No API keys or personal settings are included in this package.
+CREATE A WORKBOOK
+Choose Vytvorit inventarizacny zosit.
+MkSoft: configure the API URL and your own API key in Nastavenia, then select
+client/year, load details and create. Office network/VPN may be required.
+Subory: select a journal and/or general ledger, optionally a chart of accounts.
+Review the accounting system, ICO, entity name and fiscal year before creating.
+File import does not require the API. No API keys or user settings are packaged.
 
-PARAMETERS AND OUTPUT
-Parametre contains location/date, inventory start/end dates, messages and the
-people table. Choose a role, enter a name and select where signatures appear.
-Blank names are omitted. Add more people by extending the Excel table.
-Default roles can be changed in Nastavenia (one role per line).
-Names, roles, signatures, location and dates use native Excel spill formulas.
-Use a Microsoft 365 Excel version with FILTER, VSTACK and SEQUENCE.
-With automatic calculation, changes update immediately, even without the add-in.
-In manual calculation mode press F9. Keep spill areas below the signatures empty.
-Tlacit validates the inputs and opens print preview; Exportovat do PDF creates
-one PDF. Both include Titulna strana, then accounts in order; Parametre and
-unrelated sheets are excluded. Signatures appear once at each account's end,
-followed by location/date. Ordinary Excel printing does not apply this selection.
-Create a new workbook with 0.1.10 for formula-driven signatures. Older workbooks
-are not automatically migrated. Ribbon output requires these new workbooks.
-Parametre is first. Account output uses unmerged, monochrome portrait A4 layout.
+PARAMETRE
+Editable fields are highlighted near the top, including entity identity,
+address and dates. Public parameter names start with P_. MkSoft address
+retrieval requires the updated server API and database wrappers.
+Enter people in ABV_People. Prva and Ucty control title/account signatures.
+For Menovaci dekret select Prijemca or Podpisujuci; for Rekapitulacia select
+Komisia or Podpisujuci. Blank names are omitted. Extend the table for more people.
+Documents recalculate with Excel formulas; no refresh button is needed.
+Use Microsoft 365 supporting FILTER, LET and SEQUENCE. In manual calculation
+mode press F9. Keep dynamic-array spill areas clear.
 
-FIRST CHECK
-Import a known journal/general ledger. Select its correct fiscal year and
-account names. Check account balances, filtered table totals and comments.
-Workbooks are editable and are not protected. Save the resulting workbook.
+PRINT AND PDF
+Select the document in the Tlac a export dropdown, then use Tlacit or
+Exportovat do PDF:
+- Inventarizacia: title page and account worksheets, one PDF.
+- Rekapitulacia: only the recapitulation worksheet, one PDF.
+- Menovacie dekrety: decree pages only; PDF export creates one file per
+  recipient in a new Menovacie_dekrety_... subfolder of the selected folder.
+All three PDF options share a remembered destination folder across sessions.
+For decrees the remembered location is the parent, not the generated subfolder.
+If normal PDF export fails, close the destination PDF in its viewer and retry,
+or choose another filename. Cancel ends the export without closing your workbook.
+Buttons follow the active workbook and selected document. Finish a cell edit
+with Enter or cancel it with Esc before running a command.
+Use ribbon output for the defined sheet selection and adjusted print areas.
+Ordinary Excel print does not apply the add-in's selection rules.
 
-UNINSTALL
-Close Excel and run Uninstall.cmd. Workbooks and connection settings are kept.
+REKAPITULACIA PROTOTYPE
+This is a municipality-oriented prototype for auditor review, not a completed
+universal report template. Verify account mappings, source completeness,
+classifications and amounts before signing. Conclusions require auditor input.
+Zdroj rekapitulacie contains imported ledger data, including classes 5-7.
+Mapovanie rekapitulacie exposes mapping patterns, signs and manual overrides.
+These support sheets and Parametre are excluded from ribbon output.
+Special analytical mappings are prefilled only for the Kamienka 2025 example;
+other entities/years require those mappings to be completed. Missing mappings
+remain blank. Manual numeric zero is a valid override; overrides apply per
+mapping row, so do not repeat a whole-item override across all its patterns.
+Income minus expenses assumes pre-closing class 5/6 balances. Loan maturity
+and other classifications may require manual review/additional evidence.
+Section conclusion rows are unmerged with Wrap Text off. Insert whole worksheet
+rows for additional comment lines. Other report narrative cells may be merged.
+The final signature line has a 45-point row height. Check pagination after edits.
+The prototype supports up to 20 named commission members.
+
+TEST CHECKLIST
+- Create and save a workbook; verify entity/year, imported balances and address.
+- Edit parameters and people; verify title, account, decree and recap formulas.
+- Fill conclusions and verify mapping/override results.
+- Preview/export each of the three document selections independently.
+- Re-export inventory/recap with the destination PDF open; test retry/cancel.
+- Check long comments, signatures and page boundaries in the actual PDF.
+- Check buttons when switching workbooks and entering/leaving cell edit mode.
+- Check the shared export folder, including after restarting Excel.
+For any issue, send the error text, steps, selected source/year and a screenshot
+or sample workbook as appropriate.
+
+UNINSTALL AND ADMINISTRATION
+Close Excel and run Uninstall.cmd. Workbooks and user settings are retained.
 This installer does not change the separate ExcelApiPoc.AddIn registration.
-
-ADMINISTRATOR
-The package installs only the Excel add-in, not the API or SQL database.
-Deploy compatible API endpoints/database wrappers separately before MkSoft use.
-Local files: %LOCALAPPDATA%\AccountBalanceVerification\AddIn
-User settings: %APPDATA%\AccountBalanceVerification\settings.json
-
-VERSION 0.1.10 CHECKS IN EXCEL
-- Create a workbook: Parametre first, then Titulna strana and account tabs.
-- Check black headers, white body/totals, no striping, and blank first total cell.
-- Edit a name, role, print placement, location and dates on Parametre.
-- Add/delete a people-table row; confirm signatures resize on title/accounts.
-- Test zero, one and several names; whitespace-only names must be omitted.
-- Test all three print placements and deleting every people-table data row.
-- Add an obstruction below a spill: Excel shows #SPILL! and ribbon output blocks.
-- Save/reopen and confirm formulas update without an application event handler.
-- Rename an account tab and confirm its print area and formulas still work.
-- Missing synthetic names can be corrected directly in A1 on the account sheet.
-- Check portrait A4 Print Preview/PDF with long account names and large amounts.
-  Width fits one page; long accounts may continue onto further pages.
-- Names overflow into blank adjacent cells; very long names may still need
-  manual column/font adjustment. There are no merged cells.
-
-Use ribbon Tlacit / Exportovat do PDF after changing people. These commands
-size the print range to the current signature list. Ordinary Excel printing
-uses the initial print range unless you adjust it manually.
-
-Location/date are separate footer formulas. Insert entire worksheet rows above
-them to add notes or accommodate more signatures than the reserved people rows.
-Ribbon output follows the footer when rows are inserted. Location does not wrap.
+This ZIP installs only the Excel add-in, not the API or SQL database.
+Deploy the compatible API and 040_RecapAddress.sql separately for MkSoft use.
+Installed files: %LOCALAPPDATA%\AccountBalanceVerification\AddIn\0.1.12
+User configuration: %APPDATA%\AccountBalanceVerification

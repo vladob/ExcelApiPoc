@@ -9,6 +9,7 @@ namespace AccountBalanceVerification.Core
         public int FiscalYear { get; set; }
         public string Ico { get; set; } = "";
         public string EntityName { get; set; } = "";
+        public string EntityAddress { get; set; } = "";
         public int LegalForm { get; set; }
         public string FrameworkCode { get; set; } = "";
     }
@@ -40,6 +41,7 @@ namespace AccountBalanceVerification.Core
         public int LegalForm { get; set; }
         public int AccountFrameworkVersionId { get; set; }
         public string EntityName { get; set; } = "";
+        public string EntityAddress { get; set; } = "";
         public string Ico { get; set; } = "";
         public string Source { get; set; } = "MkSoftRaw";
         public DateTime RetrievedAtUtc { get; set; }

@@ -171,6 +171,7 @@ namespace AccountBalanceVerification.AddIn
                         selectedIco = mkIco.Text.Trim(); selectedName = mkEntity.Text.Trim();
                         CheckIco(selectedIco);
                         package = await Api().GetAsync(resolved.ClientErpId, Year(mkYear), false, CancellationToken.None);
+                        package.EntityAddress = resolved.EntityAddress;
                     }
                     else
                     {

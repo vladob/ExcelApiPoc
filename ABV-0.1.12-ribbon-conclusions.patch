@@ -1,0 +1,266 @@
+diff --git a/AccountBalanceVerification.AddIn/VerificationRibbon.cs b/AccountBalanceVerification.AddIn/VerificationRibbon.cs
+index a37cbf4..33b733d 100644
+--- a/AccountBalanceVerification.AddIn/VerificationRibbon.cs
++++ b/AccountBalanceVerification.AddIn/VerificationRibbon.cs
+@@ -6,17 +6,112 @@ using ExcelDna.Integration;
+ using Excel = Microsoft.Office.Interop.Excel;
+ namespace AccountBalanceVerification.AddIn
+ {
++    public sealed class VerificationAddIn : IExcelAddIn
++    {
++        public void AutoOpen() { }
++        public void AutoClose() => VerificationRibbon.Close();
++    }
+     [ComVisible(true)]
+     public sealed class VerificationRibbon : ExcelRibbon
+     {
+         public override string GetCustomUI(string ribbonId) =>
+-            "<customUI xmlns='http://schemas.microsoft.com/office/2009/07/customui'><ribbon><tabs><tab id='abvTab' label='Inventarizácia'><group id='abvCreate' label='Zošit'><button id='abvNew' label='Vytvoriť inventarizačný zošit' size='large' imageMso='FileNew' onAction='CreateWorkbook'/><button id='abvPrint' label='Tlačiť' size='large' imageMso='PrintPreviewAndPrint' onAction='PrintWorkbook'/><button id='abvPdf' label='Exportovať do PDF' size='large' imageMso='FileSaveAsPdfOrXps' onAction='ExportPdf'/></group><group id='abvDecrees' label='Menovací dekrét'><button id='abvDecreeRefresh' label='Pripraviť starší zošit' imageMso='RefreshAll' onAction='PrepareDocuments'/><button id='abvDecreePrint' label='Tlačiť dekréty' imageMso='PrintPreviewAndPrint' onAction='PrintDecrees'/><button id='abvDecreePdf' label='Dekréty do jednotlivých PDF' imageMso='FileSaveAsPdfOrXps' onAction='ExportDecrees'/></group></tab></tabs></ribbon></customUI>";
+-        public void PrepareDocuments(IRibbonControl control) => WorkbookOutput.Decrees(0);
+-        public void PrintDecrees(IRibbonControl control) => WorkbookOutput.Decrees(1);
+-        public void ExportDecrees(IRibbonControl control) => WorkbookOutput.Decrees(2);
+-        public void PrintWorkbook(IRibbonControl control) => WorkbookOutput.Output(false);
+-        public void ExportPdf(IRibbonControl control) => WorkbookOutput.Output(true);
+-        public void CreateWorkbook(IRibbonControl control)
++            "<customUI xmlns='http://schemas.microsoft.com/office/2009/07/customui' onLoad='OnRibbonLoad'><ribbon><tabs><tab id='abvTab' label='Inventarizácia'><group id='abvCreate' label='Zošit'><button id='abvNew' label='Vytvoriť inventarizačný zošit' size='large' imageMso='FileNew' getEnabled='GetEnabled' onAction='CreateWorkbook'/><button id='abvPrint' label='Tlačiť' size='large' imageMso='PrintPreviewAndPrint' getEnabled='GetEnabled' onAction='PrintWorkbook'/><button id='abvPdf' label='Exportovať do PDF' size='large' imageMso='FileSaveAsPdfOrXps' getEnabled='GetEnabled' onAction='ExportPdf'/></group><group id='abvDecrees' label='Menovací dekrét'><button id='abvDecreeRefresh' label='Doplniť dekréty do staršieho zošita' screentip='Jednorazová príprava staršieho inventarizačného zošita' supertip='Rozšíri tabuľku osôb a pridá menovacie dekréty. Neobnovuje účtovné údaje ani nevytvára rekapituláciu.' imageMso='RefreshAll' getEnabled='GetEnabled' onAction='PrepareDocuments'/><button id='abvDecreePrint' label='Tlačiť dekréty' imageMso='PrintPreviewAndPrint' getEnabled='GetEnabled' onAction='PrintDecrees'/><button id='abvDecreePdf' label='Dekréty do jednotlivých PDF' imageMso='FileSaveAsPdfOrXps' getEnabled='GetEnabled' onAction='ExportDecrees'/></group></tab></tabs></ribbon></customUI>";
++        private static VerificationRibbon current;
++        private IRibbonUI ribbon;
++        private Excel.Application application;
++        private Timer timer;
++        private bool busy, editing;
++        public void OnRibbonLoad(IRibbonUI ui)
++        {
++            Close(); current = this; ribbon = ui;
++            application = (Excel.Application)ExcelDnaUtil.Application;
++            application.WorkbookActivate += WorkbookChanged;
++            application.WorkbookDeactivate += WorkbookChanged;
++            application.SheetActivate += SheetChanged;
++            timer = new Timer { Interval = 500 };
++            timer.Tick += PollEditMode;
++            timer.Start();
++        }
++        internal static void Close()
++        {
++            if (current == null) return;
++            current.timer?.Stop(); current.timer?.Dispose();
++            try {
++                if (current.application != null) {
++                    current.application.WorkbookActivate -= current.WorkbookChanged;
++                    current.application.WorkbookDeactivate -= current.WorkbookChanged;
++                    current.application.SheetActivate -= current.SheetChanged;
++                }
++            } catch (COMException) { /* Excel is shutting down. */ }
++            current.ribbon = null; current.application = null; current = null;
++        }
++        private void WorkbookChanged(Excel.Workbook book) => Invalidate();
++        private void SheetChanged(object sheet) => Invalidate();
++        private void Invalidate()
++        {
++            try { ribbon?.Invalidate(); } catch (COMException) { }
++        }
++        private static bool IsEditing()
++        {
++            // Excel-DNA exposes the native edit-state check in recent versions.
++            // Reflection keeps the add-in compatible with older installed builds.
++            var method = typeof(ExcelDnaUtil).GetMethod("IsInFormulaEditMode", Type.EmptyTypes);
++            if (method != null) return (bool)method.Invoke(null, null);
++            var app = (Excel.Application)ExcelDnaUtil.Application;
++            object bars = ((dynamic)app).CommandBars;
++            try { return !((dynamic)bars).GetEnabledMso("FileNewDefault"); }
++            finally { WorkbookOutput.Release(bars); }
++        }
++        private void PollEditMode(object sender, EventArgs e)
++        {
++            if (busy) return;
++            bool value;
++            try { value = IsEditing(); } catch { value = true; }
++            if (value != editing) { editing = value; Invalidate(); }
++        }
++        public bool GetEnabled(IRibbonControl control)
++        {
++            Excel.Workbook book = null;
++            try {
++                if (busy || IsEditing()) return false;
++                var app = (Excel.Application)ExcelDnaUtil.Application;
++                if (!app.Ready) return false;
++                if (control.Id == "abvNew") return true;
++                book = app.ActiveWorkbook;
++                bool decrees, legacy;
++                if (!WorkbookOutput.OutputAvailable(book, out decrees, out legacy)) return false;
++                if (control.Id == "abvDecreeRefresh") return legacy;
++                if (control.Id == "abvDecreePrint" || control.Id == "abvDecreePdf") return decrees;
++                return true;
++            } catch { return false; }
++            finally { WorkbookOutput.Release(book); }
++        }
++        private void Run(IRibbonControl control, Action action)
++        {
++            if (busy) return;
++            try {
++                if (IsEditing()) {
++                    MessageBox.Show("Najprv dokončite úpravu bunky klávesom Enter alebo ju zrušte klávesom Esc. Potom zopakujte príkaz.",
++                        "Inventarizácia", MessageBoxButtons.OK, MessageBoxIcon.Information);
++                    return;
++                }
++                if (!GetEnabled(control)) {
++                    MessageBox.Show("Príkaz teraz nie je dostupný. Skontrolujte aktívny inventarizačný zošit a dokončite otvorené dialógové okná.", "Inventarizácia");
++                    return;
++                }
++                busy = true; Invalidate(); action();
++            } catch (Exception ex) {
++                MessageBox.Show("Príkaz sa nepodarilo vykonať. Ak upravujete bunku, stlačte Enter alebo Esc a skúste znova.\n\n" + ex.Message,
++                    "Inventarizácia", MessageBoxButtons.OK, MessageBoxIcon.Warning);
++            } finally { busy = false; Invalidate(); }
++        }
++        public void PrepareDocuments(IRibbonControl control) => Run(control, () => WorkbookOutput.Decrees(0));
++        public void PrintDecrees(IRibbonControl control) => Run(control, () => WorkbookOutput.Decrees(1));
++        public void ExportDecrees(IRibbonControl control) => Run(control, () => WorkbookOutput.Decrees(2));
++        public void PrintWorkbook(IRibbonControl control) => Run(control, () => WorkbookOutput.Output(false));
++        public void ExportPdf(IRibbonControl control) => Run(control, () => WorkbookOutput.Output(true));
++        public void CreateWorkbook(IRibbonControl control) => Run(control, CreateWorkbookCore);
++        private void CreateWorkbookCore()
+         {
+             Excel.Workbooks books = null;
+             Excel.Workbook book = null;
+@@ -32,10 +127,6 @@ namespace AccountBalanceVerification.AddIn
+                 using (var form = new CreateWorkbookForm(book))
+                     completed = form.ShowDialog() == DialogResult.OK;
+             }
+-            catch (Exception ex)
+-            {
+-                MessageBox.Show(ex.Message, "Inventarizácia", MessageBoxButtons.OK, MessageBoxIcon.Error);
+-            }
+             finally
+             {
+                 try
+diff --git a/AccountBalanceVerification.AddIn/WorkbookOutput.cs b/AccountBalanceVerification.AddIn/WorkbookOutput.cs
+index 0cb2b66..499b142 100644
+--- a/AccountBalanceVerification.AddIn/WorkbookOutput.cs
++++ b/AccountBalanceVerification.AddIn/WorkbookOutput.cs
+@@ -178,6 +178,39 @@ namespace AccountBalanceVerification.AddIn
+             } catch { foreach (var item in result) Release(item.Sheet); Release(parameters); parameters = null; throw; }
+             finally { Release(sheets); }
+         }
++        internal static bool OutputAvailable(Excel.Workbook book, out bool decrees, out bool legacy)
++        {
++            decrees = false; legacy = false;
++            if (book == null) return false;
++            Excel.Worksheet parameters = null; List<OutputSheet> outputs = null;
++            try {
++                outputs = Sheets(book, out parameters);
++                if (!HasName(book, "_ABV_Start_Title") || !outputs.Any(x => !x.Title && !x.Recap)) return false;
++                var sheets = book.Worksheets;
++                try {
++                    for (int i = 1; i <= sheets.Count; i++) {
++                        var sheet = (Excel.Worksheet)sheets[i];
++                        try {
++                            if (Property(sheet, RoleKey) == "Decree") {
++                                var first = sheet.Range["A1"];
++                                try { decrees = Convert.ToBoolean(first.HasFormula); } finally { Release(first); }
++                            }
++                        } finally { Release(sheet); }
++                    }
++                } finally { Release(sheets); }
++                var tables = parameters.ListObjects;
++                try {
++                    var table = tables["ABV_People"]; var columns = table.ListColumns;
++                    try { legacy = !decrees || columns.Count == 3; }
++                    finally { Release(columns); Release(table); }
++                } finally { Release(tables); }
++                return true;
++            } catch { return false; }
++            finally {
++                if (outputs != null) foreach (var output in outputs) Release(output.Sheet);
++                Release(parameters);
++            }
++        }
+         private static void Formula(Excel.Worksheet sheet, string address, string formula)
+         {
+             var cell = sheet.Range[address];
+diff --git a/AccountBalanceVerification.AddIn/WorkbookRecap.cs b/AccountBalanceVerification.AddIn/WorkbookRecap.cs
+index 07c8244..782de31 100644
+--- a/AccountBalanceVerification.AddIn/WorkbookRecap.cs
++++ b/AccountBalanceVerification.AddIn/WorkbookRecap.cs
+@@ -174,13 +174,13 @@ namespace AccountBalanceVerification.AddIn
+                     if (section.RollForward) { Text(report, "B" + rr, "Začiatočný stav"); Text(report, "C" + rr, "Prírastky"); Text(report, "D" + rr, "Úbytky"); }
+                     Text(report, "E" + rr, "Konečný zostatok");
+                     var header = report.Range["A" + rr + ":E" + rr];
+-                    try { header.RowHeight = 30; header.Font.Bold = true; } finally { Release(header); }
++                    try { header.WrapText = true; header.RowHeight = 30; header.Font.Bold = true; } finally { Release(header); }
+                     rr++;
+                     int first = rr;
+                     foreach (var item in section.Items) {
+                         Text(report, "A" + rr, item.Label);
+                         var detail = report.Range["A" + rr + ":E" + rr];
+-                        try { detail.RowHeight = 32; } finally { Release(detail); }
++                        try { detail.WrapText = true; detail.RowHeight = 32; } finally { Release(detail); }
+                         if (section.RollForward) {
+                             Formula(report, "B" + rr, MapFormula(item.Key, "Opening")); Formula(report, "C" + rr, MapFormula(item.Key, "Additions")); Formula(report, "D" + rr, MapFormula(item.Key, "Reductions"));
+                         }
+@@ -191,7 +191,11 @@ namespace AccountBalanceVerification.AddIn
+                     foreach (string c in section.RollForward ? new[] { "B", "C", "D", "E" } : new[] { "E" })
+                         Formula(report, c + rr, "=IF(COUNT(" + c + first + ":" + c + (rr - 1) + ")<>" + (rr - first) + ",\"\",SUM(" + c + first + ":" + c + (rr - 1) + "))");
+                     rr++;
+-                    MergeText(report, rr, "Záver komisie: doplniť zistenia, rozdiely a odsúhlasenie s evidenciou."); Input(report, "A" + rr + ":E" + rr); rr++;
++                    Text(report, "A" + rr, "Záver komisie: doplniť zistenia, rozdiely a odsúhlasenie s evidenciou.");
++                    Input(report, "A" + rr + ":E" + rr);
++                    var conclusion = report.Range["A" + rr + ":E" + rr];
++                    try { conclusion.WrapText = false; conclusion.RowHeight = 20; } finally { Release(conclusion); }
++                    rr++;
+                 }
+                 rr++; MergeText(report, rr++, "7. Platová inventúra zamestnancov", true);
+                 MergeText(report, rr, "Doplniť výsledok dokladovej inventúry miezd a prípadné rozdiely."); Input(report, "A" + rr + ":E" + rr); rr += 2;
+@@ -207,7 +211,7 @@ namespace AccountBalanceVerification.AddIn
+                 rr++;
+                 MergeText(report, rr, ""); Formula(report, "A" + rr, "=TEXTJOIN(\"; \",TRUE,FILTER(ABV_People[Meno]&\" – \"&ABV_People[Funkcia],(ABV_People[Rekapitulácia]=\"Podpisujúci\")*(LEN(TRIM(ABV_People[Meno]))>0),\"[vyberte podpisujúceho]\"))");
+                 Anchor(book, report, "_ABV_RecapEnd", "$A$" + rr);
+-                var formatting = report.Range["A1:E" + rr]; try { formatting.Font.Name = "Calibri"; formatting.Font.Size = 11; formatting.WrapText = true; } finally { Release(formatting); }
++                var formatting = report.Range["A1:E" + rr]; try { formatting.Font.Name = "Calibri"; formatting.Font.Size = 11; } finally { Release(formatting); }
+                 formatting = report.Range["A:A"]; try { formatting.ColumnWidth = 46; } finally { Release(formatting); }
+                 formatting = report.Range["B:E"]; try { formatting.ColumnWidth = 19; formatting.NumberFormat = "#,##0.00;-#,##0.00"; } finally { Release(formatting); }
+                 // Keep headings and narratives readable; numeric detail rows may wrap to two lines.
+diff --git a/deployment/AccountBalanceVerification.AddIn/VALIDATE-0.1.12-ribbon.md b/deployment/AccountBalanceVerification.AddIn/VALIDATE-0.1.12-ribbon.md
+new file mode 100644
+index 0000000..2be4ec7
+--- /dev/null
++++ b/deployment/AccountBalanceVerification.AddIn/VALIDATE-0.1.12-ribbon.md
+@@ -0,0 +1,39 @@
++# Conclusion rows and ribbon availability
++
++Apply after the 0.1.12 PDF retry/signature patch. Rebuild with Build.ps1 and restart Excel.
++
++- New Rekapitulácia section conclusion rows are unmerged, with text in A, WrapText off, and a 20-point row height. B:E remain blank and editable. Auditors can insert worksheet rows for more lines. Existing workbooks are not rewritten: unmerge the desired conclusion rows and turn off Wrap Text manually to retain all edits.
++- Output buttons require the active workbook to contain recognized parameters, title/signature anchors and at least one account worksheet. Decree buttons additionally require the decree formula sheet. Existing content validation still runs when printing/exporting.
++- All commands check edit mode before acting. A UI-thread timer detects edit-state changes at 500 ms intervals; workbook/sheet activation and command completion invalidate ribbon state. A click-time check covers the interval before Excel updates the ribbon. No keystrokes are sent and no cell edits are committed or cancelled automatically.
++- The timer and application event subscriptions are disposed on add-in unload. The native edit-state API is discovered on ExcelDnaUtil; older assemblies fall back to the built-in New command's enabled state.
++- The legacy command is now labelled 'Doplniť dekréty do staršieho zošita'. It only prepares decree/person support. It does not upgrade the parameter layout, reload data, or build a recapitulation. It is disabled when decree support and the six-column people table are already present.
++
++## Address deployment check
++
++The initial 0.1.12 source already includes EntityAddress in MkSoftRepository.FindEntitiesAsync, both entity SQL wrapper TVFs, MkSoftEntity, and the assignment to P_AeAddress. No additional address SQL change is needed in this patch.
++
++Apply Database/AuditAddIn/Migrations/MkSoftVerificationV1/040_RecapAddress.sql, deploy the rebuilt ExcelApiPoc.Api and its dependent assemblies, and restart/recycle its IIS application as appropriate. Reload entity details before creating a workbook. A previously generated workbook does not fetch the address retroactively. File imports do not perform a MkSoft address lookup.
++
++For the example client/year, compare in SSMS:
++
++```sql
++SELECT ULICA, PSC, OBEC
++FROM [MkSoftRaw].[Data].[UDAJEFIRMY](11, 2026);
++
++SELECT ClientErpId, ICO, EntityAddress
++FROM [AuditAddIn].[MkSoft].[EntityInfo](11, 2026);
++```
++
++If the wrapper returns an address but a new MkSoft workbook stays blank, check that the configured API URL points to the updated deployment and that its entity response includes entityAddress. A successful old API response may omit that property and deserialize to an empty address.
++
++## Windows checks still required
++
++1. Start with no workbook or an ordinary workbook: Create is available; output and legacy preparation are disabled.
++2. Switch to a completed Inventarizácia workbook: normal print/PDF and decree buttons enable. Switch away: they disable.
++3. Enter edit mode using typing, F2 and the formula bar. Buttons disable after the polling interval. Test an immediate click too: the message should request Enter/Esc without creating an extra workbook or changing the pending edit. Commit/cancel manually and verify re-enabling.
++4. Create a workbook, cancel creation, switch windows, close all workbooks and unload/reload the add-in. Verify no stale state or extra timer remains.
++5. On an older workbook, check legacy preparation enables; after preparing it, decree buttons enable and preparation disables.
++6. Generate a new report. Check section conclusions are unmerged, Wrap Text off, and spill into the empty cells to the right. Insert a row, add another line, and export.
++7. Recheck PDF retry/cancel and normal print/PDF after the ribbon changes.
++
++Static source/XML checks only were possible here. No .NET compilation or Excel COM tests were run. Visual Studio may stop on a thrown COM exception before a catch handler runs when 'Break when this exception type is thrown' is checked; the new edit guard aims to avoid that exception in normal use.

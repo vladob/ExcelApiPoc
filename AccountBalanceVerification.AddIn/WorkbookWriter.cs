@@ -133,9 +133,11 @@ namespace AccountBalanceVerification.AddIn
                 warnings.AddRange(sheets.Where(s => !package.OfficialAccounts.Any(a => a.AccountLevel == 3 && a.AccountCode == s.Code && !string.IsNullOrWhiteSpace(a.AccountName))).Select(s => "Chýba názov pre syntetický účet " + s.Code + ". Zadajte názov do bunky A1 na hárku " + s.Code + "."));
                 warnings.AddRange(package.Rows.Where(x => x.OpeningBalance + x.MovementsDebit - x.MovementsCredit != x.ClosingBalance).Select(x => "Nesúhlasí výpočet konečného zostatku: " + x.AccountNo));
                 var parameters = (Excel.Worksheet)book.Worksheets.Add(Before: book.Worksheets[1]);
-                try { WorkbookOutput.CreateParameters(book, parameters, warnings, package); }
+                try { WorkbookOutput.CreateParametersV12(book, parameters, warnings, package); }
                 finally { Marshal.ReleaseComObject(parameters); }
                 WorkbookOutput.InitializeFormulas(book);
+                WorkbookOutput.CreateDecreeSheet(book);
+                WorkbookOutput.CreateRecap(book, package);
                 var first = (Excel.Worksheet)book.Worksheets[1]; first.Activate(); Marshal.ReleaseComObject(first);
                 book.Saved = false;
             }

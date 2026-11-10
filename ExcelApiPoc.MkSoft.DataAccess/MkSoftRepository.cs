@@ -16,7 +16,7 @@ public sealed class MkSoftRepository
             ? "[MkSoft].[EntityInfo](@ClientErpId, @FiscalYear)"
             : "[MkSoft].[EntitiesByIco](@Ico, @FiscalYear)";
         var sql = $"""
-            SELECT e.ClientErpId, e.ICO, e.NAZOV1, e.PRAVNAFORMA, af.Code
+            SELECT e.ClientErpId, e.ICO, e.NAZOV1, e.PRAVNAFORMA, af.Code, e.EntityAddress
             FROM {source} e
             LEFT JOIN Accounts.AccountFrameworkVersion v ON v.Id =
                 CASE WHEN e.PRAVNAFORMA = 119 THEN 3 WHEN e.PRAVNAFORMA = 801 THEN 2 ELSE 1 END
@@ -37,7 +37,8 @@ public sealed class MkSoftRepository
             Ico = reader.IsDBNull(1) ? "" : Convert.ToString(reader.GetValue(1)).Trim().PadLeft(8, '0'),
             EntityName = reader.IsDBNull(2) ? "" : Convert.ToString(reader.GetValue(2)).Trim(),
             LegalForm = reader.IsDBNull(3) ? 0 : Convert.ToInt32(reader.GetValue(3)),
-            FrameworkCode = reader.IsDBNull(4) ? "" : reader.GetString(4)
+            FrameworkCode = reader.IsDBNull(4) ? "" : reader.GetString(4),
+            EntityAddress = reader.IsDBNull(5) ? "" : reader.GetString(5)
         });
         return entities;
     }
